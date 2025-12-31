@@ -1,81 +1,83 @@
 import './LoginPage.css';
 
-function LoginPage() {
+export default function LoginPage({ onGoRegister }) {
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <div className="card-content container-fluid">
-          <div className="row g-0">
-            <div className="content-col col-12 col-lg-7 d-flex flex-column gap-2">
-              <div className="welcome">
-                <p className="welcome-back">Bem-vindo de volta!</p>
-                <h1 className="login-title">Log In</h1>
-              </div>
-
-              <div className="content-body d-flex flex-column flex-grow-1 justify-content-center align-items-center gap-3">
-                <form className="form d-flex flex-column gap-3 w-100">
-                  <label className="field">
-                    <span className="field-label">E-mail</span>
-                    <input
-                      className="field-input form-control"
-                      type="email"
-                      placeholder="Digite seu email"
-                    />
-                  </label>
-
-                  <label className="field">
-                    <div className="field-row">
-                      <span className="field-label">Senha</span>
-                      <a className="forgot-link" href="#">
-                        Esqueceu a senha?
-                      </a>
-                    </div>
-                    <input
-                      className="field-input form-control"
-                      type="password"
-                      placeholder="*****************"
-                    />
-                  </label>
-
-                  <button className="submit-btn align-self-center" type="button">
-                    <span>ENTRAR</span>
-                    <span className="arrow">→</span>
-                  </button>
-                </form>
-
-                <div className="divider align-self-center">
-                  Ou continue com o Google
-                </div>
-
-                <button className="google-btn align-self-center" type="button">
-                  <img src="/google.svg" alt="Google" />
-                </button>
-
-                <div className="footer text-center">
-                  <span>Ainda não tem uma conta?</span>
-                  <a className="signup-link" href="#">
-                    Cadastre-se aqui
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="brand-tag">
+    <main className="login-page">
+      <section className="login-card">
+        {/* Brand (some quando a imagem/painel some) */}
+        <header className="brand-tag" aria-label="Skill Refine">
           <span className="brand-skill">Skill</span>
           <span className="brand-refine">Refine</span>
-        </div>
+        </header>
 
-        <img
-          className="girl-img"
-          src="/Character-working-laptop-sitting-chair.svg"
-          alt="Person using laptop"
-        />
-        <img className="cactus-img" src="/cactus.svg" alt="Cactus" />
-      </div>
-    </div>
+        <div className="login-layout">
+          <div className="login-content">
+            <div className="welcome">
+              <p className="welcome-back">Bem-vindo de volta!</p>
+              <h1 className="login-title">Log In</h1>
+            </div>
+
+            <form className="form">
+              <label className="field">
+                <span className="field-label">E-mail</span>
+                <input
+                  className="field-input"
+                  type="email"
+                  placeholder="Digite seu email"
+                />
+              </label>
+
+              <label className="field">
+                <span className="field-row">
+                  <span className="field-label">Senha</span>
+                  <a className="forgot-link" href="#">
+                    Esqueceu a senha?
+                  </a>
+                </span>
+                <input
+                  className="field-input"
+                  type="password"
+                  placeholder="*****************"
+                />
+              </label>
+
+              <button className="submit-btn" type="button">
+                <span>ENTRAR</span>
+                <span className="arrow">→</span>
+              </button>
+            </form>
+
+            <p className="divider">Ou continue com o Google</p>
+
+            <button className="google-btn" type="button" aria-label="Entrar com Google">
+              <img src="/google.svg" alt="Google" />
+            </button>
+
+            <footer className="footer">
+              <span>Ainda não tem uma conta?</span>
+            <a
+              className="signup-link"
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                onGoRegister?.();
+              }}
+            >
+                Cadastre-se aqui
+              </a>
+            </footer>
+          </div>
+
+          <aside className="login-visual" aria-hidden="true">
+            <img
+              className="girl-img"
+              src="/Character-working-laptop-sitting-chair.svg"
+              alt=""
+            />
+            <img className="cactus-img" src="/cactus.svg" alt="" />
+          </aside>
+        </div>
+      </section>
+    </main>
   );
 }
-
-export default LoginPage;
