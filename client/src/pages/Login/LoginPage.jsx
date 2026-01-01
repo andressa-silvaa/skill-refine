@@ -1,6 +1,10 @@
+import { useState } from 'react';
 import './LoginPage.css';
+import PasswordInput from '../../components/PasswordInput';
 
 export default function LoginPage({ onGoRegister }) {
+  const [password, setPassword] = useState('');
+
   return (
     <main className="login-page">
       <section className="login-card">
@@ -27,19 +31,17 @@ export default function LoginPage({ onGoRegister }) {
                 />
               </label>
 
-              <label className="field">
-                <span className="field-row">
-                  <span className="field-label">Senha</span>
+              <PasswordInput
+                label="Senha"
+                labelRight={
                   <a className="forgot-link" href="#">
                     Esqueceu a senha?
                   </a>
-                </span>
-                <input
-                  className="field-input"
-                  type="password"
-                  placeholder="*****************"
-                />
-              </label>
+                }
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
 
               <button className="submit-btn" type="button">
                 <span>ENTRAR</span>

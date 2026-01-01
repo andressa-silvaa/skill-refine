@@ -26,7 +26,7 @@
 /* LAYOUT */
 .login-layout{display:grid;grid-template-columns:1fr}
 .login-content{
-  z-index:2;width:100%;
+  z-index:3;width:100%;
   padding:clamp(28px,4vw,40px) clamp(18px,5vw,72px);
   display:grid;gap:18px;justify-items:center;
 }
@@ -88,9 +88,16 @@
   .login-visual{
     display:block;position:relative;background:var(--right-panel);
     border-top-left-radius:60px;border-bottom-left-radius:60px;overflow:visible;
+    pointer-events:none;
   }
-  .girl-img{position:absolute;height:420px;left:0;bottom:86px;transform:translateX(-35%);z-index:7}
-  .cactus-img{position:absolute;height:280px;right:90px;bottom:116px;z-index:2}
+  .girl-img{
+    position:absolute;height:420px;left:0;bottom:86px;transform:translateX(-35%);
+    z-index:1;pointer-events:none;
+  }
+  .cactus-img{
+    position:absolute;height:280px;right:90px;bottom:116px;
+    z-index:0;pointer-events:none;
+  }
 }
 
 /* QUANDO A IMG SOME, O BRAND SOME TAMBÉM */

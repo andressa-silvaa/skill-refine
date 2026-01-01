@@ -3,13 +3,12 @@ import DatePicker from 'react-date-picker';
 import 'react-date-picker/dist/DatePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import './RegisterPage.css';
+import PasswordInput from '../../components/PasswordInput';
 
 export default function RegisterPage({ onGoLogin }) {
   const [birthDate, setBirthDate] = useState(null);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
     <main className="register-page">
@@ -59,49 +58,19 @@ export default function RegisterPage({ onGoLogin }) {
                 />
               </label>
 
-              <label className="field">
-                <span className="field-label">Senha</span>
-                <div className="password-wrapper">
-                  <input
-                    className="field-input has-icon"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="*****************"
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="toggle-visibility"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  >
-                    {showPassword ? '🙈' : '👁️'}
-                  </button>
-                </div>
-              </label>
+              <PasswordInput
+                label="Senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
+              />
 
-              <label className="field">
-                <span className="field-label">Confirme a senha</span>
-                <div className="password-wrapper">
-                  <input
-                    className="field-input has-icon"
-                    type={showConfirm ? 'text' : 'password'}
-                    placeholder="*****************"
-                    autoComplete="new-password"
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="toggle-visibility"
-                    onClick={() => setShowConfirm((prev) => !prev)}
-                    aria-label={showConfirm ? 'Ocultar senha' : 'Mostrar senha'}
-                  >
-                    {showConfirm ? '🙈' : '👁️'}
-                  </button>
-                </div>
-              </label>
+              <PasswordInput
+                label="Confirme a senha"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                autoComplete="new-password"
+              />
 
               <label className="terms">
                 <input type="checkbox" />
