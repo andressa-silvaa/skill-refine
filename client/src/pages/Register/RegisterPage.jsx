@@ -76,13 +76,13 @@ export default function RegisterPage({ onGoLogin }) {
                 <input type="checkbox" />
                 <span>
                   Eu aceito{' '}
-                  <a href="#" className="terms-link">
+                  <button type="button" className="terms-link">
                     Termos
-                  </a>{' '}
+                  </button>{' '}
                   e{' '}
-                  <a href="#" className="terms-link">
+                  <button type="button" className="terms-link">
                     Política de Privacidade
-                  </a>
+                  </button>
                 </span>
               </label>
 
@@ -94,16 +94,9 @@ export default function RegisterPage({ onGoLogin }) {
 
             <footer className="footer">
               <span>Você já tem uma conta?</span>
-              <a
-                className="signup-link"
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onGoLogin?.();
-                }}
-              >
+              <button className="signup-link" type="button" onClick={() => onGoLogin?.()}>
                 Acesse aqui
-              </a>
+              </button>
             </footer>
           </div>
 

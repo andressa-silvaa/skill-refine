@@ -94,7 +94,16 @@
   justify-self:start; text-align:left;
 }
 .terms input{accent-color:var(--primary)}
-.terms-link{color:var(--primary); text-decoration:none; font-weight:700}
+.terms-link{
+  background:transparent;
+  border:0;
+  padding:0;
+  font:inherit;
+  color:var(--primary);
+  text-decoration:none;
+  font-weight:700;
+  cursor:pointer;
+}
 
 /* BUTTON */
 .submit-btn{
@@ -116,7 +125,16 @@
   font-size:12px; font-weight:600; color:#6d5b6d;
   flex-wrap:wrap; text-align:center; align-items:center;
 }
-.signup-link{color:var(--primary); font-weight:700; text-decoration:none}
+.signup-link{
+  background:transparent;
+  border:0;
+  padding:0;
+  font:inherit;
+  color:var(--primary);
+  font-weight:700;
+  text-decoration:none;
+  cursor:pointer;
+}
 
 /* RIGHT PANEL */
 .register-visual{display:none}

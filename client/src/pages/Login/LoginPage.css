@@ -47,7 +47,17 @@
 .field{display:grid;gap:10px;font-size:13px;font-weight:600;color:var(--muted)}
 .field-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .field-label{color:var(--text-dark)}
-.forgot-link{font-weight:600;color:var(--text-purple);text-decoration:none;white-space:nowrap}
+.forgot-link{
+  background:transparent;
+  border:0;
+  padding:0;
+  font:inherit;
+  font-weight:600;
+  color:var(--text-purple);
+  text-decoration:none;
+  white-space:nowrap;
+  cursor:pointer;
+}
 .field-input{
   width:100%;padding:14px;border:0;border-radius:12px;background:#e9bfe3;
   font-size:14px;outline:0;
@@ -77,7 +87,16 @@
   display:flex;justify-content:center;gap:6px;font-size:12px;font-weight:600;color:#6d5b6d;
   flex-wrap:wrap;text-align:center;
 }
-.signup-link{color:var(--primary);font-weight:700;text-decoration:none}
+.signup-link{
+  background:transparent;
+  border:0;
+  padding:0;
+  font:inherit;
+  color:var(--primary);
+  font-weight:700;
+  text-decoration:none;
+  cursor:pointer;
+}
 
 /* RIGHT PANEL */
 .login-visual{display:none}

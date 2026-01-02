@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './LoginPage.css';
 import PasswordInput from '../../components/PasswordInput';
 
-export default function LoginPage({ onGoRegister }) {
+export default function LoginPage({ onGoRegister, onGoForgot }) {
   const [password, setPassword] = useState('');
 
   return (
@@ -34,9 +34,16 @@ export default function LoginPage({ onGoRegister }) {
               <PasswordInput
                 label="Senha"
                 labelRight={
-                  <a className="forgot-link" href="#">
+                  <button
+                    className="forgot-link"
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onGoForgot?.();
+                    }}
+                  >
                     Esqueceu a senha?
-                  </a>
+                  </button>
                 }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -57,16 +64,13 @@ export default function LoginPage({ onGoRegister }) {
 
             <footer className="footer">
               <span>Ainda não tem uma conta?</span>
-            <a
+            <button
               className="signup-link"
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                onGoRegister?.();
-              }}
+              type="button"
+              onClick={() => onGoRegister?.()}
             >
                 Cadastre-se aqui
-              </a>
+              </button>
             </footer>
           </div>
 
