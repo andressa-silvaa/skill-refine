@@ -1,0 +1,107 @@
+.register-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 4vw, 36px);
+  background: var(--pink-bg);
+  font-family: 'Poppins', sans-serif;
+}
+
+.register-card {
+  position: relative;
+  width: min(1080px, 100%);
+  background: var(--card-pink);
+  border-radius: 42px;
+  overflow: hidden;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+}
+
+/* BRAND */
+.brand-tag {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: 58% 42%;
+  align-items: center;
+  font-size: clamp(20px, 2.6vw, 34px);
+  font-weight: 800;
+}
+
+.brand-skill {
+  justify-self: end;
+  margin-right: 18px;
+  color: var(--right-panel);
+}
+
+.brand-refine {
+  justify-self: start;
+  margin-left: 18px;
+  color: var(--card-pink);
+}
+
+/* LAYOUT */
+.register-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* RIGHT PANEL */
+.register-visual {
+  display: none;
+}
+
+/* DESKTOP */
+@media (min-width: 992px) {
+  .register-layout {
+    grid-template-columns: 58% 42%;
+    min-height: 700px;
+  }
+
+  .register-visual {
+    display: block;
+    position: relative;
+    background: var(--right-panel);
+    border-top-left-radius: 60px;
+    border-bottom-left-radius: 60px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .girl-img {
+    position: absolute;
+    height: 420px;
+    left: 0;
+    bottom: 86px;
+    transform: translateX(-35%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .cactus-img {
+    position: absolute;
+    height: 280px;
+    right: 90px;
+    bottom: 116px;
+    z-index: 0;
+    pointer-events: none;
+  }
+}
+
+/* MOBILE: some o brand quando a imagem some */
+@media (max-width: 991px) {
+  .brand-tag {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .register-visual {
+    display: none;
+  }
+}
+
+

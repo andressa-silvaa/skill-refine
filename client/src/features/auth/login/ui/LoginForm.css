@@ -1,0 +1,167 @@
+.login-content {
+  z-index: 3;
+  width: 100%;
+  padding: clamp(28px, 4vw, 40px) clamp(18px, 5vw, 72px);
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+
+.welcome,
+.form,
+.field,
+.divider,
+.footer {
+  width: 100%;
+}
+
+.welcome-back {
+  margin: 0 0 8px;
+  font-size: clamp(18px, 2.4vw, 30px);
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.login-title {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 800;
+  color: var(--text-purple);
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.field-label {
+  color: var(--text-dark);
+}
+
+.forgot-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-purple);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.field-input {
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--input-bg);
+  font-size: 14px;
+  outline: 0;
+}
+
+.field-input::placeholder {
+  color: var(--placeholder);
+}
+
+.submit-btn,
+.google-btn {
+  width: min(130px, 100%);
+  justify-self: center;
+}
+
+.submit-btn {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--primary);
+  color: #fff;
+  border: 0;
+  border-radius: 22px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(199, 44, 184, 0.32);
+}
+
+.submit-btn .arrow {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #a51895;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+}
+
+.divider {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7c6a7d;
+}
+
+.google-btn {
+  height: 46px;
+  border-radius: 16px;
+  border: 1.5px solid #f4b7ed;
+  background: var(--card-pink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.google-btn img {
+  width: 30px;
+  height: 30px;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6d5b6d;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.signup-link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.form-error {
+  margin: 0;
+  width: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a1b1b;
+}
+
+

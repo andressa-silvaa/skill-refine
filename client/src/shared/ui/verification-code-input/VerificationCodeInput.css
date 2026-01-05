@@ -1,0 +1,26 @@
+.code-input-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.code-input-box {
+  width: 54px;
+  height: 54px;
+  text-align: center;
+  border-radius: 14px;
+  border: 0;
+  background: #e9bfe3;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e1a1d;
+  outline: 0;
+  box-shadow: 0 0 0 1px rgba(199, 44, 184, 0.15);
+}
+
+.code-input-box:focus-visible {
+  outline: 2px solid #c72cb8;
+  outline-offset: 2px;
+}
+
+
