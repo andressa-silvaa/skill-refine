@@ -6,12 +6,14 @@ type Props = {
   length?: number;
   value?: string;
   onChange?: (value: string) => void;
+  onBlur?: () => void;
   autoFocus?: boolean;
   className?: string;
+  isInvalid?: boolean;
 };
 
 export function VerificationCodeInput(props: Props) {
-  const { length = 5, value, onChange, autoFocus = false, className = '' } = props;
+  const { length = 5, value, onChange, onBlur, autoFocus = false, className = '', isInvalid = false } = props;
 
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
   const [digits, setDigits] = useState<string[]>(() => toArray(value, length));
@@ -64,12 +66,14 @@ export function VerificationCodeInput(props: Props) {
           ref={(el) => {
             inputsRef.current[index] = el;
           }}
-          className="code-input-box"
+          className={`code-input-box${isInvalid ? ' is-invalid' : ''}`}
           inputMode="numeric"
           maxLength={1}
           value={digit}
           onChange={(e) => handleChange(index, e.target.value)}
           onKeyDown={(e) => handleKeyDown(index, e)}
+          onBlur={onBlur}
+          aria-invalid={isInvalid}
         />
       ))}
     </div>

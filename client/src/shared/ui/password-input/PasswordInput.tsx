@@ -1,5 +1,5 @@
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { useId, type ChangeEventHandler, type InputHTMLAttributes, type ReactNode } from 'react';
+import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
 import { usePasswordVisibility } from '@/shared/lib/hooks/usePasswordVisibility';
 
@@ -8,20 +8,23 @@ import './PasswordInput.css';
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   label?: ReactNode;
   labelRight?: ReactNode;
+  isInvalid?: boolean;
+  error?: ReactNode;
+  wrapperClassName?: string;
   inputClassName?: string;
-  onChange?: ChangeEventHandler<HTMLInputElement>;
 };
 
-export function PasswordInput(props: Props) {
+export const PasswordInput = forwardRef<HTMLInputElement, Props>(function PasswordInput(props, ref) {
   const {
     label,
     labelRight,
-    value,
-    onChange,
+    isInvalid = false,
+    error,
     placeholder = '*****************',
     autoComplete = 'current-password',
     name,
     id,
+    wrapperClassName = '',
     className = '',
     inputClassName = '',
     ...rest
@@ -33,7 +36,7 @@ export function PasswordInput(props: Props) {
   });
 
   return (
-    <div className={`field${className ? ` ${className}` : ''}`}>
+    <div className={`field${wrapperClassName ? ` ${wrapperClassName}` : ''}`}>
       {labelRight ? (
         <div className="field-row">
           {label && (
@@ -54,14 +57,16 @@ export function PasswordInput(props: Props) {
       <div className="password-wrapper">
         <input
           {...rest}
+          ref={ref}
           id={id ?? generatedId}
           name={name}
           type={inputType}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className={`field-input has-icon${inputClassName ? ` ${inputClassName}` : ''}`}
-          value={value}
-          onChange={onChange}
+          aria-invalid={isInvalid || rest['aria-invalid']}
+          className={`field-input has-icon${isInvalid ? ' is-invalid' : ''}${className ? ` ${className}` : ''}${
+            inputClassName ? ` ${inputClassName}` : ''
+          }`}
         />
         <button
           type="button"
@@ -74,8 +79,10 @@ export function PasswordInput(props: Props) {
           <i className={`fa-solid ${isVisible ? 'fa-eye-low-vision' : 'fa-eye'}`} />
         </button>
       </div>
+
+      {error ? <p className="field-error">{error}</p> : null}
     </div>
   );
-}
+});
 
 

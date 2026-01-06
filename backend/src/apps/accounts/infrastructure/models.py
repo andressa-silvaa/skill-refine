@@ -23,6 +23,9 @@ class UserQuerySet(models.QuerySet):
 
 
 class UserManager(models.Manager):
+    def active(self):
+        return self.get_queryset().active()
+
     def get_queryset(self):
         return UserQuerySet(self.model, using=self._db)
 
@@ -54,6 +57,18 @@ class User(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
     def save(self, *args, **kwargs):
         self.email = normalize_email(self.email) or ""
         super().save(*args, **kwargs)
+
+    @property
+    def is_authenticated(self) -> bool:
+        """
+        Compatibility with DRF permissions (we don't use django.contrib.auth).
+        """
+
+        return True
+
+    @property
+    def is_anonymous(self) -> bool:
+        return False
 
 
 class UserPassword(models.Model):
@@ -138,6 +153,9 @@ class PasswordResetRequest(UUIDPrimaryKeyModel, models.Model):
     code_hash = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField()
+    verified_at = models.DateTimeField(null=True, blank=True)
+    reset_token_hash = models.TextField(null=True, blank=True)
+    reset_token_expires_at = models.DateTimeField(null=True, blank=True)
     consumed_at = models.DateTimeField(null=True, blank=True)
     attempts = models.IntegerField(default=0)
     last_attempt_at = models.DateTimeField(null=True, blank=True)

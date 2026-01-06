@@ -15,6 +15,9 @@
   --text-purple: #8b2e80;
   --muted: #775f73;
   --placeholder: #b46bac;
+
+  --danger: #9a1b1b;
+  --danger-soft: rgba(154, 27, 27, 0.25);
 }
 
 * {
@@ -25,6 +28,34 @@
 
 body {
   margin: 0;
+}
+
+.field-input.is-invalid,
+.recovery-input.is-invalid,
+.code-input-box.is-invalid,
+.date-picker.is-invalid .react-date-picker__wrapper {
+  box-shadow: 0 0 0 2px var(--danger-soft);
+}
+
+.terms.is-invalid {
+  color: var(--danger);
+}
+
+.terms.is-invalid .terms-link {
+  color: var(--danger);
+}
+
+.field-error {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none !important;
 }
 
 .app-shell {

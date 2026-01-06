@@ -1,6 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 import { PasswordInput } from '@/shared/ui';
+import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
 
 import { setNewPasswordSchema, type SetNewPasswordValues } from '../model/schemas';
 
@@ -8,44 +11,74 @@ import './PasswordRecovery.css';
 
 type Props = {
   onSubmit?: (values: SetNewPasswordValues) => void;
+  serverError?: string;
 };
 
 export function SetNewPasswordForm(props: Props) {
-  const { onSubmit } = props;
-  const [password, setPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const { onSubmit, serverError } = props;
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const parsed = setNewPasswordSchema.safeParse({ password, confirm });
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Dados inválidos');
-      return;
-    }
-    setError(null);
-    onSubmit?.(parsed.data);
-  };
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    formState: { errors, touchedFields, dirtyFields, isSubmitting },
+    watch,
+  } = useForm<SetNewPasswordValues>({
+    resolver: zodResolver(setNewPasswordSchema),
+    defaultValues: { password: '', confirm: '' },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  });
+
+  const [isReady, setIsReady] = useState(false);
+
+  const showPasswordError = (!!touchedFields.password || !!dirtyFields.password) && !!errors.password?.message;
+
+  const passwordValue = watch('password');
+  const confirmValue = watch('confirm');
+  const confirmInteracted = !!touchedFields.confirm || !!dirtyFields.confirm;
+
+  const confirmMismatchVisible =
+    confirmInteracted &&
+    Boolean(passwordValue) &&
+    Boolean(confirmValue) &&
+    passwordValue !== confirmValue;
+  const confirmErrorMessage = errors.confirm?.message ?? (confirmMismatchVisible ? 'As senhas não coincidem' : undefined);
+  const showConfirmError = confirmInteracted && !!confirmErrorMessage;
+
+  const showGenericError = showPasswordError || showConfirmError;
+
+  useEffect(() => {
+    void trigger().finally(() => setIsReady(true));
+  }, [trigger]);
+
+  useEffect(() => {
+    if (!confirmInteracted) return;
+    void trigger('confirm');
+  }, [passwordValue, confirmInteracted, trigger]);
 
   return (
-    <form className="recovery-form" onSubmit={handleSubmit}>
+    <form className="recovery-form" onSubmit={handleSubmit((values) => onSubmit?.(values))}>
       <PasswordInput
         label="Nova senha"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        {...register('password')}
         autoComplete="new-password"
+        isInvalid={showPasswordError}
+        error={showPasswordError ? errors.password?.message : undefined}
       />
 
       <PasswordInput
         label="Confirme a senha"
-        value={confirm}
-        onChange={(e) => setConfirm(e.target.value)}
+        {...register('confirm')}
         autoComplete="new-password"
+        isInvalid={showConfirmError}
+        error={showConfirmError ? confirmErrorMessage : undefined}
       />
 
-      {error ? <p className="recovery-error">{error}</p> : null}
+      {showGenericError ? <p className="recovery-error">{GENERIC_FORM_ERROR_MESSAGE}</p> : null}
+      {serverError ? <p className="recovery-error">{serverError}</p> : null}
 
-      <button className="recovery-btn" type="submit" disabled={!password || !confirm}>
+      <button className="recovery-btn" type="submit" disabled={!isReady || hasFormErrors(errors) || isSubmitting}>
         Redefinir senha
       </button>
     </form>

@@ -15,6 +15,29 @@ services:
       timeout: 5s
       retries: 20
 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skill-refine-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/env.example
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgres://skill_refine:skill_refine@postgres:5432/skill_refine
+      - DJANGO_DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
 volumes:
   skill_refine_postgres_data:
 
