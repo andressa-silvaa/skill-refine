@@ -172,3 +172,30 @@ class PasswordResetRequest(UUIDPrimaryKeyModel, models.Model):
         super().save(*args, **kwargs)
 
 
+class EmailConfirmationToken(UUIDPrimaryKeyModel, models.Model):
+    """
+    email_confirmation_tokens (email verification flow).
+    """
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
+    email = models.TextField()
+    token_hash = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True, blank=True)
+    ip = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+
+    class Meta:
+        db_table = "email_confirmation_tokens"
+        indexes = [
+            models.Index(fields=["email", "-created_at"], name="idx_ect_email_created"),
+            models.Index(fields=["expires_at"], name="idx_ect_expires"),
+            models.Index(fields=["token_hash"], name="idx_ect_token_hash"),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.email = normalize_email(self.email) or ""
+        super().save(*args, **kwargs)
+
+

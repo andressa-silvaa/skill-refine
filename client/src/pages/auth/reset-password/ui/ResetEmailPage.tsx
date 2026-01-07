@@ -9,14 +9,15 @@ import {
   passwordRecoveryApi,
   setRecoveryEmail,
 } from '@/features/auth/password-recovery';
-import { RecoveryLayout } from '@/widgets/auth/recovery-layout';
+import { getApiErrorMessage } from '@/shared/api';
+import { AuthLayout } from '@/widgets/auth/auth-layout';
 
 export function ResetEmailPage() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
 
   return (
-    <RecoveryLayout
+    <AuthLayout
       title="Recuperação de senha"
       subtitle="Informe o e-mail para o qual deseja receber o envio de redefinição de senha."
       onBack={() => navigate(-1)}
@@ -32,11 +33,11 @@ export function ResetEmailPage() {
             setRecoveryEmail(values.email);
             navigate('/reset/code');
           } catch (e) {
-            setServerError('Não foi possível enviar o código. Tente novamente.');
+            setServerError(getApiErrorMessage(e, 'Não foi possível enviar o código. Tente novamente.'));
           }
         }}
       />
-    </RecoveryLayout>
+    </AuthLayout>
   );
 }
 

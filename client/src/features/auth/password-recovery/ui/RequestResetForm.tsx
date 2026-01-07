@@ -6,10 +6,10 @@ import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
 
 import { requestResetSchema, type RequestResetValues } from '../model/schemas';
 
-import './PasswordRecovery.css';
+import '@/shared/ui/auth/AuthStyles.css';
 
 type Props = {
-  onSubmit?: (values: RequestResetValues) => void;
+  onSubmit?: (values: RequestResetValues) => void | Promise<void>;
   serverError?: string;
 };
 

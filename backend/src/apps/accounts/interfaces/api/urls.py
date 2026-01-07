@@ -3,6 +3,8 @@ from __future__ import annotations
 from django.urls import path
 
 from .views import (
+    EmailConfirmationConfirmView,
+    EmailConfirmationRequestView,
     GoogleLoginView,
     GoogleOAuthCallbackView,
     GoogleOAuthStartView,
@@ -29,6 +31,16 @@ urlpatterns = [
     path("password-reset/request", PasswordResetRequestView.as_view(), name="password_reset_request"),
     path("password-reset/verify", PasswordResetVerifyView.as_view(), name="password_reset_verify"),
     path("password-reset/confirm", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
+    path(
+        "email-confirmation/request",
+        EmailConfirmationRequestView.as_view(),
+        name="email_confirmation_request",
+    ),
+    path(
+        "email-confirmation/confirm",
+        EmailConfirmationConfirmView.as_view(),
+        name="email_confirmation_confirm",
+    ),
 ]
 
 

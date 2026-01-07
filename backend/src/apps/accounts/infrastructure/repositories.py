@@ -6,12 +6,20 @@ from django.db import models, transaction
 
 from apps.accounts.domain.ports import (
     AuthIdentityRepository,
+    EmailConfirmationRepository,
     PasswordRepository,
     PasswordResetRepository,
     SessionRepository,
     UserRepository,
 )
-from apps.accounts.infrastructure.models import AuthIdentity, PasswordResetRequest, Session, User, UserPassword
+from apps.accounts.infrastructure.models import (
+    AuthIdentity,
+    EmailConfirmationToken,
+    PasswordResetRequest,
+    Session,
+    User,
+    UserPassword,
+)
 from shared.utils.normalization import normalize_email
 
 
@@ -162,4 +170,66 @@ class OrmPasswordResetRepository(PasswordResetRepository):
     def consume(self, *, request_id: str, when: datetime) -> None:
         PasswordResetRequest.objects.filter(id=request_id).update(consumed_at=when)
 
+
+class OrmEmailConfirmationRepository(EmailConfirmationRepository):
+    def latest_active_for_email(self, *, email: str):
+        email_n = normalize_email(email) or ""
+        if not email_n:
+            return None
+        return (
+            EmailConfirmationToken.objects.filter(email=email_n, consumed_at__isnull=True)
+            .order_by("-created_at")
+            .first()
+        )
+
+    def count_recent_for_email(self, *, email: str, since: datetime) -> int:
+        email_n = normalize_email(email) or ""
+        if not email_n:
+            return 0
+        return EmailConfirmationToken.objects.filter(email=email_n, created_at__gte=since).count()
+
+    def count_recent_for_ip(self, *, ip: str, since: datetime) -> int:
+        if not ip:
+            return 0
+        return EmailConfirmationToken.objects.filter(ip=ip, created_at__gte=since).count()
+
+    def create_token(
+        self,
+        *,
+        user_id: str,
+        email: str,
+        token_hash: str,
+        expires_at: datetime,
+        ip: str | None,
+        user_agent: str | None,
+    ):
+        return EmailConfirmationToken.objects.create(
+            user_id=user_id,
+            email=email,
+            token_hash=token_hash,
+            expires_at=expires_at,
+            ip=ip,
+            user_agent=user_agent,
+        )
+
+    def get_active_by_token_hash(self, *, token_hash: str):
+        if not token_hash:
+            return None
+        return (
+            EmailConfirmationToken.objects.filter(token_hash=token_hash, consumed_at__isnull=True)
+            .order_by("-created_at")
+            .first()
+        )
+
+    def consume(self, *, token_id: str, when: datetime) -> None:
+        EmailConfirmationToken.objects.filter(id=token_id).update(consumed_at=when)
+
+    def consume_if_active(self, *, token_id: str, when: datetime) -> bool:
+        """
+        Best-effort single-use enforcement: only consume if the token is still active.
+        Returns True if consumed, False if it was already consumed/missing.
+        """
+        return (
+            EmailConfirmationToken.objects.filter(id=token_id, consumed_at__isnull=True).update(consumed_at=when) == 1
+        )
 

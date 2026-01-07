@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from 'react';
 
 import { sessionApi } from '../api/sessionApi';
+import { getHasRefreshCookieHint } from '../lib/refreshFlag';
 import type { SessionStatus, SessionUser } from './types';
 
 type SessionState = {
@@ -13,7 +14,10 @@ type SessionActions = {
   bootstrap: () => Promise<void>;
   login: (payload: { email: string; password: string }) => Promise<void>;
   loginGoogle: (payload: { credential: string }) => Promise<void>;
-  register: (payload: { email: string; full_name: string; birth_date?: string | null; password: string }) => Promise<void>;
+  register: (payload: { email: string; full_name: string; birth_date?: string | null; password: string }) => Promise<{
+    user: SessionUser;
+    email_confirmation_sent?: boolean;
+  }>;
   logout: () => Promise<void>;
 };
 
@@ -23,6 +27,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SessionState>({ status: 'unknown', user: null });
 
   const bootstrap = useCallback(async () => {
+    // Avoid hitting /refresh on first load when we know there's no previous session.
+    // This prevents noisy 401s in the console on the public login screen.
+    if (!getHasRefreshCookieHint()) {
+      setState({ status: 'anonymous', user: null });
+      return;
+    }
     try {
       await sessionApi.refresh();
       const user = await sessionApi.me();
@@ -49,7 +59,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (payload: { email: string; full_name: string; birth_date?: string | null; password: string }) => {
-      await sessionApi.register(payload);
+      return sessionApi.register(payload);
       // After register, require explicit login (clean + avoids auto-session on register).
     },
     []

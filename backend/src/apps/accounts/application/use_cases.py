@@ -5,7 +5,13 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 from apps.accounts.domain.errors import (
+    EmailConfirmationExpired,
+    EmailConfirmationInvalid,
+    EmailNotConfirmed,
+    EmailNotRegistered,
     EmailAlreadyInUse,
+    EmailSendFailed,
+    EmailServiceNotConfigured,
     GoogleLoginNotConfigured,
     GoogleTokenInvalid,
     InvalidCredentials,
@@ -16,11 +22,13 @@ from apps.accounts.domain.errors import (
     PasswordResetTooManyAttempts,
     RefreshInvalid,
     RefreshRevoked,
+    TooManyRequests,
     UserDisabled,
     ValidationError,
 )
 from apps.accounts.domain.ports import (
     AuthIdentityRepository,
+    EmailConfirmationRepository,
     EmailSender,
     GoogleTokenVerifier,
     PasswordHasher,
@@ -65,6 +73,10 @@ class AccountsAuthConfig:
     password_reset_code_ttl_minutes: int
     password_reset_grant_ttl_minutes: int
     password_reset_code_pepper: str
+
+    email_confirmation_token_ttl_hours: int
+    email_confirmation_token_pepper: str
+    frontend_url: str
 
     google_oauth_client_id: str
 
@@ -185,6 +197,17 @@ def login_with_password(
         )
         raise InvalidCredentials()
 
+    if not getattr(user, "email_verified_at", None):
+        audit.log(
+            action="accounts.login_failed",
+            actor_user_id=str(user.id),
+            subject_user_id=str(user.id),
+            ip=ip,
+            user_agent=user_agent,
+            metadata={"reason": "email_not_confirmed"},
+        )
+        raise EmailNotConfirmed()
+
     now = now_utc()
     identities.ensure_password_identity(user_id=str(user.id), when=now)
     identities.touch_last_login(user_id=str(user.id), provider="password", when=now)
@@ -232,6 +255,152 @@ def login_with_password(
         f"{session.id}.{refresh_plain}",
     )
 
+
+def _normalize_frontend_url(url: str) -> str:
+    url = (url or "").strip()
+    return url[:-1] if url.endswith("/") else url
+
+
+def request_email_confirmation(
+    *,
+    cfg: AccountsAuthConfig,
+    users: UserRepository,
+    confirmations: EmailConfirmationRepository,
+    email_sender: EmailSender,
+    audit: AuditLogger,
+    email: str,
+    ip: str | None,
+    user_agent: str | None,
+) -> None:
+    email_n = normalize_email(email)
+    if not email_n:
+        raise ValidationError("Invalid email")
+
+    user = users.get_by_email(email_n)
+    if user is None:
+        audit.log(
+            action="accounts.email_confirmation_requested",
+            actor_user_id=None,
+            subject_user_id=None,
+            ip=ip,
+            user_agent=user_agent,
+            metadata={"email": email_n, "result": "email_not_registered"},
+        )
+        raise EmailNotRegistered()
+
+    if getattr(user, "email_verified_at", None):
+        audit.log(
+            action="accounts.email_confirmation_requested",
+            actor_user_id=str(user.id),
+            subject_user_id=str(user.id),
+            ip=ip,
+            user_agent=user_agent,
+            metadata={"email": email_n, "result": "already_verified"},
+        )
+        return
+
+    now = now_utc()
+
+    # Basic throttling: avoid multiple emails in a short window.
+    last_req = confirmations.latest_active_for_email(email=email_n)
+    if last_req is not None:
+        last_created = _utc(last_req.created_at)
+        if (now - last_created).total_seconds() < 60:
+            audit.log(
+                action="accounts.email_confirmation_requested",
+                actor_user_id=str(user.id),
+                subject_user_id=str(user.id),
+                ip=ip,
+                user_agent=user_agent,
+                metadata={"email": email_n, "result": "throttled"},
+            )
+            raise TooManyRequests()
+
+    # Slightly stronger rate limit (db-based, no cache required).
+    since = now - timedelta(hours=1)
+    if confirmations.count_recent_for_email(email=email_n, since=since) >= 8:
+        raise TooManyRequests()
+    if ip and confirmations.count_recent_for_ip(ip=ip, since=since) >= 25:
+        raise TooManyRequests()
+
+    token_plain = secrets.token_urlsafe(48)
+    token_hash = _hash_secret(token_plain, cfg.email_confirmation_token_pepper)
+    expires_at = now + timedelta(hours=cfg.email_confirmation_token_ttl_hours)
+
+    created = confirmations.create_token(
+        user_id=str(user.id),
+        email=email_n,
+        token_hash=token_hash,
+        expires_at=expires_at,
+        ip=ip,
+        user_agent=user_agent,
+    )
+
+    frontend = _normalize_frontend_url(cfg.frontend_url)
+    confirm_url = f"{frontend}/confirm-email?token={token_plain}"
+
+    try:
+        email_sender.send_email_confirmation_link(to_email=email_n, confirm_url=confirm_url)
+    except (EmailServiceNotConfigured, EmailSendFailed) as exc:
+        # If sending failed, make sure the token cannot be used later.
+        confirmations.consume(token_id=str(created.id), when=now)
+        raise exc
+
+    audit.log(
+        action="accounts.email_confirmation_requested",
+        actor_user_id=None,
+        subject_user_id=str(user.id),
+        ip=ip,
+        user_agent=user_agent,
+        metadata={"email": email_n, "result": "sent"},
+    )
+
+
+def confirm_email(
+    *,
+    cfg: AccountsAuthConfig,
+    users: UserRepository,
+    confirmations: EmailConfirmationRepository,
+    audit: AuditLogger,
+    token: str,
+    ip: str | None,
+    user_agent: str | None,
+) -> None:
+    token = (token or "").strip()
+    if len(token) < 10:
+        raise EmailConfirmationInvalid()
+
+    now = now_utc()
+    token_hash = _hash_secret(token, cfg.email_confirmation_token_pepper)
+    rec = confirmations.get_active_by_token_hash(token_hash=token_hash)
+    if rec is None:
+        raise EmailConfirmationInvalid()
+
+    if _utc(rec.expires_at) <= now:
+        confirmations.consume_if_active(token_id=str(rec.id), when=now)
+        raise EmailConfirmationExpired()
+
+    user = users.get_by_id(str(rec.user_id))
+    if user is None:
+        confirmations.consume_if_active(token_id=str(rec.id), when=now)
+        raise EmailConfirmationInvalid()
+
+    # Enforce single-use (best-effort): only one request should be able to consume the token.
+    if not confirmations.consume_if_active(token_id=str(rec.id), when=now):
+        raise EmailConfirmationInvalid()
+
+    # Idempotent: if already verified, nothing else to do.
+    if not getattr(user, "email_verified_at", None):
+        users.mark_email_verified(user_id=str(user.id), when=now)
+
+    audit.log(
+        action="accounts.email_confirmed",
+        actor_user_id=str(user.id),
+        subject_user_id=str(user.id),
+        ip=ip,
+        user_agent=user_agent,
+        metadata={"email": getattr(user, "email", None)},
+    )
 
 def refresh_session(
     *,
@@ -444,10 +613,11 @@ def request_password_reset(
     ip: str | None,
     user_agent: str | None,
 ) -> None:
-    email_n = normalize_email(email) or ""
-    # Don't leak user existence
-    user = users.get_by_email(email_n) if email_n else None
+    email_n = normalize_email(email)
+    if not email_n:
+        raise ValidationError("Invalid email")
 
+    user = users.get_by_email(email_n)
     if user is None:
         audit.log(
             action="accounts.password_reset_requested",
@@ -455,9 +625,9 @@ def request_password_reset(
             subject_user_id=None,
             ip=ip,
             user_agent=user_agent,
-            metadata={"email": email_n, "result": "ignored"},
+            metadata={"email": email_n, "result": "email_not_registered"},
         )
-        return
+        raise EmailNotRegistered()
 
     now = now_utc()
     last_req = password_resets.latest_active_for_email(email=email_n)
@@ -478,9 +648,44 @@ def request_password_reset(
     code = _random_digits(5)
     code_hash = _hash_secret(code, cfg.password_reset_code_pepper)
     expires_at = now + timedelta(minutes=cfg.password_reset_code_ttl_minutes)
-    password_resets.create_request(user_id=str(user.id), email=email_n, code_hash=code_hash, expires_at=expires_at)
 
-    email_sender.send_password_reset_code(to_email=email_n, code=code)
+    created = password_resets.create_request(
+        user_id=str(user.id),
+        email=email_n,
+        code_hash=code_hash,
+        expires_at=expires_at,
+    )
+
+    try:
+        email_sender.send_password_reset_code(to_email=email_n, code=code)
+    except (EmailServiceNotConfigured, EmailSendFailed):
+        # Avoid leaving an "active" reset request that would throttle future attempts and/or enable code verification.
+        created_id = getattr(created, "id", None)
+        if created_id:
+            password_resets.consume(request_id=str(created_id), when=now)
+        audit.log(
+            action="accounts.password_reset_requested",
+            actor_user_id=None,
+            subject_user_id=str(user.id),
+            ip=ip,
+            user_agent=user_agent,
+            metadata={"email": email_n, "result": "email_failed"},
+        )
+        raise
+    except Exception as exc:  # noqa: BLE001
+        created_id = getattr(created, "id", None)
+        if created_id:
+            password_resets.consume(request_id=str(created_id), when=now)
+        audit.log(
+            action="accounts.password_reset_requested",
+            actor_user_id=None,
+            subject_user_id=str(user.id),
+            ip=ip,
+            user_agent=user_agent,
+            metadata={"email": email_n, "result": "email_failed"},
+        )
+        raise EmailSendFailed() from exc
+
     audit.log(
         action="accounts.password_reset_requested",
         actor_user_id=None,

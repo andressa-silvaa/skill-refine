@@ -2,9 +2,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { useState } from 'react';
 
+import { accountApi } from '@/entities/session/api/accountApi';
 import { useSessionActions } from '@/entities/session';
 import { LoginForm } from '@/features/auth/login';
-import { ApiError } from '@/shared/api';
+import { asApiError } from '@/shared/api';
+import { useAsyncRequest } from '@/shared/lib/hooks/useAsyncRequest';
+import { useCooldown } from '@/shared/lib/hooks/useCooldown';
+import { LinkButton } from '@/shared/ui';
 
 import './LoginPage.css';
 
@@ -12,6 +16,11 @@ export function LoginPage() {
   const navigate = useNavigate();
   const { login } = useSessionActions();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [needsEmailConfirmation, setNeedsEmailConfirmation] = useState(false);
+
+  const resendReq = useAsyncRequest(accountApi.requestEmailConfirmation);
+  const cooldown = useCooldown({ seconds: 60 });
 
   return (
     <main className="login-page">
@@ -28,11 +37,15 @@ export function LoginPage() {
             onSubmit={async (values) => {
               try {
                 setServerError(null);
+                setNeedsEmailConfirmation(false);
+                setPendingEmail(values.email);
                 await login(values);
                 navigate('/protected');
               } catch (e) {
-                if (e instanceof ApiError) {
-                  setServerError(e.message);
+                const apiErr = asApiError(e);
+                if (apiErr) {
+                  setServerError(apiErr.message);
+                  setNeedsEmailConfirmation(apiErr.code === 'email_not_confirmed');
                 } else {
                   setServerError('E-mail ou senha inválidos.');
                 }
@@ -48,6 +61,32 @@ export function LoginPage() {
             }}
             serverError={serverError ?? undefined}
           />
+
+          {needsEmailConfirmation && pendingEmail ? (
+            <div style={{ padding: '0 24px 24px' }}>
+              <LinkButton
+                type="button"
+                disabled={resendReq.isLoading || cooldown.isCoolingDown}
+                onClick={async () => {
+                  try {
+                    setServerError(null);
+                    await resendReq.run({ email: pendingEmail });
+                    cooldown.start();
+                    setServerError('E-mail de confirmação reenviado.');
+                  } catch (err) {
+                    const apiErr = asApiError(err);
+                    setServerError(apiErr?.message ?? 'Não foi possível reenviar agora. Tente novamente.');
+                  }
+                }}
+              >
+                {cooldown.isCoolingDown ? cooldown.label : 'Reenviar confirmação'}
+              </LinkButton>
+              <span style={{ marginLeft: 10, fontSize: 12, fontWeight: 700, color: '#6d5b6d' }}>ou</span>{' '}
+              <LinkButton type="button" onClick={() => navigate('/verify-email', { state: { email: pendingEmail } })}>
+                Ver instruções
+              </LinkButton>
+            </div>
+          ) : null}
 
           <aside className="login-visual" aria-hidden="true">
             <img className="girl-img" src="/Character-working-laptop-sitting-chair.svg" alt="" />

@@ -1,4 +1,4 @@
-import './PasswordRecovery.css';
+import '@/shared/ui/auth/AuthStyles.css';
 
 type Props = {
   onGoLogin?: () => void;

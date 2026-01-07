@@ -7,16 +7,17 @@ import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
 
 import { verifyCodeSchema, type VerifyCodeValues } from '../model/schemas';
 
-import './PasswordRecovery.css';
+import '@/shared/ui/auth/AuthStyles.css';
 
 type Props = {
-  onSubmit?: (values: VerifyCodeValues) => void;
-  onResend?: () => void;
+  onSubmit?: (values: VerifyCodeValues) => void | Promise<void>;
+  onResend?: () => void | Promise<void>;
+  isResending?: boolean;
   serverError?: string;
 };
 
 export function VerifyCodeForm(props: Props) {
-  const { onSubmit, onResend, serverError } = props;
+  const { onSubmit, onResend, isResending, serverError } = props;
 
   const {
     control,
@@ -64,6 +65,7 @@ export function VerifyCodeForm(props: Props) {
         className="recovery-small-action"
         type="button"
         onClick={onResend}
+        disabled={Boolean(isResending) || isSubmitting}
         style={{ justifySelf: 'start' }}
       >
         Reenviar código

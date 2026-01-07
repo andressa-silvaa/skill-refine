@@ -12,16 +12,24 @@ from rest_framework.views import APIView
 from apps.accounts.application.use_cases import (
     AccountsAuthConfig,
     confirm_new_password,
+    confirm_email,
     login_with_google,
     login_with_password,
     refresh_session,
     register_user,
+    request_email_confirmation,
     request_password_reset,
     verify_password_reset_code,
 )
 from apps.accounts.domain.errors import (
     AccountsError,
+    EmailConfirmationExpired,
+    EmailConfirmationInvalid,
+    EmailNotRegistered,
     EmailAlreadyInUse,
+    EmailSendFailed,
+    EmailServiceNotConfigured,
+    EmailNotConfirmed,
     GoogleLoginNotConfigured,
     InvalidCredentials,
     PasswordResetExpired,
@@ -31,12 +39,14 @@ from apps.accounts.domain.errors import (
     PasswordResetTooManyAttempts,
     RefreshInvalid,
     RefreshRevoked,
+    TooManyRequests,
 )
 from apps.accounts.infrastructure.email_sender import DjangoEmailSender
 from apps.accounts.infrastructure.google_verifier import GoogleIdTokenVerifier
 from apps.accounts.infrastructure.password_hasher import Argon2PasswordHasher
 from apps.accounts.infrastructure.repositories import (
     OrmAuthIdentityRepository,
+    OrmEmailConfirmationRepository,
     OrmPasswordRepository,
     OrmPasswordResetRepository,
     OrmSessionRepository,
@@ -46,6 +56,8 @@ from apps.audit.infrastructure.logger import OrmAuditLogger
 from shared.auth.drf import request_meta
 
 from .serializers import (
+    EmailConfirmationConfirmSerializer,
+    EmailConfirmationRequestSerializer,
     GoogleLoginSerializer,
     LoginSerializer,
     PasswordResetConfirmSerializer,
@@ -65,6 +77,9 @@ def _cfg() -> AccountsAuthConfig:
         password_reset_code_ttl_minutes=settings.PASSWORD_RESET_CODE_TTL_MINUTES,
         password_reset_grant_ttl_minutes=settings.PASSWORD_RESET_GRANT_TTL_MINUTES,
         password_reset_code_pepper=settings.PASSWORD_RESET_CODE_PEPPER,
+        email_confirmation_token_ttl_hours=settings.EMAIL_CONFIRMATION_TOKEN_TTL_HOURS,
+        email_confirmation_token_pepper=settings.EMAIL_CONFIRMATION_TOKEN_PEPPER,
+        frontend_url=settings.FRONTEND_URL,
         google_oauth_client_id=settings.GOOGLE_OAUTH_CLIENT_ID,
     )
 
@@ -275,10 +290,31 @@ class RegisterView(APIView):
         except EmailAlreadyInUse:
             return _error("email_already_in_use", "E-mail já cadastrado", status.HTTP_409_CONFLICT)
 
-        return Response(
-            {"user": user.__dict__},
-            status=status.HTTP_201_CREATED,
-        )
+        # Best-effort: attempt to send confirmation email, but don't block user creation.
+        email_confirmation_sent = True
+        confirmations = OrmEmailConfirmationRepository()
+        email_sender = DjangoEmailSender()
+        try:
+            request_email_confirmation(
+                cfg=_cfg(),
+                users=users,
+                confirmations=confirmations,
+                email_sender=email_sender,
+                audit=audit,
+                email=ser.validated_data["email"],
+                ip=meta["ip"],
+                user_agent=meta["user_agent"],
+            )
+        except (EmailServiceNotConfigured, EmailSendFailed):
+            email_confirmation_sent = False
+        except TooManyRequests:
+            # Should be rare on register; treat as "sent" UX-wise (user can request later).
+            email_confirmation_sent = True
+        except Exception:  # noqa: BLE001
+            # Don't break register if the email confirmation subsystem is misconfigured (e.g. missing migrations).
+            email_confirmation_sent = False
+
+        return Response({"user": user.__dict__, "email_confirmation_sent": email_confirmation_sent}, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -313,6 +349,8 @@ class LoginView(APIView):
             )
         except InvalidCredentials:
             return _error("invalid_credentials", "Credenciais inválidas", status.HTTP_401_UNAUTHORIZED)
+        except EmailNotConfirmed:
+            return _error("email_not_confirmed", "Confirme seu e-mail para fazer login.", status.HTTP_403_FORBIDDEN)
 
         response = Response(
             {"access_token": result.access_token, "user": result.user.__dict__},
@@ -443,17 +481,33 @@ class PasswordResetRequestView(APIView):
         email_sender = DjangoEmailSender()
         audit = OrmAuditLogger()
 
-        # Always 200
-        request_password_reset(
-            cfg=_cfg(),
-            users=users,
-            password_resets=resets,
-            email_sender=email_sender,
-            audit=audit,
-            email=ser.validated_data["email"],
-            ip=meta["ip"],
-            user_agent=meta["user_agent"],
-        )
+        try:
+            request_password_reset(
+                cfg=_cfg(),
+                users=users,
+                password_resets=resets,
+                email_sender=email_sender,
+                audit=audit,
+                email=ser.validated_data["email"],
+                ip=meta["ip"],
+                user_agent=meta["user_agent"],
+            )
+        except EmailNotRegistered:
+            return _error(
+                "email_not_registered",
+                "Não existe nenhum usuário cadastrado com este e-mail.",
+                status.HTTP_404_NOT_FOUND,
+            )
+        except (EmailServiceNotConfigured, EmailSendFailed):
+            return _error(
+                "email_service_unavailable",
+                "Não foi possível enviar o e-mail agora. Tente novamente mais tarde.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except AccountsError:
+            # Safe fallback for domain errors.
+            return _error("password_reset_request_failed", "Não foi possível processar sua solicitação.", status.HTTP_400_BAD_REQUEST)
+
         return Response({"status": "ok"}, status=status.HTTP_200_OK)
 
 
@@ -517,6 +571,104 @@ class PasswordResetConfirmView(APIView):
             return _error("not_verified", "Confirme o código antes de redefinir", status.HTTP_403_FORBIDDEN)
         except (PasswordResetGrantInvalid, PasswordResetExpired, PasswordResetNotFound):
             return _error("invalid_reset", "Sessão de reset inválida ou expirada", status.HTTP_400_BAD_REQUEST)
+
+        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+
+
+class EmailConfirmationRequestView(APIView):
+    authentication_classes: list = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        ser = EmailConfirmationRequestSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        meta = request_meta(request)
+
+        users = OrmUserRepository()
+        confirmations = OrmEmailConfirmationRepository()
+        email_sender = DjangoEmailSender()
+        audit = OrmAuditLogger()
+
+        try:
+            request_email_confirmation(
+                cfg=_cfg(),
+                users=users,
+                confirmations=confirmations,
+                email_sender=email_sender,
+                audit=audit,
+                email=ser.validated_data["email"],
+                ip=meta["ip"],
+                user_agent=meta["user_agent"],
+            )
+        except EmailNotRegistered:
+            return _error(
+                "email_not_registered",
+                "Não existe nenhum usuário cadastrado com este e-mail.",
+                status.HTTP_404_NOT_FOUND,
+            )
+        except TooManyRequests:
+            return _error(
+                "too_many_requests",
+                "Aguarde um pouco antes de reenviar a confirmação.",
+                status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+        except (EmailServiceNotConfigured, EmailSendFailed):
+            return _error(
+                "email_service_unavailable",
+                "Não foi possível enviar o e-mail agora. Tente novamente mais tarde.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except AccountsError:
+            return _error(
+                "email_confirmation_request_failed",
+                "Não foi possível processar sua solicitação.",
+                status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:  # noqa: BLE001
+            return _error(
+                "email_confirmation_request_failed",
+                "Serviço temporariamente indisponível. Tente novamente mais tarde.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+
+
+class EmailConfirmationConfirmView(APIView):
+    authentication_classes: list = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        ser = EmailConfirmationConfirmSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        meta = request_meta(request)
+
+        users = OrmUserRepository()
+        confirmations = OrmEmailConfirmationRepository()
+        audit = OrmAuditLogger()
+
+        try:
+            confirm_email(
+                cfg=_cfg(),
+                users=users,
+                confirmations=confirmations,
+                audit=audit,
+                token=ser.validated_data["token"],
+                ip=meta["ip"],
+                user_agent=meta["user_agent"],
+            )
+        except EmailConfirmationExpired:
+            return _error("token_expired", "Token expirado. Solicite um novo e-mail.", status.HTTP_400_BAD_REQUEST)
+        except EmailConfirmationInvalid:
+            return _error("token_invalid", "Token inválido. Solicite um novo e-mail.", status.HTTP_400_BAD_REQUEST)
+        except AccountsError:
+            return _error("email_confirmation_failed", "Não foi possível confirmar seu e-mail.", status.HTTP_400_BAD_REQUEST)
+        except Exception:  # noqa: BLE001
+            return _error(
+                "email_confirmation_failed",
+                "Serviço temporariamente indisponível. Tente novamente mais tarde.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
         return Response({"status": "ok"}, status=status.HTTP_200_OK)
 

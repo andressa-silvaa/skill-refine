@@ -10,7 +10,8 @@ import {
   getRecoveryResetToken,
   passwordRecoveryApi,
 } from '@/features/auth/password-recovery';
-import { RecoveryLayout } from '@/widgets/auth/recovery-layout';
+import { getApiErrorMessage } from '@/shared/api';
+import { AuthLayout } from '@/widgets/auth/auth-layout';
 
 export function ResetNewPasswordPage() {
   const navigate = useNavigate();
@@ -21,10 +22,10 @@ export function ResetNewPasswordPage() {
   }, [navigate]);
 
   return (
-    <RecoveryLayout
+    <AuthLayout
       title="Redefinição de senha"
       subtitle="Insira abaixo sua nova senha."
-      onBack={() => navigate('/reset/code')}
+      onBack={() => navigate(-1)}
       footer={<PasswordRecoveryFooter onGoLogin={() => navigate('/login')} />}
     >
       <SetNewPasswordForm
@@ -42,11 +43,11 @@ export function ResetNewPasswordPage() {
             clearRecovery();
             navigate('/reset/success');
           } catch (e) {
-            setServerError('Não foi possível redefinir a senha. Tente novamente.');
+            setServerError(getApiErrorMessage(e, 'Não foi possível redefinir a senha. Tente novamente.'));
           }
         }}
       />
-    </RecoveryLayout>
+    </AuthLayout>
   );
 }
 

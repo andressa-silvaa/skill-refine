@@ -1,52 +1,51 @@
-import { ApiError, apiRequest, clearAccessToken, setAccessToken } from '@/shared/api';
+import { ApiError, clearAccessToken, setAccessToken } from '@/shared/api';
 
-import type { SessionUser } from '../model/types';
-
-type AuthResponse = { access_token: string; user: SessionUser };
-type RefreshResponse = { access_token: string };
-type MeResponse = { user: SessionUser };
-type RegisterResponse = { user: SessionUser };
+import { clearHasRefreshCookieHint, setHasRefreshCookieHint } from '../lib/refreshFlag';
+import { authApi } from './authApi';
 
 export const sessionApi = {
   async register(payload: { email: string; full_name: string; birth_date?: string | null; password: string }) {
-    return apiRequest<RegisterResponse>('/accounts/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    return authApi.register(payload);
   },
 
   async login(payload: { email: string; password: string }) {
-    const res = await apiRequest<AuthResponse>('/accounts/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    const res = await authApi.login(payload);
     setAccessToken(res.access_token);
+    setHasRefreshCookieHint();
     return res.user;
   },
 
   async loginGoogle(payload: { credential: string }) {
-    const res = await apiRequest<AuthResponse>('/accounts/auth/google', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    const res = await authApi.loginGoogle(payload);
     setAccessToken(res.access_token);
+    setHasRefreshCookieHint();
     return res.user;
   },
 
   async refresh() {
-    const res = await apiRequest<RefreshResponse>('/accounts/auth/refresh', { method: 'POST' });
-    setAccessToken(res.access_token);
-    return res.access_token;
+    try {
+      const res = await authApi.refresh();
+      setAccessToken(res.access_token);
+      setHasRefreshCookieHint();
+      return res.access_token;
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 401) {
+        // No refresh cookie (or expired). Avoid noisy re-tries on future boots.
+        clearAccessToken();
+        clearHasRefreshCookieHint();
+      }
+      throw e;
+    }
   },
 
   async me() {
     try {
-      const res = await apiRequest<MeResponse>('/accounts/auth/me', { method: 'GET' });
+      const res = await authApi.me();
       return res.user;
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         await sessionApi.refresh();
-        const res = await apiRequest<MeResponse>('/accounts/auth/me', { method: 'GET' });
+        const res = await authApi.me();
         return res.user;
       }
       throw e;
@@ -55,9 +54,10 @@ export const sessionApi = {
 
   async logout() {
     try {
-      await apiRequest<void>('/accounts/auth/logout', { method: 'POST' });
+      await authApi.logout();
     } finally {
       clearAccessToken();
+      clearHasRefreshCookieHint();
     }
   },
 };

@@ -9,25 +9,28 @@ import {
   passwordRecoveryApi,
   setRecoveryResetToken,
 } from '@/features/auth/password-recovery';
-import { RecoveryLayout } from '@/widgets/auth/recovery-layout';
+import { getApiErrorMessage } from '@/shared/api';
+import { AuthLayout } from '@/widgets/auth/auth-layout';
 
 export function ResetCodePage() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
     if (!getRecoveryEmail()) navigate('/reset/email', { replace: true });
   }, [navigate]);
 
   return (
-    <RecoveryLayout
+    <AuthLayout
       title="Código de confirmação"
       subtitle="Insira o código de 5 dígitos enviado para seu e-mail."
-      onBack={() => navigate('/reset/email')}
+      onBack={() => navigate(-1)}
       footer={<PasswordRecoveryFooter onGoLogin={() => navigate('/login')} />}
     >
       <VerifyCodeForm
         serverError={serverError ?? undefined}
+        isResending={isResending}
         onSubmit={async (values) => {
           try {
             setServerError(null);
@@ -40,16 +43,24 @@ export function ResetCodePage() {
             setRecoveryResetToken(res.reset_token);
             navigate('/reset/new');
           } catch (e) {
-            setServerError('Código inválido ou expirado.');
+            setServerError(getApiErrorMessage(e, 'Código inválido ou expirado.'));
           }
         }}
         onResend={async () => {
           const email = getRecoveryEmail();
           if (!email) return;
-          await passwordRecoveryApi.requestReset({ email });
+          try {
+            setServerError(null);
+            setIsResending(true);
+            await passwordRecoveryApi.requestReset({ email });
+          } catch (e) {
+            setServerError(getApiErrorMessage(e, 'Não foi possível reenviar o código. Tente novamente.'));
+          } finally {
+            setIsResending(false);
+          }
         }}
       />
-    </RecoveryLayout>
+    </AuthLayout>
   );
 }
 

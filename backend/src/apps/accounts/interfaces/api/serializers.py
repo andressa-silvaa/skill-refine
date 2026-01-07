@@ -34,6 +34,14 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password = serializers.CharField(min_length=8, write_only=True)
 
 
+class EmailConfirmationRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class EmailConfirmationConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField(min_length=10, write_only=True)
+
+
 class AuthUserSerializer(serializers.Serializer):
     id = serializers.CharField()
     email = serializers.EmailField()

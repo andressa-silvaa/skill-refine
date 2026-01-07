@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { useSessionActions } from '@/entities/session';
 import { RegisterForm } from '@/features/auth/register';
+import { getApiErrorMessage } from '@/shared/api';
 
 import './RegisterPage.css';
 
@@ -27,15 +28,17 @@ export function RegisterPage() {
               try {
                 setServerError(null);
                 const birth_date = values.birthDate ? values.birthDate.toISOString().slice(0, 10) : null;
-                await register({
+                const res = await register({
                   email: values.email,
                   full_name: values.fullName,
                   birth_date,
                   password: values.password,
                 });
-                navigate('/login');
+                navigate('/verify-email', {
+                  state: { email: values.email, emailConfirmationSent: Boolean(res.email_confirmation_sent ?? true) },
+                });
               } catch (e) {
-                setServerError('Não foi possível cadastrar. Verifique os dados e tente novamente.');
+                setServerError(getApiErrorMessage(e, 'Não foi possível cadastrar. Verifique os dados e tente novamente.'));
               }
             }}
             serverError={serverError ?? undefined}

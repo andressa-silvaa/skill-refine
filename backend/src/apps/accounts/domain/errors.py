@@ -60,3 +60,31 @@ class GoogleTokenInvalid(AccountsError):
     code = "google_token_invalid"
 
 
+class EmailNotRegistered(AccountsError):
+    code = "email_not_registered"
+
+
+class EmailServiceNotConfigured(AccountsError):
+    code = "email_service_not_configured"
+
+
+class EmailSendFailed(AccountsError):
+    code = "email_send_failed"
+
+
+class EmailNotConfirmed(AccountsError):
+    code = "email_not_confirmed"
+
+
+class EmailConfirmationInvalid(AccountsError):
+    code = "email_confirmation_invalid"
+
+
+class EmailConfirmationExpired(AccountsError):
+    code = "email_confirmation_expired"
+
+
+class TooManyRequests(AccountsError):
+    code = "too_many_requests"
+
+

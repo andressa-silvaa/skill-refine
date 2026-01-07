@@ -7,10 +7,10 @@ import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
 
 import { setNewPasswordSchema, type SetNewPasswordValues } from '../model/schemas';
 
-import './PasswordRecovery.css';
+import '@/shared/ui/auth/AuthStyles.css';
 
 type Props = {
-  onSubmit?: (values: SetNewPasswordValues) => void;
+  onSubmit?: (values: SetNewPasswordValues) => void | Promise<void>;
   serverError?: string;
 };
 
