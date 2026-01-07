@@ -39,7 +39,6 @@
   color: var(--text-dark);
 }
 
-/* INPUT PADRÃO */
 .field-input,
 .date-picker .react-date-picker__wrapper {
   width: 100%;
@@ -61,7 +60,6 @@
   color: var(--placeholder);
 }
 
-/* DATE PICKER = IGUAL AO INPUT */
 .date-picker {
   width: 100%;
 }
@@ -106,7 +104,6 @@
   color: var(--placeholder);
 }
 
-/* CALENDAR */
 .react-calendar {
   border: 0;
   border-radius: 14px;
@@ -141,7 +138,6 @@
   background: #f0b9e7;
 }
 
-/* TERMS */
 .terms {
   width: 100%;
   display: flex;
@@ -170,7 +166,6 @@
   cursor: pointer;
 }
 
-/* BUTTON */
 .submit-btn {
   margin-top: 6px;
   width: min(180px, 100%);
@@ -200,7 +195,6 @@
   font-size: 15px;
 }
 
-/* FOOTER */
 .footer {
   display: flex;
   justify-content: center;

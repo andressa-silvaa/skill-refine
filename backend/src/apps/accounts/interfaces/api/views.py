@@ -103,8 +103,18 @@ def _clear_refresh_cookie(response: Response) -> None:
     )
 
 
+def _canonical_error_code(code: str) -> str:
+    return (code or "").strip().upper()
+
+
 def _error(code: str, message: str, http_status: int) -> Response:
-    return Response({"error": {"code": code, "message": message}}, status=http_status)
+    canonical = _canonical_error_code(code)
+    payload = {
+        "error": {"code": code, "error_code": canonical, "message": message},
+        "error_code": canonical,
+        "message": message,
+    }
+    return Response(payload, status=http_status)
 
 
 OAUTH_STATE_COOKIE = "sr_google_oauth_state"
@@ -117,11 +127,6 @@ def _append_query(url: str, params: dict[str, str]) -> str:
 
 
 def _safe_next_url(next_url: str | None) -> str:
-    """
-    Prevent open redirects: only allow absolute http(s) URLs to localhost/127.0.0.1 in dev.
-    In production you should restrict this to your known frontend domains.
-    """
-
     if not next_url:
         return "http://localhost:3000/oauth/callback"
     if next_url.startswith("http://localhost:3000") or next_url.startswith("http://127.0.0.1:3000"):
@@ -147,7 +152,7 @@ class GoogleOAuthStartView(APIView):
             "response_type": "code",
             "scope": "openid email profile",
             "state": state,
-            "prompt": "select_account",
+            "prompt": "consent select_account",
         }
         auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
 
@@ -212,7 +217,7 @@ class GoogleOAuthCallbackView(APIView):
                 body = token_res.json()
                 google_error = str(body.get("error") or "")
                 google_desc = str(body.get("error_description") or "")
-            except Exception:  # noqa: BLE001
+            except Exception:
                 pass
 
             params = {"oauth_error": "token_exchange_failed", "status": str(token_res.status_code)}
@@ -251,7 +256,6 @@ class GoogleOAuthCallbackView(APIView):
 
         resp = redirect(next_url)
         _set_refresh_cookie(resp, refresh_cookie)
-        # Cleanup short-lived cookies
         resp.delete_cookie(OAUTH_STATE_COOKIE, path="/")
         resp.delete_cookie(OAUTH_NEXT_COOKIE, path="/")
         return resp
@@ -288,9 +292,15 @@ class RegisterView(APIView):
                 user_agent=meta["user_agent"],
             )
         except EmailAlreadyInUse:
+            existing = users.get_by_email(ser.validated_data["email"])
+            if existing and getattr(existing, "email_verified_at", None) is None:
+                return _error(
+                    "email_not_confirmed",
+                    "Confirme seu e-mail para continuar.",
+                    status.HTTP_409_CONFLICT,
+                )
             return _error("email_already_in_use", "E-mail já cadastrado", status.HTTP_409_CONFLICT)
 
-        # Best-effort: attempt to send confirmation email, but don't block user creation.
         email_confirmation_sent = True
         confirmations = OrmEmailConfirmationRepository()
         email_sender = DjangoEmailSender()
@@ -308,10 +318,8 @@ class RegisterView(APIView):
         except (EmailServiceNotConfigured, EmailSendFailed):
             email_confirmation_sent = False
         except TooManyRequests:
-            # Should be rare on register; treat as "sent" UX-wise (user can request later).
             email_confirmation_sent = True
-        except Exception:  # noqa: BLE001
-            # Don't break register if the email confirmation subsystem is misconfigured (e.g. missing migrations).
+        except Exception:
             email_confirmation_sent = False
 
         return Response({"user": user.__dict__, "email_confirmation_sent": email_confirmation_sent}, status=status.HTTP_201_CREATED)
@@ -348,7 +356,7 @@ class LoginView(APIView):
                 user_agent=meta["user_agent"],
             )
         except InvalidCredentials:
-            return _error("invalid_credentials", "Credenciais inválidas", status.HTTP_401_UNAUTHORIZED)
+            return _error("invalid_credentials", "E-mail ou senha inválidos.", status.HTTP_401_UNAUTHORIZED)
         except EmailNotConfirmed:
             return _error("email_not_confirmed", "Confirme seu e-mail para fazer login.", status.HTTP_403_FORBIDDEN)
 
@@ -505,7 +513,6 @@ class PasswordResetRequestView(APIView):
                 status.HTTP_503_SERVICE_UNAVAILABLE,
             )
         except AccountsError:
-            # Safe fallback for domain errors.
             return _error("password_reset_request_failed", "Não foi possível processar sua solicitação.", status.HTTP_400_BAD_REQUEST)
 
         return Response({"status": "ok"}, status=status.HTTP_200_OK)
@@ -624,7 +631,7 @@ class EmailConfirmationRequestView(APIView):
                 "Não foi possível processar sua solicitação.",
                 status.HTTP_400_BAD_REQUEST,
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             return _error(
                 "email_confirmation_request_failed",
                 "Serviço temporariamente indisponível. Tente novamente mais tarde.",
@@ -663,7 +670,7 @@ class EmailConfirmationConfirmView(APIView):
             return _error("token_invalid", "Token inválido. Solicite um novo e-mail.", status.HTTP_400_BAD_REQUEST)
         except AccountsError:
             return _error("email_confirmation_failed", "Não foi possível confirmar seu e-mail.", status.HTTP_400_BAD_REQUEST)
-        except Exception:  # noqa: BLE001
+        except Exception:
             return _error(
                 "email_confirmation_failed",
                 "Serviço temporariamente indisponível. Tente novamente mais tarde.",

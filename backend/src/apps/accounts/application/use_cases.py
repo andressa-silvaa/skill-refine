@@ -50,14 +50,12 @@ def _utc(dt: datetime) -> datetime:
 
 
 def _hash_secret(value: str, pepper: str) -> str:
-    # HMAC would also be fine; this is enough for a one-way token hash with a server-side pepper.
     import hashlib
 
     return hashlib.sha256((pepper + ":" + value).encode("utf-8")).hexdigest()
 
 
 def _random_digits(length: int) -> str:
-    # cryptographically secure digits
     return "".join(str(secrets.randbelow(10)) for _ in range(length))
 
 
@@ -301,7 +299,6 @@ def request_email_confirmation(
 
     now = now_utc()
 
-    # Basic throttling: avoid multiple emails in a short window.
     last_req = confirmations.latest_active_for_email(email=email_n)
     if last_req is not None:
         last_created = _utc(last_req.created_at)
@@ -316,7 +313,6 @@ def request_email_confirmation(
             )
             raise TooManyRequests()
 
-    # Slightly stronger rate limit (db-based, no cache required).
     since = now - timedelta(hours=1)
     if confirmations.count_recent_for_email(email=email_n, since=since) >= 8:
         raise TooManyRequests()
@@ -342,7 +338,6 @@ def request_email_confirmation(
     try:
         email_sender.send_email_confirmation_link(to_email=email_n, confirm_url=confirm_url)
     except (EmailServiceNotConfigured, EmailSendFailed) as exc:
-        # If sending failed, make sure the token cannot be used later.
         confirmations.consume(token_id=str(created.id), when=now)
         raise exc
 
@@ -385,11 +380,9 @@ def confirm_email(
         confirmations.consume_if_active(token_id=str(rec.id), when=now)
         raise EmailConfirmationInvalid()
 
-    # Enforce single-use (best-effort): only one request should be able to consume the token.
     if not confirmations.consume_if_active(token_id=str(rec.id), when=now):
         raise EmailConfirmationInvalid()
 
-    # Idempotent: if already verified, nothing else to do.
     if not getattr(user, "email_verified_at", None):
         users.mark_email_verified(user_id=str(user.id), when=now)
 
@@ -433,7 +426,6 @@ def refresh_session(
     import hmac
 
     if not hmac.compare_digest(expected, provided):
-        # Possible token theft; revoke session.
         sessions.revoke_session(session_id=str(session.id), when=now, replaced_by_session_id=None)
         audit.log(
             action="accounts.refresh_failed",
@@ -449,7 +441,6 @@ def refresh_session(
     if user is None or getattr(user, "status", "active") != "active":
         raise RefreshRevoked()
 
-    # Rotate: create a new session, revoke current.
     new_refresh_plain = secrets.token_urlsafe(48)
     new_refresh_hash = _hash_secret(new_refresh_plain, cfg.refresh_token_pepper)
     new_expires_at = now + timedelta(days=cfg.refresh_ttl_days)
@@ -530,7 +521,7 @@ def login_with_google(
 
     try:
         profile = google.verify(id_token=id_token)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         raise GoogleTokenInvalid() from exc
 
     email_n = normalize_email(profile.email)
@@ -632,7 +623,6 @@ def request_password_reset(
     now = now_utc()
     last_req = password_resets.latest_active_for_email(email=email_n)
     if last_req is not None:
-        # Simple anti-spam: avoid sending multiple emails in a short window.
         last_created = _utc(last_req.created_at)
         if (now - last_created).total_seconds() < 60:
             audit.log(
@@ -659,7 +649,6 @@ def request_password_reset(
     try:
         email_sender.send_password_reset_code(to_email=email_n, code=code)
     except (EmailServiceNotConfigured, EmailSendFailed):
-        # Avoid leaving an "active" reset request that would throttle future attempts and/or enable code verification.
         created_id = getattr(created, "id", None)
         if created_id:
             password_resets.consume(request_id=str(created_id), when=now)
@@ -672,7 +661,7 @@ def request_password_reset(
             metadata={"email": email_n, "result": "email_failed"},
         )
         raise
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         created_id = getattr(created, "id", None)
         if created_id:
             password_resets.consume(request_id=str(created_id), when=now)

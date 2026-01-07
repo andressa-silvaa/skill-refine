@@ -34,6 +34,52 @@
   gap: 14px;
 }
 
+.secondary-actions {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  margin-top: -4px;
+}
+
+.login-secondary-link {
+  justify-self: start;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6d5b6d;
+}
+
+.login-secondary-link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-secondary-link:hover:not(:disabled) {
+  color: var(--text-purple);
+  text-decoration: underline;
+}
+
+.secondary-error {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9a1b1b;
+}
+
+.form-server-error {
+  width: 100%;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.login-inline-cta {
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .field {
   display: grid;
   gap: 10px;

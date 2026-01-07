@@ -2,8 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { PasswordInput } from '@/shared/ui';
-import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
+import { LinkButton, PasswordInput } from '@/shared/ui';
+import { hasFormErrors } from '@/shared/lib/forms';
 
 import { loginSchema, type LoginValues } from '../model/schema';
 
@@ -15,15 +15,32 @@ type Props = {
   onGoForgot?: () => void;
   onGoogle?: () => void;
   serverError?: string;
+  onConfirmEmail?: (email: string) => void | Promise<void>;
+  confirmEmailBusy?: boolean;
+  confirmEmailLabel?: string;
+  confirmEmailError?: string;
+  showConfirmEmailCta?: boolean;
 };
 
 export function LoginForm(props: Props) {
-  const { onSubmit, onGoRegister, onGoForgot, onGoogle, serverError } = props;
+  const {
+    onSubmit,
+    onGoRegister,
+    onGoForgot,
+    onGoogle,
+    serverError,
+    onConfirmEmail,
+    confirmEmailBusy,
+    confirmEmailLabel,
+    confirmEmailError,
+    showConfirmEmailCta,
+  } = props;
 
   const {
     register,
     handleSubmit,
     trigger,
+    watch,
     formState: { errors, touchedFields, dirtyFields, isSubmitting },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -36,7 +53,6 @@ export function LoginForm(props: Props) {
 
   const showEmailError = (!!touchedFields.email || !!dirtyFields.email) && !!errors.email?.message;
   const showPasswordError = (!!touchedFields.password || !!dirtyFields.password) && !!errors.password?.message;
-  const showGenericError = showEmailError || showPasswordError;
 
   useEffect(() => {
     void trigger().finally(() => setIsReady(true));
@@ -83,8 +99,41 @@ export function LoginForm(props: Props) {
           error={showPasswordError ? errors.password?.message : undefined}
         />
 
-        {showGenericError ? <p className="form-error">{GENERIC_FORM_ERROR_MESSAGE}</p> : null}
-        {serverError ? <p className="form-error">{serverError}</p> : null}
+        <div className="secondary-actions" aria-live="polite">
+          <LinkButton
+            type="button"
+            className="login-secondary-link"
+            disabled={confirmEmailBusy}
+            onClick={(e) => {
+              e.preventDefault();
+              void onConfirmEmail?.(watch('email') ?? '');
+            }}
+          >
+            {confirmEmailLabel ?? 'Confirmar e-mail'}
+          </LinkButton>
+          {confirmEmailError ? <p className="secondary-error">{confirmEmailError}</p> : null}
+        </div>
+
+        {serverError ? (
+          <div className="form-server-error">
+            <p className="form-error" style={{ width: 'auto' }}>
+              {serverError}
+            </p>
+            {showConfirmEmailCta ? (
+              <LinkButton
+                type="button"
+                className="login-inline-cta"
+                disabled={confirmEmailBusy}
+                onClick={(e) => {
+                  e.preventDefault();
+                  void onConfirmEmail?.(watch('email') ?? '');
+                }}
+              >
+                {confirmEmailLabel ?? 'Confirmar e-mail'}
+              </LinkButton>
+            ) : null}
+          </div>
+        ) : null}
 
         <button className="submit-btn" type="submit" disabled={!isReady || hasFormErrors(errors) || isSubmitting}>
           <span>ENTRAR</span>

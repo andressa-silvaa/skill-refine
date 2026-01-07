@@ -11,7 +11,7 @@ type SessionState = {
 };
 
 type SessionActions = {
-  bootstrap: () => Promise<void>;
+  bootstrap: (options?: { force?: boolean }) => Promise<void>;
   login: (payload: { email: string; password: string }) => Promise<void>;
   loginGoogle: (payload: { credential: string }) => Promise<void>;
   register: (payload: { email: string; full_name: string; birth_date?: string | null; password: string }) => Promise<{
@@ -26,10 +26,8 @@ const SessionContext = createContext<{ state: SessionState; actions: SessionActi
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SessionState>({ status: 'unknown', user: null });
 
-  const bootstrap = useCallback(async () => {
-    // Avoid hitting /refresh on first load when we know there's no previous session.
-    // This prevents noisy 401s in the console on the public login screen.
-    if (!getHasRefreshCookieHint()) {
+  const bootstrap = useCallback(async (options?: { force?: boolean }) => {
+    if (!options?.force && !getHasRefreshCookieHint()) {
       setState({ status: 'anonymous', user: null });
       return;
     }
@@ -38,7 +36,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       const user = await sessionApi.me();
       setState({ status: 'authenticated', user });
     } catch (e) {
-      // If there is no refresh cookie, treat as anonymous.
       setState({ status: 'anonymous', user: null });
     }
   }, []);
@@ -60,7 +57,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const register = useCallback(
     async (payload: { email: string; full_name: string; birth_date?: string | null; password: string }) => {
       return sessionApi.register(payload);
-      // After register, require explicit login (clean + avoids auto-session on register).
     },
     []
   );

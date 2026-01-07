@@ -44,7 +44,7 @@ def decode_token(*, secret: str, issuer: str, token: str) -> dict[str, Any]:
             options={"require": ["exp", "iat", "iss", "sub"]},
             issuer=issuer,
         )
-    except jwt.PyJWTError as exc:  # noqa: BLE001
+    except jwt.PyJWTError as exc:
         raise JwtError("invalid_token") from exc
     if not isinstance(payload, dict):
         raise JwtError("invalid_token")

@@ -36,13 +36,6 @@ class UserManager(models.Manager):
 
 
 class User(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
-    """
-    users (identity) — schema source of truth: Django migrations.
-
-    Note: We intentionally do NOT use Django's built-in auth user model yet because
-    the required schema stores password hashes in a separate table (`user_passwords`).
-    """
-
     email = models.TextField(unique=True)
     email_verified_at = models.DateTimeField(null=True, blank=True)
     full_name = models.TextField()
@@ -60,10 +53,6 @@ class User(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
 
     @property
     def is_authenticated(self) -> bool:
-        """
-        Compatibility with DRF permissions (we don't use django.contrib.auth).
-        """
-
         return True
 
     @property
@@ -72,11 +61,6 @@ class User(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
 
 
 class UserPassword(models.Model):
-    """
-    user_passwords (separate password storage).
-    PK = FK to users.id (OneToOne).
-    """
-
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -93,10 +77,6 @@ class UserPassword(models.Model):
 
 
 class AuthIdentity(UUIDPrimaryKeyModel, CreatedAtModel):
-    """
-    auth_identities (password + social).
-    """
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
     provider = models.CharField(max_length=16, choices=AuthProvider.choices)
     provider_user_id = models.TextField(null=True, blank=True)
@@ -122,10 +102,6 @@ class AuthIdentity(UUIDPrimaryKeyModel, CreatedAtModel):
 
 
 class Session(UUIDPrimaryKeyModel, models.Model):
-    """
-    sessions (refresh token sessions).
-    """
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
     refresh_token_hash = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -144,10 +120,6 @@ class Session(UUIDPrimaryKeyModel, models.Model):
 
 
 class PasswordResetRequest(UUIDPrimaryKeyModel, models.Model):
-    """
-    password_reset_requests (email/code recovery flow).
-    """
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
     email = models.TextField()
     code_hash = models.TextField()
@@ -173,10 +145,6 @@ class PasswordResetRequest(UUIDPrimaryKeyModel, models.Model):
 
 
 class EmailConfirmationToken(UUIDPrimaryKeyModel, models.Model):
-    """
-    email_confirmation_tokens (email verification flow).
-    """
-
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
     email = models.TextField()
     token_hash = models.TextField()

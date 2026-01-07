@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
+import { hasFormErrors } from '@/shared/lib/forms';
 
 import { requestResetSchema, type RequestResetValues } from '../model/schemas';
 
@@ -31,7 +31,6 @@ export function RequestResetForm(props: Props) {
   const [isReady, setIsReady] = useState(false);
 
   const showEmailError = (!!touchedFields.email || !!dirtyFields.email) && !!errors.email?.message;
-  const showGenericError = showEmailError;
 
   useEffect(() => {
     void trigger().finally(() => setIsReady(true));
@@ -51,7 +50,6 @@ export function RequestResetForm(props: Props) {
         {showEmailError ? <p className="field-error">{errors.email?.message}</p> : null}
       </label>
 
-      {showGenericError ? <p className="recovery-error">{GENERIC_FORM_ERROR_MESSAGE}</p> : null}
       {serverError ? <p className="recovery-error">{serverError}</p> : null}
 
       <button className="recovery-btn" type="submit" disabled={!isReady || hasFormErrors(errors) || isSubmitting}>

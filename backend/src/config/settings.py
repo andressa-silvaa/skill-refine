@@ -6,7 +6,6 @@ from pathlib import Path
 import environ
 
 
-# src/config/settings.py -> backend/src
 SRC_DIR = Path(__file__).resolve().parents[1]
 BACKEND_DIR = SRC_DIR.parent
 REPO_DIR = BACKEND_DIR.parent
@@ -15,7 +14,6 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, False),
 )
 
-# Try backend/.env first, then repo-root .env
 for candidate in (BACKEND_DIR / ".env", REPO_DIR / ".env"):
     if candidate.exists():
         env.read_env(str(candidate))
@@ -31,13 +29,10 @@ CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 
 
 INSTALLED_APPS = [
-    # Minimal Django core
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
-    # Third-party
     "rest_framework",
     "corsheaders",
-    # Domain apps (modular monolith)
     "apps.accounts",
     "apps.resumes",
     "apps.analysis",
@@ -59,10 +54,6 @@ DATABASES = {
     "default": env.db(),
 }
 
-# Pragmatic: enable SSL in production when the URL requests it (e.g. ?sslmode=require).
-# django-environ passes query params into OPTIONS automatically for postgres.
-
-
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "UTC"
 USE_I18N = True
@@ -73,17 +64,13 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-APP_ENV = env.str("APP_ENV", default="dev")  # dev | prod
-
-# ------------------------------------------------------------
-# Security (pragmatic defaults)
-# ------------------------------------------------------------
+APP_ENV = env.str("APP_ENV", default="dev")
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 X_FRAME_OPTIONS = "DENY"
 
 if not DEBUG:
-    SECURE_BROWSER_XSS_FILTER = True  # noqa: S105
+    SECURE_BROWSER_XSS_FILTER = True
     SECURE_HSTS_SECONDS = env.int("DJANGO_SECURE_HSTS_SECONDS", default=60 * 60 * 24 * 30)
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = False
@@ -91,9 +78,6 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
 
-# ------------------------------------------------------------
-# CORS (frontend dev server)
-# ------------------------------------------------------------
 CORS_ALLOWED_ORIGINS = env.list(
     "DJANGO_CORS_ALLOWED_ORIGINS",
     default=[
@@ -113,9 +97,6 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-# ------------------------------------------------------------
-# Auth (JWT access + refresh cookie)
-# ------------------------------------------------------------
 JWT_SECRET = env.str("JWT_SECRET", default=SECRET_KEY)
 JWT_ISSUER = env.str("JWT_ISSUER", default="skill-refine")
 JWT_ACCESS_TTL_MINUTES = env.int("JWT_ACCESS_TTL_MINUTES", default=15)
@@ -125,26 +106,20 @@ REFRESH_TTL_DAYS = env.int("REFRESH_TTL_DAYS", default=30)
 
 REFRESH_COOKIE_NAME = env.str("REFRESH_COOKIE_NAME", default="sr_refresh")
 REFRESH_COOKIE_SECURE = env.bool("REFRESH_COOKIE_SECURE", default=(not DEBUG))
-REFRESH_COOKIE_SAMESITE = env.str("REFRESH_COOKIE_SAMESITE", default="Lax")  # Lax | Strict | None
+REFRESH_COOKIE_SAMESITE = env.str("REFRESH_COOKIE_SAMESITE", default="Lax")
 REFRESH_COOKIE_PATH = env.str("REFRESH_COOKIE_PATH", default="/")
 
-# Password reset flow
 PASSWORD_RESET_CODE_TTL_MINUTES = env.int("PASSWORD_RESET_CODE_TTL_MINUTES", default=10)
 PASSWORD_RESET_GRANT_TTL_MINUTES = env.int("PASSWORD_RESET_GRANT_TTL_MINUTES", default=15)
 PASSWORD_RESET_CODE_PEPPER = env.str("PASSWORD_RESET_CODE_PEPPER", default=SECRET_KEY)
 
-# Email confirmation flow
 EMAIL_CONFIRMATION_TOKEN_TTL_HOURS = env.int("EMAIL_CONFIRMATION_TOKEN_TTL_HOURS", default=24)
 EMAIL_CONFIRMATION_TOKEN_PEPPER = env.str("EMAIL_CONFIRMATION_TOKEN_PEPPER", default=SECRET_KEY)
 FRONTEND_URL = env.str("FRONTEND_URL", default="http://localhost:3000")
 
-# Google OAuth2
 GOOGLE_OAUTH_CLIENT_ID = env.str("GOOGLE_OAUTH_CLIENT_ID", default="")
 GOOGLE_OAUTH_CLIENT_SECRET = env.str("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 
-# ------------------------------------------------------------
-# Email (free tiers via SMTP: Gmail/Brevo/Resend SMTP)
-# ------------------------------------------------------------
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env.str("EMAIL_HOST", default="")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
@@ -163,7 +138,6 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
-    # We don't enable django.contrib.auth; avoid importing AnonymousUser.
     "UNAUTHENTICATED_USER": None,
     "UNAUTHENTICATED_TOKEN": None,
 }

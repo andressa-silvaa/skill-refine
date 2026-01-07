@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { accountApi } from '@/entities/session/api/accountApi';
-import { getApiErrorMessage } from '@/shared/api';
-import { useAsyncRequest } from '@/shared/lib/hooks/useAsyncRequest';
-import { useCooldown } from '@/shared/lib/hooks/useCooldown';
+import { useEmailConfirmationResend } from '@/features/auth/email-confirmation';
+import { asApiError, getApiErrorMessage } from '@/shared/api';
+import { isValidEmail } from '@/shared/lib/forms';
+import { notify } from '@/shared/lib/notify';
 import { AlertMessage, LinkButton, PrimaryButton } from '@/shared/ui';
 import { AuthLayout } from '@/widgets/auth/auth-layout';
 
@@ -26,10 +26,22 @@ export function VerifyEmailPage() {
     return fromState ?? true;
   }, [location.state]);
 
-  const [alert, setAlert] = useState<{ message: string; variant: 'success' | 'error' } | null>(null);
+  const hasExplicitSentFlag = useMemo(() => {
+    const fromState = (location.state as LocationState)?.emailConfirmationSent;
+    return typeof fromState === 'boolean';
+  }, [location.state]);
 
-  const cooldown = useCooldown({ seconds: 60 });
-  const resendReq = useAsyncRequest(accountApi.requestEmailConfirmation);
+  const { resend, isLoading, isCoolingDown, cooldownLabel, startCooldown } = useEmailConfirmationResend({
+    cooldownSeconds: 60,
+  });
+  const canResend = isValidEmail(email) && !isLoading && !isCoolingDown;
+
+  useEffect(() => {
+    if (!hasExplicitSentFlag) return;
+    if (!emailConfirmationSent) return;
+    if (!email) return;
+    startCooldown(60);
+  }, [email, emailConfirmationSent, hasExplicitSentFlag, startCooldown]);
 
   return (
     <AuthLayout
@@ -56,27 +68,22 @@ export function VerifyEmailPage() {
         />
       ) : null}
 
-      {alert ? <AlertMessage message={alert.message} variant={alert.variant} /> : null}
-
       <PrimaryButton
         type="button"
-        disabled={!email || resendReq.isLoading || cooldown.isCoolingDown}
+        disabled={!canResend}
         onClick={async () => {
-          if (!email) return;
+          if (!canResend) return;
           try {
-            setAlert(null);
-            await resendReq.run({ email });
-            cooldown.start();
-            setAlert({ message: 'E-mail de confirmação reenviado.', variant: 'success' });
+            await resend(email.trim());
+            notify.success('E-mail de confirmação reenviado.');
           } catch (e) {
-            setAlert({
-              message: getApiErrorMessage(e, 'Não foi possível reenviar agora. Tente novamente.'),
-              variant: 'error',
-            });
+            const apiErr = asApiError(e);
+            if (apiErr?.status === 429) return;
+            notify.error(getApiErrorMessage(e, 'Não foi possível reenviar agora. Tente novamente.'));
           }
         }}
       >
-        {cooldown.isCoolingDown ? cooldown.label : 'Reenviar e-mail de confirmação'}
+        {isCoolingDown ? cooldownLabel : isLoading ? 'Enviando...' : 'Reenviar confirmação'}
       </PrimaryButton>
     </AuthLayout>
   );

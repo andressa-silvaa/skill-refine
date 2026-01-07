@@ -1,3 +1,4 @@
-export { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors, shouldShowGenericFormError } from './formError';
+export { hasFormErrors, shouldShowGenericFormError } from './formError';
+export { isValidEmail } from './isValidEmail';
 
 

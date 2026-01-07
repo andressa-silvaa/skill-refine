@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { PasswordInput } from '@/shared/ui';
-import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
+import { hasFormErrors } from '@/shared/lib/forms';
 
 import { setNewPasswordSchema, type SetNewPasswordValues } from '../model/schemas';
 
@@ -46,8 +46,6 @@ export function SetNewPasswordForm(props: Props) {
   const confirmErrorMessage = errors.confirm?.message ?? (confirmMismatchVisible ? 'As senhas não coincidem' : undefined);
   const showConfirmError = confirmInteracted && !!confirmErrorMessage;
 
-  const showGenericError = showPasswordError || showConfirmError;
-
   useEffect(() => {
     void trigger().finally(() => setIsReady(true));
   }, [trigger]);
@@ -75,7 +73,6 @@ export function SetNewPasswordForm(props: Props) {
         error={showConfirmError ? confirmErrorMessage : undefined}
       />
 
-      {showGenericError ? <p className="recovery-error">{GENERIC_FORM_ERROR_MESSAGE}</p> : null}
       {serverError ? <p className="recovery-error">{serverError}</p> : null}
 
       <button className="recovery-btn" type="submit" disabled={!isReady || hasFormErrors(errors) || isSubmitting}>

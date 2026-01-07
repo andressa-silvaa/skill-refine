@@ -10,6 +10,7 @@ import {
   setRecoveryResetToken,
 } from '@/features/auth/password-recovery';
 import { getApiErrorMessage } from '@/shared/api';
+import { notify } from '@/shared/lib/notify';
 import { AuthLayout } from '@/widgets/auth/auth-layout';
 
 export function ResetCodePage() {
@@ -53,6 +54,7 @@ export function ResetCodePage() {
             setServerError(null);
             setIsResending(true);
             await passwordRecoveryApi.requestReset({ email });
+            notify.success('Código reenviado.');
           } catch (e) {
             setServerError(getApiErrorMessage(e, 'Não foi possível reenviar o código. Tente novamente.'));
           } finally {

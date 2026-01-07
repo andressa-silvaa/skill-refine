@@ -30,7 +30,6 @@ export const sessionApi = {
       return res.access_token;
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
-        // No refresh cookie (or expired). Avoid noisy re-tries on future boots.
         clearAccessToken();
         clearHasRefreshCookieHint();
       }

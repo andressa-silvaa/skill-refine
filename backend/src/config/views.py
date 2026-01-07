@@ -6,7 +6,7 @@ class HealthcheckView(APIView):
     authentication_classes: list = []
     permission_classes: list = []
 
-    def get(self, request, *args, **kwargs):  # noqa: ARG002
+    def get(self, request, *_args, **_kwargs):
         return Response({"status": "ok"})
 
 

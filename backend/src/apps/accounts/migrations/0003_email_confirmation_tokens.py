@@ -1,4 +1,3 @@
-# Generated manually (source of truth: Django migrations).
 from __future__ import annotations
 
 import uuid

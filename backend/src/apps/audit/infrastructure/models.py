@@ -6,10 +6,6 @@ from shared.db.models import UUIDPrimaryKeyModel
 
 
 class AuditLog(UUIDPrimaryKeyModel, models.Model):
-    """
-    audit_log — append-only audit events.
-    """
-
     actor_user_id = models.UUIDField(null=True, blank=True)
     subject_user_id = models.UUIDField(null=True, blank=True)
     action = models.TextField()

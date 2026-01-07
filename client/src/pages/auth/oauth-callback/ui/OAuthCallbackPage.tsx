@@ -37,9 +37,8 @@ export function OAuthCallbackPage() {
     if (oauthError) return;
     void (async () => {
       try {
-        await bootstrap();
+        await bootstrap({ force: true });
       } catch {
-        // bootstrap already sets anonymous
       }
     })();
   }, [bootstrap, oauthError]);

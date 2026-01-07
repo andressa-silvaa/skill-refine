@@ -225,10 +225,6 @@ class OrmEmailConfirmationRepository(EmailConfirmationRepository):
         EmailConfirmationToken.objects.filter(id=token_id).update(consumed_at=when)
 
     def consume_if_active(self, *, token_id: str, when: datetime) -> bool:
-        """
-        Best-effort single-use enforcement: only consume if the token is still active.
-        Returns True if consumed, False if it was already consumed/missing.
-        """
         return (
             EmailConfirmationToken.objects.filter(id=token_id, consumed_at__isnull=True).update(consumed_at=when) == 1
         )

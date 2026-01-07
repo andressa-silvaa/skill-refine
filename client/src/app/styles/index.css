@@ -62,7 +62,6 @@ button:disabled {
   min-height: 100vh;
 }
 
-/* Mantém cor de fundo/texto dos inputs mesmo com autofill */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,

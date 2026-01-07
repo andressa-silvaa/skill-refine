@@ -16,7 +16,6 @@
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
 }
 
-/* BRAND */
 .brand-tag {
   position: absolute;
   top: 28px;
@@ -43,18 +42,15 @@
   color: var(--card-pink);
 }
 
-/* LAYOUT */
 .login-layout {
   display: grid;
   grid-template-columns: 1fr;
 }
 
-/* RIGHT PANEL */
 .login-visual {
   display: none;
 }
 
-/* DESKTOP */
 @media (min-width: 992px) {
   .login-layout {
     grid-template-columns: 58% 42%;
@@ -91,7 +87,6 @@
   }
 }
 
-/* QUANDO A IMG SOME, O BRAND SOME TAMBÉM */
 @media (max-width: 991px) {
   .brand-tag {
     display: none;

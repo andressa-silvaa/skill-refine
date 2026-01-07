@@ -17,9 +17,11 @@ export function useCooldown(options: Options) {
     setRemaining(0);
   }, []);
 
-  const start = useCallback(() => {
+  const start = useCallback((overrideSeconds?: number) => {
     stop();
-    setRemaining(seconds);
+    const initial = Math.max(0, Math.floor(overrideSeconds ?? seconds));
+    setRemaining(initial);
+    if (!initial) return;
     timerRef.current = window.setInterval(() => {
       setRemaining((prev) => {
         if (prev <= 1) {

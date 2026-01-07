@@ -12,12 +12,6 @@ from shared.auth.jwt import JwtError, decode_token
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
-    """
-    Bearer access token auth.
-
-    Note: We do NOT rely on django.contrib.auth user model.
-    """
-
     keyword = "Bearer"
 
     def authenticate(self, request: Request):
@@ -48,14 +42,10 @@ class JWTAuthentication(authentication.BaseAuthentication):
         except User.DoesNotExist:
             raise AuthenticationFailed("User not found")
 
-        return (user, payload)  # request.user, request.auth
+        return (user, payload)
 
 
 def request_meta(request: Request) -> dict[str, Any]:
-    """
-    Minimal request metadata for auditing/security.
-    """
-
     return {
         "ip": _client_ip(request),
         "user_agent": request.headers.get("User-Agent"),
@@ -65,7 +55,6 @@ def request_meta(request: Request) -> dict[str, Any]:
 def _client_ip(request: Request) -> str | None:
     xff = request.headers.get("X-Forwarded-For")
     if xff:
-        # XFF can be a comma-separated list
         return xff.split(",", 1)[0].strip() or None
     return request.META.get("REMOTE_ADDR")
 

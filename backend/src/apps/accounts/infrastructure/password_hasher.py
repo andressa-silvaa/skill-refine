@@ -8,7 +8,6 @@ from apps.accounts.domain.ports import PasswordHasher as PasswordHasherPort
 
 class Argon2PasswordHasher(PasswordHasherPort):
     def __init__(self) -> None:
-        # defaults are strong; can be tuned later via env if needed
         self._hasher = PasswordHasher()
 
     def hash(self, password: str) -> str:

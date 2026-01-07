@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 import { VerificationCodeInput } from '@/shared/ui';
-import { GENERIC_FORM_ERROR_MESSAGE, hasFormErrors } from '@/shared/lib/forms';
+import { hasFormErrors } from '@/shared/lib/forms';
 
 import { verifyCodeSchema, type VerifyCodeValues } from '../model/schemas';
 
@@ -34,7 +34,6 @@ export function VerifyCodeForm(props: Props) {
   const [isReady, setIsReady] = useState(false);
 
   const showCodeError = (!!touchedFields.code || !!dirtyFields.code) && !!errors.code?.message;
-  const showGenericError = showCodeError;
 
   useEffect(() => {
     void trigger().finally(() => setIsReady(true));
@@ -58,7 +57,6 @@ export function VerifyCodeForm(props: Props) {
       />
       {showCodeError ? <p className="field-error">{errors.code?.message}</p> : null}
 
-      {showGenericError ? <p className="recovery-error">{GENERIC_FORM_ERROR_MESSAGE}</p> : null}
       {serverError ? <p className="recovery-error">{serverError}</p> : null}
 
       <button

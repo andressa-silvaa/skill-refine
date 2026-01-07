@@ -1,17 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { accountApi } from '@/entities/session/api/accountApi';
+import { useEmailConfirmationResend } from '@/features/auth/email-confirmation';
 import { getApiErrorMessage } from '@/shared/api';
+import { isValidEmail } from '@/shared/lib/forms';
 import { useAsyncRequest } from '@/shared/lib/hooks/useAsyncRequest';
-import { useCooldown } from '@/shared/lib/hooks/useCooldown';
-import { AlertMessage, AuthForm, Field, LinkButton, PrimaryButton, Spinner } from '@/shared/ui';
+import { AlertMessage, AuthForm, Field, PrimaryButton, Spinner } from '@/shared/ui';
 import { AuthLayout } from '@/widgets/auth/auth-layout';
+
+type LocationState = { email?: string; emailConfirmationSent?: boolean } | null;
 
 export function ConfirmEmailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [params] = useSearchParams();
   const token = useMemo(() => params.get('token') ?? '', [params]);
+  const emailFromQuery = useMemo(() => params.get('email') ?? '', [params]);
+  const emailFromState = useMemo(() => (location.state as LocationState)?.email ?? '', [location.state]);
+  const resendSentFromState = useMemo(
+    () => Boolean((location.state as LocationState)?.emailConfirmationSent),
+    [location.state]
+  );
 
   const [emailForResend, setEmailForResend] = useState('');
   const [serverError, setServerError] = useState<string | null>(null);
@@ -23,8 +33,15 @@ export function ConfirmEmailPage() {
     isSuccess: isConfirmed,
     isError: isConfirmError,
   } = useAsyncRequest(accountApi.confirmEmail);
-  const { run: resendEmail, isLoading: isResending } = useAsyncRequest(accountApi.requestEmailConfirmation);
-  const cooldown = useCooldown({ seconds: 60 });
+  const resend = useEmailConfirmationResend({ cooldownSeconds: 60 });
+
+  const canResend = isValidEmail(emailForResend) && !resend.isLoading && !resend.isCoolingDown;
+
+  useEffect(() => {
+    const initial = (emailFromState || emailFromQuery || '').trim();
+    if (!initial) return;
+    setEmailForResend(initial);
+  }, [emailFromQuery, emailFromState]);
 
   useEffect(() => {
     if (!token) return;
@@ -44,22 +61,15 @@ export function ConfirmEmailPage() {
     <AuthLayout
       title="Confirmação de e-mail"
       subtitle={
-        !token
-          ? 'Token ausente. Solicite um novo e-mail de confirmação.'
-          : isConfirming
+        token
+          ? isConfirming
             ? 'Estamos confirmando seu e-mail. Aguarde um instante.'
             : isConfirmed
               ? 'Tudo certo! Sua conta está pronta para uso.'
               : 'Não foi possível confirmar automaticamente. Você pode reenviar a confirmação abaixo.'
-      }
-      onBack={() => navigate(-1)}
-      footer={
-        <span>
-          Voltar para{' '}
-          <LinkButton type="button" onClick={() => navigate('/login')}>
-            login
-          </LinkButton>
-        </span>
+          : emailForResend
+            ? `Vamos reenviar o link de confirmação para ${emailForResend}.`
+            : 'Informe seu e-mail para reenviar o link de confirmação.'
       }
     >
       {isConfirming ? (
@@ -84,20 +94,22 @@ export function ConfirmEmailPage() {
         <>
           {serverError ? <AlertMessage message={serverError} variant="error" /> : null}
           {serverSuccess ? <AlertMessage message={serverSuccess} variant="success" /> : null}
+          {resendSentFromState ? (
+            <AlertMessage message="E-mail de confirmação enviado. Verifique sua caixa de entrada." variant="success" />
+          ) : null}
 
           <AuthForm
             onSubmit={(e) => {
               e.preventDefault();
               void (async () => {
-                if (!emailForResend) return;
+                if (!canResend) return;
                 try {
                   setServerError(null);
                   setServerSuccess(null);
-                  await resendEmail({ email: emailForResend });
-                  cooldown.start();
+                  await resend.resend(emailForResend.trim());
                   setServerSuccess('E-mail de confirmação reenviado.');
                 } catch (err) {
-                    setServerError(getApiErrorMessage(err, 'Não foi possível reenviar agora. Tente novamente.'));
+                  setServerError(getApiErrorMessage(err, 'Não foi possível reenviar agora. Tente novamente.'));
                 }
               })();
             }}
@@ -111,8 +123,8 @@ export function ConfirmEmailPage() {
               onChange={(e) => setEmailForResend(e.target.value)}
             />
 
-            <PrimaryButton type="submit" disabled={isResending || cooldown.isCoolingDown || !emailForResend}>
-              {cooldown.isCoolingDown ? cooldown.label : 'Reenviar e-mail de confirmação'}
+            <PrimaryButton type="submit" disabled={!canResend}>
+              {resend.isCoolingDown ? resend.cooldownLabel : resend.isLoading ? 'Enviando...' : 'Reenviar confirmação'}
             </PrimaryButton>
           </AuthForm>
         </>

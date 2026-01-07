@@ -10,6 +10,7 @@ import {
   setRecoveryEmail,
 } from '@/features/auth/password-recovery';
 import { getApiErrorMessage } from '@/shared/api';
+import { notify } from '@/shared/lib/notify';
 import { AuthLayout } from '@/widgets/auth/auth-layout';
 
 export function ResetEmailPage() {
@@ -31,6 +32,7 @@ export function ResetEmailPage() {
             clearRecovery();
             await passwordRecoveryApi.requestReset({ email: values.email });
             setRecoveryEmail(values.email);
+            notify.success('Código enviado. Verifique seu e-mail.');
             navigate('/reset/code');
           } catch (e) {
             setServerError(getApiErrorMessage(e, 'Não foi possível enviar o código. Tente novamente.'));

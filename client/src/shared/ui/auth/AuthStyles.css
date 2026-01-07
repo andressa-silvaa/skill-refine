@@ -1,5 +1,3 @@
-/* Shared auth controls (used by reset password + email confirmation) */
-
 .auth-form,
 .recovery-form {
   display: grid;

@@ -1,22 +1,26 @@
 import { getAccessToken } from './token';
+import { normalizeApiErrorCode } from './errorCodes';
 
 export type ApiErrorBody = {
-  error?: { code?: string; message?: string };
+  error?: { code?: string; error_code?: string; message?: string };
+  error_code?: string;
+  message?: string;
 };
 
 export class ApiError extends Error {
   readonly status: number;
   readonly code?: string;
+  readonly retryAfterSeconds?: number;
 
-  constructor(status: number, code: string | undefined, message: string) {
+  constructor(status: number, code: string | undefined, message: string, retryAfterSeconds?: number) {
     super(message);
     this.status = status;
     this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
 const RAW_API_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:8000';
-// Defensive: if .env is malformed, CRA can concatenate vars into one string.
 const API_URL = (RAW_API_URL.split('REACT_APP_')[0] ?? '').trim();
 
 export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -29,7 +33,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     headers,
-    credentials: 'include', // required for HttpOnly refresh cookie
+    credentials: 'include',
   });
 
   const contentType = res.headers.get('content-type') ?? '';
@@ -38,9 +42,26 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
 
   if (!res.ok) {
     const body = (data ?? {}) as ApiErrorBody;
-    const code = body.error?.code;
-    const message = body.error?.message ?? 'Erro inesperado';
-    throw new ApiError(res.status, code, message);
+    const rawCode = body.error?.error_code ?? body.error_code ?? body.error?.code;
+    const code = normalizeApiErrorCode(rawCode);
+    const message = body.error?.message ?? body.message ?? 'Erro inesperado';
+    let retryAfterSeconds: number | undefined;
+    if (res.status === 429) {
+      const raw = (res.headers.get('retry-after') ?? '').trim();
+      if (raw) {
+        const asInt = Number(raw);
+        if (Number.isFinite(asInt) && asInt > 0) {
+          retryAfterSeconds = Math.floor(asInt);
+        } else {
+          const asDate = Date.parse(raw);
+          if (!Number.isNaN(asDate)) {
+            const diffSeconds = Math.ceil((asDate - Date.now()) / 1000);
+            if (diffSeconds > 0) retryAfterSeconds = diffSeconds;
+          }
+        }
+      }
+    }
+    throw new ApiError(res.status, code, message, retryAfterSeconds);
   }
 
   return (data ?? ({} as unknown)) as T;

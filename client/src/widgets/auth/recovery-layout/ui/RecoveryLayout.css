@@ -1,5 +1,3 @@
-/* ================= SHELL ================= */
-
 .recovery-shell {
   position: relative;
   min-height: 100vh;
@@ -8,21 +6,14 @@
   place-items: center;
   padding: clamp(16px, 4vw, 40px);
 
-  /* fallback */
   background: linear-gradient(135deg, #b54fa0 0%, #d7a1cb 55%, #e9c9e8 100%);
 
   font-family: 'Poppins', sans-serif;
   overflow: hidden;
 
-  /* stacking seguro */
   isolation: isolate;
 }
 
-/* ================= BACKGROUND ================= */
-
-/* Fundo em duas camadas:
-   - ::before: preenche tudo (cover) + blur
-   - ::after: imagem principal inteira (contain), sem cortes */
 .recovery-shell::before,
 .recovery-shell::after {
   content: '';
@@ -50,8 +41,6 @@
   background-repeat: no-repeat;
 }
 
-/* ================= CARD ================= */
-
 .recovery-card {
   position: relative;
   width: min(480px, 100%);
@@ -63,8 +52,6 @@
   gap: 18px;
   z-index: 1;
 }
-
-/* ================= HEADER ================= */
 
 .recovery-back {
   background: transparent;
@@ -96,14 +83,10 @@
   line-height: 1.4;
 }
 
-/* ================= BODY ================= */
-
 .recovery-body {
   display: grid;
   gap: 16px;
 }
-
-/* ================= FOOTER ================= */
 
 .recovery-footer {
   text-align: center;

@@ -18,7 +18,6 @@ class OrmAuditLogger(AuditLogger):
         user_agent: str | None,
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        # Best-effort: audit logging must never break core flows (register/login/etc).
         try:
             AuditLog.objects.create(
                 action=action,
@@ -28,7 +27,7 @@ class OrmAuditLogger(AuditLogger):
                 user_agent=user_agent,
                 metadata=metadata or {},
             )
-        except Exception:  # noqa: BLE001
+        except Exception:
             logging.getLogger(__name__).exception("Failed to write audit log (ignored)")
 
 

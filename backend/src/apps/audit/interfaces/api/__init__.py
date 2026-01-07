@@ -1,3 +1,0 @@
-# DRF API placeholder
-
-
