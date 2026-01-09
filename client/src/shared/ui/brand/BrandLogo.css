@@ -1,0 +1,13 @@
+.sr-brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.sr-brand__label {
+  font-weight: 800;
+  font-size: 1.5em;
+  line-height: 1;
+  color: var(--text-purple);
+  white-space: nowrap;
+}

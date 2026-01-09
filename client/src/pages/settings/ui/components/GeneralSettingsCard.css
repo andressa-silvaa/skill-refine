@@ -1,0 +1,21 @@
+.sr-settings-general__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.sr-settings-general__hint {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(20, 20, 20, 0.52);
+}
+
+@media (max-width: 760px) {
+  .sr-settings-general__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+

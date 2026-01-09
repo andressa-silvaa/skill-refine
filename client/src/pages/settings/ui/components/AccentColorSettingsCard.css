@@ -1,0 +1,37 @@
+.sr-accent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sr-accent__dot {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  position: relative;
+}
+
+.sr-accent__dot.is-active {
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+.sr-accent__dot.is-active::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 18px;
+  border: 2px solid rgba(199, 44, 184, 0.65);
+}
+
+.sr-accent__dot:focus-visible {
+  outline: 2px solid #c72cb8;
+  outline-offset: 2px;
+}
+
+

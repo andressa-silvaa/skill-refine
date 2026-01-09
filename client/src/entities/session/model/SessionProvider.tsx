@@ -62,8 +62,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   );
 
   const logout = useCallback(async () => {
-    await sessionApi.logout();
-    setState({ status: 'anonymous', user: null });
+    try {
+      await sessionApi.logout();
+    } finally {
+      // Garante saída mesmo se o request falhar (UX previsível)
+      setState({ status: 'anonymous', user: null });
+    }
   }, []);
 
   const actions: SessionActions = useMemo(

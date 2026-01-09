@@ -6,7 +6,8 @@ import { OAuthCallbackPage } from '@/pages/auth/oauth-callback';
 import { RegisterPage } from '@/pages/auth/register';
 import { ResetCodePage, ResetEmailPage, ResetNewPasswordPage, ResetSuccessPage } from '@/pages/auth/reset-password';
 import { VerifyEmailPage } from '@/pages/auth/verify-email';
-import { ProtectedPage } from '@/pages/protected';
+import { ProfilePage } from '@/pages/profile';
+import { SettingsPage } from '@/pages/settings';
 
 import { RequireAuth } from './RequireAuth';
 
@@ -28,7 +29,25 @@ export function AppRouter() {
         path="/protected"
         element={
           <RequireAuth>
-            <ProtectedPage />
+            <Navigate to="/protected/profile" replace />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/protected/profile"
+        element={
+          <RequireAuth>
+            <ProfilePage />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/protected/settings"
+        element={
+          <RequireAuth>
+            <SettingsPage />
           </RequireAuth>
         }
       />

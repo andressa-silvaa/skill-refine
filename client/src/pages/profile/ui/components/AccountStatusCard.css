@@ -1,0 +1,64 @@
+.sr-account-status {
+  display: grid;
+  gap: 12px;
+}
+
+.sr-account-status__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sr-account-status__k {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(20, 20, 20, 0.56);
+}
+
+.sr-account-status__v {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(20, 20, 20, 0.74);
+  white-space: nowrap;
+}
+
+.sr-account-status__badge {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 20, 20, 0.12);
+  background: rgba(20, 20, 20, 0.04);
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(20, 20, 20, 0.72);
+}
+
+.sr-account-status__badge.is-ok {
+  border-color: rgba(43, 191, 90, 0.22);
+  background: rgba(43, 191, 90, 0.08);
+}
+
+.sr-account-status__icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(20, 20, 20, 0.12);
+  background: rgba(20, 20, 20, 0.04);
+  color: rgba(20, 20, 20, 0.62);
+}
+
+.sr-account-status__icon.is-ok {
+  border-color: rgba(43, 191, 90, 0.22);
+  background: rgba(43, 191, 90, 0.08);
+  color: rgba(20, 20, 20, 0.72);
+}
+
+

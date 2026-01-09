@@ -1,0 +1,53 @@
+.sr-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  height: 56px;
+  padding: 8px 16px 0;
+  position: relative;
+  z-index: 30;
+}
+
+.sr-topbar__left {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+}
+
+.sr-topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sr-topbar__icon-btn {
+  color: rgba(20, 20, 20, 0.78);
+}
+
+.sr-topbar__icon-btn:hover {
+  background: rgba(20, 20, 20, 0.06);
+}
+
+.sr-topbar__icon-btn--badge {
+  position: relative;
+}
+
+.sr-topbar__badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 2px solid #fff;
+}
+
+.sr-topbar__badge--danger {
+  background: #d92c2c;
+}
+
+.sr-topbar__badge--success {
+  background: #2bbf5a;
+}
+

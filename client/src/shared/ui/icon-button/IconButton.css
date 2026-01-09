@@ -1,0 +1,31 @@
+.sr-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--text-purple);
+  cursor: pointer;
+  transition: background 160ms ease, transform 160ms ease;
+}
+
+.sr-icon-btn:hover {
+  background: rgba(199, 44, 184, 0.08);
+}
+
+.sr-icon-btn:active {
+  transform: scale(0.98);
+}
+
+.sr-icon-btn.is-active {
+  background: rgba(199, 44, 184, 0.14);
+}
+
+.sr-icon-btn i {
+  font-size: 18px;
+  line-height: 1;
+}
+
+

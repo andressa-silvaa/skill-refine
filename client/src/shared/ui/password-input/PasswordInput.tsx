@@ -1,4 +1,3 @@
-import '@fortawesome/fontawesome-free/css/all.min.css';
 import { forwardRef, useId, type InputHTMLAttributes, type ReactNode } from 'react';
 
 import { usePasswordVisibility } from '@/shared/lib/hooks/usePasswordVisibility';

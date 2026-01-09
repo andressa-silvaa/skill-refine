@@ -1,0 +1,26 @@
+.sr-profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 30% 20%, rgba(248, 215, 242, 0.9), rgba(233, 191, 227, 0.7) 45%, rgba(215, 161, 203, 0.55) 100%);
+  border: 1px solid rgba(20, 20, 20, 0.08);
+  overflow: hidden;
+}
+
+.sr-profile-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sr-profile-avatar__txt {
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(20, 20, 20, 0.76);
+  letter-spacing: 0.02em;
+}
+
+
