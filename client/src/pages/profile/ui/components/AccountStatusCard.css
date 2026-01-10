@@ -13,7 +13,7 @@
 .sr-account-status__k {
   font-size: 12px;
   font-weight: 700;
-  color: rgba(20, 20, 20, 0.56);
+  color: var(--sr-ink-muted);
 }
 
 .sr-account-status__v {
@@ -22,7 +22,7 @@
   gap: 8px;
   font-size: 12px;
   font-weight: 800;
-  color: rgba(20, 20, 20, 0.74);
+  color: var(--sr-ink-subtle);
   white-space: nowrap;
 }
 
@@ -32,11 +32,11 @@
   height: 26px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1px solid rgba(20, 20, 20, 0.12);
-  background: rgba(20, 20, 20, 0.04);
+  border: 1px solid var(--sr-border);
+  background: var(--sr-surface-hover);
   font-size: 12px;
   font-weight: 800;
-  color: rgba(20, 20, 20, 0.72);
+  color: var(--sr-ink-subtle);
 }
 
 .sr-account-status__badge.is-ok {
@@ -50,9 +50,9 @@
   border-radius: 999px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(20, 20, 20, 0.12);
-  background: rgba(20, 20, 20, 0.04);
-  color: rgba(20, 20, 20, 0.62);
+  border: 1px solid var(--sr-border);
+  background: var(--sr-surface-hover);
+  color: var(--sr-ink-muted);
 }
 
 .sr-account-status__icon.is-ok {

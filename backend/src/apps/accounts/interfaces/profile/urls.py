@@ -1,0 +1,12 @@
+from __future__ import annotations
+
+from django.urls import path
+
+from .views import AvatarUploadView, PreferencesView, ProfileView
+
+urlpatterns = [
+    path("", ProfileView.as_view(), name="profile"),
+    path("avatar", AvatarUploadView.as_view(), name="avatar_upload"),
+    path("preferences", PreferencesView.as_view(), name="preferences"),
+]
+

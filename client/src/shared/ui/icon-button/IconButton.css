@@ -12,7 +12,7 @@
 }
 
 .sr-icon-btn:hover {
-  background: rgba(199, 44, 184, 0.08);
+  background: rgba(var(--sr-accent-rgb), 0.08);
 }
 
 .sr-icon-btn:active {
@@ -20,7 +20,7 @@
 }
 
 .sr-icon-btn.is-active {
-  background: rgba(199, 44, 184, 0.14);
+  background: rgba(var(--sr-accent-rgb), 0.14);
 }
 
 .sr-icon-btn i {

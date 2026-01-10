@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 
+import { useSession } from '@/entities/session';
+
 import './AccountStatusCard.css';
 
 type Meta = {
@@ -10,14 +12,16 @@ type Meta = {
 };
 
 export function AccountStatusCard() {
+  const { user } = useSession();
+
   const meta = useMemo<Meta>(
     () => ({
-      statusLabel: 'Ativa',
-      isActive: true,
-      isEmailVerified: true,
-      memberSince: '14/08/2024',
+      statusLabel: user?.status === 'disabled' ? 'Desativada' : user?.status === 'deleted' ? 'Excluída' : 'Ativa',
+      isActive: user?.status !== 'disabled' && user?.status !== 'deleted',
+      isEmailVerified: Boolean(user?.email_verified),
+      memberSince: user?.created_at ? new Date(user.created_at).toLocaleDateString('pt-BR') : '-',
     }),
-    []
+    [user?.created_at, user?.email_verified, user?.status]
   );
 
   return (

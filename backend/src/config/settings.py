@@ -62,6 +62,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
+# Media (user uploads)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = str(BACKEND_DIR / "media")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 APP_ENV = env.str("APP_ENV", default="dev")
@@ -117,6 +121,8 @@ EMAIL_CONFIRMATION_TOKEN_TTL_HOURS = env.int("EMAIL_CONFIRMATION_TOKEN_TTL_HOURS
 EMAIL_CONFIRMATION_TOKEN_PEPPER = env.str("EMAIL_CONFIRMATION_TOKEN_PEPPER", default=SECRET_KEY)
 FRONTEND_URL = env.str("FRONTEND_URL", default="http://localhost:3000")
 
+CLOUDINARY_URL = env.str("CLOUDINARY_URL", default="")
+
 GOOGLE_OAUTH_CLIENT_ID = env.str("GOOGLE_OAUTH_CLIENT_ID", default="")
 GOOGLE_OAUTH_CLIENT_SECRET = env.str("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 
@@ -157,5 +163,3 @@ TEMPLATES = [
         "OPTIONS": {"context_processors": []},
     }
 ]
-
-

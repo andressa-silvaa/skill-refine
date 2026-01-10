@@ -26,7 +26,7 @@
   margin: 6px 0 0;
   font-size: 13px;
   font-weight: 600;
-  color: rgba(20, 20, 20, 0.62);
+  color: var(--sr-ink-subtle);
 }
 
 .sr-settings__grid {
@@ -52,11 +52,17 @@
 }
 
 .sr-settings__card {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(20, 20, 20, 0.08);
+  background: var(--sr-surface);
+  border: 1px solid var(--sr-border);
   border-radius: 16px;
   backdrop-filter: blur(10px);
   padding: 14px;
+  box-shadow: var(--sr-elev-1);
+}
+
+:root[data-theme='dark'] .sr-settings__side-col .sr-settings__card {
+  background: var(--sr-surface-soft);
+  box-shadow: none;
 }
 
 .sr-settings__card-header {
@@ -71,7 +77,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 800;
-  color: rgba(20, 20, 20, 0.84);
+  color: var(--sr-ink);
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -84,21 +90,12 @@
 .sr-settings__muted {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(20, 20, 20, 0.56);
+  color: var(--sr-ink-muted);
 }
 
 @media (max-width: 520px) {
   .sr-settings {
     padding: 14px 14px 22px;
-  }
-}
-
-@media (max-width: 980px) {
-  .sr-settings__grid {
-    flex-direction: column;
-  }
-  .sr-settings__side-col {
-    flex: 1 1 auto;
   }
 }
 

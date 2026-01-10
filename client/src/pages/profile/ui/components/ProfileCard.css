@@ -20,12 +20,12 @@
 }
 
 .sr-profile-card__edit-btn:hover {
-  border-color: rgba(199, 44, 184, 0.18);
-  background: rgba(199, 44, 184, 0.06);
+  border-color: rgba(var(--sr-accent-rgb), 0.18);
+  background: rgba(var(--sr-accent-rgb), 0.06);
 }
 
 .sr-profile-card__edit-btn:focus-visible {
-  outline: 2px solid #c72cb8;
+  outline: 2px solid var(--sr-accent);
   outline-offset: 2px;
 }
 
@@ -63,6 +63,14 @@
 .sr-profile-card__avatar:hover .sr-profile-card__avatar-cta,
 .sr-profile-card__avatar:focus-within .sr-profile-card__avatar-cta {
   opacity: 1;
+}
+
+.sr-profile-card__avatar:not(.is-editing) .sr-profile-card__avatar-cta {
+  display: none;
+}
+
+.sr-profile-card__avatar-cta:disabled {
+  cursor: default;
 }
 
 .sr-profile-card__fields {

@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+
 import './ProfileAvatar.css';
 
 type Props = {
@@ -18,10 +20,19 @@ function initialsFromName(fullName: string) {
 export function ProfileAvatar(props: Props) {
   const { fullName, src } = props;
   const initials = initialsFromName(fullName);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
 
   return (
     <div className="sr-profile-avatar" aria-label="Foto de perfil">
-      {src ? <img className="sr-profile-avatar__img" src={src} alt="" /> : <span className="sr-profile-avatar__txt">{initials}</span>}
+      {src && !failed ? (
+        <img className="sr-profile-avatar__img" src={src} alt="" onError={() => setFailed(true)} />
+      ) : (
+        <span className="sr-profile-avatar__txt">{initials}</span>
+      )}
     </div>
   );
 }

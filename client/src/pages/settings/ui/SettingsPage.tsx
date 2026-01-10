@@ -6,6 +6,7 @@ import { GeneralSettingsCard } from './components/GeneralSettingsCard';
 import { PrivacySettingsCard } from './components/PrivacySettingsCard';
 
 import '@/shared/ui/sr-controls/SrControls.css';
+import '@/shared/ui/layout/TwoColumnStack.css';
 import './SettingsPage.css';
 
 export function SettingsPage() {

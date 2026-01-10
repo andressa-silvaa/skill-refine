@@ -32,8 +32,8 @@
 }
 
 .sr-appearance__option.is-active {
-  border-color: rgba(199, 44, 184, 0.7);
-  background: rgba(199, 44, 184, 0.05);
+  border-color: rgba(var(--sr-accent-rgb), 0.7);
+  background: rgba(var(--sr-accent-rgb), 0.05);
 }
 
 .sr-appearance__option.is-active i {
@@ -52,7 +52,7 @@
 }
 
 .sr-appearance__option:focus-visible {
-  outline: 2px solid #c72cb8;
+  outline: 2px solid var(--sr-accent);
   outline-offset: 2px;
 }
 

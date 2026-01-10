@@ -54,12 +54,16 @@ from apps.accounts.infrastructure.repositories import (
 )
 from apps.audit.infrastructure.logger import OrmAuditLogger
 from shared.auth.drf import request_meta
+from shared.auth.jwt import now_utc
+
+from apps.accounts.infrastructure.cloudinary_avatar import avatar_url
 
 from .serializers import (
     EmailConfirmationConfirmSerializer,
     EmailConfirmationRequestSerializer,
     GoogleLoginSerializer,
     LoginSerializer,
+    PasswordChangeSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
     PasswordResetVerifySerializer,
@@ -115,6 +119,37 @@ def _error(code: str, message: str, http_status: int) -> Response:
         "message": message,
     }
     return Response(payload, status=http_status)
+
+
+def _field_error(code: str, message: str, fields: dict[str, str], http_status: int) -> Response:
+    canonical = _canonical_error_code(code)
+    payload = {
+        "error": {"code": code, "error_code": canonical, "message": message},
+        "error_code": canonical,
+        "message": message,
+        "fields": fields,
+    }
+    return Response(payload, status=http_status)
+
+
+def _user_payload(*, users: OrmUserRepository, user_id: str, fallback: dict) -> dict:
+    u = users.get_by_id(user_id)
+    if not u:
+        return fallback
+    key = getattr(u, "avatar_storage_key", None)
+    url = avatar_url(str(key) if key else None)
+    return {
+        "id": str(u.id),
+        "email": u.email,
+        "full_name": u.full_name,
+        "email_verified": bool(getattr(u, "email_verified_at", None)),
+        "status": getattr(u, "status", None),
+        "created_at": getattr(u, "created_at", None),
+        "avatar_storage_key": str(key) if key else None,
+        "avatarStorageKey": str(key) if key else None,
+        "avatar_url": url,
+        "avatarUrl": url,
+    }
 
 
 OAUTH_STATE_COOKIE = "sr_google_oauth_state"
@@ -322,7 +357,13 @@ class RegisterView(APIView):
         except Exception:
             email_confirmation_sent = False
 
-        return Response({"user": user.__dict__, "email_confirmation_sent": email_confirmation_sent}, status=status.HTTP_201_CREATED)
+        return Response(
+            {
+                "user": _user_payload(users=users, user_id=str(user.id), fallback=user.__dict__),
+                "email_confirmation_sent": email_confirmation_sent,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(APIView):
@@ -360,8 +401,12 @@ class LoginView(APIView):
         except EmailNotConfirmed:
             return _error("email_not_confirmed", "Confirme seu e-mail para fazer login.", status.HTTP_403_FORBIDDEN)
 
+        fallback_user = result.user.__dict__
         response = Response(
-            {"access_token": result.access_token, "user": result.user.__dict__},
+            {
+                "access_token": result.access_token,
+                "user": _user_payload(users=users, user_id=str(result.user.id), fallback=fallback_user),
+            },
             status=status.HTTP_200_OK,
         )
         _set_refresh_cookie(response, refresh_cookie)
@@ -400,8 +445,12 @@ class GoogleLoginView(APIView):
         except AccountsError:
             return _error("google_token_invalid", "Token do Google inválido", status.HTTP_401_UNAUTHORIZED)
 
+        fallback_user = result.user.__dict__
         response = Response(
-            {"access_token": result.access_token, "user": result.user.__dict__},
+            {
+                "access_token": result.access_token,
+                "user": _user_payload(users=users, user_id=str(result.user.id), fallback=fallback_user),
+            },
             status=status.HTTP_200_OK,
         )
         _set_refresh_cookie(response, refresh_cookie)
@@ -685,6 +734,8 @@ class MeView(APIView):
 
     def get(self, request):
         user = request.user
+        key = getattr(user, "avatar_storage_key", None)
+        url = avatar_url(str(key) if key else None)
         return Response(
             {
                 "user": {
@@ -692,8 +743,89 @@ class MeView(APIView):
                     "email": user.email,
                     "full_name": user.full_name,
                     "email_verified": bool(user.email_verified_at),
+                    "status": getattr(user, "status", None),
+                    "created_at": getattr(user, "created_at", None),
+                    "avatar_storage_key": str(key) if key else None,
+                    "avatar_url": url,
+                    # Backward-friendly alias
+                    "avatarStorageKey": str(key) if key else None,
+                    "avatarUrl": url,
                 }
             }
         )
 
 
+class PasswordChangeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        ser = PasswordChangeSerializer(data=request.data)
+        if not ser.is_valid():
+            fields: dict[str, str] = {}
+            for key in ("current_password", "new_password", "confirm_new_password"):
+                if key in ser.errors:
+                    try:
+                        fields[key] = str(ser.errors[key][0])
+                    except Exception:
+                        fields[key] = "Valor inválido."
+            return _field_error("validation_error", "Dados inválidos.", fields, status.HTTP_400_BAD_REQUEST)
+
+        current_password = ser.validated_data["current_password"]
+        new_password = ser.validated_data["new_password"]
+        confirm_new_password = ser.validated_data["confirm_new_password"]
+
+        if new_password != confirm_new_password:
+            return _field_error(
+                "validation_error",
+                "Dados inválidos.",
+                {"confirm_new_password": "As senhas não coincidem"},
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+        user = request.user
+        user_id = str(getattr(user, "id", "")) or None
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+
+        passwords = OrmPasswordRepository()
+        hasher = Argon2PasswordHasher()
+        audit = OrmAuditLogger()
+        meta = request_meta(request)
+
+        stored_hash = passwords.get_password_hash(user_id=user_id)
+        if not stored_hash or not hasher.verify(stored_hash, current_password):
+            audit.log(
+                action="accounts.password_change_failed",
+                actor_user_id=user_id,
+                subject_user_id=user_id,
+                ip=meta["ip"],
+                user_agent=meta["user_agent"],
+                metadata={"reason": "wrong_current_password"},
+            )
+            return _field_error(
+                "invalid_current_password",
+                "Senha atual inválida.",
+                {"current_password": "Senha atual inválida."},
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            now = now_utc()
+            password_hash = hasher.hash(new_password)
+            passwords.set_password(user_id=user_id, password_hash=password_hash, when=now)
+            audit.log(
+                action="accounts.password_changed",
+                actor_user_id=user_id,
+                subject_user_id=user_id,
+                ip=meta["ip"],
+                user_agent=meta["user_agent"],
+                metadata={},
+            )
+        except Exception:
+            return _error(
+                "password_change_failed",
+                "Não foi possível atualizar sua senha agora. Tente novamente.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        return Response({"status": "ok"}, status=status.HTTP_200_OK)

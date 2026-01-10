@@ -22,7 +22,7 @@
 }
 
 .sr-topbar__icon-btn {
-  color: rgba(20, 20, 20, 0.78);
+  color: var(--sr-ink);
 }
 
 .sr-topbar__icon-btn:hover {

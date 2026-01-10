@@ -6,6 +6,7 @@ import { SecurityCard } from './components/SecurityCard';
 import { PreferencesCard } from './components/PreferencesCard';
 
 import '@/shared/ui/sr-controls/SrControls.css';
+import '@/shared/ui/layout/TwoColumnStack.css';
 import './ProfilePage.css';
 
 export function ProfilePage() {

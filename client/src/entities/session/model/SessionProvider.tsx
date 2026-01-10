@@ -4,6 +4,8 @@ import type { ReactNode } from 'react';
 import { sessionApi } from '../api/sessionApi';
 import { getHasRefreshCookieHint } from '../lib/refreshFlag';
 import type { SessionStatus, SessionUser } from './types';
+import { profileApi } from '../api/profileApi';
+import { applyAppearancePreferences } from '@/shared/lib/theme/appearance';
 
 type SessionState = {
   status: SessionStatus;
@@ -19,6 +21,7 @@ type SessionActions = {
     email_confirmation_sent?: boolean;
   }>;
   logout: () => Promise<void>;
+  updateUser: (patch: Partial<SessionUser>) => void;
 };
 
 const SessionContext = createContext<{ state: SessionState; actions: SessionActions } | null>(null);
@@ -35,6 +38,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       await sessionApi.refresh();
       const user = await sessionApi.me();
       setState({ status: 'authenticated', user });
+      void profileApi
+        .getPreferences()
+        .then((prefs) => {
+          applyAppearancePreferences({
+            theme: (prefs.theme as any) ?? null,
+            accent_color: (prefs.accent_color ?? prefs.accentColor ?? null) as any,
+          });
+        })
+        .catch(() => void 0);
     } catch (e) {
       setState({ status: 'anonymous', user: null });
     }
@@ -47,11 +59,29 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (payload: { email: string; password: string }) => {
     const user = await sessionApi.login(payload);
     setState({ status: 'authenticated', user });
+    void profileApi
+      .getPreferences()
+      .then((prefs) => {
+        applyAppearancePreferences({
+          theme: (prefs.theme as any) ?? null,
+          accent_color: (prefs.accent_color ?? prefs.accentColor ?? null) as any,
+        });
+      })
+      .catch(() => void 0);
   }, []);
 
   const loginGoogle = useCallback(async (payload: { credential: string }) => {
     const user = await sessionApi.loginGoogle(payload);
     setState({ status: 'authenticated', user });
+    void profileApi
+      .getPreferences()
+      .then((prefs) => {
+        applyAppearancePreferences({
+          theme: (prefs.theme as any) ?? null,
+          accent_color: (prefs.accent_color ?? prefs.accentColor ?? null) as any,
+        });
+      })
+      .catch(() => void 0);
   }, []);
 
   const register = useCallback(
@@ -67,12 +97,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } finally {
       // Garante saída mesmo se o request falhar (UX previsível)
       setState({ status: 'anonymous', user: null });
+      applyAppearancePreferences({ theme: 'light', accent_color: 'pink' });
     }
   }, []);
 
+  const updateUser = useCallback((patch: Partial<SessionUser>) => {
+    setState((prev) => {
+      if (!prev.user) return prev;
+      return { ...prev, user: { ...prev.user, ...patch } };
+    });
+  }, []);
+
   const actions: SessionActions = useMemo(
-    () => ({ bootstrap, login, loginGoogle, register, logout }),
-    [bootstrap, login, loginGoogle, register, logout]
+    () => ({ bootstrap, login, loginGoogle, register, logout, updateUser }),
+    [bootstrap, login, loginGoogle, register, logout, updateUser]
   );
 
   return <SessionContext.Provider value={{ state, actions }}>{children}</SessionContext.Provider>;

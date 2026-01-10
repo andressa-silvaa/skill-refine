@@ -42,6 +42,12 @@ class EmailConfirmationConfirmSerializer(serializers.Serializer):
     token = serializers.CharField(min_length=10, write_only=True)
 
 
+class PasswordChangeSerializer(serializers.Serializer):
+    current_password = serializers.CharField(min_length=1, write_only=True)
+    new_password = serializers.CharField(min_length=8, write_only=True)
+    confirm_new_password = serializers.CharField(min_length=1, write_only=True)
+
+
 class AuthUserSerializer(serializers.Serializer):
     id = serializers.CharField()
     email = serializers.EmailField()

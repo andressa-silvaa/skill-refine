@@ -36,11 +36,22 @@ class UserManager(models.Manager):
 
 
 class User(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
+    """
+    User core identity record.
+
+    Note on deletion semantics:
+    - `deleted_at` is the source of truth for "account deleted" (soft delete).
+    - `status` remains as-is (do not change enum via migrations right now).
+    """
+
     email = models.TextField(unique=True)
     email_verified_at = models.DateTimeField(null=True, blank=True)
     full_name = models.TextField()
     birth_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=16, choices=UserStatus.choices, default=UserStatus.ACTIVE)
+    # Pointer to a file stored in external/internal object storage (e.g., S3 key).
+    # Nullable to keep backwards compatibility and allow progressive rollout.
+    avatar_storage_key = models.TextField(null=True, blank=True)
 
     objects = UserManager()
 
@@ -165,5 +176,34 @@ class EmailConfirmationToken(UUIDPrimaryKeyModel, models.Model):
     def save(self, *args, **kwargs):
         self.email = normalize_email(self.email) or ""
         super().save(*args, **kwargs)
+
+
+class UserTheme(models.TextChoices):
+    LIGHT = "light", "light"
+    DARK = "dark", "dark"
+
+
+class UserPreferences(TimestampedModel, models.Model):
+    """
+    Per-user preferences for UI and simple communication toggles.
+
+    1–1 with User (user_id is both PK and FK).
+    """
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        primary_key=True,
+        db_column="user_id",
+        related_name="preferences",
+    )
+    language = models.CharField(max_length=16, default="pt-BR")
+    theme = models.CharField(max_length=16, choices=UserTheme.choices, default=UserTheme.LIGHT)
+    accent_color = models.CharField(max_length=16, default="pink")
+    email_notifications_enabled = models.BooleanField(default=True)
+    region = models.CharField(max_length=16, null=True, blank=True)
+
+    class Meta:
+        db_table = "user_preferences"
 
 

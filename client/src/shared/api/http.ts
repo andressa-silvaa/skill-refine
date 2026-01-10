@@ -5,18 +5,21 @@ export type ApiErrorBody = {
   error?: { code?: string; error_code?: string; message?: string };
   error_code?: string;
   message?: string;
+  fields?: Record<string, string | string[]>;
 };
 
 export class ApiError extends Error {
   readonly status: number;
   readonly code?: string;
   readonly retryAfterSeconds?: number;
+  readonly body?: ApiErrorBody;
 
-  constructor(status: number, code: string | undefined, message: string, retryAfterSeconds?: number) {
+  constructor(status: number, code: string | undefined, message: string, retryAfterSeconds?: number, body?: ApiErrorBody) {
     super(message);
     this.status = status;
     this.code = code;
     this.retryAfterSeconds = retryAfterSeconds;
+    this.body = body;
   }
 }
 
@@ -27,7 +30,9 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   const token = getAccessToken();
 
   const headers = new Headers(init.headers);
-  if (!headers.has('Content-Type') && init.body) headers.set('Content-Type', 'application/json');
+  // Only set JSON content-type for string bodies.
+  // For FormData (multipart) the browser must set the boundary.
+  if (!headers.has('Content-Type') && typeof init.body === 'string') headers.set('Content-Type', 'application/json');
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
   const res = await fetch(`${API_URL}${path}`, {
@@ -61,7 +66,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
         }
       }
     }
-    throw new ApiError(res.status, code, message, retryAfterSeconds);
+    throw new ApiError(res.status, code, message, retryAfterSeconds, body);
   }
 
   return (data ?? ({} as unknown)) as T;

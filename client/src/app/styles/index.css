@@ -10,6 +10,8 @@
   --card-pink: #f7d0f1;
   --primary: #c72cb8;
   --right-panel: #d62bc3;
+  --sr-accent: var(--primary);
+  --sr-accent-rgb: 199,44,184;
 
   --text-dark: #1e1a1d;
   --text-purple: #8b2e80;
@@ -18,6 +20,51 @@
 
   --danger: #9a1b1b;
   --danger-soft: rgba(154, 27, 27, 0.25);
+
+  --sr-surface: rgba(255, 255, 255, 0.92);
+  --sr-surface-soft: rgba(255, 255, 255, 0.7);
+  --sr-surface-2: rgba(255, 255, 255, 0.82);
+  --sr-surface-hover: rgba(20, 20, 20, 0.04);
+  --sr-border: rgba(20, 20, 20, 0.08);
+  --sr-ink: rgba(20, 20, 20, 0.84);
+  --sr-ink-muted: rgba(20, 20, 20, 0.56);
+  --sr-ink-subtle: rgba(20, 20, 20, 0.62);
+
+  --sr-page-bg: #fbf7fb;
+  --sr-elev-1: 0 10px 26px rgba(20, 20, 20, 0.08);
+  --sr-elev-2: 0 18px 40px rgba(20, 20, 20, 0.12);
+
+  --sr-input-bg: rgba(255, 255, 255, 0.92);
+  --sr-input-border: rgba(20, 20, 20, 0.14);
+  --sr-input-placeholder: rgba(20, 20, 20, 0.38);
+}
+
+:root[data-theme='dark'] {
+  --input-bg: rgba(255, 255, 255, 0.08);
+  --input-text: rgba(255, 255, 255, 0.9);
+
+  --text-dark: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.7);
+  --placeholder: rgba(255, 255, 255, 0.45);
+
+  --sr-page-bg: #0f1116;
+
+  --sr-surface: rgba(24, 26, 33, 0.92);
+  --sr-surface-soft: rgba(20, 22, 28, 0.78);
+  --sr-surface-2: rgba(34, 36, 44, 0.88);
+  --sr-surface-hover: rgba(255, 255, 255, 0.04);
+
+  --sr-border: rgba(255, 255, 255, 0.10);
+  --sr-ink: rgba(255, 255, 255, 0.90);
+  --sr-ink-subtle: rgba(255, 255, 255, 0.70);
+  --sr-ink-muted: rgba(255, 255, 255, 0.56);
+
+  --sr-elev-1: 0 14px 34px rgba(0, 0, 0, 0.45);
+  --sr-elev-2: 0 22px 60px rgba(0, 0, 0, 0.58);
+
+  --sr-input-bg: rgba(255, 255, 255, 0.06);
+  --sr-input-border: rgba(255, 255, 255, 0.12);
+  --sr-input-placeholder: rgba(255, 255, 255, 0.42);
 }
 
 * {
@@ -28,6 +75,8 @@
 
 body {
   margin: 0;
+  background: var(--sr-page-bg);
+  color: var(--text-dark);
 }
 
 .field-input.is-invalid,
