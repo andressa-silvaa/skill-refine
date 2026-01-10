@@ -7,12 +7,12 @@
   height: 36px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(20, 20, 20, 0.14);
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--sr-input-border);
+  background: var(--sr-surface-soft);
   font: inherit;
   font-size: 12px;
   font-weight: 800;
-  color: rgba(20, 20, 20, 0.72);
+  color: var(--sr-ink-subtle);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -20,8 +20,9 @@
 }
 
 .sr-profile-card__edit-btn:hover {
-  border-color: rgba(var(--sr-accent-rgb), 0.18);
-  background: rgba(var(--sr-accent-rgb), 0.06);
+  border-color: rgba(var(--sr-accent-rgb), 0.35);
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  color: var(--sr-accent);
 }
 
 .sr-profile-card__edit-btn:focus-visible {
@@ -87,26 +88,26 @@
 .sr-profile-card__label {
   font-size: 12px;
   font-weight: 800;
-  color: rgba(20, 20, 20, 0.7);
+  color: var(--sr-ink-subtle);
 }
 
 .sr-profile-card__value {
   height: 44px;
   padding: 12px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(20, 20, 20, 0.14);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--sr-input-border);
+  background: var(--sr-input-bg);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  color: rgba(20, 20, 20, 0.82);
+  color: var(--sr-ink);
   font-size: 14px;
   font-weight: 600;
 }
 
 .sr-profile-card__value--with-icon i {
-  color: rgba(20, 20, 20, 0.42);
+  color: var(--sr-ink-muted);
 }
 
 .sr-profile-card__value-text {

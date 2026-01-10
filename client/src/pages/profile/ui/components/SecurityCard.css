@@ -6,12 +6,12 @@
   height: 36px;
   padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid rgba(20, 20, 20, 0.14);
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--sr-input-border);
+  background: var(--sr-surface-soft);
   font: inherit;
   font-size: 12px;
   font-weight: 800;
-  color: rgba(20, 20, 20, 0.72);
+  color: var(--sr-ink-subtle);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -19,8 +19,9 @@
 }
 
 .sr-security__edit-btn:hover {
-  border-color: rgba(var(--sr-accent-rgb), 0.18);
-  background: rgba(var(--sr-accent-rgb), 0.06);
+  border-color: rgba(var(--sr-accent-rgb), 0.35);
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  color: var(--sr-accent);
 }
 
 .sr-security__edit-btn:focus-visible {

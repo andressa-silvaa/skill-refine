@@ -34,6 +34,14 @@ export function AppearanceSettingsCard() {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (isSaving) return;
+      if (!isEditing) return;
+      applyAppearancePreferences({ theme: serverTheme ?? 'light' });
+    };
+  }, [isEditing, isSaving, serverTheme]);
+
   const isDirty = useMemo(() => serverTheme !== null && draftTheme !== serverTheme, [draftTheme, serverTheme]);
 
   return (

@@ -22,7 +22,7 @@
   gap: 8px;
   font-size: 12px;
   font-weight: 800;
-  color: var(--sr-ink-subtle);
+  color: var(--sr-ink);
   white-space: nowrap;
 }
 
@@ -58,7 +58,7 @@
 .sr-account-status__icon.is-ok {
   border-color: rgba(43, 191, 90, 0.22);
   background: rgba(43, 191, 90, 0.08);
-  color: rgba(20, 20, 20, 0.72);
+  color: var(--sr-ink);
 }
 
 

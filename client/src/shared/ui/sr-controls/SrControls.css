@@ -65,8 +65,9 @@
 }
 
 .sr-edit-btn:hover {
-  border-color: rgba(var(--sr-accent-rgb), 0.18);
-  background: rgba(var(--sr-accent-rgb), 0.06);
+  border-color: rgba(var(--sr-accent-rgb), 0.35);
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  color: var(--sr-accent);
 }
 
 .sr-edit-btn:focus-visible {
@@ -118,8 +119,41 @@
 .sr-profile .sr-profile-input:focus,
 .sr-settings .sr-input:focus {
   border-color: rgba(var(--sr-accent-rgb), 0.55);
-  outline: 2px solid rgba(199, 44, 184, 0.34);
+  outline: 2px solid rgba(var(--sr-accent-rgb), 0.34);
   outline-offset: 1px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+:root[data-theme='dark'] .sr-settings select.sr-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--sr-input-bg);
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.7) 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.7) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 19px,
+    calc(100% - 12px) 19px;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
+
+:root[data-theme='dark'] .sr-settings select.sr-input:hover:not(:disabled) {
+  border-color: rgba(var(--sr-accent-rgb), 0.35);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='dark'] .sr-settings select.sr-input option {
+  background: #151821;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme='dark'] .sr-settings select.sr-input option:checked {
+  background: rgba(var(--sr-accent-rgb), 0.25);
 }
 
 .sr-profile .sr-profile-input[readonly] {

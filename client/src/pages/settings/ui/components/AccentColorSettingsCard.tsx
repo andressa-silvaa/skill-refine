@@ -34,6 +34,14 @@ export function AccentColorSettingsCard() {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (isSaving) return;
+      if (!isEditing) return;
+      applyAppearancePreferences({ accent_color: serverKey ?? 'pink' });
+    };
+  }, [isEditing, isSaving, serverKey]);
+
   const isDirty = useMemo(() => serverKey !== null && draftKey !== serverKey, [draftKey, serverKey]);
 
   return (
