@@ -1,154 +1,80 @@
-import { useEffect, useMemo, useState } from 'react';
-
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
-import { notify } from '@/shared/lib/notify';
-import { applyAppearancePreferences, type ThemeMode } from '@/shared/lib/theme/appearance';
+import { useAppearanceSettings } from './useAppearanceSettings';
+import { useTranslation } from 'react-i18next';
 
 import './AppearanceSettingsCard.css';
 
 export function AppearanceSettingsCard() {
-  const [serverTheme, setServerTheme] = useState<ThemeMode | null>(null);
-  const [draftTheme, setDraftTheme] = useState<ThemeMode>('light');
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [fieldError, setFieldError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    void profileApi
-      .getPreferences()
-      .then((res) => {
-        const raw = (res.theme === 'dark' ? 'dark' : 'light') as ThemeMode;
-        if (!isMounted) return;
-        setServerTheme(raw);
-        setDraftTheme(raw);
-      })
-      .catch((e) => {
-        if (!isMounted) return;
-        setServerTheme(null);
-        notify.error(getApiErrorMessage(e, 'Não foi possível carregar suas preferências.'));
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (isSaving) return;
-      if (!isEditing) return;
-      applyAppearancePreferences({ theme: serverTheme ?? 'light' });
-    };
-  }, [isEditing, isSaving, serverTheme]);
-
-  const isDirty = useMemo(() => serverTheme !== null && draftTheme !== serverTheme, [draftTheme, serverTheme]);
+  const { t } = useTranslation();
+  const ui = useAppearanceSettings();
 
   return (
-    <section className="sr-settings__card" aria-label="Aparência">
+    <section className="sr-settings__card" aria-label={t('settings.appearanceTitle')}>
       <header className="sr-settings__card-header">
         <div>
           <h2 className="sr-settings__card-title">
-            <i className="fa-solid fa-palette" aria-hidden /> Aparência
+            <i className="fa-solid fa-palette" aria-hidden /> {t('settings.appearanceTitle')}
           </h2>
-          <div className="sr-settings__muted">Escolha entre tema claro e escuro.</div>
+          <div className="sr-settings__muted">{t('settings.appearanceMuted')}</div>
         </div>
         <button
           type="button"
           className="sr-edit-btn"
-          aria-label={isEditing ? 'Fechar edição' : 'Editar aparência'}
-          disabled={isSaving || serverTheme === null}
-          onClick={() => {
-            setIsEditing((v) => {
-              const next = !v;
-              setFieldError(null);
-              setDraftTheme(serverTheme ?? 'light');
-              if (!next) applyAppearancePreferences({ theme: serverTheme ?? 'light' });
-              return next;
-            });
-          }}
+          aria-label={ui.isEditing ? t('common.close') : t('common.edit')}
+          disabled={ui.isSaving || ui.serverTheme === null}
+          onClick={ui.toggleEdit}
         >
-          <i className={`fa-regular ${isEditing ? 'fa-circle-xmark' : 'fa-pen-to-square'}`} aria-hidden />{' '}
-          {isEditing ? 'Fechar' : 'Editar'}
+          <i className={`fa-regular ${ui.isEditing ? 'fa-circle-xmark' : 'fa-pen-to-square'}`} aria-hidden />{' '}
+          {ui.isEditing ? t('common.close') : t('common.edit')}
         </button>
       </header>
 
       <div className="sr-appearance">
-        <div className="sr-appearance__label">Tema</div>
+        <div className="sr-appearance__label">{t('settings.themeLabel')}</div>
         <div className="sr-appearance__grid" role="group" aria-label="Selecionar tema">
           <button
             type="button"
-            className={`sr-appearance__option${draftTheme === 'light' ? ' is-active' : ''}`}
-            disabled={!isEditing || isSaving}
+            className={`sr-appearance__option${ui.draftTheme === 'light' ? ' is-active' : ''}`}
+            disabled={!ui.isEditing || ui.isSaving}
             onClick={() => {
-              if (!isEditing || isSaving) return;
-              setFieldError(null);
-              setDraftTheme('light');
-              applyAppearancePreferences({ theme: 'light' });
+              ui.changeDraftTheme('light');
             }}
           >
             <i className="fa-regular fa-sun" aria-hidden />
-            <span>Claro</span>
+            <span>{t('settings.themeLight')}</span>
           </button>
           <button
             type="button"
-            className={`sr-appearance__option${draftTheme === 'dark' ? ' is-active' : ''}`}
-            disabled={!isEditing || isSaving}
+            className={`sr-appearance__option${ui.draftTheme === 'dark' ? ' is-active' : ''}`}
+            disabled={!ui.isEditing || ui.isSaving}
             onClick={() => {
-              if (!isEditing || isSaving) return;
-              setFieldError(null);
-              setDraftTheme('dark');
-              applyAppearancePreferences({ theme: 'dark' });
+              ui.changeDraftTheme('dark');
             }}
           >
             <i className="fa-regular fa-moon" aria-hidden />
-            <span>Escuro</span>
+            <span>{t('settings.themeDark')}</span>
           </button>
         </div>
       </div>
 
-      {fieldError ? <p className="field-error">{fieldError}</p> : null}
+      {ui.fieldError ? <p className="field-error">{ui.fieldError}</p> : null}
 
-      {isEditing ? (
+      {ui.isEditing ? (
         <div className="sr-card-actions">
           <button
             type="button"
             className="sr-btn sr-btn--primary"
-            disabled={isSaving || serverTheme === null || !isDirty}
-            onClick={async () => {
-              setIsSaving(true);
-              setFieldError(null);
-              try {
-                const res = await profileApi.updatePreferences({ theme: draftTheme });
-                const next = (res.theme === 'dark' ? 'dark' : 'light') as ThemeMode;
-                setServerTheme(next);
-                setDraftTheme(next);
-                applyAppearancePreferences({ theme: next });
-                setIsEditing(false);
-              } catch (e) {
-                const fields = getApiFieldErrors(e);
-                const errMsg = fields?.theme;
-                if (errMsg) setFieldError(errMsg);
-                else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
-              } finally {
-                setIsSaving(false);
-              }
-            }}
+            disabled={!ui.isEditing || ui.isSaving || ui.serverTheme === null || !ui.isDirty}
+            onClick={ui.save}
           >
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {ui.isSaving ? t('common.saving') : t('common.save')}
           </button>
           <button
             type="button"
             className="sr-btn sr-btn--secondary"
-            disabled={isSaving}
-            onClick={() => {
-              setDraftTheme(serverTheme ?? 'light');
-              setFieldError(null);
-              applyAppearancePreferences({ theme: serverTheme ?? 'light' });
-              setIsEditing(false);
-            }}
+            disabled={ui.isSaving}
+            onClick={ui.cancelEdit}
           >
-            Cancelar
+            {t('common.cancel')}
           </button>
         </div>
       ) : null}

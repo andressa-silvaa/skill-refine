@@ -1,87 +1,78 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { useSession, useSessionActions } from '@/entities/session';
 import { profileApi } from '@/entities/session/api/profileApi';
 import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
+import { useDirtyState } from '@/shared/lib/hooks/useDirtyState';
 import { notify } from '@/shared/lib/notify';
 
 import './PreferencesCard.css';
 
 export function PreferencesCard() {
-  const [serverValue, setServerValue] = useState<boolean | null>(null);
-  const [draftValue, setDraftValue] = useState(false);
+  const { t } = useTranslation();
+  const { preferences } = useSession();
+  const { updatePreferences } = useSessionActions();
+  const emailNotifications = useDirtyState<boolean>(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
-  const isDirty = serverValue !== null && draftValue !== serverValue;
 
   useEffect(() => {
-    let isMounted = true;
-    void profileApi
-      .getPreferences()
-      .then((res) => {
-        const value = Boolean(res.email_notifications_enabled ?? res.emailNotificationsEnabled);
-        if (!isMounted) return;
-        setServerValue(value);
-        setDraftValue(value);
-      })
-      .catch((e) => {
-        if (!isMounted) return;
-        setServerValue(null);
-        setDraftValue(false);
-        notify.error(getApiErrorMessage(e, 'Não foi possível carregar suas preferências.'));
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (!preferences) return;
+    if (isEditing) return;
+    emailNotifications.acceptServer(preferences.email_notifications_enabled);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, preferences?.email_notifications_enabled]);
+
+  const isDirty = emailNotifications.server !== null && emailNotifications.isDirty;
 
   return (
-    <section className="sr-profile__card" aria-label="Preferências">
+    <section className="sr-profile__card" aria-label={t('profile.preferences')}>
       <header className="sr-profile__card-header">
         <div>
-          <h2 className="sr-profile__card-title">Preferências</h2>
-          <div className="sr-profile__muted">Ajustes rápidos de comunicação.</div>
+          <h2 className="sr-profile__card-title">{t('profile.preferences')}</h2>
+          <div className="sr-profile__muted">{t('profile.preferencesMuted')}</div>
         </div>
         <button
           type="button"
           className="sr-profile-card__edit-btn"
-          aria-label={isEditing ? 'Fechar edição' : 'Editar preferências'}
-          disabled={isSaving || serverValue === null}
+          aria-label={isEditing ? t('common.close') : t('common.edit')}
+          disabled={isSaving || emailNotifications.server === null}
           onClick={() => {
             setIsEditing((v) => {
               const next = !v;
               setFieldError(null);
-              if (next) setDraftValue(serverValue ?? false);
-              else setDraftValue(serverValue ?? false);
+              emailNotifications.resetDraft();
               return next;
             });
           }}
         >
           <i className={`fa-regular ${isEditing ? 'fa-circle-xmark' : 'fa-pen-to-square'}`} aria-hidden />{' '}
-          {isEditing ? 'Fechar' : 'Editar'}
+          {isEditing ? t('common.close') : t('common.edit')}
         </button>
       </header>
 
-      <div className="sr-pref__row" aria-label="Notificações por e-mail">
+      <div className="sr-pref__row" aria-label={t('profile.emailNotifications')}>
         <div className="sr-pref__left">
           <span className="sr-pref__icon" aria-hidden>
             <i className="fa-fw fa-regular fa-envelope" />
           </span>
           <div className="sr-pref__text">
-            <div className="sr-pref__label">Notificações por e-mail</div>
-            <div className="sr-pref__desc">Receba avisos importantes e lembretes.</div>
+            <div className="sr-pref__label">{t('profile.emailNotifications')}</div>
+            <div className="sr-pref__desc">{t('profile.emailNotificationsDesc')}</div>
           </div>
         </div>
         <button
           type="button"
-          className={`sr-pref__switch${draftValue ? ' is-on' : ''}`}
+          className={`sr-pref__switch${emailNotifications.draft ? ' is-on' : ''}`}
           role="switch"
-          aria-checked={draftValue}
-          disabled={!isEditing || isSaving || serverValue === null}
+          aria-checked={emailNotifications.draft}
+          disabled={!isEditing || isSaving || emailNotifications.server === null}
           onClick={() => {
             if (!isEditing || isSaving) return;
             setFieldError(null);
-            setDraftValue((v) => !v);
+            emailNotifications.setDraft(!emailNotifications.draft);
           }}
         >
           <span className="sr-pref__thumb" aria-hidden />
@@ -95,15 +86,15 @@ export function PreferencesCard() {
           <button
             type="button"
             className="sr-btn sr-btn--primary"
-            disabled={isSaving || serverValue === null || !isDirty}
+            disabled={!isEditing || isSaving || emailNotifications.server === null || !isDirty}
             onClick={async () => {
               setIsSaving(true);
               setFieldError(null);
               try {
-                const res = await profileApi.updatePreferences({ email_notifications_enabled: draftValue });
+                const res = await profileApi.updatePreferences({ email_notifications_enabled: emailNotifications.draft });
                 const value = Boolean(res.email_notifications_enabled ?? res.emailNotificationsEnabled);
-                setServerValue(value);
-                setDraftValue(value);
+                emailNotifications.acceptServer(value);
+                updatePreferences({ email_notifications_enabled: value });
                 setIsEditing(false);
               } catch (e) {
                 const fields = getApiFieldErrors(e);
@@ -115,19 +106,19 @@ export function PreferencesCard() {
               }
             }}
           >
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? t('common.saving') : t('common.save')}
           </button>
           <button
             type="button"
             className="sr-btn sr-btn--secondary"
             disabled={isSaving}
             onClick={() => {
-              setDraftValue(serverValue ?? false);
+              emailNotifications.resetDraft();
               setFieldError(null);
               setIsEditing(false);
             }}
           >
-            Cancelar
+            {t('common.cancel')}
           </button>
         </div>
       ) : null}

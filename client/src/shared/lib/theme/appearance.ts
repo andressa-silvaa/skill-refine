@@ -17,8 +17,14 @@ const ACCENT_VARS: Record<AccentKey, { primary: string; textPurple: string; righ
   orange: { primary: '#d45a00', textPurple: '#d45a00', rightPanel: '#e06a00', rgb: '212,90,0' },
 };
 
+function getThemeScopeRoot(): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+  return document.querySelector<HTMLElement>('[data-sr-theme-scope]');
+}
+
 export function applyAppearancePreferences(prefs: { theme?: ThemeMode | null; accent_color?: string | null }) {
-  const root = document.documentElement;
+  const root = getThemeScopeRoot();
+  if (!root) return;
   const nextTheme = prefs.theme === 'dark' || prefs.theme === 'light' ? prefs.theme : null;
   if (nextTheme) root.dataset.theme = nextTheme;
 

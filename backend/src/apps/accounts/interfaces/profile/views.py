@@ -8,7 +8,11 @@ from rest_framework.views import APIView
 
 from apps.accounts.infrastructure.avatar_storage import save_user_avatar
 from apps.accounts.infrastructure.cloudinary_avatar import avatar_url
+from apps.accounts.infrastructure.email_sender import DjangoEmailSender
 from apps.accounts.infrastructure.models import UserPreferences
+from apps.accounts.infrastructure.repositories import OrmSessionRepository, OrmUserRepository
+from apps.audit.infrastructure.logger import OrmAuditLogger
+from shared.auth.drf import request_meta
 from shared.auth.jwt import now_utc
 
 from .serializers import (
@@ -160,6 +164,7 @@ class PreferencesView(APIView):
             {
                 "email_notifications_enabled": bool(prefs.email_notifications_enabled),
                 "emailNotificationsEnabled": bool(prefs.email_notifications_enabled),
+                "language": str(getattr(prefs, "language", "") or ""),
                 "theme": str(getattr(prefs, "theme", "") or ""),
                 "accent_color": str(getattr(prefs, "accent_color", "") or ""),
                 "accentColor": str(getattr(prefs, "accent_color", "") or ""),
@@ -175,7 +180,7 @@ class PreferencesView(APIView):
         ser = PreferencesSerializer(data=request.data, partial=True)
         if not ser.is_valid():
             fields: dict[str, str] = {}
-            for key in ("email_notifications_enabled", "theme", "accent_color"):
+            for key in ("email_notifications_enabled", "language", "theme", "accent_color"):
                 if key in ser.errors:
                     try:
                         fields[key] = str(ser.errors[key][0])
@@ -188,6 +193,9 @@ class PreferencesView(APIView):
         if "email_notifications_enabled" in ser.validated_data:
             prefs.email_notifications_enabled = bool(ser.validated_data["email_notifications_enabled"])
             updated = True
+        if "language" in ser.validated_data:
+            prefs.language = str(ser.validated_data["language"])
+            updated = True
         if "theme" in ser.validated_data:
             prefs.theme = str(ser.validated_data["theme"])
             updated = True
@@ -199,6 +207,8 @@ class PreferencesView(APIView):
             update_fields = ["updated_at"]
             if "email_notifications_enabled" in ser.validated_data:
                 update_fields.append("email_notifications_enabled")
+            if "language" in ser.validated_data:
+                update_fields.append("language")
             if "theme" in ser.validated_data:
                 update_fields.append("theme")
             if "accent_color" in ser.validated_data:
@@ -209,10 +219,82 @@ class PreferencesView(APIView):
             {
                 "email_notifications_enabled": bool(prefs.email_notifications_enabled),
                 "emailNotificationsEnabled": bool(prefs.email_notifications_enabled),
+                "language": str(getattr(prefs, "language", "") or ""),
                 "theme": str(getattr(prefs, "theme", "") or ""),
                 "accent_color": str(getattr(prefs, "accent_color", "") or ""),
                 "accentColor": str(getattr(prefs, "accent_color", "") or ""),
             },
             status=status.HTTP_200_OK,
         )
+
+
+class PrivacyExportView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if not getattr(user, "id", None):
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+
+        to_email = str(getattr(user, "email", "") or "").strip()
+        if not to_email:
+            return _error("validation_error", "E-mail do usuário não encontrado.", status.HTTP_400_BAD_REQUEST)
+
+        meta = request_meta(request)
+        audit = OrmAuditLogger()
+        email_sender = DjangoEmailSender()
+
+        from apps.accounts.application.use_cases import request_data_export as request_data_export_uc
+        from apps.accounts.domain.errors import EmailSendFailed, EmailServiceNotConfigured
+
+        try:
+            result = request_data_export_uc(
+                user_id=str(user.id),
+                to_email=to_email,
+                email_sender=email_sender,
+                audit=audit,
+                ip=meta["ip"],
+                user_agent=meta["user_agent"],
+            )
+        except EmailServiceNotConfigured:
+            return _error(
+                "email_service_not_configured",
+                "Serviço de e-mail não configurado.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except EmailSendFailed:
+            return _error(
+                "email_send_failed",
+                "Não foi possível enviar o e-mail agora.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class PrivacyDeleteAccountView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if not getattr(user, "id", None):
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+
+        meta = request_meta(request)
+        audit = OrmAuditLogger()
+        users = OrmUserRepository()
+        sessions = OrmSessionRepository()
+
+        from apps.accounts.application.use_cases import delete_account as delete_account_uc
+
+        delete_account_uc(
+            user_id=str(user.id),
+            users=users,
+            sessions=sessions,
+            audit=audit,
+            ip=meta["ip"],
+            user_agent=meta["user_agent"],
+        )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
 

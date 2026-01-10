@@ -72,10 +72,10 @@
   border-color: rgba(var(--sr-accent-rgb), 0.28);
 }
 
-:root[data-theme='dark'] .sr-pref__switch.is-on {
+[data-sr-theme-scope][data-theme='dark'] .sr-pref__switch.is-on {
   background: rgba(var(--sr-accent-rgb), 0.28);
   border-color: rgba(var(--sr-accent-rgb), 0.55);
-  box-shadow: 0 0 0 1px rgba(var(--sr-accent-rgb), 0.14), 0 0 18px rgba(var(--sr-accent-rgb), 0.12);
+  box-shadow: none;
 }
 
 .sr-pref__switch.is-on .sr-pref__thumb {

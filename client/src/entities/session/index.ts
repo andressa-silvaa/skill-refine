@@ -1,4 +1,4 @@
 export { SessionProvider, useSession, useSessionActions } from './model/SessionProvider';
-export type { SessionUser, SessionStatus } from './model/types';
+export type { SessionPreferences, SessionUser, SessionStatus } from './model/types';
 
 

@@ -10,6 +10,13 @@ export type SessionUser = {
   avatarUrl?: string | null;
 };
 
+export type SessionPreferences = {
+  theme: 'light' | 'dark';
+  accent_color: string;
+  language: string;
+  email_notifications_enabled: boolean;
+};
+
 export type SessionStatus = 'unknown' | 'authenticated' | 'anonymous';
 
 

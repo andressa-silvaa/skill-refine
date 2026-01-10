@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { IconButton } from '@/shared/ui';
 
@@ -13,19 +14,20 @@ type Action = {
 };
 
 export function Topbar() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const actions: Action[] = [
-    { key: 'search', ariaLabel: 'Buscar', iconClass: 'fa-solid fa-magnifying-glass' },
+    { key: 'search', ariaLabel: t('nav.search'), iconClass: 'fa-solid fa-magnifying-glass' },
     {
       key: 'notifications',
-      ariaLabel: 'Notificações',
+      ariaLabel: t('nav.notifications'),
       iconClass: 'fa-regular fa-bell',
       badgeClass: 'sr-topbar__badge--danger',
     },
     {
       key: 'profile',
-      ariaLabel: 'Perfil',
+      ariaLabel: t('nav.profile'),
       iconClass: 'fa-regular fa-user',
       badgeClass: 'sr-topbar__badge--success',
       onClick: () => navigate('/protected/profile'),
@@ -35,7 +37,7 @@ export function Topbar() {
   return (
     <header className="sr-topbar">
       <div className="sr-topbar__left" aria-hidden />
-      <div className="sr-topbar__right" aria-label="Ações do usuário">
+      <div className="sr-topbar__right" aria-label={t('appShell.userActions')}>
         {actions.map((a) => (
           <IconButton
             key={a.key}

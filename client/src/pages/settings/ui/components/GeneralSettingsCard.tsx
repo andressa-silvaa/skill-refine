@@ -1,10 +1,15 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import './GeneralSettingsCard.css';
+import { LanguageSelect } from './LanguageSelect';
+import { useGeneralSettingsLanguage } from './useGeneralSettingsLanguage';
 
 type Option = { value: string; label: string };
 
 export function GeneralSettingsCard() {
+  const { t } = useTranslation();
+
   const languageOptions = useMemo<Option[]>(
     () => [
       { value: 'pt-BR', label: 'Português (Brasil)' },
@@ -14,121 +19,76 @@ export function GeneralSettingsCard() {
     []
   );
 
-  const [language, setLanguage] = useState('pt-BR');
   const [region, setRegion] = useState('BR');
 
-  const languageId = useId();
-  const langWrapRef = useRef<HTMLDivElement | null>(null);
-  const [langOpen, setLangOpen] = useState(false);
-  const [langActiveIndex, setLangActiveIndex] = useState(0);
-
-  const languageLabel = useMemo(() => {
-    return languageOptions.find((o) => o.value === language)?.label ?? 'Selecionar';
-  }, [language, languageOptions]);
-
-  useEffect(() => {
-    if (!langOpen) return;
-    const onDown = (e: MouseEvent) => {
-      const el = langWrapRef.current;
-      if (!el) return;
-      if (e.target instanceof Node && el.contains(e.target)) return;
-      setLangOpen(false);
-    };
-    document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
-  }, [langOpen]);
-
-  useEffect(() => {
-    if (!langOpen) return;
-    const idx = Math.max(0, languageOptions.findIndex((o) => o.value === language));
-    setLangActiveIndex(idx);
-  }, [langOpen, language, languageOptions]);
+  const lang = useGeneralSettingsLanguage(languageOptions);
 
   return (
-    <section className="sr-settings__card" aria-label="Configurações gerais" data-lang-open={langOpen ? 'true' : undefined}>
+    <section
+      className="sr-settings__card"
+      aria-label={t('settings.general')}
+      data-lang-open={lang.langOpen ? 'true' : undefined}
+    >
       <header className="sr-settings__card-header">
         <div>
           <h2 className="sr-settings__card-title">
-            <i className="fa-solid fa-gear" aria-hidden /> Geral
+            <i className="fa-solid fa-gear" aria-hidden /> {t('settings.general')}
           </h2>
-          <div className="sr-settings__muted">Preferências principais da sua conta.</div>
+          <div className="sr-settings__muted">{t('settings.subtitle')}</div>
         </div>
+        <button
+          type="button"
+          className="sr-edit-btn"
+          aria-label={lang.isEditing ? t('common.close') : t('common.edit')}
+          disabled={lang.isSaving || lang.serverLanguage === null}
+          onClick={lang.toggleEdit}
+        >
+          <i className={`fa-regular ${lang.isEditing ? 'fa-circle-xmark' : 'fa-pen-to-square'}`} aria-hidden />{' '}
+          {lang.isEditing ? t('common.close') : t('common.edit')}
+        </button>
       </header>
 
       <div className="sr-settings-general__grid">
         <label className="sr-field">
-          <span className="sr-label">Idioma</span>
-          <div ref={langWrapRef} className="sr-settings-general__select">
-            <button
-              type="button"
-              className="sr-input sr-settings-general__select-trigger"
-              aria-haspopup="listbox"
-              aria-expanded={langOpen}
-              aria-controls={languageId}
-              onClick={() => setLangOpen((v) => !v)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  setLangOpen(false);
-                  return;
-                }
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setLangOpen(true);
-                  return;
-                }
-                if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  setLangOpen(true);
-                  setLangActiveIndex((i) => Math.min(languageOptions.length - 1, i + 1));
-                  return;
-                }
-                if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  setLangOpen(true);
-                  setLangActiveIndex((i) => Math.max(0, i - 1));
-                }
-              }}
-            >
-              <span className="sr-settings-general__select-value">{languageLabel}</span>
-              <span className="sr-settings-general__select-caret" aria-hidden />
-            </button>
-
-            {langOpen ? (
-              <div className="sr-settings-general__select-menu" role="listbox" id={languageId} aria-label="Selecionar idioma">
-                {languageOptions.map((opt, idx) => {
-                  const selected = opt.value === language;
-                  const active = idx === langActiveIndex;
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      role="option"
-                      aria-selected={selected}
-                      className={`sr-settings-general__select-option${selected ? ' is-selected' : ''}${active ? ' is-active' : ''}`}
-                      onMouseEnter={() => setLangActiveIndex(idx)}
-                      onClick={() => {
-                        setLanguage(opt.value);
-                        setLangOpen(false);
-                      }}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
-          </div>
-          <span className="sr-settings-general__hint">Essa configuração afeta apenas a interface do sistema.</span>
+          <span className="sr-label">{t('settings.language')}</span>
+          <LanguageSelect
+            value={lang.draftLanguage}
+            options={languageOptions}
+            disabled={!lang.isEditing || lang.isSaving}
+            onOpenChange={(open) => lang.setLangOpen(open)}
+            onChange={(value) => {
+              lang.changeDraftLanguage(value);
+            }}
+          />
+          <span className="sr-settings-general__hint">{t('settings.languageHint')}</span>
         </label>
 
         <label className="sr-field">
-          <span className="sr-label">Região (visual)</span>
+          <span className="sr-label">{t('settings.regionVisual')}</span>
           <select className="sr-input" value={region} onChange={(e) => setRegion(e.target.value)} disabled>
             <option value="BR">Brasil</option>
           </select>
-          <span className="sr-settings-general__hint">Opção reservada para futuras integrações.</span>
+          <span className="sr-settings-general__hint">{t('settings.regionHint')}</span>
         </label>
       </div>
+
+      {lang.fieldError ? <p className="field-error">{lang.fieldError}</p> : null}
+
+      {lang.isEditing ? (
+        <div className="sr-card-actions">
+          <button
+            type="button"
+            className="sr-btn sr-btn--primary"
+            disabled={!lang.isEditing || lang.isSaving || lang.serverLanguage === null || !lang.isDirty}
+            onClick={lang.save}
+          >
+            {lang.isSaving ? t('common.saving') : t('common.save')}
+          </button>
+          <button type="button" className="sr-btn sr-btn--secondary" disabled={lang.isSaving} onClick={lang.cancelEdit}>
+            {t('common.cancel')}
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

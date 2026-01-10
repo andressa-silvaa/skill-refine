@@ -18,6 +18,7 @@ from apps.accounts.infrastructure.models import (
     PasswordResetRequest,
     Session,
     User,
+    UserStatus,
     UserPassword,
 )
 from shared.utils.normalization import normalize_email
@@ -44,6 +45,9 @@ class OrmUserRepository(UserRepository):
 
     def mark_email_verified(self, *, user_id: str, when: datetime) -> None:
         User.objects.filter(id=user_id).update(email_verified_at=when)
+
+    def soft_delete(self, *, user_id: str, when: datetime) -> None:
+        User.objects.filter(id=user_id).update(deleted_at=when, status=UserStatus.DELETED)
 
 
 class OrmPasswordRepository(PasswordRepository):
@@ -117,6 +121,12 @@ class OrmSessionRepository(SessionRepository):
         Session.objects.filter(id=session_id, revoked_at__isnull=True).update(
             revoked_at=when,
             replaced_by_session_id=replaced_by_session_id,
+        )
+
+    def revoke_all_for_user(self, *, user_id: str, when: datetime) -> None:
+        Session.objects.filter(user_id=user_id, revoked_at__isnull=True).update(
+            revoked_at=when,
+            replaced_by_session_id=None,
         )
 
 

@@ -28,7 +28,7 @@
   inset: -6px;
   border-radius: 18px;
   border: 2px solid var(--sr-accent-color);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
+  box-shadow: none;
 }
 
 .sr-accent__dot:focus-visible {

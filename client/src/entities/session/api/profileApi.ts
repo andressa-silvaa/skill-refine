@@ -20,6 +20,7 @@ export type ChangePasswordPayload = {
 export type PreferencesResponse = {
   email_notifications_enabled?: boolean;
   emailNotificationsEnabled?: boolean;
+  language?: string;
   theme?: 'light' | 'dark' | string;
   accent_color?: string;
   accentColor?: string;
@@ -44,7 +45,9 @@ export const profileApi = {
     return apiRequest<PreferencesResponse>('/accounts/profile/preferences', { method: 'GET' });
   },
 
-  updatePreferences(payload: Partial<{ email_notifications_enabled: boolean; theme: 'light' | 'dark'; accent_color: string }>) {
+  updatePreferences(
+    payload: Partial<{ email_notifications_enabled: boolean; language: string; theme: 'light' | 'dark'; accent_color: string }>
+  ) {
     return apiRequest<PreferencesResponse>('/accounts/profile/preferences', { method: 'PATCH', body: JSON.stringify(payload) });
   },
 };

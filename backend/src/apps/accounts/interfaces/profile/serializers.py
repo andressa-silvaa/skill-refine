@@ -34,5 +34,6 @@ class ProfileUpdateSerializer(serializers.Serializer):
 
 class PreferencesSerializer(serializers.Serializer):
     email_notifications_enabled = serializers.BooleanField(required=False)
+    language = serializers.ChoiceField(choices=["pt-BR", "en-US", "es-ES"], required=False)
     theme = serializers.ChoiceField(choices=["light", "dark"], required=False)
     accent_color = serializers.ChoiceField(choices=["pink", "purple", "blue", "green", "orange"], required=False)

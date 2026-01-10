@@ -1,81 +1,40 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
-import { notify } from '@/shared/lib/notify';
-import { ACCENTS, applyAppearancePreferences, type AccentKey } from '@/shared/lib/theme/appearance';
+import { useAccentColorSettings } from './useAccentColorSettings';
+
+import { ACCENTS } from '@/shared/lib/theme/appearance';
 
 import './AccentColorSettingsCard.css';
 
 export function AccentColorSettingsCard() {
-  const [serverKey, setServerKey] = useState<AccentKey | null>(null);
-  const [draftKey, setDraftKey] = useState<AccentKey>('pink');
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [fieldError, setFieldError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    void profileApi
-      .getPreferences()
-      .then((res) => {
-        const raw = (res.accent_color ?? res.accentColor ?? 'pink') as AccentKey;
-        if (!isMounted) return;
-        setServerKey(raw);
-        setDraftKey(raw);
-      })
-      .catch((e) => {
-        if (!isMounted) return;
-        setServerKey(null);
-        notify.error(getApiErrorMessage(e, 'Não foi possível carregar suas preferências.'));
-      });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (isSaving) return;
-      if (!isEditing) return;
-      applyAppearancePreferences({ accent_color: serverKey ?? 'pink' });
-    };
-  }, [isEditing, isSaving, serverKey]);
-
-  const isDirty = useMemo(() => serverKey !== null && draftKey !== serverKey, [draftKey, serverKey]);
+  const { t } = useTranslation();
+  const ui = useAccentColorSettings();
 
   return (
-    <section className="sr-settings__card" aria-label="Cor de destaque">
+    <section className="sr-settings__card" aria-label={t('settings.accentTitle')}>
       <header className="sr-settings__card-header">
         <div>
           <h2 className="sr-settings__card-title">
-            <i className="fa-regular fa-star" aria-hidden /> Cor de destaque
+            <i className="fa-regular fa-star" aria-hidden /> {t('settings.accentTitle')}
           </h2>
-          <div className="sr-settings__muted">Personalize a cor do sistema.</div>
+          <div className="sr-settings__muted">{t('settings.accentMuted')}</div>
         </div>
         <button
           type="button"
           className="sr-edit-btn"
-          aria-label={isEditing ? 'Fechar edição' : 'Editar cor de destaque'}
-          disabled={isSaving || serverKey === null}
-          onClick={() => {
-            setIsEditing((v) => {
-              const next = !v;
-              setFieldError(null);
-              setDraftKey(serverKey ?? 'pink');
-              if (!next) applyAppearancePreferences({ accent_color: serverKey ?? 'pink' });
-              return next;
-            });
-          }}
+          aria-label={ui.isEditing ? t('common.close') : t('common.edit')}
+          disabled={ui.isSaving || ui.serverKey === null}
+          onClick={ui.toggleEdit}
         >
-          <i className={`fa-regular ${isEditing ? 'fa-circle-xmark' : 'fa-pen-to-square'}`} aria-hidden />{' '}
-          {isEditing ? 'Fechar' : 'Editar'}
+          <i className={`fa-regular ${ui.isEditing ? 'fa-circle-xmark' : 'fa-pen-to-square'}`} aria-hidden />{' '}
+          {ui.isEditing ? t('common.close') : t('common.edit')}
         </button>
       </header>
 
-      <div className="sr-accent" role="list" aria-label="Selecionar cor de destaque">
+      <div className="sr-accent" role="list" aria-label={t('settings.accentTitle')}>
         {ACCENTS.map((a) => {
-          const isActive = draftKey === a.key;
+          const isActive = ui.draftKey === a.key;
           const style = {
             background: a.color,
             ['--sr-accent-color' as unknown as keyof CSSProperties]: a.color,
@@ -88,12 +47,9 @@ export function AccentColorSettingsCard() {
               style={style}
               aria-label={a.label}
               aria-pressed={isActive}
-              disabled={!isEditing || isSaving}
+              disabled={!ui.isEditing || ui.isSaving}
               onClick={() => {
-                if (!isEditing || isSaving) return;
-                setFieldError(null);
-                setDraftKey(a.key);
-                applyAppearancePreferences({ accent_color: a.key });
+                ui.changeDraftKey(a.key);
               }}
             >
               {isActive ? <i className="fa-solid fa-check" aria-hidden /> : null}
@@ -102,48 +58,25 @@ export function AccentColorSettingsCard() {
         })}
       </div>
 
-      {fieldError ? <p className="field-error">{fieldError}</p> : null}
+      {ui.fieldError ? <p className="field-error">{ui.fieldError}</p> : null}
 
-      {isEditing ? (
+      {ui.isEditing ? (
         <div className="sr-card-actions">
           <button
             type="button"
             className="sr-btn sr-btn--primary"
-            disabled={isSaving || serverKey === null || !isDirty}
-            onClick={async () => {
-              setIsSaving(true);
-              setFieldError(null);
-              try {
-                const res = await profileApi.updatePreferences({ accent_color: draftKey });
-                const next = (res.accent_color ?? res.accentColor ?? draftKey) as AccentKey;
-                setServerKey(next);
-                setDraftKey(next);
-                applyAppearancePreferences({ accent_color: next });
-                setIsEditing(false);
-              } catch (e) {
-                const fields = getApiFieldErrors(e);
-                const errMsg = fields?.accent_color;
-                if (errMsg) setFieldError(errMsg);
-                else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
-              } finally {
-                setIsSaving(false);
-              }
-            }}
+            disabled={!ui.isEditing || ui.isSaving || ui.serverKey === null || !ui.isDirty}
+            onClick={ui.save}
           >
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {ui.isSaving ? t('common.saving') : t('common.save')}
           </button>
           <button
             type="button"
             className="sr-btn sr-btn--secondary"
-            disabled={isSaving}
-            onClick={() => {
-              setDraftKey(serverKey ?? 'pink');
-              setFieldError(null);
-              applyAppearancePreferences({ accent_color: serverKey ?? 'pink' });
-              setIsEditing(false);
-            }}
+            disabled={ui.isSaving}
+            onClick={ui.cancelEdit}
           >
-            Cancelar
+            {t('common.cancel')}
           </button>
         </div>
       ) : null}

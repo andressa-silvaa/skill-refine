@@ -57,10 +57,10 @@
   border-radius: 16px;
   backdrop-filter: blur(10px);
   padding: 14px;
-  box-shadow: var(--sr-elev-1);
+  box-shadow: none;
 }
 
-:root[data-theme='dark'] .sr-settings__side-col .sr-settings__card {
+[data-sr-theme-scope][data-theme='dark'] .sr-settings__side-col .sr-settings__card {
   background: var(--sr-surface-soft);
   box-shadow: none;
 }

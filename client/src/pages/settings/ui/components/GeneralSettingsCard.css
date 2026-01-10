@@ -50,14 +50,14 @@
   border: 1px solid var(--sr-border);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: var(--sr-elev-2);
+  box-shadow: none;
 }
 
-:root[data-theme='dark'] .sr-settings-general__select-trigger {
+[data-sr-theme-scope][data-theme='dark'] .sr-settings-general__select-trigger {
   background-color: #151821;
 }
 
-:root[data-theme='dark'] .sr-settings-general__select-menu {
+[data-sr-theme-scope][data-theme='dark'] .sr-settings-general__select-menu {
   background: #151821;
 }
 

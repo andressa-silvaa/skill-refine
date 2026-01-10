@@ -1,0 +1,72 @@
+.sr-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.sr-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+}
+
+.sr-modal__panel {
+  position: relative;
+  width: min(360px, 100%);
+  border-radius: 16px;
+  border: 1px solid var(--sr-border);
+  background: var(--sr-surface);
+  backdrop-filter: blur(10px);
+  box-shadow: none;
+  padding: 14px;
+}
+
+.sr-modal__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--sr-accent-rgb), 0.18);
+  color: var(--sr-accent);
+  font-size: 16px;
+}
+
+.sr-modal__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--sr-ink);
+}
+
+.sr-modal__text {
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink-subtle);
+  line-height: 1.6;
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-modal__panel {
+  background: var(--sr-surface-soft);
+}
+
+.sr-modal__actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sr-modal__actions .sr-btn {
+  min-width: 120px;
+}
