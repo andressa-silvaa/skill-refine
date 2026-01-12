@@ -1,0 +1,21 @@
+import type { ResumeStatus } from '../model/types';
+
+export function formatDatePt(dateIso: string) {
+  const d = new Date(dateIso);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = String(d.getFullYear());
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+export function getResumeStatusLabel(status: ResumeStatus) {
+  if (status === 'draft') return 'Rascunho';
+  if (status === 'complete') return 'Completo';
+  return 'Analisando';
+}
+
+export function getResumeStatusTone(status: ResumeStatus) {
+  if (status === 'complete') return 'success';
+  if (status === 'analyzing') return 'warning';
+  return 'neutral';
+}

@@ -1,0 +1,32 @@
+.sr-badge {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--sr-border);
+  background: var(--sr-surface-soft);
+  color: var(--sr-ink);
+}
+
+.sr-badge--success {
+  background: rgba(43, 191, 90, 0.1);
+  border-color: rgba(43, 191, 90, 0.25);
+  color: rgba(20, 20, 20, 0.78);
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-badge--success {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.sr-badge--warning {
+  background: rgba(212, 90, 0, 0.1);
+  border-color: rgba(212, 90, 0, 0.25);
+  color: rgba(20, 20, 20, 0.78);
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-badge--warning {
+  color: rgba(255, 255, 255, 0.88);
+}

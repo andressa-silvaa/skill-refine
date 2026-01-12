@@ -1,0 +1,42 @@
+.sr-auto-save-indicator {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sr-auto-save-indicator__saved,
+.sr-auto-save-indicator__unsaved {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sr-auto-save-indicator__saved {
+  color: var(--sr-ink-muted);
+}
+
+.sr-auto-save-indicator__saved i {
+  font-size: 8px;
+  color: var(--sr-accent);
+}
+
+.sr-auto-save-indicator__unsaved {
+  color: var(--sr-ink-subtle);
+}
+
+.sr-auto-save-indicator__unsaved i {
+  font-size: 8px;
+  color: var(--sr-ink-subtle);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

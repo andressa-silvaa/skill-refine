@@ -1,0 +1,118 @@
+.sr-resumes-sort-select {
+  position: relative;
+  min-width: 160px;
+}
+
+.sr-resumes-sort-select__trigger {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--sr-input-border);
+  border-radius: 12px;
+  background: var(--sr-input-bg);
+  color: var(--sr-ink);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sr-resumes-sort-select__trigger:hover {
+  border-color: var(--sr-accent);
+}
+
+.sr-resumes-sort-select__trigger:focus-visible {
+  outline: none;
+  border-color: var(--sr-accent);
+  box-shadow: 0 0 0 3px rgba(var(--sr-accent-rgb), 0.1);
+}
+
+.sr-resumes-sort-select__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.sr-resumes-sort-select__caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--sr-ink-subtle);
+  flex: 0 0 auto;
+  transition: transform 0.2s;
+}
+
+.sr-resumes-sort-select__trigger[aria-expanded='true'] .sr-resumes-sort-select__caret {
+  transform: rotate(180deg);
+}
+
+.sr-resumes-sort-select__menu {
+  position: absolute;
+  z-index: 130;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--sr-surface);
+  border: 1px solid var(--sr-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--sr-elev-1);
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-resumes-sort-select__menu {
+  background: var(--sr-surface-soft);
+}
+
+.sr-resumes-sort-select__option {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--sr-ink);
+  padding: 12px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sr-resumes-sort-select__option:hover,
+.sr-resumes-sort-select__option.is-active {
+  background: rgba(var(--sr-accent-rgb), 0.10);
+}
+
+.sr-resumes-sort-select__option.is-selected {
+  background: rgba(var(--sr-accent-rgb), 0.16);
+}
+
+.sr-resumes-sort-select__option.is-selected::after {
+  content: '✓';
+  float: right;
+  color: var(--sr-accent);
+}
+
+@media (max-width: 480px) {
+  .sr-resumes-sort-select {
+    min-width: 140px;
+  }
+
+  .sr-resumes-sort-select__trigger {
+    height: 38px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .sr-resumes-sort-select__value {
+    font-size: 13px;
+  }
+}

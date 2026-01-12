@@ -1,0 +1,120 @@
+.sr-resume-preview-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--sr-page-bg);
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.sr-resume-preview-fullscreen__header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--sr-border);
+  background: var(--sr-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.sr-resume-preview-fullscreen__header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sr-resume-preview-fullscreen__badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(var(--sr-accent-rgb), 0.12);
+  color: var(--sr-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sr-resume-preview-fullscreen__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--sr-ink);
+}
+
+.sr-resume-preview-fullscreen__close {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid var(--sr-border);
+  background: transparent;
+  color: var(--sr-ink-subtle);
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s;
+}
+
+.sr-resume-preview-fullscreen__close:hover {
+  background: rgba(var(--sr-accent-rgb), 0.08);
+}
+
+.sr-resume-preview-fullscreen__content {
+  overflow-y: auto;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.sr-resume-preview-fullscreen__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sr-resume-preview-fullscreen__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sr-resume-preview-fullscreen__content::-webkit-scrollbar-thumb {
+  background: var(--sr-border);
+  border-radius: 999px;
+}
+
+@media (max-width: 768px) {
+  .sr-resume-preview-fullscreen__header {
+    padding: 12px 16px;
+  }
+
+  .sr-resume-preview-fullscreen__title {
+    font-size: 13px;
+  }
+
+  .sr-resume-preview-fullscreen__content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-resume-preview-fullscreen__header {
+    padding: 10px 12px;
+  }
+
+  .sr-resume-preview-fullscreen__badge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
+
+  .sr-resume-preview-fullscreen__title {
+    font-size: 12px;
+  }
+
+  .sr-resume-preview-fullscreen__close {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .sr-resume-preview-fullscreen__content {
+    padding: 12px;
+  }
+}

@@ -1,0 +1,54 @@
+.sr-resume-meta {
+  display: grid;
+  gap: 10px;
+}
+
+.sr-resume-meta__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sr-resume-meta__score {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--sr-ink-subtle);
+}
+
+.sr-resume-meta__score i {
+  color: #f2b01e;
+}
+
+.sr-resume-meta__tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sr-resume-meta.is-compact {
+  gap: 0;
+}
+
+@media (max-width: 480px) {
+  .sr-resume-meta {
+    gap: 8px;
+  }
+
+  .sr-resume-meta__top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .sr-resume-meta__score {
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .sr-resume-meta__tags {
+    gap: 6px;
+  }
+}

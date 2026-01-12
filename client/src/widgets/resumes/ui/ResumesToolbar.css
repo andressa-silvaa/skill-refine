@@ -1,0 +1,149 @@
+.sr-resumes-toolbar {
+  background: var(--sr-surface);
+  border: 1px solid var(--sr-border);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .sr-resumes-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .sr-resumes-toolbar__search {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .sr-resumes-toolbar__right {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-resumes-toolbar {
+  background: var(--sr-surface-soft);
+}
+
+.sr-resumes-toolbar__search {
+  flex: 1 1 320px;
+  min-width: 240px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 14px;
+  border: 1px solid var(--sr-input-border);
+  background: var(--sr-input-bg);
+  position: relative;
+}
+
+.sr-resumes-toolbar__search i {
+  color: var(--sr-ink-muted);
+  flex-shrink: 0;
+}
+
+.sr-resumes-toolbar__input {
+  border: 0;
+  background: transparent;
+  height: 44px;
+  padding: 0;
+  outline: 0;
+  flex: 1;
+  min-width: 0;
+  color: var(--sr-ink);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  box-shadow: none;
+}
+
+.sr-resumes-toolbar__input::placeholder {
+  color: var(--sr-input-placeholder);
+}
+
+.sr-resumes-toolbar__input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.sr-resumes-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.sr-resumes-toolbar__filters-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sr-resumes-toolbar__filters-hint {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sr-ink-muted);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.sr-resumes-toolbar__filters-wrapper:hover .sr-resumes-toolbar__filters-hint {
+  opacity: 1;
+}
+
+@media (max-width: 840px) {
+  .sr-resumes-toolbar__filters-hint {
+    display: none;
+  }
+}
+
+.sr-resumes-toolbar__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid var(--sr-border);
+  background: rgba(var(--sr-accent-rgb), 0.03);
+}
+
+@media (max-width: 480px) {
+  .sr-resumes-toolbar {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .sr-resumes-toolbar__search {
+    padding: 0 10px;
+  }
+
+  .sr-resumes-toolbar__input {
+    height: 40px;
+    font-size: 13px;
+  }
+
+  .sr-resumes-toolbar__right {
+    gap: 8px;
+  }
+
+  .sr-resumes-toolbar__filters-wrapper .sr-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .sr-resumes-toolbar__toggle {
+    padding: 2px;
+  }
+}

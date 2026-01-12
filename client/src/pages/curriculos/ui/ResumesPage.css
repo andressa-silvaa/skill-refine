@@ -1,0 +1,30 @@
+.sr-resumes {
+  min-height: 100%;
+  padding: 18px 20px 28px;
+  width: 100%;
+  margin: 0;
+}
+
+.sr-resumes__content {
+  margin-top: 12px;
+}
+
+@media (max-width: 768px) {
+  .sr-resumes {
+    padding: 16px 16px 24px;
+  }
+
+  .sr-resumes__content {
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-resumes {
+    padding: 12px 12px 20px;
+  }
+
+  .sr-resumes__content {
+    margin-top: 12px;
+  }
+}

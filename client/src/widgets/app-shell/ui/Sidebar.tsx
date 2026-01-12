@@ -16,7 +16,7 @@ type NavItem = {
 
 const mainNav: NavItem[] = [
   { key: 'dashboard', icon: <i className="fa-solid fa-house" aria-hidden /> },
-  { key: 'curriculos', icon: <i className="fa-regular fa-file-lines" aria-hidden /> },
+  { key: 'curriculos', icon: <i className="fa-regular fa-file-lines" aria-hidden />, to: '/protected/curriculos' },
   { key: 'analiseComIA', icon: <i className="fa-solid fa-wand-magic-sparkles" aria-hidden /> },
   { key: 'historico', icon: <i className="fa-solid fa-clock-rotate-left" aria-hidden /> },
 ];

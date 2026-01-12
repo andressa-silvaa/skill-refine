@@ -1,0 +1,141 @@
+.sr-resume-preview {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  justify-content: center;
+}
+
+.sr-resume-preview__paper {
+  width: 100%;
+  background: #ffffff;
+  padding: 48px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-resume-preview__paper {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.sr-resume-preview__header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--sr-accent);
+}
+
+.sr-resume-preview__name {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--sr-ink);
+}
+
+.sr-resume-preview__position {
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--sr-ink-subtle);
+}
+
+.sr-resume-preview__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sr-ink-muted);
+}
+
+.sr-resume-preview__contact span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sr-resume-preview__section-title {
+  margin: 32px 0 16px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--sr-accent);
+  border-bottom: 1px solid var(--sr-border);
+  padding-bottom: 8px;
+}
+
+.sr-resume-preview__item {
+  margin-bottom: 24px;
+}
+
+.sr-resume-preview__item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.sr-resume-preview__item-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sr-ink);
+  flex: 1;
+}
+
+.sr-resume-preview__item-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sr-ink-muted);
+  white-space: nowrap;
+}
+
+.sr-resume-preview__item-company {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sr-ink-subtle);
+}
+
+.sr-resume-preview__item-list {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--sr-ink);
+}
+
+.sr-resume-preview__item-list li {
+  margin-bottom: 4px;
+}
+
+.sr-resume-preview__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.sr-resume-preview__skill-tag {
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: rgba(var(--sr-accent-rgb), 0.1);
+  color: var(--sr-accent);
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(var(--sr-accent-rgb), 0.2);
+}
+
+@media (max-width: 768px) {
+  .sr-resume-preview__paper {
+    padding: 32px 24px;
+  }
+
+  .sr-resume-preview__name {
+    font-size: 24px;
+  }
+
+  .sr-resume-preview__item-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

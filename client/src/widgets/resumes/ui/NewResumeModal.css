@@ -1,0 +1,148 @@
+.sr-new-resume {
+  display: grid;
+  gap: 14px;
+}
+
+.sr-new-resume__steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sr-new-resume__step {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  border: 1px solid var(--sr-border);
+  background: rgba(var(--sr-accent-rgb), 0.03);
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--sr-ink-subtle);
+}
+
+.sr-new-resume__step.is-active {
+  background: rgba(var(--sr-accent-rgb), 0.14);
+  border-color: rgba(var(--sr-accent-rgb), 0.35);
+  color: var(--sr-ink);
+}
+
+.sr-new-resume__step.is-done {
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  border-color: rgba(var(--sr-accent-rgb), 0.25);
+  color: var(--sr-ink);
+}
+
+.sr-new-resume__panel {
+  display: grid;
+  gap: 10px;
+}
+
+.sr-new-resume__h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--sr-ink);
+}
+
+.sr-new-resume__muted {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink-subtle);
+}
+
+.sr-new-resume__carousel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sr-new-resume__template {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.sr-new-resume__template.is-selected {
+  border-color: rgba(var(--sr-accent-rgb), 0.35);
+}
+
+.sr-new-resume__preview {
+  height: 140px;
+  border-radius: 14px;
+  border: 1px solid var(--sr-border);
+  background: linear-gradient(180deg, rgba(var(--sr-accent-rgb), 0.06), rgba(var(--sr-accent-rgb), 0.02));
+}
+
+.sr-new-resume__template-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sr-new-resume__template-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--sr-ink);
+}
+
+.sr-new-resume__template-desc {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink-subtle);
+  margin-top: 2px;
+}
+
+.sr-new-resume__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sr-new-resume__placeholder {
+  border: 1px solid var(--sr-border);
+  border-radius: 16px;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  background: rgba(var(--sr-accent-rgb), 0.03);
+}
+
+.sr-new-resume__placeholder-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.sr-new-resume__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(var(--sr-accent-rgb), 0.18);
+  border: 1px solid rgba(var(--sr-accent-rgb), 0.25);
+  margin-top: 4px;
+}
+
+.sr-new-resume__dot.is-active {
+  background: rgba(var(--sr-accent-rgb), 0.6);
+}
+
+.sr-new-resume__placeholder-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--sr-ink);
+}
+
+@media (max-width: 840px) {
+  .sr-new-resume__carousel {
+    grid-template-columns: 1fr;
+  }
+
+  .sr-new-resume__preview {
+    height: 120px;
+  }
+}

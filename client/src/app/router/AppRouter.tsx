@@ -8,6 +8,7 @@ import { ResetCodePage, ResetEmailPage, ResetNewPasswordPage, ResetSuccessPage }
 import { VerifyEmailPage } from '@/pages/auth/verify-email';
 import { ProfilePage } from '@/pages/profile';
 import { SettingsPage } from '@/pages/settings';
+import { ResumesPage } from '@/pages/curriculos';
 
 import { RequireAuth } from './RequireAuth';
 
@@ -48,6 +49,15 @@ export function AppRouter() {
         element={
           <RequireAuth>
             <SettingsPage />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/protected/curriculos"
+        element={
+          <RequireAuth>
+            <ResumesPage />
           </RequireAuth>
         }
       />

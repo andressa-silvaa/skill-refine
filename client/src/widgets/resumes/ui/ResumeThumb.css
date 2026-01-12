@@ -1,0 +1,15 @@
+.sr-resume-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--sr-accent-rgb), 0.18);
+  color: var(--sr-accent);
+  flex: 0 0 auto;
+}
+
+.sr-resume-thumb i {
+  font-size: 18px;
+}

@@ -1,0 +1,133 @@
+.sr-experience-step {
+  display: grid;
+  gap: 20px;
+}
+
+.sr-experience-step__header {
+  display: grid;
+  gap: 6px;
+}
+
+.sr-experience-step__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--sr-ink);
+}
+
+.sr-experience-step__subtitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sr-ink-muted);
+}
+
+.sr-experience-step__list {
+  display: grid;
+  gap: 16px;
+}
+
+.sr-experience-card {
+  padding: 16px;
+  border: 1px solid var(--sr-border);
+  border-radius: 14px;
+  background: var(--sr-surface-2);
+  display: grid;
+  gap: 16px;
+}
+
+.sr-experience-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sr-experience-card__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--sr-ink);
+}
+
+.sr-experience-card__fields {
+  display: grid;
+  gap: 14px;
+}
+
+.sr-experience-card__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.sr-experience-card__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sr-ink);
+  cursor: pointer;
+}
+
+.sr-experience-card__checkbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.sr-experience-card__bullets {
+  display: grid;
+  gap: 10px;
+}
+
+.sr-experience-card__bullets-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sr-ink);
+}
+
+.sr-experience-card__bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sr-experience-card__bullet .sr-input-wrapper {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .sr-experience-step {
+    gap: 16px;
+  }
+
+  .sr-experience-card {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .sr-experience-card__row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-experience-step {
+    gap: 14px;
+  }
+
+  .sr-experience-step__title {
+    font-size: 16px;
+  }
+
+  .sr-experience-card {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .sr-experience-card__fields {
+    gap: 12px;
+  }
+}

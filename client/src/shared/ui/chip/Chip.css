@@ -1,0 +1,12 @@
+.sr-chip {
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--sr-accent-rgb), 0.22);
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  color: var(--text-purple);
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+}

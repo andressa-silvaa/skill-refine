@@ -1,0 +1,11 @@
+.sr-card {
+  background: var(--sr-surface);
+  border: 1px solid var(--sr-border);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: none;
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-card {
+  background: var(--sr-surface-soft);
+}

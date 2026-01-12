@@ -1,5 +1,6 @@
 .sr-profile .sr-btn,
 .sr-settings .sr-btn,
+.sr-resumes .sr-btn,
 .sr-modal .sr-btn {
   height: 40px;
   padding: 0 14px;
@@ -13,6 +14,7 @@
 
 .sr-profile .sr-btn:disabled,
 .sr-settings .sr-btn:disabled,
+.sr-resumes .sr-btn:disabled,
 .sr-modal .sr-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
@@ -20,6 +22,7 @@
 
 .sr-profile .sr-btn--primary,
 .sr-settings .sr-btn--primary,
+.sr-resumes .sr-btn--primary,
 .sr-modal .sr-btn--primary {
   background: rgba(var(--sr-accent-rgb), 0.06);
   color: var(--text-purple);
@@ -28,6 +31,7 @@
 
 .sr-profile .sr-btn--primary:hover,
 .sr-settings .sr-btn--primary:hover,
+.sr-resumes .sr-btn--primary:hover,
 .sr-modal .sr-btn--primary:hover {
   background: rgba(var(--sr-accent-rgb), 0.1);
   border-color: rgba(var(--sr-accent-rgb), 0.4);
@@ -35,6 +39,7 @@
 
 .sr-profile .sr-btn--secondary,
 .sr-settings .sr-btn--secondary,
+.sr-resumes .sr-btn--secondary,
 .sr-modal .sr-btn--secondary {
   background: transparent;
   color: var(--sr-ink-subtle);
@@ -43,6 +48,7 @@
 
 .sr-profile .sr-btn--secondary:hover,
 .sr-settings .sr-btn--secondary:hover,
+.sr-resumes .sr-btn--secondary:hover,
 .sr-modal .sr-btn--secondary:hover {
   border-color: rgba(var(--sr-accent-rgb), 0.28);
   background: rgba(var(--sr-accent-rgb), 0.06);
@@ -50,6 +56,7 @@
 
 .sr-profile .sr-btn--danger,
 .sr-settings .sr-btn--danger,
+.sr-resumes .sr-btn--danger,
 .sr-modal .sr-btn--danger {
   background: var(--sr-accent);
   color: #fff;
@@ -58,6 +65,7 @@
 
 .sr-profile .sr-btn--danger:hover,
 .sr-settings .sr-btn--danger:hover,
+.sr-resumes .sr-btn--danger:hover,
 .sr-modal .sr-btn--danger:hover {
   filter: brightness(0.92);
   border-color: rgba(var(--sr-accent-rgb), 0.7);
@@ -65,6 +73,7 @@
 
 .sr-profile .sr-btn--danger:focus-visible,
 .sr-settings .sr-btn--danger:focus-visible,
+.sr-resumes .sr-btn--danger:focus-visible,
 .sr-modal .sr-btn--danger:focus-visible {
   outline: 2px solid var(--sr-accent);
   outline-offset: 2px;
@@ -72,6 +81,7 @@
 
 .sr-profile .sr-btn--ghost,
 .sr-settings .sr-btn--ghost,
+.sr-resumes .sr-btn--ghost,
 .sr-modal .sr-btn--ghost {
   background: rgba(20, 20, 20, 0.06);
   color: var(--sr-ink-subtle);
@@ -79,6 +89,7 @@
 
 .sr-profile .sr-btn:focus-visible,
 .sr-settings .sr-btn:focus-visible,
+.sr-resumes .sr-btn:focus-visible,
 .sr-modal .sr-btn:focus-visible {
   outline: 2px solid var(--sr-accent);
   outline-offset: 2px;
@@ -134,7 +145,8 @@
 }
 
 .sr-profile .sr-profile-input,
-.sr-settings .sr-input {
+.sr-settings .sr-input,
+.sr-resumes .sr-input {
   width: 100%;
   height: 44px;
   padding: 12px 12px;
@@ -148,12 +160,14 @@
 }
 
 .sr-profile .sr-profile-input::placeholder,
-.sr-settings .sr-input::placeholder {
+.sr-settings .sr-input::placeholder,
+.sr-resumes .sr-input::placeholder {
   color: var(--sr-input-placeholder);
 }
 
 .sr-profile .sr-profile-input:focus,
-.sr-settings .sr-input:focus {
+.sr-settings .sr-input:focus,
+.sr-resumes .sr-input:focus {
   border-color: rgba(var(--sr-accent-rgb), 0.55);
   outline: 2px solid rgba(var(--sr-accent-rgb), 0.34);
   outline-offset: 1px;

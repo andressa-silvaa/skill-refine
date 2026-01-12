@@ -1,0 +1,54 @@
+.sr-resumes-empty {
+  padding: 22px;
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+
+.sr-resumes-empty__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--sr-accent-rgb), 0.18);
+  color: var(--sr-accent);
+}
+
+.sr-resumes-empty__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--sr-ink);
+}
+
+.sr-resumes-empty__text {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink-subtle);
+  line-height: 1.6;
+  max-width: 520px;
+}
+
+@media (max-width: 480px) {
+  .sr-resumes-empty {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .sr-resumes-empty__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .sr-resumes-empty__title {
+    font-size: 13px;
+  }
+
+  .sr-resumes-empty__text {
+    font-size: 11px;
+    max-width: 100%;
+  }
+}

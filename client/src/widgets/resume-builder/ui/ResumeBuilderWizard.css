@@ -1,0 +1,130 @@
+.sr-resume-builder-wizard {
+  display: grid;
+  gap: 24px;
+  height: 100%;
+  grid-template-rows: auto auto 1fr auto;
+}
+
+.sr-resume-builder-wizard__progress {
+  display: grid;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.sr-resume-builder-wizard__stepper {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--sr-border);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.sr-resume-builder-wizard__content {
+  min-height: 400px;
+  max-height: none;
+  overflow-y: auto;
+  padding-right: 8px;
+  flex: 1 1 auto;
+}
+
+.sr-resume-builder-wizard__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sr-resume-builder-wizard__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sr-resume-builder-wizard__content::-webkit-scrollbar-thumb {
+  background: var(--sr-border);
+  border-radius: 999px;
+}
+
+.sr-resume-builder-wizard__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--sr-border);
+  flex-shrink: 0;
+}
+
+.sr-resume-builder-wizard__actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .sr-resume-builder-wizard {
+    gap: 16px;
+  }
+
+  .sr-resume-builder-wizard__stepper {
+    padding: 12px 0;
+  }
+
+  .sr-resume-builder-wizard__content {
+    min-height: 300px;
+    padding-right: 4px;
+  }
+
+  .sr-resume-builder-wizard__actions {
+    padding-top: 12px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-resume-builder-wizard {
+    gap: 12px;
+  }
+
+  .sr-resume-builder-wizard__progress {
+    gap: 8px;
+  }
+
+  .sr-resume-builder-wizard__stepper {
+    padding: 10px 0;
+  }
+
+  .sr-resume-builder-wizard__content {
+    min-height: 250px;
+  }
+
+  .sr-resume-builder-wizard__actions {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 12px;
+    position: sticky;
+    bottom: 0;
+    background: var(--sr-surface);
+    border-top: 1px solid var(--sr-border);
+    padding-bottom: 12px;
+    margin: 0 -12px -12px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  [data-sr-theme-scope][data-theme='dark'] .sr-resume-builder-wizard__actions {
+    background: var(--sr-surface-soft);
+  }
+
+  .sr-resume-builder-wizard__actions-right {
+    width: 100%;
+    justify-content: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sr-resume-builder-wizard__actions-right .sr-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sr-resume-builder-wizard__actions > .sr-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

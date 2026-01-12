@@ -1,0 +1,111 @@
+.sr-custom-select-wrapper {
+  display: grid;
+  gap: 6px;
+}
+
+.sr-custom-select-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sr-ink);
+}
+
+.sr-custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.sr-custom-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sr-custom-select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.sr-custom-select-caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--sr-ink-subtle);
+  flex: 0 0 auto;
+  transition: transform 0.2s;
+}
+
+.sr-custom-select-trigger[aria-expanded='true'] .sr-custom-select-caret {
+  transform: rotate(180deg);
+}
+
+.sr-custom-select-menu {
+  position: absolute;
+  z-index: 130;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--sr-surface);
+  border: 1px solid var(--sr-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--sr-elev-1);
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-custom-select-menu {
+  background: var(--sr-surface-soft);
+}
+
+.sr-custom-select-option {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--sr-ink);
+  padding: 12px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sr-custom-select-option:hover,
+.sr-custom-select-option.is-active {
+  background: rgba(var(--sr-accent-rgb), 0.10);
+}
+
+.sr-custom-select-option.is-selected {
+  background: rgba(var(--sr-accent-rgb), 0.16);
+}
+
+.sr-custom-select-option.is-selected::after {
+  content: '✓';
+  float: right;
+  color: var(--sr-accent);
+}
+
+.sr-custom-select-trigger:focus-visible {
+  outline: 2px solid var(--sr-accent);
+  outline-offset: 2px;
+}
+
+.sr-custom-select-hint {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink-muted);
+}
+
+.sr-custom-select-error {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--danger);
+}
