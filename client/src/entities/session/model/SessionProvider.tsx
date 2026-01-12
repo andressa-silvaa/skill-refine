@@ -24,7 +24,7 @@ type SessionActions = {
     user: SessionUser;
     email_confirmation_sent?: boolean;
   }>;
-  logout: () => Promise<void>;
+  logout: (options?: { skipServer?: boolean }) => Promise<void>;
   updateUser: (patch: Partial<SessionUser>) => void;
   updatePreferences: (patch: Partial<SessionPreferences>) => void;
 };
@@ -85,9 +85,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     []
   );
 
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (options?: { skipServer?: boolean }) => {
     try {
-      await sessionApi.logout();
+      if (!options?.skipServer) {
+        await sessionApi.logout();
+      }
     } finally {
       // Garante saída mesmo se o request falhar (UX previsível)
       setState({ status: 'anonymous', user: null, preferences: null });

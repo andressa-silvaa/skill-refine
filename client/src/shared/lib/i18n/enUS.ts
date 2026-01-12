@@ -73,8 +73,9 @@ export const enUS = {
     },
     nav: {
       dashboard: 'Dashboard',
-      curriculo: 'Resume',
-      dashboard2: 'Dashboard',
+      curriculos: 'Resumes',
+      analiseComIA: 'AI Analysis',
+      historico: 'History',
       perfil: 'Profile',
       config: 'Settings',
       sair: 'Logout',

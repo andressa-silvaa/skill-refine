@@ -40,7 +40,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         try:
             user = User.objects.active().get(id=user_id)
         except User.DoesNotExist:
-            raise AuthenticationFailed("User not found")
+            raise AuthenticationFailed("Invalid token")
 
         return (user, payload)
 

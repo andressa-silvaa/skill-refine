@@ -71,8 +71,9 @@ export const ptBR = {
     },
     nav: {
       dashboard: 'Dashboard',
-      curriculo: 'Currículo',
-      dashboard2: 'Dashboard',
+      curriculos: 'Currículos',
+      analiseComIA: 'Análise com IA',
+      historico: 'Histórico',
       perfil: 'Perfil',
       config: 'Configurações',
       sair: 'Sair',

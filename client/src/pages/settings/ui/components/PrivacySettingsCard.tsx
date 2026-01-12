@@ -88,10 +88,11 @@ export function PrivacySettingsCard() {
           setIsDeleting(true);
           try {
             await privacyApi.deleteAccount();
-            await logout();
+            await logout({ skipServer: true });
+            notify.success('Sua conta foi excluída com sucesso.');
             nav('/login', { replace: true });
           } catch (e) {
-            notify.error(getApiErrorMessage(e, t('errors.deleteFailed')));
+            notify.error(getApiErrorMessage(e, 'Não foi possível excluir sua conta agora.'));
           } finally {
             setIsDeleting(false);
             setDeleteOpen(false);

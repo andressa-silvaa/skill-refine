@@ -30,7 +30,7 @@ class OrmUserRepository(UserRepository):
         if not email_n:
             return None
         try:
-            return User.objects.get(email=email_n)
+            return User.objects.filter(email=email_n, deleted_at__isnull=True).get()
         except User.DoesNotExist:
             return None
 

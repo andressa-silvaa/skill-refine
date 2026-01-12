@@ -32,6 +32,7 @@ from apps.accounts.domain.errors import (
     EmailNotConfirmed,
     GoogleLoginNotConfigured,
     InvalidCredentials,
+    UserDisabled,
     PasswordResetExpired,
     PasswordResetGrantInvalid,
     PasswordResetNotFound,
@@ -398,6 +399,8 @@ class LoginView(APIView):
             )
         except InvalidCredentials:
             return _error("invalid_credentials", "E-mail ou senha inválidos.", status.HTTP_401_UNAUTHORIZED)
+        except UserDisabled:
+            return _error("invalid_credentials", "E-mail ou senha inválidos.", status.HTTP_401_UNAUTHORIZED)
         except EmailNotConfirmed:
             return _error("email_not_confirmed", "Confirme seu e-mail para fazer login.", status.HTTP_403_FORBIDDEN)
 
@@ -495,6 +498,7 @@ class RefreshView(APIView):
 
 
 class LogoutView(APIView):
+    authentication_classes: list = []
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):

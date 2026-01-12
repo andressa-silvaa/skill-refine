@@ -41,13 +41,28 @@ export function LoginPage() {
                 navigate('/protected');
               } catch (e) {
                 const apiErr = asApiError(e);
-                if (apiErr) {
-                  setServerError(apiErr.message);
-                  setServerErrorCode(apiErr.code ?? null);
-                } else {
+                if (!apiErr) {
+                  setServerError('Erro inesperado, tente novamente.');
+                  setServerErrorCode(null);
+                  return;
+                }
+
+                const code = apiErr.code ?? null;
+                setServerErrorCode(code);
+
+                if (code === API_ERROR_CODES.EMAIL_NOT_CONFIRMED) {
+                  setServerError(getApiErrorMessage(apiErr, 'Confirme seu e-mail para fazer login.'));
+                  return;
+                }
+
+                if (apiErr.status === 401) {
                   setServerError('E-mail ou senha inválidos.');
                   setServerErrorCode(API_ERROR_CODES.INVALID_CREDENTIALS);
+                  return;
                 }
+
+                setServerError('Erro inesperado, tente novamente.');
+                setServerErrorCode(null);
               }
             }}
             onConfirmEmail={async (email) => {

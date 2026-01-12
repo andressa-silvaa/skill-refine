@@ -11,14 +11,14 @@ import './Sidebar.css';
 type NavItem = {
   key: string;
   icon: ReactNode;
-  isActive?: boolean;
   to?: string;
 };
 
 const mainNav: NavItem[] = [
   { key: 'dashboard', icon: <i className="fa-solid fa-house" aria-hidden /> },
-  { key: 'curriculo', icon: <i className="fa-regular fa-file-lines" aria-hidden />, isActive: true },
-  { key: 'dashboard2', icon: <i className="fa-regular fa-house" aria-hidden /> },
+  { key: 'curriculos', icon: <i className="fa-regular fa-file-lines" aria-hidden /> },
+  { key: 'analiseComIA', icon: <i className="fa-solid fa-wand-magic-sparkles" aria-hidden /> },
+  { key: 'historico', icon: <i className="fa-solid fa-clock-rotate-left" aria-hidden /> },
 ];
 
 const bottomNav: NavItem[] = [
@@ -40,6 +40,16 @@ export function Sidebar(props: Props) {
   const location = useLocation();
 
   const pathname = location.pathname;
+
+  const isNavItemActive = (item: NavItem) => (item.to ? pathname.startsWith(item.to) : false);
+
+  const onNavItemClick = (item: NavItem) => {
+    if (item.key === 'sair') {
+      void logout();
+      return;
+    }
+    if (item.to) navigate(item.to);
+  };
 
   return (
     <aside className={`sr-sidebar${collapsed ? ' is-collapsed' : ''}`}>
@@ -67,8 +77,11 @@ export function Sidebar(props: Props) {
             <li key={item.key}>
               <button
                 type="button"
-                className={`sr-sidebar__item${item.isActive ? ' is-active' : ''}`}
+                className={`sr-sidebar__item${isNavItemActive(item) ? ' is-active' : ''}`}
                 aria-label={collapsed ? t(`nav.${item.key}`) : undefined}
+                onClick={() => {
+                  onNavItemClick(item);
+                }}
               >
                 <span className="sr-sidebar__icon">{item.icon}</span>
                 {!collapsed ? <span className="sr-sidebar__label">{t(`nav.${item.key}`)}</span> : null}
@@ -84,16 +97,10 @@ export function Sidebar(props: Props) {
             <li key={item.key}>
               <button
                 type="button"
-                className={`sr-sidebar__item sr-sidebar__item--muted${
-                  item.to && pathname.startsWith(item.to) ? ' is-active' : ''
-                }`}
+                className={`sr-sidebar__item sr-sidebar__item--muted${isNavItemActive(item) ? ' is-active' : ''}`}
                 aria-label={collapsed ? t(`nav.${item.key}`) : undefined}
                 onClick={() => {
-                  if (item.key === 'sair') {
-                    void logout();
-                    return;
-                  }
-                  if (item.to) navigate(item.to);
+                  onNavItemClick(item);
                 }}
               >
                 <span className="sr-sidebar__icon">{item.icon}</span>

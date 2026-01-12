@@ -73,8 +73,9 @@ export const esES = {
     },
     nav: {
       dashboard: 'Dashboard',
-      curriculo: 'Currículum',
-      dashboard2: 'Dashboard',
+      curriculos: 'Currículos',
+      analiseComIA: 'Análisis con IA',
+      historico: 'Histórico',
       perfil: 'Perfil',
       config: 'Configuración',
       sair: 'Salir',

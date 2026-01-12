@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.db import models
+from django.db.models import Q
 
 from shared.db.models import CreatedAtModel, SoftDeleteModel, TimestampedModel, UUIDPrimaryKeyModel
 from shared.utils.normalization import normalize_email
@@ -44,7 +45,7 @@ class User(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
     - `status` remains as-is (do not change enum via migrations right now).
     """
 
-    email = models.TextField(unique=True)
+    email = models.TextField()
     email_verified_at = models.DateTimeField(null=True, blank=True)
     full_name = models.TextField()
     birth_date = models.DateField(null=True, blank=True)
@@ -57,6 +58,9 @@ class User(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
 
     class Meta:
         db_table = "users"
+        constraints = [
+            models.UniqueConstraint(fields=["email"], condition=Q(deleted_at__isnull=True), name="uniq_users_email_active"),
+        ]
 
     def save(self, *args, **kwargs):
         self.email = normalize_email(self.email) or ""
