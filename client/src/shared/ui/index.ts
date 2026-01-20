@@ -18,3 +18,4 @@ export { CustomSelect } from './custom-select/CustomSelect';
 export { Stepper } from './stepper/Stepper';
 export { ProgressBar } from './progress-bar/ProgressBar';
 export { DatePicker } from './date-picker/DatePicker';
+export { Tooltip } from './tooltip/Tooltip';

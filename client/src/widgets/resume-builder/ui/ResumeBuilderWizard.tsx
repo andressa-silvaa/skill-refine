@@ -137,8 +137,13 @@ export function ResumeBuilderWizard(props: Props) {
     <Modal open={open} title="Criar Currículo" subtitle="Preencha as informações para criar seu currículo" onClose={handleClose} width={900}>
       <div className="sr-resume-builder-wizard">
         <div className="sr-resume-builder-wizard__progress">
-          <ProgressBar current={currentStepNum} total={totalSteps} />
-          <AutoSaveIndicator lastSaved={builder.lastSaved} hasUnsavedChanges={builder.hasUnsavedChanges} onSave={builder.saveDraft} />
+          <ProgressBar
+            current={currentStepNum}
+            total={totalSteps}
+            rightContent={
+              <AutoSaveIndicator lastSaved={builder.lastSaved} hasUnsavedChanges={builder.hasUnsavedChanges} onSave={builder.saveDraft} />
+            }
+          />
         </div>
 
         <div className="sr-resume-builder-wizard__stepper">
@@ -162,23 +167,26 @@ export function ResumeBuilderWizard(props: Props) {
         <div className="sr-resume-builder-wizard__content">{renderStep()}</div>
 
         <div className="sr-resume-builder-wizard__actions">
+          {/* Botão Voltar/Cancelar à esquerda */}
           <Button variant="secondary" onClick={builder.currentStep === 'template' ? handleClose : builder.prevStep}>
             {builder.currentStep === 'template' ? 'Cancelar' : 'Voltar'}
           </Button>
+
+          {/* Ações à direita: Salvar + Visualizar + Próximo */}
           <div className="sr-resume-builder-wizard__actions-right">
+            {builder.currentStep !== 'review' && builder.hasUnsavedChanges ? (
+              <Button variant="ghost" onClick={handleSaveDraft}>
+                Salvar rascunho
+              </Button>
+            ) : null}
             {builder.currentStep !== 'template' ? (
               <Button variant="ghost" onClick={() => preview.openPreview(builder.data)}>
                 <i className="fa-solid fa-eye" aria-hidden />
                 Visualizar
               </Button>
             ) : null}
-            {builder.currentStep !== 'review' && builder.hasUnsavedChanges ? (
-              <Button variant="ghost" onClick={handleSaveDraft}>
-                Salvar rascunho
-              </Button>
-            ) : null}
             <Button variant="primary" onClick={handleNext} disabled={!builder.canGoNext}>
-              {builder.currentStep === 'review' ? 'Concluir currículo' : 'Próximo'}
+              {builder.currentStep === 'review' ? 'Concluir' : 'Próximo'}
               {builder.currentStep !== 'review' ? <i className="fa-solid fa-arrow-right" aria-hidden /> : null}
             </Button>
           </div>

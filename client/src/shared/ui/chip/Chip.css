@@ -9,4 +9,9 @@
   font-weight: 800;
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
 }

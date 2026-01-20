@@ -3,4 +3,16 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Em mobile, botões em containers flex podem ocupar full width */
+@media (max-width: 768px) {
+  .sr-btn {
+    min-width: 0;
+  }
 }

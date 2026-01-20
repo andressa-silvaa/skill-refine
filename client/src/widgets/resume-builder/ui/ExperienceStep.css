@@ -34,12 +34,18 @@
   background: var(--sr-surface-2);
   display: grid;
   gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .sr-experience-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
 }
 
 .sr-experience-card__title {
@@ -47,17 +53,29 @@
   font-size: 14px;
   font-weight: 800;
   color: var(--sr-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
 }
 
 .sr-experience-card__fields {
   display: grid;
   gap: 14px;
+  min-width: 0;
+  width: 100%;
 }
 
 .sr-experience-card__row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  min-width: 0;
+}
+
+.sr-experience-card__row > * {
+  min-width: 0;
 }
 
 .sr-experience-card__checkbox {
@@ -95,6 +113,11 @@
 
 .sr-experience-card__bullet .sr-input-wrapper {
   flex: 1;
+  min-width: 0;
+}
+
+.sr-experience-card__bullet button {
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
@@ -129,5 +152,22 @@
 
   .sr-experience-card__fields {
     gap: 12px;
+  }
+  
+  /* Garantia extra: botões e inputs não saem do card */
+  .sr-experience-card button {
+    max-width: 100%;
+  }
+  
+  .sr-experience-card .sr-input {
+    max-width: 100%;
+  }
+  
+  .sr-experience-card__header button {
+    flex-shrink: 0;
+  }
+  
+  .sr-experience-card__checkbox {
+    word-break: break-word;
   }
 }

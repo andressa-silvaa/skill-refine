@@ -39,6 +39,8 @@
   font-weight: 700;
   color: var(--sr-ink-muted);
   transition: all 0.2s;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .sr-stepper__item.is-active .sr-stepper__circle {
@@ -69,40 +71,76 @@
   font-weight: 700;
 }
 
+/* ========================================
+   MOBILE: Distribuído ocupando todo espaço
+   ======================================== */
 @media (max-width: 768px) {
   .sr-stepper {
-    gap: 6px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-  }
-
-  .sr-stepper::-webkit-scrollbar {
-    display: none;
+    gap: 4px;
+    padding: 4px 2px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+    overflow: visible;
   }
 
   .sr-stepper__item {
-    flex-shrink: 0;
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+    padding: 2px;
   }
 
   .sr-stepper__circle {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     font-size: 12px;
+  }
+
+  /* Esconde labels no mobile <= 768px */
+  .sr-stepper__label {
+    display: none;
   }
 }
 
+/* ========================================
+   MOBILE PEQUENO: Otimização máxima
+   ======================================== */
 @media (max-width: 480px) {
   .sr-stepper {
-    gap: 4px;
+    gap: 6px;
+    padding: 6px 3px;
   }
 
-  .sr-stepper__label {
-    display: none;
+  .sr-stepper__item {
+    flex: 1;
+    justify-content: center;
+    padding: 3px;
   }
 
   .sr-stepper__circle {
     width: 32px;
     height: 32px;
+    font-size: 12px;
+    border-radius: 12px;
+    box-sizing: border-box;
+  }
+
+  /* Item ativo fica mais destacado */
+  .sr-stepper__item.is-active .sr-stepper__circle {
+    background: rgba(var(--sr-accent-rgb), 0.18);
+    border-color: var(--sr-accent);
+    border-width: 2px;
+    color: var(--sr-accent);
+    font-weight: 900;
+  }
+
+  /* Touch target mínimo de 44px */
+  .sr-stepper__item.is-clickable {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

@@ -1,44 +1,112 @@
+/* ResumesList — tabela responsiva com scroll horizontal interno */
 .sr-resumes-list {
+  --px: 16px;
+  --py: 14px;
+  --gap: 12px;
+
+  /* larguras mínimas por coluna (evita esmagar e quebrar) */
+  --col-name: 260px;
+  --col-status: 140px;
+  --col-updated: 190px;
+  --col-score: 120px;
+  --col-actions: 88px;
+
   border: 1px solid var(--sr-border);
   border-radius: 16px;
   background: var(--sr-surface);
-  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+
+  /* scroll horizontal interno */
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
 }
 
 [data-sr-theme-scope][data-theme='dark'] .sr-resumes-list {
   background: var(--sr-surface-soft);
 }
 
+/* tabela (head e rows usam a MESMA grade) */
 .sr-resumes-list__head,
 .sr-resumes-list__row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1.2fr 0.9fr 0.8fr;
-  gap: 12px;
+  grid-template-columns:
+    minmax(var(--col-name), 2fr)
+    minmax(var(--col-status), 1fr)
+    minmax(var(--col-updated), 1.2fr)
+    minmax(var(--col-score), 0.9fr)
+    minmax(var(--col-actions), min-content);
+
+  gap: var(--gap);
   align-items: center;
-  padding: 12px 14px;
+  padding: var(--py) var(--px);
+  box-sizing: border-box;
+
+  /* chave do scroll interno:
+     força a "tabela" a ter largura mínima e o container rola */
+  min-width: calc(
+    var(--col-name) +
+    var(--col-status) +
+    var(--col-updated) +
+    var(--col-score) +
+    var(--col-actions) +
+    (4 * var(--gap)) +
+    (2 * var(--px))
+  );
 }
 
+/* permitir truncar dentro do grid */
+.sr-resumes-list__head > *,
+.sr-resumes-list__row > * {
+  min-width: 0;
+}
+
+/* Header */
 .sr-resumes-list__head {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   font-size: 12px;
   font-weight: 800;
   color: var(--sr-ink-subtle);
   background: rgba(var(--sr-accent-rgb), 0.03);
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
 }
 
+.sr-resumes-list__head > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-resumes-list__head-actions {
+  justify-self: end;
+}
+
+/* Rows */
 .sr-resumes-list__row {
   border-top: 1px solid var(--sr-border);
 }
 
+/* Nome */
 .sr-resumes-list__name {
+  min-width: 0;
+  max-width: 100%;
+  display: block;
+
   border: 0;
   padding: 0;
   background: transparent;
   text-align: left;
+
   font: inherit;
   font-size: 13px;
   font-weight: 800;
   color: var(--sr-ink);
   cursor: pointer;
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -48,12 +116,28 @@
   color: var(--sr-accent);
 }
 
+/* Updated/muted */
 .sr-resumes-list__muted {
   font-size: 12px;
   font-weight: 600;
   color: var(--sr-ink-subtle);
 }
 
+.sr-resumes-list__truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+/* Badge wrapper */
+.sr-resumes-list__badge-wrap {
+  max-width: 100%;
+  display: inline-block;
+  overflow: hidden;
+}
+
+/* Score */
 .sr-resumes-list__score {
   display: inline-flex;
   align-items: center;
@@ -61,65 +145,66 @@
   font-size: 12px;
   font-weight: 800;
   color: var(--sr-ink-subtle);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .sr-resumes-list__score i {
   color: #f2b01e;
+  flex-shrink: 0;
 }
 
+.sr-resumes-list__score > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ações */
 .sr-resumes-list__actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
+.sr-resumes-list__actions > * {
+  flex-shrink: 0;
+}
+
+/* Tablet: reduz mínimos para caber melhor */
 @media (max-width: 1024px) {
-  .sr-resumes-list__head,
-  .sr-resumes-list__row {
-    grid-template-columns: 2fr 1fr 1fr 0.8fr;
+  .sr-resumes-list {
+    --px: 14px;
+    --py: 12px;
+    --gap: 10px;
+
+    --col-name: 220px;
+    --col-status: 130px;
+    --col-updated: 180px;
+    --col-score: 110px;
+    --col-actions: 84px;
   }
 }
 
-@media (max-width: 768px) {
-  .sr-resumes-list__head,
-  .sr-resumes-list__row {
-    grid-template-columns: 2fr 1fr 0.9fr;
-    gap: 10px;
-    padding: 10px 12px;
-  }
-
-  .sr-resumes-list__hide-sm {
-    display: none;
-  }
-}
-
+/* Mobile: mantém tabela completa com scroll, só deixa mínimos mais compactos */
 @media (max-width: 480px) {
   .sr-resumes-list {
-    background: transparent;
-    border: 0;
-    display: grid;
-    gap: 12px;
+    --px: 12px;
+    --py: 12px;
+    --gap: 10px;
+
+    --col-name: 200px;
+    --col-status: 120px;
+    --col-updated: 170px;
+    --col-score: 110px;
+    --col-actions: 84px;
   }
 
   .sr-resumes-list__head {
-    display: none;
-  }
-
-  .sr-resumes-list__row {
-    border: 1px solid var(--sr-border);
-    border-radius: 12px;
-    background: var(--sr-surface);
-    padding: 12px;
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  [data-sr-theme-scope][data-theme='dark'] .sr-resumes-list__row {
-    background: var(--sr-surface-soft);
-  }
-
-  .sr-resumes-list__name {
-    font-size: 14px;
+    font-size: 11px;
   }
 
   .sr-resumes-list__muted {
@@ -128,10 +213,5 @@
 
   .sr-resumes-list__score {
     font-size: 11px;
-  }
-
-  .sr-resumes-list__actions {
-    justify-content: flex-start;
-    gap: 8px;
   }
 }

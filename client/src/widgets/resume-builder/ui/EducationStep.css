@@ -34,12 +34,18 @@
   background: var(--sr-surface-2);
   display: grid;
   gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .sr-education-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
 }
 
 .sr-education-card__title {
@@ -47,17 +53,29 @@
   font-size: 14px;
   font-weight: 800;
   color: var(--sr-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
 }
 
 .sr-education-card__fields {
   display: grid;
   gap: 14px;
+  min-width: 0;
+  width: 100%;
 }
 
 .sr-education-card__row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  min-width: 0;
+}
+
+.sr-education-card__row > * {
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
@@ -92,5 +110,18 @@
 
   .sr-education-card__fields {
     gap: 12px;
+  }
+  
+  /* Garantia extra: botões e inputs não saem do card */
+  .sr-education-card button {
+    max-width: 100%;
+  }
+  
+  .sr-education-card .sr-input {
+    max-width: 100%;
+  }
+  
+  .sr-education-card__header button {
+    flex-shrink: 0;
   }
 }

@@ -82,6 +82,15 @@ body {
   margin: 0;
   background: var(--sr-page-bg);
   color: var(--text-dark);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+html {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 .field-input.is-invalid,

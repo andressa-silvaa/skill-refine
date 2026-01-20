@@ -1,6 +1,11 @@
 .sr-resume-meta {
   display: grid;
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .sr-resume-meta__top {
@@ -8,6 +13,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sr-resume-meta__top > * {
+  flex-shrink: 0;
 }
 
 .sr-resume-meta__score {
@@ -17,6 +30,8 @@
   font-size: 12px;
   font-weight: 800;
   color: var(--sr-ink-subtle);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .sr-resume-meta__score i {
@@ -27,6 +42,10 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .sr-resume-meta.is-compact {

@@ -12,8 +12,15 @@ type Props = {
   onCreate: (data: { name: string; templateId: TemplateId }) => void;
 };
 
+const TEMPLATES = [
+  { id: 'tech', title: 'Tech', desc: 'Ideal para devs e produto.' },
+  { id: 'business', title: 'Business', desc: 'Foco em resultados e gestão.' },
+  { id: 'minimal', title: 'Minimal', desc: 'Limpo e direto ao ponto.' },
+] as const;
+
 export function NewResumeModal(props: Props) {
   const { open, onClose, onCreate } = props;
+
   const [step, setStep] = useState(1);
   const [templateId, setTemplateId] = useState<TemplateId>('tech');
   const [name, setName] = useState('');
@@ -49,7 +56,8 @@ export function NewResumeModal(props: Props) {
   return (
     <Modal open={open} title="Novo Currículo" subtitle="Preencha as informações para criar seu currículo" onClose={close} width={760}>
       <div className="sr-new-resume">
-        <div className="sr-new-resume__steps" aria-label="Etapas">
+        {/* Stepper (desktop/tablet) */}
+        <div className="sr-new-resume__steps sr-new-resume__steps--desktop" aria-label="Etapas">
           {[1, 2, 3].map((n) => (
             <div key={n} className={`sr-new-resume__step${n === step ? ' is-active' : ''}${n < step ? ' is-done' : ''}`}>
               {n}
@@ -57,74 +65,97 @@ export function NewResumeModal(props: Props) {
           ))}
         </div>
 
-        {step === 1 ? (
-          <div className="sr-new-resume__panel">
-            <h3 className="sr-new-resume__h3">Selecione seu modelo</h3>
-            <p className="sr-new-resume__muted">Para começar, selecione um modelo de currículo abaixo.</p>
+        {/* Progresso compacto (mobile/tablet pequeno) */}
+        <div className="sr-new-resume__progress sr-new-resume__progress--mobile" aria-label="Progresso">
+          <span className="sr-new-resume__progress-text">Etapa {step} de 3</span>
+          <div className="sr-new-resume__progress-bar" aria-hidden>
+            <div className="sr-new-resume__progress-fill" style={{ width: `${(step / 3) * 100}%` }} />
+          </div>
+        </div>
 
-            <div className="sr-new-resume__carousel" role="list">
-              {(
-                [
-                  { id: 'tech', title: 'Tech', desc: 'Ideal para devs e produto.' },
-                  { id: 'business', title: 'Business', desc: 'Foco em resultados e gestão.' },
-                  { id: 'minimal', title: 'Minimal', desc: 'Limpo e direto ao ponto.' },
-                ] as const
-              ).map((t) => (
-                <Card key={t.id} className={`sr-new-resume__template${templateId === t.id ? ' is-selected' : ''}`} role="listitem">
-                  <div className="sr-new-resume__preview" aria-hidden />
-                  <div className="sr-new-resume__template-body">
-                    <div>
-                      <div className="sr-new-resume__template-title">{t.title}</div>
-                      <div className="sr-new-resume__template-desc">{t.desc}</div>
+        {/* Única área scrollável */}
+        <div className="sr-new-resume__content">
+          {step === 1 ? (
+            <div className="sr-new-resume__panel">
+              <h3 className="sr-new-resume__h3">Selecione seu modelo</h3>
+              <p className="sr-new-resume__muted">Para começar, selecione um modelo de currículo abaixo.</p>
+
+              <div className="sr-new-resume__carousel" role="list">
+                {TEMPLATES.map((t) => (
+                  <Card
+                    key={t.id}
+                    className={`sr-new-resume__template${templateId === t.id ? ' is-selected' : ''}`}
+                    role="listitem"
+                  >
+                    <div className="sr-new-resume__preview" aria-hidden />
+                    <div className="sr-new-resume__template-body">
+                      <div className="sr-new-resume__template-text">
+                        <div className="sr-new-resume__template-title">{t.title}</div>
+                        <div className="sr-new-resume__template-desc">{t.desc}</div>
+                      </div>
+
+                      <Button
+                        variant={templateId === t.id ? 'primary' : 'secondary'}
+                        onClick={() => setTemplateId(t.id)}
+                      >
+                        Selecionar
+                      </Button>
                     </div>
-                    <Button variant={templateId === t.id ? 'primary' : 'secondary'} onClick={() => setTemplateId(t.id)}>
-                      Selecionar
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ) : step === 2 ? (
-          <div className="sr-new-resume__panel">
-            <h3 className="sr-new-resume__h3">Nome do currículo</h3>
-            <p className="sr-new-resume__muted">Ex.: Currículo Desenvolvedor 2026</p>
-            <input className="sr-input" value={name} placeholder="Digite um nome para identificar este currículo" onChange={(e) => setName(e.target.value)} />
-          </div>
-        ) : (
-          <div className="sr-new-resume__panel">
-            <h3 className="sr-new-resume__h3">Próximas etapas</h3>
-            <p className="sr-new-resume__muted">O builder completo entra aqui. Por enquanto, vamos criar seu rascunho.</p>
-            <div className="sr-new-resume__placeholder">
-              <div className="sr-new-resume__placeholder-row">
-                <div className="sr-new-resume__dot is-active" />
-                <div>
-                  <div className="sr-new-resume__placeholder-title">Dados pessoais</div>
-                  <div className="sr-new-resume__template-desc">Nome, e-mail, telefone, links…</div>
-                </div>
-              </div>
-              <div className="sr-new-resume__placeholder-row">
-                <div className="sr-new-resume__dot" />
-                <div>
-                  <div className="sr-new-resume__placeholder-title">Experiência</div>
-                  <div className="sr-new-resume__template-desc">Cargos, empresas, resultados…</div>
-                </div>
-              </div>
-              <div className="sr-new-resume__placeholder-row">
-                <div className="sr-new-resume__dot" />
-                <div>
-                  <div className="sr-new-resume__placeholder-title">Habilidades</div>
-                  <div className="sr-new-resume__template-desc">Tags, nível e destaque…</div>
-                </div>
+                  </Card>
+                ))}
               </div>
             </div>
-          </div>
-        )}
+          ) : step === 2 ? (
+            <div className="sr-new-resume__panel">
+              <h3 className="sr-new-resume__h3">Nome do currículo</h3>
+              <p className="sr-new-resume__muted">Ex.: Currículo Desenvolvedor 2026</p>
+              <input
+                className="sr-input"
+                value={name}
+                placeholder="Digite um nome para identificar este currículo"
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+          ) : (
+            <div className="sr-new-resume__panel">
+              <h3 className="sr-new-resume__h3">Próximas etapas</h3>
+              <p className="sr-new-resume__muted">O builder completo entra aqui. Por enquanto, vamos criar seu rascunho.</p>
 
-        <div className="sr-new-resume__actions">
+              <div className="sr-new-resume__placeholder">
+                <div className="sr-new-resume__placeholder-row">
+                  <div className="sr-new-resume__dot is-active" />
+                  <div>
+                    <div className="sr-new-resume__placeholder-title">Dados pessoais</div>
+                    <div className="sr-new-resume__template-desc">Nome, e-mail, telefone, links…</div>
+                  </div>
+                </div>
+
+                <div className="sr-new-resume__placeholder-row">
+                  <div className="sr-new-resume__dot" />
+                  <div>
+                    <div className="sr-new-resume__placeholder-title">Experiência</div>
+                    <div className="sr-new-resume__template-desc">Cargos, empresas, resultados…</div>
+                  </div>
+                </div>
+
+                <div className="sr-new-resume__placeholder-row">
+                  <div className="sr-new-resume__dot" />
+                  <div>
+                    <div className="sr-new-resume__placeholder-title">Habilidades</div>
+                    <div className="sr-new-resume__template-desc">Tags, nível e destaque…</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer fixo */}
+        <div className="sr-new-resume__footer">
           <Button variant="secondary" onClick={step === 1 ? close : back}>
             {step === 1 ? 'Cancelar' : 'Voltar'}
           </Button>
+
           {step < 3 ? (
             <Button variant="primary" onClick={next} disabled={!canNext}>
               Próximo

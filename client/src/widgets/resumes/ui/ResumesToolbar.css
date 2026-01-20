@@ -8,6 +8,9 @@
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -20,12 +23,44 @@
   .sr-resumes-toolbar__search {
     min-width: 0;
     width: 100%;
+    flex: 0 0 auto;
+    padding: 0 10px;
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+  }
+
+  .sr-resumes-toolbar__input {
+    height: 40px;
+    font-size: 13px;
   }
 
   .sr-resumes-toolbar__right {
     width: 100%;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .sr-resumes-toolbar__filters-wrapper {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  
+  .sr-resumes-toolbar__filters-wrapper .sr-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .sr-resumes-sort-select {
+    flex: 0 0 auto;
+    min-width: 120px;
+  }
+  
+  .sr-resumes-toolbar__toggle {
+    flex: 0 0 auto;
   }
 }
 
@@ -35,7 +70,8 @@
 
 .sr-resumes-toolbar__search {
   flex: 1 1 320px;
-  min-width: 240px;
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -44,6 +80,7 @@
   border: 1px solid var(--sr-input-border);
   background: var(--sr-input-bg);
   position: relative;
+  box-sizing: border-box;
 }
 
 .sr-resumes-toolbar__search i {
@@ -54,7 +91,7 @@
 .sr-resumes-toolbar__input {
   border: 0;
   background: transparent;
-  height: 44px;
+  height: 42px;
   padding: 0;
   outline: 0;
   flex: 1;
@@ -127,23 +164,48 @@
 
   .sr-resumes-toolbar__search {
     padding: 0 10px;
+    min-width: 0;
+    width: 100%;
+    border-radius: 12px;
+    flex: 0 0 auto;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
   }
 
   .sr-resumes-toolbar__input {
-    height: 40px;
+    height: 38px;
     font-size: 13px;
+  }
+
+  .sr-resumes-toolbar__search i {
+    font-size: 16px;
   }
 
   .sr-resumes-toolbar__right {
     gap: 8px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .sr-resumes-toolbar__filters-wrapper {
+    width: 100%;
   }
 
   .sr-resumes-toolbar__filters-wrapper .sr-btn {
     padding: 8px 12px;
     font-size: 13px;
+    width: 100%;
+  }
+  
+  .sr-resumes-sort-select {
+    width: 100%;
+    min-width: 0;
   }
 
   .sr-resumes-toolbar__toggle {
     padding: 2px;
+    width: 100%;
+    justify-content: center;
   }
 }

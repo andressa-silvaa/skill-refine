@@ -25,6 +25,8 @@
 .sr-basic-info-step__fields {
   display: grid;
   gap: 16px;
+  min-width: 0;
+  width: 100%;
 }
 
 @media (max-width: 768px) {

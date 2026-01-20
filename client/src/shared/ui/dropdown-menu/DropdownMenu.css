@@ -1,18 +1,17 @@
 .sr-dd {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
 }
 
-.sr-dd__trigger {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-}
 
 .sr-dd__menu {
   position: absolute;
   top: calc(100% + 8px);
   min-width: 180px;
+  max-width: 220px;
+  width: 180px;
   border-radius: 14px;
   border: 1px solid var(--sr-border);
   background: var(--sr-surface);
@@ -33,7 +32,12 @@
 
 .sr-dd__menu--portal {
   position: fixed;
-  z-index: 10000;
+  z-index: 99999;
+  pointer-events: auto;
+  width: 180px;
+  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
+  will-change: transform;
 }
 
 [data-sr-theme-scope][data-theme='dark'] .sr-dd__menu {

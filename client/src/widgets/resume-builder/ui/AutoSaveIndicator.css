@@ -1,6 +1,8 @@
 .sr-auto-save-indicator {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
 }
 
 .sr-auto-save-indicator__saved,
@@ -10,6 +12,10 @@
   gap: 6px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .sr-auto-save-indicator__saved {
@@ -19,6 +25,7 @@
 .sr-auto-save-indicator__saved i {
   font-size: 8px;
   color: var(--sr-accent);
+  flex-shrink: 0;
 }
 
 .sr-auto-save-indicator__unsaved {
@@ -29,6 +36,7 @@
   font-size: 8px;
   color: var(--sr-ink-subtle);
   animation: pulse 2s infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulse {
@@ -38,5 +46,18 @@
   }
   50% {
     opacity: 0.5;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-auto-save-indicator__saved,
+  .sr-auto-save-indicator__unsaved {
+    font-size: 11px;
+    gap: 4px;
+  }
+  
+  .sr-auto-save-indicator__saved i,
+  .sr-auto-save-indicator__unsaved i {
+    font-size: 7px;
   }
 }

@@ -1,6 +1,8 @@
 .sr-resumes-sort-select {
   position: relative;
-  min-width: 160px;
+  min-width: 120px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .sr-resumes-sort-select__trigger {
@@ -103,7 +105,8 @@
 
 @media (max-width: 480px) {
   .sr-resumes-sort-select {
-    min-width: 140px;
+    min-width: 0;
+    width: 100%;
   }
 
   .sr-resumes-sort-select__trigger {

@@ -5,6 +5,13 @@
   gap: 12px;
   margin-bottom: 12px;
   flex-wrap: wrap;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sr-resumes__header > div {
+  min-width: 0; /* evita overflow do texto no flex */
 }
 
 .sr-resumes__h1 {
@@ -13,6 +20,7 @@
   font-weight: 800;
   color: var(--text-purple);
   letter-spacing: -0.02em;
+  line-height: 1.15;
 }
 
 .sr-resumes__subtitle {
@@ -20,6 +28,13 @@
   font-size: 13px;
   font-weight: 600;
   color: var(--sr-ink-subtle);
+  line-height: 1.35;
+}
+
+/* Se o botão for um flex internamente (ícone + texto) isso ajuda a não quebrar */
+.sr-resumes__header .sr-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -36,6 +51,7 @@
   .sr-resumes__header .sr-btn {
     width: 100%;
     justify-content: center;
+    white-space: normal; /* deixa o texto do botão quebrar se precisar */
   }
 }
 

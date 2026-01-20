@@ -9,6 +9,11 @@
   border: 1px solid var(--sr-border);
   background: var(--sr-surface-soft);
   color: var(--sr-ink);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .sr-badge--success {

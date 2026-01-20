@@ -11,6 +11,8 @@
 
 .sr-input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 10px 14px;
   border: 1px solid var(--sr-input-border);
   border-radius: 12px;
@@ -20,6 +22,7 @@
   font-weight: 500;
   font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
 .sr-input:focus {

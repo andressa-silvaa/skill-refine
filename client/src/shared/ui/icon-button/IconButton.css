@@ -1,6 +1,7 @@
 .sr-icon-btn {
   width: 40px;
   height: 40px;
+  min-width: 40px;
   border-radius: 12px;
   border: 0;
   background: transparent;
@@ -9,6 +10,8 @@
   color: var(--text-purple);
   cursor: pointer;
   transition: background 160ms ease, transform 160ms ease;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .sr-icon-btn:hover {
