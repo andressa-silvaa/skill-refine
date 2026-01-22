@@ -1,4 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useId } from 'react';
+
+import { useListbox } from '@/shared/lib/hooks/useListbox';
 
 import './CustomSelect.css';
 
@@ -19,37 +21,14 @@ export function CustomSelect(props: Props) {
   const { value, options, label, error, hint, disabled, onChange, className = '' } = props;
 
   const selectId = useId();
-  const wrapRef = useRef<HTMLDivElement | null>(null);
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
   const hintId = hint ? `${selectId}-hint` : undefined;
   const errorId = error ? `${selectId}-error` : undefined;
 
-  const selectedLabel = useMemo(() => {
-    return options.find((o) => o.value === value)?.label ?? '';
-  }, [options, value]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      const el = wrapRef.current;
-      if (!el) return;
-      if (e.target instanceof Node && el.contains(e.target)) return;
-      setOpen(false);
-    };
-    document.addEventListener('mousedown', onDown);
-    return () => document.removeEventListener('mousedown', onDown);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const idx = Math.max(0, options.findIndex((o) => o.value === value));
-    setActiveIndex(idx);
-  }, [open, options, value]);
-
-  useEffect(() => {
-    if (disabled) setOpen(false);
-  }, [disabled]);
+  const { wrapRef, open, setOpen, activeIndex, setActiveIndex, selectedLabel, onTriggerKeyDown } = useListbox({
+    value,
+    options,
+    disabled,
+  });
 
   return (
     <div className={`sr-custom-select-wrapper${className ? ` ${className}` : ''}`}>
@@ -69,29 +48,7 @@ export function CustomSelect(props: Props) {
           aria-describedby={hintId || errorId || undefined}
           disabled={disabled}
           onClick={() => setOpen((v) => !v)}
-          onKeyDown={(e) => {
-            if (disabled) return;
-            if (e.key === 'Escape') {
-              setOpen(false);
-              return;
-            }
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setOpen(true);
-              return;
-            }
-            if (e.key === 'ArrowDown') {
-              e.preventDefault();
-              setOpen(true);
-              setActiveIndex((i) => Math.min(options.length - 1, i + 1));
-              return;
-            }
-            if (e.key === 'ArrowUp') {
-              e.preventDefault();
-              setOpen(true);
-              setActiveIndex((i) => Math.max(0, i - 1));
-            }
-          }}
+          onKeyDown={onTriggerKeyDown}
         >
           <span className="sr-custom-select-value">{selectedLabel || 'Selecione...'}</span>
           <span className="sr-custom-select-caret" aria-hidden />

@@ -12,5 +12,3 @@ export function PrimaryButton(props: Props) {
     </button>
   );
 }
-
-

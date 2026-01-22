@@ -1,10 +1,7 @@
 import { AppShell } from '@/widgets/app-shell';
 import { useTranslation } from 'react-i18next';
 
-import { AppearanceSettingsCard } from './components/AppearanceSettingsCard';
-import { AccentColorSettingsCard } from './components/AccentColorSettingsCard';
-import { GeneralSettingsCard } from './components/GeneralSettingsCard';
-import { PrivacySettingsCard } from './components/PrivacySettingsCard';
+import { AppearanceSettingsCard, AccentColorSettingsCard, GeneralSettingsCard, PrivacySettingsCard } from '@/widgets/settings';
 
 import '@/shared/ui/sr-controls/SrControls.css';
 import '@/shared/ui/layout/TwoColumnStack.css';

@@ -74,7 +74,6 @@
   box-shadow: none;
 }
 
-.auth-link-btn,
 .recovery-small-action {
   background: transparent;
   border: 0;
@@ -127,5 +126,3 @@
     transform: rotate(360deg);
   }
 }
-
-

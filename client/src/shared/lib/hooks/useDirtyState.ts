@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 type Options<T> = {
   isEqual?: (a: T, b: T) => boolean;
@@ -19,15 +19,15 @@ export function useDirtyState<T>(initialDraft: T, options?: Options<T>) {
     return !isEqual(draft, server);
   }, [draft, isEqual, server]);
 
-  const acceptServer = (next: T) => {
+  const acceptServer = useCallback((next: T) => {
     setServer(next);
     setDraft(next);
-  };
+  }, []);
 
-  const resetDraft = () => {
+  const resetDraft = useCallback(() => {
     if (server === null) return;
     setDraft(server);
-  };
+  }, [server]);
 
   return {
     server,

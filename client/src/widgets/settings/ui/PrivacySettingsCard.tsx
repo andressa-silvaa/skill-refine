@@ -32,9 +32,7 @@ export function PrivacySettingsCard() {
 
       <div className="sr-privacy__panel" aria-label={t('settings.privacyPanelAria')}>
         <div className="sr-privacy__panel-title">{t('settings.privacyPanelTitle')}</div>
-        <p className="sr-privacy__panel-text">
-          {t('settings.privacyPanelText')}
-        </p>
+        <p className="sr-privacy__panel-text">{t('settings.privacyPanelText')}</p>
       </div>
 
       <div className="sr-privacy__actions" aria-label={t('settings.dataActionsAria')}>
@@ -102,5 +100,3 @@ export function PrivacySettingsCard() {
     </section>
   );
 }
-
-

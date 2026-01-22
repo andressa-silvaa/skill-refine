@@ -33,7 +33,6 @@ export function Tooltip(props: Props) {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      // Set initial position immediately (rough estimate)
       let initialTop: number;
       let initialLeft: number;
       
@@ -59,7 +58,6 @@ export function Tooltip(props: Props) {
           initialLeft = Math.max(scrollX + 8, rect.left + scrollX + rect.width / 2 - 100);
       }
       
-      // Ensure it's within viewport
       initialTop = Math.min(initialTop, scrollY + viewportHeight - 50);
       initialLeft = Math.min(initialLeft, scrollX + viewportWidth - 200);
       
@@ -79,7 +77,6 @@ export function Tooltip(props: Props) {
           case 'top':
             top = rect.top + scrollY - tooltipRect.height - 8;
             left = rect.left + scrollX + rect.width / 2 - tooltipRect.width / 2;
-            // Keep within viewport
             if (left < scrollX + 8) left = scrollX + 8;
             if (left + tooltipRect.width > scrollX + viewportWidth - 8) {
               left = scrollX + viewportWidth - tooltipRect.width - 8;
@@ -88,7 +85,6 @@ export function Tooltip(props: Props) {
           case 'bottom':
             top = rect.bottom + scrollY + 8;
             left = rect.left + scrollX + rect.width / 2 - tooltipRect.width / 2;
-            // Keep within viewport
             if (left < scrollX + 8) left = scrollX + 8;
             if (left + tooltipRect.width > scrollX + viewportWidth - 8) {
               left = scrollX + viewportWidth - tooltipRect.width - 8;
@@ -97,7 +93,6 @@ export function Tooltip(props: Props) {
           case 'left':
             top = rect.top + scrollY + rect.height / 2 - tooltipRect.height / 2;
             left = rect.left + scrollX - tooltipRect.width - 8;
-            // Keep within viewport
             if (top < scrollY + 8) top = scrollY + 8;
             if (top + tooltipRect.height > scrollY + viewportHeight - 8) {
               top = scrollY + viewportHeight - tooltipRect.height - 8;
@@ -106,7 +101,6 @@ export function Tooltip(props: Props) {
           case 'right':
             top = rect.top + scrollY + rect.height / 2 - tooltipRect.height / 2;
             left = rect.right + scrollX + 8;
-            // Keep within viewport
             if (top < scrollY + 8) top = scrollY + 8;
             if (top + tooltipRect.height > scrollY + viewportHeight - 8) {
               top = scrollY + viewportHeight - tooltipRect.height - 8;

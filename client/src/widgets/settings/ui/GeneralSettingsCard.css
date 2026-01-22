@@ -1,0 +1,22 @@
+.sr-settings-general__grid {
+  display: grid;
+  gap: 12px 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sr-settings-general__grid .sr-field {
+  display: grid;
+  gap: 6px;
+}
+
+.sr-settings-general__hint {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(20, 20, 20, 0.5);
+}
+
+@media (max-width: 920px) {
+  .sr-settings-general__grid {
+    grid-template-columns: 1fr;
+  }
+}

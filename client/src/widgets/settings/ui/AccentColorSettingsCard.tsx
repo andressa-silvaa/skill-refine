@@ -1,7 +1,7 @@
 import { type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useAccentColorSettings } from './useAccentColorSettings';
+import { useAccentColorSettings } from '../model/useAccentColorSettings';
 
 import { ACCENTS } from '@/shared/lib/theme/appearance';
 
@@ -70,12 +70,7 @@ export function AccentColorSettingsCard() {
           >
             {ui.isSaving ? t('common.saving') : t('common.save')}
           </button>
-          <button
-            type="button"
-            className="sr-btn sr-btn--secondary"
-            disabled={ui.isSaving}
-            onClick={ui.cancelEdit}
-          >
+          <button type="button" className="sr-btn sr-btn--secondary" disabled={ui.isSaving} onClick={ui.cancelEdit}>
             {t('common.cancel')}
           </button>
         </div>
@@ -83,5 +78,3 @@ export function AccentColorSettingsCard() {
     </section>
   );
 }
-
-

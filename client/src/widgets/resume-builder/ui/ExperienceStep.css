@@ -142,7 +142,6 @@
     gap: 12px;
   }
   
-  /* Garantia extra: botões e inputs não saem do card */
   .sr-experience-card button {
     max-width: 100%;
   }

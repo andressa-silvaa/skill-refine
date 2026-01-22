@@ -1,0 +1,59 @@
+.sr-privacy__panel {
+  margin-top: 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(199, 44, 184, 0.08);
+  display: grid;
+  gap: 6px;
+}
+
+.sr-privacy__panel-title {
+  font-weight: 700;
+}
+
+.sr-privacy__panel-text {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(20, 20, 20, 0.7);
+}
+
+.sr-privacy__actions {
+  margin-top: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.sr-privacy__actions-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(20, 20, 20, 0.65);
+}
+
+.sr-privacy__links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sr-privacy__link {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: #6d5b6d;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sr-privacy__link--danger {
+  color: #a31b1b;
+}
+
+.sr-privacy__link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sr-privacy__dot {
+  color: rgba(20, 20, 20, 0.45);
+}

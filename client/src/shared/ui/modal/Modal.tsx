@@ -1,5 +1,7 @@
-import { useEffect, useId, type ReactNode } from 'react';
+import { useId, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+
+import { useModalEffects } from '@/shared/lib/hooks/useModalEffects';
 
 import './Modal.css';
 
@@ -16,23 +18,7 @@ export function Modal(props: Props) {
   const { open, title, subtitle, width = 560, children, onClose } = props;
   const labelId = useId();
 
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose, open]);
+  useModalEffects({ open, onClose });
 
   if (!open) return null;
 

@@ -6,7 +6,7 @@ import { useEmailConfirmationResend } from '@/features/auth/email-confirmation';
 import { getApiErrorMessage } from '@/shared/api';
 import { isValidEmail } from '@/shared/lib/forms';
 import { useAsyncRequest } from '@/shared/lib/hooks/useAsyncRequest';
-import { AlertMessage, AuthForm, Field, PrimaryButton, Spinner } from '@/shared/ui';
+import { AlertMessage, AuthForm, Field, PrimaryButton, Spinner } from '@/features/auth/ui';
 import { AuthLayout } from '@/widgets/auth/auth-layout';
 
 type LocationState = { email?: string; emailConfirmationSent?: boolean } | null;

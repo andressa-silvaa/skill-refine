@@ -43,17 +43,17 @@ export function useResumeBuilder() {
       case 'contact':
         return Boolean(data.contact.fullName && data.contact.email && data.contact.phone);
       case 'experience':
-        return true; // Optional step
+        return true;
       case 'education':
-        return true; // Optional step
+        return true;
       case 'skills':
-        return true; // Optional step
+        return true;
       case 'languages':
-        return true; // Optional step
+        return true;
       case 'summary':
-        return true; // Optional step
+        return true;
       case 'review':
-        return false; // Final step
+        return false;
       default:
         return false;
     }
@@ -81,17 +81,17 @@ export function useResumeBuilder() {
       case 'contact':
         return Boolean(data.contact.fullName && data.contact.email && data.contact.phone);
       case 'experience':
-        return true; // Optional, always accessible
+        return true;
       case 'education':
-        return true; // Optional, always accessible
+        return true;
       case 'skills':
-        return true; // Optional, always accessible
+        return true;
       case 'languages':
-        return true; // Optional, always accessible
+        return true;
       case 'summary':
-        return true; // Optional, always accessible
+        return true;
       case 'review':
-        return true; // Can always go to review
+        return true;
       default:
         return false;
     }
@@ -101,15 +101,11 @@ export function useResumeBuilder() {
     const currentOrder = getStepOrder(currentStep);
     const targetOrder = getStepOrder(targetStep);
     
-    // Can always go to current step
     if (targetOrder === currentOrder) return true;
     
-    // Can go to previous steps (already visited)
     if (targetOrder < currentOrder) return true;
     
-    // Can go to next step if current is complete
     if (targetOrder === currentOrder + 1) {
-      // Check if current step requirements are met
       switch (currentStep) {
         case 'theme':
           return Boolean(data.themeId);
@@ -118,11 +114,10 @@ export function useResumeBuilder() {
         case 'contact':
           return Boolean(data.contact.fullName && data.contact.email && data.contact.phone);
         default:
-          return true; // Optional steps
+          return true;
       }
     }
     
-    // Can go to any step if all previous steps are complete
     for (let i = currentOrder + 1; i < targetOrder; i++) {
       const step = BUILDER_STEPS.find((s) => s.order === i);
       if (step && !isStepComplete(step.id)) {
@@ -130,7 +125,6 @@ export function useResumeBuilder() {
       }
     }
     
-    // Can go if target step is complete or optional
     return isStepComplete(targetStep);
   }, [currentStep, data, getStepOrder, isStepComplete]);
 
@@ -148,7 +142,6 @@ export function useResumeBuilder() {
   const saveDraft = useCallback(() => {
     setLastSaved(new Date());
     setHasUnsavedChanges(false);
-    // TODO: Save to backend
   }, []);
 
   const reset = useCallback(() => {

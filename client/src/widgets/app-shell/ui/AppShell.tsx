@@ -32,15 +32,14 @@ export function AppShell(props: Props) {
   useEffect(() => {
     if (isMobile) {
       desktopCollapsedRef.current = collapsed;
-      setCollapsed(true); // mobile inicia encolhido (ícones visíveis)
+      setCollapsed(true);
       return;
     }
     if (desktopCollapsedRef.current != null) {
       setCollapsed(desktopCollapsedRef.current);
       desktopCollapsedRef.current = null;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
+  }, [isMobile, collapsed]);
 
   useEffect(() => {
     if (!isMobile) return;

@@ -6,7 +6,7 @@ import { hasFormErrors } from '@/shared/lib/forms';
 
 import { requestResetSchema, type RequestResetValues } from '../model/schemas';
 
-import '@/shared/ui/auth/AuthStyles.css';
+import '@/features/auth/ui/AuthStyles.css';
 
 type Props = {
   onSubmit?: (values: RequestResetValues) => void | Promise<void>;

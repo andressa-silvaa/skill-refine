@@ -32,10 +32,10 @@ export type Experience = {
   id: string;
   company: string;
   position: string;
-  startDate: string; // YYYY-MM
-  endDate?: string; // YYYY-MM
+  startDate: string;
+  endDate?: string;
   isCurrent: boolean;
-  description: string[]; // bullet points
+  description: string[];
 };
 
 export type Education = {
@@ -43,8 +43,8 @@ export type Education = {
   institution: string;
   course: string;
   degree: string;
-  startDate: string; // YYYY-MM
-  endDate?: string; // YYYY-MM
+  startDate: string;
+  endDate?: string;
   status: EducationStatus;
 };
 
@@ -77,7 +77,7 @@ export type ResumeData = {
 export type Resume = {
   id: string;
   name: string;
-  updatedAt: string; // ISO
+  updatedAt: string;
   status: ResumeStatus;
   score: number;
   tags: string[];

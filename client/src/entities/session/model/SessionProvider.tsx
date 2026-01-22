@@ -91,7 +91,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         await sessionApi.logout();
       }
     } finally {
-      // Garante saída mesmo se o request falhar (UX previsível)
       setState({ status: 'anonymous', user: null, preferences: null });
       applyAppearancePreferences({ theme: 'light', accent_color: 'pink' });
       applyLanguagePreferences({ language: 'pt-BR' });

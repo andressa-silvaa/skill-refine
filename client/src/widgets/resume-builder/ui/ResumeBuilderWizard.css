@@ -64,10 +64,6 @@
   border-radius: 999px;
 }
 
-/* ========================================
-   FOOTER: Desktop layout
-   [Voltar] ............. [Salvar] [Visualizar] [Próximo]
-   ======================================== */
 .sr-resume-builder-wizard__actions {
   display: flex;
   align-items: center;
@@ -102,9 +98,6 @@
   white-space: nowrap;
 }
 
-/* ========================================
-   TABLET: <= 768px
-   ======================================== */
 @media (max-width: 768px) {
   .sr-resume-builder-wizard {
     gap: 14px;
@@ -135,11 +128,6 @@
   }
 }
 
-/* ========================================
-   MOBILE: <= 480px
-   Footer mantém layout horizontal:
-   [Voltar] ......... [Visualizar] [Próximo]
-   ======================================== */
 @media (max-width: 480px) {
   .sr-resume-builder-wizard {
     gap: 10px;
@@ -172,12 +160,6 @@
     padding-bottom: 16px;
   }
 
-  /* ========================================
-     FOOTER MOBILE: Layout vertical otimizado
-     [← Voltar]
-     [Salvar] [Visualizar]
-     [Próximo (100%)]
-     ======================================== */
   .sr-resume-builder-wizard__actions {
     display: grid;
     grid-template-columns: 1fr;
@@ -239,7 +221,6 @@
     font-size: 12px;
   }
 
-  /* CTA principal: destaque máximo */
   .sr-resume-builder-wizard__actions-primary {
     grid-area: primary;
     margin-left: 0;
@@ -259,12 +240,10 @@
     margin-left: 6px;
   }
 
-  /* Tema escuro */
   [data-sr-theme-scope][data-theme='dark'] .sr-resume-builder-wizard__actions {
     background: var(--sr-surface-soft);
   }
   
-  /* Previne overflow horizontal */
   .sr-resume-builder-wizard {
     overflow-x: hidden;
   }
@@ -274,10 +253,6 @@
   }
 }
 
-/* ========================================
-   EXTRA SMALL: <= 374px (320px–374px)
-   Otimização máxima para telas pequenas
-   ======================================== */
 @media (max-width: 374px) {
   .sr-resume-builder-wizard {
     gap: 6px;
@@ -286,13 +261,11 @@
     overflow-y: visible;
   }
 
-  /* Progress bar mais compacta */
   .sr-resume-builder-wizard__progress {
     padding: 0;
     margin-bottom: 4px;
   }
 
-  /* Stepper: menor padding, scroll horizontal habilitado */
   .sr-resume-builder-wizard__stepper {
     padding: 6px 0;
     padding-bottom: 10px;
@@ -303,7 +276,6 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Conteúdo: máximo de espaço vertical */
   .sr-resume-builder-wizard__content {
     min-height: 200px;
     padding-right: 0;
@@ -313,7 +285,6 @@
     margin: 0;
   }
 
-  /* Footer: ultra compacto mas funcional */
   .sr-resume-builder-wizard__actions {
     gap: 6px;
     padding: 8px;
@@ -321,14 +292,12 @@
     margin: 0 -8px;
   }
 
-  /* Botão Voltar: ainda mais discreto */
   .sr-resume-builder-wizard__actions-back .sr-btn {
     padding: 6px 8px;
     font-size: 12px;
     min-height: auto;
   }
 
-  /* Ações secundárias: reduzir padding */
   .sr-resume-builder-wizard__actions-secondary {
     gap: 6px;
   }
@@ -344,7 +313,6 @@
     margin-right: 4px;
   }
 
-  /* CTA Principal: manter destaque mas reduzir altura */
   .sr-resume-builder-wizard__actions-primary .sr-btn {
     min-height: 44px;
     font-size: 13px;
@@ -358,9 +326,6 @@
   }
 }
 
-/* ========================================
-   ULTRA SMALL: <= 340px (edge cases)
-   ======================================== */
 @media (max-width: 340px) {
   .sr-resume-builder-wizard {
     gap: 4px;

@@ -1,4 +1,4 @@
-import '@/shared/ui/auth/AuthStyles.css';
+import '@/features/auth/ui/AuthStyles.css';
 
 type Props = {
   onGoLogin?: () => void;

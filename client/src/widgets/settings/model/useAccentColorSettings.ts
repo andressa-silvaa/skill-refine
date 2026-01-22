@@ -11,6 +11,7 @@ export function useAccentColorSettings() {
   const { preferences } = useSession();
   const { updatePreferences } = useSessionActions();
   const accent = useDirtyState<AccentKey>('pink');
+  const { acceptServer, resetDraft, setDraft } = accent;
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -18,9 +19,8 @@ export function useAccentColorSettings() {
   useEffect(() => {
     if (!preferences) return;
     if (isEditing) return;
-    accent.acceptServer(preferences.accent_color as AccentKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, preferences?.accent_color]);
+    acceptServer(preferences.accent_color as AccentKey);
+  }, [acceptServer, isEditing, preferences?.accent_color]);
 
   useEffect(() => {
     return () => {
@@ -34,7 +34,7 @@ export function useAccentColorSettings() {
     setIsEditing((v) => {
       const next = !v;
       setFieldError(null);
-      accent.resetDraft();
+      resetDraft();
       if (!next) applyAppearancePreferences({ accent_color: accent.server ?? 'pink' });
       return next;
     });
@@ -43,12 +43,12 @@ export function useAccentColorSettings() {
   const changeDraftKey = (value: AccentKey) => {
     if (!isEditing || isSaving) return;
     setFieldError(null);
-    accent.setDraft(value);
+    setDraft(value);
     applyAppearancePreferences({ accent_color: value });
   };
 
   const cancelEdit = () => {
-    accent.resetDraft();
+    resetDraft();
     setFieldError(null);
     applyAppearancePreferences({ accent_color: accent.server ?? 'pink' });
     setIsEditing(false);

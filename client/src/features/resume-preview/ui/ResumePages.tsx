@@ -27,7 +27,6 @@ type Props = {
 export function ResumePages({ layout, sectionGap }: Props) {
   const gap = parsePx(sectionGap, 16);
   const contentHeight = A4_PAGE.height - DEFAULT_PADDING * 2;
-  // Root cause: o preview ficava em uma unica pagina com overflow. Aqui paginamos por altura A4.
 
   const { pages: mainPages, register: registerMain } = usePaginatedBlocks(
     layout.type === 'single' ? layout.blocks : layout.main,

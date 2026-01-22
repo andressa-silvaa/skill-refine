@@ -54,7 +54,7 @@ export function AppRouter() {
       />
 
       <Route
-        path="/protected/curriculos"
+        path="/protected/resumes"
         element={
           <RequireAuth>
             <ResumesPage />

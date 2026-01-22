@@ -4,7 +4,7 @@ import 'react-date-picker/dist/DatePicker.css';
 import './DatePicker.css';
 
 type Props = {
-  value: string; // YYYY-MM format
+  value: string;
   onChange: (value: string) => void;
   label?: string;
   error?: string;

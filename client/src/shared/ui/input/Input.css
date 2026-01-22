@@ -54,9 +54,6 @@
   color: var(--danger);
 }
 
-/* ========================================
-   EXTRA SMALL: <= 374px
-   ======================================== */
 @media (max-width: 374px) {
   .sr-input-wrapper {
     gap: 5px;

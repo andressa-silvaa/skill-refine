@@ -2,42 +2,45 @@ import { useId } from 'react';
 
 import { useListbox } from '@/shared/lib/hooks/useListbox';
 
-import './SortSelect.css';
-
 type Option = { value: string; label: string };
 
 type Props = {
   value: string;
   options: Option[];
+  disabled?: boolean;
   onChange: (value: string) => void;
+  onOpenChange?: (open: boolean) => void;
 };
 
-export function SortSelect(props: Props) {
-  const { value, options, onChange } = props;
+export function LanguageSelect(props: Props) {
+  const { value, options, disabled, onChange, onOpenChange } = props;
 
   const selectId = useId();
   const { wrapRef, open, setOpen, activeIndex, setActiveIndex, selectedLabel, onTriggerKeyDown } = useListbox({
     value,
     options,
+    disabled,
+    onOpenChange,
   });
 
   return (
-    <div ref={wrapRef} className="sr-resumes-sort-select">
+    <div ref={wrapRef} className="sr-settings-general__select">
       <button
         type="button"
-        className="sr-resumes-sort-select__trigger"
+        className="sr-input sr-settings-general__select-trigger"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={selectId}
+        disabled={disabled}
         onClick={() => setOpen((v) => !v)}
         onKeyDown={onTriggerKeyDown}
       >
-        <span className="sr-resumes-sort-select__value">{selectedLabel}</span>
-        <span className="sr-resumes-sort-select__caret" aria-hidden />
+        <span className="sr-settings-general__select-value">{selectedLabel}</span>
+        <span className="sr-settings-general__select-caret" aria-hidden />
       </button>
 
       {open ? (
-        <div className="sr-resumes-sort-select__menu" role="listbox" id={selectId}>
+        <div className="sr-settings-general__select-menu" role="listbox" id={selectId}>
           {options.map((opt, idx) => {
             const selected = opt.value === value;
             const active = idx === activeIndex;
@@ -47,7 +50,8 @@ export function SortSelect(props: Props) {
                 type="button"
                 role="option"
                 aria-selected={selected}
-                className={`sr-resumes-sort-select__option${selected ? ' is-selected' : ''}${active ? ' is-active' : ''}`}
+                disabled={disabled}
+                className={`sr-settings-general__select-option${selected ? ' is-selected' : ''}${active ? ' is-active' : ''}`}
                 onMouseEnter={() => setActiveIndex(idx)}
                 onClick={() => {
                   onChange(opt.value);

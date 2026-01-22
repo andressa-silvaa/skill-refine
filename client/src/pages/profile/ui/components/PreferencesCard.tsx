@@ -14,6 +14,7 @@ export function PreferencesCard() {
   const { preferences } = useSession();
   const { updatePreferences } = useSessionActions();
   const emailNotifications = useDirtyState<boolean>(false);
+  const { acceptServer, resetDraft, setDraft } = emailNotifications;
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -21,9 +22,8 @@ export function PreferencesCard() {
   useEffect(() => {
     if (!preferences) return;
     if (isEditing) return;
-    emailNotifications.acceptServer(preferences.email_notifications_enabled);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, preferences?.email_notifications_enabled]);
+    acceptServer(preferences.email_notifications_enabled);
+  }, [acceptServer, isEditing, preferences?.email_notifications_enabled]);
 
   const isDirty = emailNotifications.server !== null && emailNotifications.isDirty;
 
@@ -43,7 +43,7 @@ export function PreferencesCard() {
             setIsEditing((v) => {
               const next = !v;
               setFieldError(null);
-              emailNotifications.resetDraft();
+              resetDraft();
               return next;
             });
           }}
@@ -72,7 +72,7 @@ export function PreferencesCard() {
           onClick={() => {
             if (!isEditing || isSaving) return;
             setFieldError(null);
-            emailNotifications.setDraft(!emailNotifications.draft);
+            setDraft(!emailNotifications.draft);
           }}
         >
           <span className="sr-pref__thumb" aria-hidden />
@@ -93,7 +93,7 @@ export function PreferencesCard() {
               try {
                 const res = await profileApi.updatePreferences({ email_notifications_enabled: emailNotifications.draft });
                 const value = Boolean(res.email_notifications_enabled ?? res.emailNotificationsEnabled);
-                emailNotifications.acceptServer(value);
+                acceptServer(value);
                 updatePreferences({ email_notifications_enabled: value });
                 setIsEditing(false);
               } catch (e) {
@@ -113,7 +113,7 @@ export function PreferencesCard() {
             className="sr-btn sr-btn--secondary"
             disabled={isSaving}
             onClick={() => {
-              emailNotifications.resetDraft();
+              resetDraft();
               setFieldError(null);
               setIsEditing(false);
             }}

@@ -9,8 +9,6 @@ export function useMediaQuery(query: string) {
     const onChange = () => setMatches(mql.matches);
 
     onChange();
-    // TS (lib.dom) pode tipar MediaQueryList sem addListener/removeListener (deprecated),
-    // então usamos fallback via `any` para compatibilidade com browsers antigos.
     if (typeof mql.addEventListener === 'function') mql.addEventListener('change', onChange);
     else (mql as any).addListener?.(onChange);
 

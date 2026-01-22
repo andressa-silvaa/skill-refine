@@ -73,7 +73,6 @@ export function ResumesList(props: Props) {
           Última atualização
         </div>
         <div role="columnheader">Score</div>
-        {/* Mantém a coluna de ações SEMPRE existente para alinhar com as rows */}
         <div role="columnheader" className="sr-resumes-list__head-actions" aria-label="Ações" />
       </div>
 

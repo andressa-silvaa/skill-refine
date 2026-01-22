@@ -21,5 +21,3 @@ export function Field(props: Props) {
     </label>
   );
 }
-
-

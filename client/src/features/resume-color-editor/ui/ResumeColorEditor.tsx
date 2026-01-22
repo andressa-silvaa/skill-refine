@@ -20,7 +20,6 @@ export function ResumeColorEditor(props: Props) {
   const palette = useMemo(() => getResumeThemePalette(theme, paletteId), [theme, paletteId]);
 
   const background = theme.styleTokens.paperBg ?? '#ffffff';
-  // Como adicionar novos controles: inclua na UI + valide contraste antes de aplicar.
 
   const applyAccent = (value: string) => {
     if (!isContrastOk(value, background)) {

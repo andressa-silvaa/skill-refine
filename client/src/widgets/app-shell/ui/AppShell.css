@@ -1,5 +1,4 @@
 .sr-app-shell {
-  /* Ajuste fino da largura aqui (deve bater com a imagem) */
   --sr-sidebar-width-expanded: 292px;
   --sr-sidebar-width-collapsed: 76px;
   --sr-sidebar-width: var(--sr-sidebar-width-expanded);
@@ -83,7 +82,6 @@
     pointer-events: auto;
   }
 
-  /* Mobile: rail sempre visível (ícones). Expansão abre overlay sem mover conteúdo */
   .sr-app-shell .sr-sidebar {
     position: fixed;
     top: 0;

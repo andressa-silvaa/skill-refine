@@ -9,5 +9,3 @@ export function AlertMessage(props: Props) {
   const { message, variant = 'error' } = props;
   return <p className={`auth-alert auth-alert--${variant}`}>{message}</p>;
 }
-
-

@@ -8,8 +8,6 @@ const BASE_PALETTES: ResumeThemePalette[] = [
   { id: 'mono', name: 'Monocromático', accent: '#111827', accentSoft: 'rgba(17, 24, 39, 0.12)' },
 ];
 
-// Guia rápido: adicione o tema aqui + thumbnailSpec + paletas + ajustes em ThemeRenderer/ThemeThumbnail.
-// Para novas paletas, use cores com bom contraste e mantenha 3-6 opções por tema.
 export const resumeThemes: ResumeTheme[] = [
   {
     id: 'classic-one-column',

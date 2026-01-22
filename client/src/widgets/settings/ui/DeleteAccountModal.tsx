@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
+import { useModalEffects } from '@/shared/lib/hooks/useModalEffects';
+
 import './DeleteAccountModal.css';
 
 type Props = {
@@ -16,23 +18,7 @@ export function DeleteAccountModal(props: Props) {
   const { open, onClose, onConfirm, isLoading } = props;
   const cancelRef = useRef<HTMLButtonElement | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose, open]);
+  useModalEffects({ open, onClose });
 
   useEffect(() => {
     if (!open) return;

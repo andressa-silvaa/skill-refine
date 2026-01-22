@@ -11,7 +11,7 @@
 }
 
 .sr-resumes__header > div {
-  min-width: 0; /* evita overflow do texto no flex */
+  min-width: 0;
 }
 
 .sr-resumes__h1 {
@@ -31,7 +31,6 @@
   line-height: 1.35;
 }
 
-/* Se o botão for um flex internamente (ícone + texto) isso ajuda a não quebrar */
 .sr-resumes__header .sr-btn {
   flex-shrink: 0;
   white-space: nowrap;
@@ -51,7 +50,7 @@
   .sr-resumes__header .sr-btn {
     width: 100%;
     justify-content: center;
-    white-space: normal; /* deixa o texto do botão quebrar se precisar */
+    white-space: normal;
   }
 }
 

@@ -11,6 +11,7 @@ export function useAppearanceSettings() {
   const { preferences } = useSession();
   const { updatePreferences } = useSessionActions();
   const theme = useDirtyState<ThemeMode>('light');
+  const { acceptServer, resetDraft, setDraft } = theme;
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -18,9 +19,8 @@ export function useAppearanceSettings() {
   useEffect(() => {
     if (!preferences) return;
     if (isEditing) return;
-    theme.acceptServer(preferences.theme as ThemeMode);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, preferences?.theme]);
+    acceptServer(preferences.theme as ThemeMode);
+  }, [acceptServer, isEditing, preferences?.theme]);
 
   useEffect(() => {
     return () => {
@@ -34,7 +34,7 @@ export function useAppearanceSettings() {
     setIsEditing((v) => {
       const next = !v;
       setFieldError(null);
-      theme.resetDraft();
+      resetDraft();
       if (!next) applyAppearancePreferences({ theme: theme.server ?? 'light' });
       return next;
     });
@@ -43,12 +43,12 @@ export function useAppearanceSettings() {
   const changeDraftTheme = (value: ThemeMode) => {
     if (!isEditing || isSaving) return;
     setFieldError(null);
-    theme.setDraft(value);
+    setDraft(value);
     applyAppearancePreferences({ theme: value });
   };
 
   const cancelEdit = () => {
-    theme.resetDraft();
+    resetDraft();
     setFieldError(null);
     applyAppearancePreferences({ theme: theme.server ?? 'light' });
     setIsEditing(false);

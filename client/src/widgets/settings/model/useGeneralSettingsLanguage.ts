@@ -12,6 +12,7 @@ export function useGeneralSettingsLanguage(options: Array<{ value: string; label
   const { preferences } = useSession();
   const { updatePreferences } = useSessionActions();
   const language = useDirtyState<string>('pt-BR');
+  const { acceptServer, resetDraft, setDraft } = language;
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -22,11 +23,10 @@ export function useGeneralSettingsLanguage(options: Array<{ value: string; label
   useEffect(() => {
     if (!preferences) return;
     if (isEditing) return;
-    language.acceptServer(preferences.language);
+    acceptServer(preferences.language);
     applyLanguagePreferences({ language: preferences.language });
     void i18n.changeLanguage(preferences.language);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, preferences?.language]);
+  }, [acceptServer, isEditing, preferences?.language]);
 
   useEffect(() => {
     return () => {
@@ -43,7 +43,7 @@ export function useGeneralSettingsLanguage(options: Array<{ value: string; label
     setIsEditing((v) => {
       const next = !v;
       setFieldError(null);
-      language.resetDraft();
+      resetDraft();
       if (!next) {
         applyLanguagePreferences({ language: language.server ?? 'pt-BR' });
         void i18n.changeLanguage(language.server ?? 'pt-BR');
@@ -56,13 +56,13 @@ export function useGeneralSettingsLanguage(options: Array<{ value: string; label
     if (!isEditing || isSaving) return;
     if (!options.some((o) => o.value === value)) return;
     setFieldError(null);
-    language.setDraft(value);
+    setDraft(value);
     applyLanguagePreferences({ language: value });
     void i18n.changeLanguage(value);
   };
 
   const cancelEdit = () => {
-    language.resetDraft();
+    resetDraft();
     setFieldError(null);
     applyLanguagePreferences({ language: language.server ?? 'pt-BR' });
     void i18n.changeLanguage(language.server ?? 'pt-BR');
@@ -86,7 +86,7 @@ export function useGeneralSettingsLanguage(options: Array<{ value: string; label
       setIsEditing(false);
     } catch (e) {
       const fields = getApiFieldErrors(e);
-      const errMsg = (fields as any)?.language;
+      const errMsg = (fields as { language?: string } | null)?.language;
       if (errMsg) setFieldError(errMsg);
       else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
     } finally {

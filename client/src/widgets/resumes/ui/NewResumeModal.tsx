@@ -50,7 +50,6 @@ export function NewResumeModal(props: Props) {
   return (
     <Modal open={open} title="Novo Currículo" subtitle="Preencha as informações para criar seu currículo" onClose={close} width={760}>
       <div className="sr-new-resume">
-        {/* Stepper (desktop/tablet) */}
         <div className="sr-new-resume__steps sr-new-resume__steps--desktop" aria-label="Etapas">
           {[1, 2, 3].map((n) => (
             <div key={n} className={`sr-new-resume__step${n === step ? ' is-active' : ''}${n < step ? ' is-done' : ''}`}>
@@ -59,7 +58,6 @@ export function NewResumeModal(props: Props) {
           ))}
         </div>
 
-        {/* Progresso compacto (mobile/tablet pequeno) */}
         <div className="sr-new-resume__progress sr-new-resume__progress--mobile" aria-label="Progresso">
           <span className="sr-new-resume__progress-text">Etapa {step} de 3</span>
           <div className="sr-new-resume__progress-bar" aria-hidden>
@@ -67,7 +65,6 @@ export function NewResumeModal(props: Props) {
           </div>
         </div>
 
-        {/* Única área scrollável */}
         <div className="sr-new-resume__content">
           {step === 1 ? (
             <div className="sr-new-resume__panel">
@@ -121,7 +118,6 @@ export function NewResumeModal(props: Props) {
           )}
         </div>
 
-        {/* Footer fixo */}
         <div className="sr-new-resume__footer">
           <Button variant="secondary" onClick={step === 1 ? close : back}>
             {step === 1 ? 'Cancelar' : 'Voltar'}

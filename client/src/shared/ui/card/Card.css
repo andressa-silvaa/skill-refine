@@ -9,17 +9,15 @@
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  overflow: hidden; /* Previne conteúdo sair do card */
+  overflow: hidden;
 }
 
-/* Todos os filhos diretos do card respeitam largura */
 .sr-card > * {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
 }
 
-/* Todos os filhos indiretos também */
 .sr-card * {
   box-sizing: border-box;
 }
@@ -43,13 +41,11 @@
     min-width: 0 !important;
   }
   
-  /* Garante que nenhum filho saia - todos os níveis */
   .sr-card *:not(button):not(i) {
     max-width: 100% !important;
     min-width: 0 !important;
   }
   
-  /* Botões respeitam mas não quebram */
   .sr-card button {
     max-width: 100%;
   }

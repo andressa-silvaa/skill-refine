@@ -13,7 +13,6 @@ export function useResumePreview() {
 
   const closePreview = useCallback(() => {
     setIsOpen(false);
-    // Keep previewData for smooth transitions if needed
   }, []);
 
   return {

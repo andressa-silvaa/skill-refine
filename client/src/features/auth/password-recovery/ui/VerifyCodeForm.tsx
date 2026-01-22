@@ -7,7 +7,7 @@ import { hasFormErrors } from '@/shared/lib/forms';
 
 import { verifyCodeSchema, type VerifyCodeValues } from '../model/schemas';
 
-import '@/shared/ui/auth/AuthStyles.css';
+import '@/features/auth/ui/AuthStyles.css';
 
 type Props = {
   onSubmit?: (values: VerifyCodeValues) => void | Promise<void>;

@@ -10,16 +10,12 @@
   text-overflow: ellipsis;
 }
 
-/* Em mobile, botões em containers flex podem ocupar full width */
 @media (max-width: 768px) {
   .sr-btn {
     min-width: 0;
   }
 }
 
-/* ========================================
-   EXTRA SMALL: <= 374px
-   ======================================== */
 @media (max-width: 374px) {
   .sr-btn {
     gap: 6px;

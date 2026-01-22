@@ -112,7 +112,6 @@
     gap: 12px;
   }
   
-  /* Garantia extra: botões e inputs não saem do card */
   .sr-education-card button {
     max-width: 100%;
   }

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import './GeneralSettingsCard.css';
 import { LanguageSelect } from './LanguageSelect';
-import { useGeneralSettingsLanguage } from './useGeneralSettingsLanguage';
+import { useGeneralSettingsLanguage } from '../model/useGeneralSettingsLanguage';
 
 type Option = { value: string; label: string };
 
@@ -92,5 +92,3 @@ export function GeneralSettingsCard() {
     </section>
   );
 }
-
-

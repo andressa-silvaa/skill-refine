@@ -12,5 +12,3 @@ export function AuthForm(props: Props) {
     </form>
   );
 }
-
-

@@ -2,20 +2,11 @@ import { useEffect, useState } from 'react';
 
 import { Button, Modal, ProgressBar, Stepper } from '@/shared/ui';
 import type { ResumeThemeId } from '@/entities/resume';
-import { getResumeThemeById } from '@/entities/resume';
 import { useResumeBuilder, type BuilderStep } from '@/features/resume-builder';
 import { useResumePreview } from '@/features/resume-preview';
 import { ResumePreviewFullscreen } from '@/widgets/resume-preview';
-import { ThemeSelectionStep } from './ThemeSelectionStep';
-import { BasicInfoStep } from './BasicInfoStep';
-import { ContactStep } from './ContactStep';
-import { ExperienceStep } from './ExperienceStep';
-import { EducationStep } from './EducationStep';
-import { SkillsStep } from './SkillsStep';
-import { LanguagesStep } from './LanguagesStep';
-import { SummaryStep } from './SummaryStep';
-import { ReviewStep } from './ReviewStep';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
+import { ResumeBuilderStepContent } from './ResumeBuilderStepContent';
 
 import './ResumeBuilderWizard.css';
 
@@ -24,18 +15,6 @@ type Props = {
   onClose: () => void;
   onCreate: (data: { name: string; themeId: ResumeThemeId }) => void;
 };
-
-const STEP_LABELS = [
-  { id: 'theme', label: 'Tema' },
-  { id: 'basic', label: 'Básico' },
-  { id: 'contact', label: 'Contato' },
-  { id: 'experience', label: 'Experiência' },
-  { id: 'education', label: 'Formação' },
-  { id: 'skills', label: 'Habilidades' },
-  { id: 'languages', label: 'Idiomas' },
-  { id: 'summary', label: 'Resumo' },
-  { id: 'review', label: 'Revisão' },
-];
 
 export function ResumeBuilderWizard(props: Props) {
   const { open, onClose, onCreate } = props;
@@ -78,7 +57,6 @@ export function ResumeBuilderWizard(props: Props) {
 
   const handleNext = () => {
     if (builder.currentStep === 'review') {
-      // Final step - create resume
       onCreate({
         name: builder.data.targetPosition || 'Novo Currículo',
         themeId: builder.data.themeId,
@@ -90,7 +68,6 @@ export function ResumeBuilderWizard(props: Props) {
   };
 
   const handleStepEdit = (stepId: string) => {
-    // Map section IDs to builder steps
     const stepMap: Record<string, BuilderStep> = {
       basic: 'basic',
       contact: 'contact',
@@ -110,39 +87,6 @@ export function ResumeBuilderWizard(props: Props) {
   const currentStepNum = currentStepIndex + 1;
   const totalSteps = builder.steps.length;
 
-  const renderStep = () => {
-    switch (builder.currentStep) {
-      case 'theme':
-        return (
-          <ThemeSelectionStep
-            selectedId={builder.data.themeId}
-            onSelect={(id) => {
-              const theme = getResumeThemeById(id);
-              builder.updateData({ themeId: id, themePaletteId: theme.defaultPaletteId });
-            }}
-          />
-        );
-      case 'basic':
-        return <BasicInfoStep data={builder.data} onChange={builder.updateData} />;
-      case 'contact':
-        return <ContactStep contact={builder.data.contact} onChange={(contact) => builder.updateData({ contact })} />;
-      case 'experience':
-        return <ExperienceStep experiences={builder.data.experiences} onChange={(experiences) => builder.updateData({ experiences })} />;
-      case 'education':
-        return <EducationStep educations={builder.data.educations} onChange={(educations) => builder.updateData({ educations })} />;
-      case 'skills':
-        return <SkillsStep skills={builder.data.skills} onChange={(skills) => builder.updateData({ skills })} />;
-      case 'languages':
-        return <LanguagesStep languages={builder.data.languages} onChange={(languages) => builder.updateData({ languages })} />;
-      case 'summary':
-        return <SummaryStep summary={builder.data.summary} onChange={(summary) => builder.updateData({ summary })} />;
-      case 'review':
-        return <ReviewStep data={builder.data} onEdit={handleStepEdit} />;
-      default:
-        return null;
-    }
-  };
-
   return (
     <Modal open={open} title="Criar Currículo" subtitle="Preencha as informações para criar seu currículo" onClose={handleClose} width={900}>
       <div className="sr-resume-builder-wizard">
@@ -158,7 +102,7 @@ export function ResumeBuilderWizard(props: Props) {
 
         <div className="sr-resume-builder-wizard__stepper">
           <Stepper
-            steps={STEP_LABELS}
+            steps={builder.steps.map((step) => ({ id: step.id, label: step.label }))}
             currentStep={currentStepNum}
             onStepClick={(stepId) => {
               const targetStep = stepId as BuilderStep;
@@ -168,23 +112,22 @@ export function ResumeBuilderWizard(props: Props) {
             }}
             isStepClickable={(stepId, stepNum) => {
               const targetStep = stepId as BuilderStep;
-              // Can click on current step or completed steps
               return stepNum <= currentStepNum || builder.canGoToStep(targetStep);
             }}
           />
         </div>
 
-        <div className="sr-resume-builder-wizard__content">{renderStep()}</div>
+        <div className="sr-resume-builder-wizard__content">
+          <ResumeBuilderStepContent builder={builder} onStepEdit={handleStepEdit} />
+        </div>
 
         <div className="sr-resume-builder-wizard__actions">
-          {/* Navegação: Voltar */}
           <div className="sr-resume-builder-wizard__actions-back">
             <Button variant="secondary" onClick={builder.currentStep === 'theme' ? handleClose : builder.prevStep}>
               {builder.currentStep === 'theme' ? 'Cancelar' : 'Voltar'}
             </Button>
           </div>
 
-          {/* Ações secundárias: Salvar + Visualizar */}
           <div className="sr-resume-builder-wizard__actions-secondary">
             {builder.currentStep !== 'review' && builder.hasUnsavedChanges ? (
               <Button variant="ghost" onClick={handleSaveDraft}>
@@ -199,7 +142,6 @@ export function ResumeBuilderWizard(props: Props) {
             ) : null}
           </div>
 
-          {/* CTA Principal: Próximo */}
           <div className="sr-resume-builder-wizard__actions-primary">
             <Button variant="primary" onClick={handleNext} disabled={!builder.canGoNext}>
               {builder.currentStep === 'review' ? 'Concluir' : 'Próximo'}

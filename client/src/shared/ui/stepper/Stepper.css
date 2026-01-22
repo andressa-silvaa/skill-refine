@@ -71,9 +71,6 @@
   font-weight: 700;
 }
 
-/* ========================================
-   MOBILE: Distribuído ocupando todo espaço
-   ======================================== */
 @media (max-width: 768px) {
   .sr-stepper {
     gap: 4px;
@@ -97,15 +94,11 @@
     font-size: 12px;
   }
 
-  /* Esconde labels no mobile <= 768px */
   .sr-stepper__label {
     display: none;
   }
 }
 
-/* ========================================
-   MOBILE PEQUENO: Otimização máxima
-   ======================================== */
 @media (max-width: 480px) {
   .sr-stepper {
     gap: 6px;
@@ -126,7 +119,6 @@
     box-sizing: border-box;
   }
 
-  /* Item ativo fica mais destacado */
   .sr-stepper__item.is-active .sr-stepper__circle {
     background: rgba(var(--sr-accent-rgb), 0.18);
     border-color: var(--sr-accent);
@@ -135,7 +127,6 @@
     font-weight: 900;
   }
 
-  /* Touch target mínimo de 44px */
   .sr-stepper__item.is-clickable {
     min-width: 44px;
     min-height: 44px;
@@ -145,10 +136,6 @@
   }
 }
 
-/* ========================================
-   EXTRA SMALL: <= 374px
-   Stepper com scroll horizontal para evitar overflow
-   ======================================== */
 @media (max-width: 374px) {
   .sr-stepper {
     gap: 4px;
@@ -157,11 +144,10 @@
     overflow-x: auto;
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
     justify-content: flex-start;
   }
 
-  /* Esconde scrollbar mas mantém funcionalidade */
   .sr-stepper::-webkit-scrollbar {
     display: none;
   }
@@ -185,7 +171,6 @@
     font-weight: 800;
   }
 
-  /* Touch target mantido através de padding do item */
   .sr-stepper__item.is-clickable {
     min-width: 36px;
     min-height: 36px;

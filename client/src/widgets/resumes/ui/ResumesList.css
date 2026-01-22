@@ -1,10 +1,8 @@
-/* ResumesList — tabela responsiva com scroll horizontal interno */
 .sr-resumes-list {
   --px: 16px;
   --py: 14px;
   --gap: 12px;
 
-  /* larguras mínimas por coluna (evita esmagar e quebrar) */
   --col-name: 260px;
   --col-status: 140px;
   --col-updated: 190px;
@@ -17,7 +15,6 @@
   width: 100%;
   box-sizing: border-box;
 
-  /* scroll horizontal interno */
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
@@ -27,7 +24,6 @@
   background: var(--sr-surface-soft);
 }
 
-/* tabela (head e rows usam a MESMA grade) */
 .sr-resumes-list__head,
 .sr-resumes-list__row {
   display: grid;
@@ -43,8 +39,6 @@
   padding: var(--py) var(--px);
   box-sizing: border-box;
 
-  /* chave do scroll interno:
-     força a "tabela" a ter largura mínima e o container rola */
   min-width: calc(
     var(--col-name) +
     var(--col-status) +
@@ -56,13 +50,11 @@
   );
 }
 
-/* permitir truncar dentro do grid */
 .sr-resumes-list__head > *,
 .sr-resumes-list__row > * {
   min-width: 0;
 }
 
-/* Header */
 .sr-resumes-list__head {
   position: sticky;
   top: 0;
@@ -85,12 +77,10 @@
   justify-self: end;
 }
 
-/* Rows */
 .sr-resumes-list__row {
   border-top: 1px solid var(--sr-border);
 }
 
-/* Nome */
 .sr-resumes-list__name {
   min-width: 0;
   max-width: 100%;
@@ -116,7 +106,6 @@
   color: var(--sr-accent);
 }
 
-/* Updated/muted */
 .sr-resumes-list__muted {
   font-size: 12px;
   font-weight: 600;
@@ -130,14 +119,12 @@
   display: block;
 }
 
-/* Badge wrapper */
 .sr-resumes-list__badge-wrap {
   max-width: 100%;
   display: inline-block;
   overflow: hidden;
 }
 
-/* Score */
 .sr-resumes-list__score {
   display: inline-flex;
   align-items: center;
@@ -161,7 +148,6 @@
   white-space: nowrap;
 }
 
-/* Ações */
 .sr-resumes-list__actions {
   justify-self: end;
   display: inline-flex;
@@ -174,7 +160,6 @@
   flex-shrink: 0;
 }
 
-/* Tablet: reduz mínimos para caber melhor */
 @media (max-width: 1024px) {
   .sr-resumes-list {
     --px: 14px;
@@ -189,7 +174,6 @@
   }
 }
 
-/* Mobile: mantém tabela completa com scroll, só deixa mínimos mais compactos */
 @media (max-width: 480px) {
   .sr-resumes-list {
     --px: 12px;

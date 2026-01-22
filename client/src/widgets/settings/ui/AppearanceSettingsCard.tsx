@@ -1,5 +1,6 @@
-import { useAppearanceSettings } from './useAppearanceSettings';
 import { useTranslation } from 'react-i18next';
+
+import { useAppearanceSettings } from '../model/useAppearanceSettings';
 
 import './AppearanceSettingsCard.css';
 
@@ -68,12 +69,7 @@ export function AppearanceSettingsCard() {
           >
             {ui.isSaving ? t('common.saving') : t('common.save')}
           </button>
-          <button
-            type="button"
-            className="sr-btn sr-btn--secondary"
-            disabled={ui.isSaving}
-            onClick={ui.cancelEdit}
-          >
+          <button type="button" className="sr-btn sr-btn--secondary" disabled={ui.isSaving} onClick={ui.cancelEdit}>
             {t('common.cancel')}
           </button>
         </div>
@@ -81,5 +77,3 @@ export function AppearanceSettingsCard() {
     </section>
   );
 }
-
-

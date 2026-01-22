@@ -79,7 +79,6 @@
     padding: 10px;
   }
   
-  /* Garantia extra: elementos não saem do card */
   .sr-skill-card button {
     max-width: 100%;
   }

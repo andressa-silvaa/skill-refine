@@ -25,7 +25,6 @@ export function DropdownMenu(props: Props) {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<DOMRect | null>(null);
 
-  // Close menu on outside click
   useEffect(() => {
     if (!open) return;
     
@@ -41,19 +40,15 @@ export function DropdownMenu(props: Props) {
     return () => window.removeEventListener('pointerdown', onPointerDown);
   }, [open]);
 
-  // Calculate position based on anchor
   const calculatePosition = useCallback(() => {
     if (!anchorRef.current || !menuRef.current) return;
 
     const anchor = anchorRef.current;
     const menu = menuRef.current;
     
-    // Get actual menu dimensions from DOM
     const menuRect = menu.getBoundingClientRect();
     
-    // Safety: if menu has invalid dimensions, skip calculation
     if (menuRect.width === 0 || menuRect.height === 0 || menuRect.width > 1000 || menuRect.height > 1000) {
-      // Retry after a delay
       setTimeout(() => calculatePosition(), 30);
       return;
     }
@@ -64,24 +59,19 @@ export function DropdownMenu(props: Props) {
     const viewportHeight = window.innerHeight;
     const padding = 8;
 
-    // Horizontal: align to right edge of anchor, but clamp to viewport
     let left = align === 'right' 
       ? anchor.right - menuWidth 
       : anchor.left;
     
     left = Math.max(padding, Math.min(left, viewportWidth - menuWidth - padding));
 
-    // Vertical: prefer below, but go above if no space
     let top: number;
     const spaceBelow = viewportHeight - anchor.bottom;
     
     if (spaceBelow >= menuHeight + padding) {
-      // Enough space below
       top = anchor.bottom + padding;
     } else {
-      // Try above
       top = anchor.top - menuHeight - padding;
-      // If not enough space above either, go below anyway and scroll
       if (top < padding) {
         top = anchor.bottom + padding;
         menu.style.maxHeight = `${Math.max(100, spaceBelow - padding)}px`;
@@ -92,18 +82,15 @@ export function DropdownMenu(props: Props) {
       }
     }
 
-    // Final clamp
     top = Math.max(padding, Math.min(top, viewportHeight - menuHeight - padding));
     left = Math.max(padding, Math.min(left, viewportWidth - menuWidth - padding));
 
     setPosition({ top, left });
   }, [align]);
 
-  // Update position when menu opens or on scroll/resize
   useEffect(() => {
     if (!open || !anchorRef.current) return;
 
-    // Initial calculation with multiple retries
     let retryCount = 0;
     const maxRetries = 5;
     
@@ -119,10 +106,8 @@ export function DropdownMenu(props: Props) {
       }
     };
 
-    // Start calculation after menu is in DOM
     setTimeout(tryCalculate, 10);
 
-    // Update on scroll and resize
     const handleUpdate = () => {
       if (anchorRef.current && menuRef.current) {
         calculatePosition();
@@ -130,15 +115,25 @@ export function DropdownMenu(props: Props) {
     };
     
     window.addEventListener('resize', handleUpdate);
-    window.addEventListener('scroll', handleUpdate, true);
 
     return () => {
       window.removeEventListener('resize', handleUpdate);
-      window.removeEventListener('scroll', handleUpdate, true);
     };
   }, [open, calculatePosition]);
 
-  // Reset when closing
+  useEffect(() => {
+    if (!open) return;
+
+    const handleScroll = () => {
+      setOpen(false);
+      setPosition(null);
+      anchorRef.current = null;
+    };
+
+    window.addEventListener('scroll', handleScroll, true);
+    return () => window.removeEventListener('scroll', handleScroll, true);
+  }, [open]);
+
   useEffect(() => {
     if (!open) {
       setPosition(null);
@@ -146,20 +141,17 @@ export function DropdownMenu(props: Props) {
     }
   }, [open]);
 
-  // Handle trigger click - capture position
   const handleTriggerClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     
     const clickedElement = e.currentTarget;
     const rect = clickedElement.getBoundingClientRect();
     
-    // Validate rect
     if (rect.width > 0 && rect.height > 0) {
       anchorRef.current = rect;
       setOpen((v) => !v);
     }
     
-    // Call original onClick if exists
     if (isValidElement(trigger)) {
       const triggerEl = trigger as ReactElement<any>;
       const originalOnClick = triggerEl.props?.onClick;
@@ -169,7 +161,6 @@ export function DropdownMenu(props: Props) {
     }
   }, [trigger]);
 
-  // Clone trigger and inject handler
   const triggerElement = isValidElement(trigger) 
     ? cloneElement(trigger as ReactElement<any>, {
         onClick: handleTriggerClick,

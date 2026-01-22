@@ -30,8 +30,6 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   const token = getAccessToken();
 
   const headers = new Headers(init.headers);
-  // Only set JSON content-type for string bodies.
-  // For FormData (multipart) the browser must set the boundary.
   if (!headers.has('Content-Type') && typeof init.body === 'string') headers.set('Content-Type', 'application/json');
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
