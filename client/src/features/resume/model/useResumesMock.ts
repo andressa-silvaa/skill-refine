@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { resumesMock, toResumeViewModel, type Resume, type ResumeViewModel } from '@/entities/resume';
+import { resumesMock, resumeThemes, toResumeViewModel, type Resume, type ResumeViewModel, type ResumeThemeId } from '@/entities/resume';
 
 import type { ResumesSortKey, ResumesViewMode } from './types';
 
@@ -56,14 +56,15 @@ export function useResumesMock() {
 
   const remove = (id: string) => setState((s) => ({ ...s, items: s.items.filter((r) => r.id !== id) }));
 
-  const create = (data: { name: string; templateId: string }) => {
+  const create = (data: { name: string; themeId: ResumeThemeId }) => {
+    const theme = resumeThemes.find((item) => item.id === data.themeId);
     const next: Resume = {
       id: `r-${Date.now()}`,
       name: data.name,
       updatedAt: new Date().toISOString(),
       status: 'draft',
       score: 0,
-      tags: data.templateId === 'tech' ? ['React', 'TypeScript', 'Node.js'] : ['Comunicação', 'Gestão', 'Resultados'],
+      tags: theme?.tag ? [theme.tag, 'Currículo', '2026'] : ['Currículo', 'Tema'],
     };
     setState((s) => ({ ...s, items: [next, ...s.items] }));
   };

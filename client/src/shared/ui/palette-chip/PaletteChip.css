@@ -1,0 +1,32 @@
+.sr-palette-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--sr-border);
+  border-radius: 999px;
+  background: var(--sr-surface);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.sr-palette-chip.is-selected {
+  border-color: rgba(var(--sr-accent-rgb), 0.4);
+  background: rgba(var(--sr-accent-rgb), 0.08);
+  color: var(--sr-accent);
+}
+
+.sr-palette-chip__swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.sr-palette-chip__label {
+  white-space: nowrap;
+}

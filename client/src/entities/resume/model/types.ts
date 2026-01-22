@@ -1,5 +1,17 @@
 export type ResumeStatus = 'draft' | 'complete' | 'analyzing';
-export type ResumeTemplateId = 'tech' | 'business' | 'design' | 'marketing' | 'general' | 'executive' | 'creative' | 'academic' | 'sales' | 'healthcare' | 'finance' | 'education';
+export type ResumeThemeId =
+  | 'classic-one-column'
+  | 'modern-one-column'
+  | 'two-column-sidebar'
+  | 'executive'
+  | 'compact-dense'
+  | 'timeline-experience'
+  | 'project-first'
+  | 'academic'
+  | 'minimal-clean'
+  | 'elegant-serif'
+  | 'tech-stack'
+  | 'hybrid-balanced';
 export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
 export type LanguageLevel = 'basic' | 'intermediate' | 'advanced' | 'fluent' | 'native';
 export type EducationStatus = 'completed' | 'in_progress';
@@ -49,7 +61,10 @@ export type Language = {
 };
 
 export type ResumeData = {
-  templateId: ResumeTemplateId;
+  themeId: ResumeThemeId;
+  themePaletteId?: string;
+  themeAccentOverride?: string;
+  themeSecondaryOverride?: string;
   targetPosition: string;
   contact: Contact;
   experiences: Experience[];

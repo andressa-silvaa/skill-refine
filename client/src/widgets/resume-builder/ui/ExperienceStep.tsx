@@ -1,6 +1,4 @@
-import { useState } from 'react';
-
-import { Button, Input, Textarea, DatePicker } from '@/shared/ui';
+import { Button, Input, DatePicker, Checkbox } from '@/shared/ui';
 import type { Experience } from '@/entities/resume';
 
 import './ExperienceStep.css';
@@ -97,7 +95,7 @@ function ExperienceCard(props: ExperienceCardProps) {
   return (
     <div className="sr-experience-card">
       <div className="sr-experience-card__header">
-        <h4 className="sr-experience-card__title">Experiência {experience.id.slice(-4)}</h4>
+        <h4 className="sr-experience-card__title">Experiência</h4>
         <Button variant="ghost" onClick={onRemove}>
           <i className="fa-solid fa-trash" aria-hidden />
         </Button>
@@ -130,14 +128,12 @@ function ExperienceCard(props: ExperienceCardProps) {
             />
           ) : null}
         </div>
-        <label className="sr-experience-card__checkbox">
-          <input
-            type="checkbox"
-            checked={experience.isCurrent}
-            onChange={(e) => onUpdate({ isCurrent: e.target.checked, endDate: e.target.checked ? undefined : experience.endDate })}
-          />
-          <span>Trabalho atual</span>
-        </label>
+        <Checkbox
+          className="sr-experience-card__checkbox"
+          checked={experience.isCurrent}
+          onChange={(checked) => onUpdate({ isCurrent: checked, endDate: checked ? undefined : experience.endDate })}
+          label="Trabalho atual"
+        />
         <div className="sr-experience-card__bullets">
           <label className="sr-experience-card__bullets-label">Descrição (bullet points)</label>
           {experience.description.map((bullet, idx) => (

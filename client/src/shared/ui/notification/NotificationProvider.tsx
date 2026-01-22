@@ -10,6 +10,7 @@ export function NotificationProvider() {
         right: 16,
         bottom: 16,
         left: 16,
+        zIndex: 10001,
         pointerEvents: 'none',
       }}
       toastOptions={{

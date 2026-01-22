@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 
 import { Button, Modal, ProgressBar, Stepper } from '@/shared/ui';
+import type { ResumeThemeId } from '@/entities/resume';
+import { getResumeThemeById } from '@/entities/resume';
 import { useResumeBuilder, type BuilderStep } from '@/features/resume-builder';
 import { useResumePreview } from '@/features/resume-preview';
 import { ResumePreviewFullscreen } from '@/widgets/resume-preview';
-import { TemplateSelectionStep } from './TemplateSelectionStep';
+import { ThemeSelectionStep } from './ThemeSelectionStep';
 import { BasicInfoStep } from './BasicInfoStep';
 import { ContactStep } from './ContactStep';
 import { ExperienceStep } from './ExperienceStep';
@@ -20,11 +22,11 @@ import './ResumeBuilderWizard.css';
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { name: string; templateId: string }) => void;
+  onCreate: (data: { name: string; themeId: ResumeThemeId }) => void;
 };
 
 const STEP_LABELS = [
-  { id: 'template', label: 'Modelo' },
+  { id: 'theme', label: 'Tema' },
   { id: 'basic', label: 'Básico' },
   { id: 'contact', label: 'Contato' },
   { id: 'experience', label: 'Experiência' },
@@ -69,7 +71,7 @@ export function ResumeBuilderWizard(props: Props) {
     builder.saveDraft();
     onCreate({
       name: builder.data.targetPosition || 'Novo Currículo',
-      templateId: builder.data.templateId,
+      themeId: builder.data.themeId,
     });
     handleClose();
   };
@@ -79,7 +81,7 @@ export function ResumeBuilderWizard(props: Props) {
       // Final step - create resume
       onCreate({
         name: builder.data.targetPosition || 'Novo Currículo',
-        templateId: builder.data.templateId,
+        themeId: builder.data.themeId,
       });
       handleClose();
     } else {
@@ -110,8 +112,16 @@ export function ResumeBuilderWizard(props: Props) {
 
   const renderStep = () => {
     switch (builder.currentStep) {
-      case 'template':
-        return <TemplateSelectionStep selectedId={builder.data.templateId} onSelect={(id) => builder.updateData({ templateId: id })} />;
+      case 'theme':
+        return (
+          <ThemeSelectionStep
+            selectedId={builder.data.themeId}
+            onSelect={(id) => {
+              const theme = getResumeThemeById(id);
+              builder.updateData({ themeId: id, themePaletteId: theme.defaultPaletteId });
+            }}
+          />
+        );
       case 'basic':
         return <BasicInfoStep data={builder.data} onChange={builder.updateData} />;
       case 'contact':
@@ -167,24 +177,30 @@ export function ResumeBuilderWizard(props: Props) {
         <div className="sr-resume-builder-wizard__content">{renderStep()}</div>
 
         <div className="sr-resume-builder-wizard__actions">
-          {/* Botão Voltar/Cancelar à esquerda */}
-          <Button variant="secondary" onClick={builder.currentStep === 'template' ? handleClose : builder.prevStep}>
-            {builder.currentStep === 'template' ? 'Cancelar' : 'Voltar'}
-          </Button>
+          {/* Navegação: Voltar */}
+          <div className="sr-resume-builder-wizard__actions-back">
+            <Button variant="secondary" onClick={builder.currentStep === 'theme' ? handleClose : builder.prevStep}>
+              {builder.currentStep === 'theme' ? 'Cancelar' : 'Voltar'}
+            </Button>
+          </div>
 
-          {/* Ações à direita: Salvar + Visualizar + Próximo */}
-          <div className="sr-resume-builder-wizard__actions-right">
+          {/* Ações secundárias: Salvar + Visualizar */}
+          <div className="sr-resume-builder-wizard__actions-secondary">
             {builder.currentStep !== 'review' && builder.hasUnsavedChanges ? (
               <Button variant="ghost" onClick={handleSaveDraft}>
                 Salvar rascunho
               </Button>
             ) : null}
-            {builder.currentStep !== 'template' ? (
+            {builder.currentStep !== 'theme' ? (
               <Button variant="ghost" onClick={() => preview.openPreview(builder.data)}>
                 <i className="fa-solid fa-eye" aria-hidden />
                 Visualizar
               </Button>
             ) : null}
+          </div>
+
+          {/* CTA Principal: Próximo */}
+          <div className="sr-resume-builder-wizard__actions-primary">
             <Button variant="primary" onClick={handleNext} disabled={!builder.canGoNext}>
               {builder.currentStep === 'review' ? 'Concluir' : 'Próximo'}
               {builder.currentStep !== 'review' ? <i className="fa-solid fa-arrow-right" aria-hidden /> : null}
@@ -197,6 +213,8 @@ export function ResumeBuilderWizard(props: Props) {
         open={preview.isOpen}
         data={builder.data}
         onClose={preview.closePreview}
+        enableStressToggle={process.env.NODE_ENV === 'development'}
+        onUpdateData={builder.updateData}
       />
     </Modal>
   );

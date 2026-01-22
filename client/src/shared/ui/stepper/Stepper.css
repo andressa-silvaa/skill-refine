@@ -144,3 +144,50 @@
     justify-content: center;
   }
 }
+
+/* ========================================
+   EXTRA SMALL: <= 374px
+   Stepper com scroll horizontal para evitar overflow
+   ======================================== */
+@media (max-width: 374px) {
+  .sr-stepper {
+    gap: 4px;
+    padding: 4px 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    justify-content: flex-start;
+  }
+
+  /* Esconde scrollbar mas mantém funcionalidade */
+  .sr-stepper::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sr-stepper__item {
+    flex: 0 0 auto;
+    min-width: 28px;
+    padding: 1px;
+  }
+
+  .sr-stepper__circle {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+    border-radius: 10px;
+    border-width: 1.5px;
+  }
+
+  .sr-stepper__item.is-active .sr-stepper__circle {
+    border-width: 2px;
+    font-weight: 800;
+  }
+
+  /* Touch target mantido através de padding do item */
+  .sr-stepper__item.is-clickable {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}

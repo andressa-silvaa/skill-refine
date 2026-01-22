@@ -1,0 +1,59 @@
+.sr-resume-color-editor {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.sr-resume-color-editor__panel {
+  width: min(320px, 100%);
+  border-radius: 16px;
+  border: 1px solid var(--sr-border);
+  background: var(--sr-surface);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  box-shadow: var(--sr-elev-1);
+}
+
+.sr-resume-color-editor__section {
+  display: grid;
+  gap: 8px;
+}
+
+.sr-resume-color-editor__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sr-ink);
+}
+
+.sr-resume-color-editor__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sr-resume-color-editor__palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sr-resume-color-editor__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.sr-resume-color-editor__error {
+  margin: 0;
+  font-size: 11px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+@media (min-width: 1024px) {
+  .sr-resume-color-editor {
+    justify-content: flex-start;
+  }
+}

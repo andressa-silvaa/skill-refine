@@ -49,3 +49,26 @@
     font-size: 11px;
   }
 }
+
+/* ========================================
+   EXTRA SMALL: <= 374px
+   ======================================== */
+@media (max-width: 374px) {
+  .sr-progress-bar {
+    gap: 4px;
+  }
+
+  .sr-progress-bar__header {
+    gap: 6px;
+    min-height: 16px;
+  }
+
+  .sr-progress-bar__track {
+    height: 5px;
+  }
+
+  .sr-progress-bar__label {
+    font-size: 10px;
+    letter-spacing: 0.2px;
+  }
+}

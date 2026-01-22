@@ -1,7 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { ResumeData } from '@/entities/resume';
+import { stressResumeData } from '@/entities/resume/mocks/stressResume';
+import { getResumeThemeById } from '@/entities/resume';
+import { ResumeColorEditor } from '@/features/resume-color-editor';
 
 import { ResumePreviewContent } from './ResumePreviewContent';
 import './ResumePreviewFullscreen.css';
@@ -10,10 +13,13 @@ type Props = {
   open: boolean;
   data: ResumeData;
   onClose: () => void;
+  enableStressToggle?: boolean;
+  onUpdateData?: (updates: Partial<ResumeData>) => void;
 };
 
 export function ResumePreviewFullscreen(props: Props) {
-  const { open, data, onClose } = props;
+  const { open, data, onClose, enableStressToggle = false, onUpdateData } = props;
+  const [useStress, setUseStress] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -25,6 +31,10 @@ export function ResumePreviewFullscreen(props: Props) {
   }, [open]);
 
   useEffect(() => {
+    if (!open) setUseStress(false);
+  }, [open]);
+
+  useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -32,6 +42,21 @@ export function ResumePreviewFullscreen(props: Props) {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onClose, open]);
+
+  const previewData = useMemo(
+    () =>
+      useStress
+        ? {
+            ...stressResumeData,
+            themeId: data.themeId,
+            themePaletteId: data.themePaletteId,
+            themeAccentOverride: data.themeAccentOverride,
+            themeSecondaryOverride: data.themeSecondaryOverride,
+          }
+        : data,
+    [data, useStress]
+  );
+  const theme = getResumeThemeById(previewData.themeId);
 
   if (!open) return null;
 
@@ -44,12 +69,37 @@ export function ResumePreviewFullscreen(props: Props) {
           <span className="sr-resume-preview-fullscreen__badge">Pré-visualização</span>
           <span className="sr-resume-preview-fullscreen__title">Visualização do currículo</span>
         </div>
+        {enableStressToggle ? (
+          <button
+            type="button"
+            className="sr-resume-preview-fullscreen__stress"
+            aria-pressed={useStress}
+            onClick={() => setUseStress((prev) => !prev)}
+          >
+            {useStress ? 'Voltar' : 'Stress'}
+          </button>
+        ) : null}
         <button type="button" className="sr-resume-preview-fullscreen__close" aria-label="Fechar" onClick={onClose}>
           ×
         </button>
       </div>
       <div className="sr-resume-preview-fullscreen__content">
-        <ResumePreviewContent data={data} />
+        <div className="sr-resume-preview-fullscreen__layout">
+          {onUpdateData ? (
+            <aside className="sr-resume-preview-fullscreen__panel">
+              <ResumeColorEditor
+                theme={theme}
+                paletteId={previewData.themePaletteId}
+                accentOverride={previewData.themeAccentOverride}
+                secondaryOverride={previewData.themeSecondaryOverride}
+                onChange={onUpdateData}
+              />
+            </aside>
+          ) : null}
+          <div className="sr-resume-preview-fullscreen__preview">
+            <ResumePreviewContent data={previewData} />
+          </div>
+        </div>
       </div>
     </div>,
     portalRoot

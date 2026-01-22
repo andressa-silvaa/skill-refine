@@ -1,11 +1,14 @@
 import { useCallback, useState } from 'react';
 
-import type { ResumeData, ResumeTemplateId } from '@/entities/resume';
-import type { BuilderStep, StepConfig } from './types';
+import type { ResumeData } from '@/entities/resume';
+import { DEFAULT_RESUME_THEME_ID } from '@/entities/resume';
+import { getResumeThemeById } from '@/entities/resume';
+import type { BuilderStep } from './types';
 import { BUILDER_STEPS } from './types';
 
 const INITIAL_DATA: ResumeData = {
-  templateId: 'tech',
+  themeId: DEFAULT_RESUME_THEME_ID,
+  themePaletteId: getResumeThemeById(DEFAULT_RESUME_THEME_ID).defaultPaletteId,
   targetPosition: '',
   contact: {
     fullName: '',
@@ -22,7 +25,7 @@ const INITIAL_DATA: ResumeData = {
 };
 
 export function useResumeBuilder() {
-  const [currentStep, setCurrentStep] = useState<BuilderStep>('template');
+  const [currentStep, setCurrentStep] = useState<BuilderStep>('theme');
   const [data, setData] = useState<ResumeData>(INITIAL_DATA);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -33,8 +36,8 @@ export function useResumeBuilder() {
 
   const canGoNext = useCallback((): boolean => {
     switch (currentStep) {
-      case 'template':
-        return Boolean(data.templateId);
+      case 'theme':
+        return Boolean(data.themeId);
       case 'basic':
         return Boolean(data.targetPosition);
       case 'contact':
@@ -71,8 +74,8 @@ export function useResumeBuilder() {
 
   const isStepComplete = useCallback((step: BuilderStep): boolean => {
     switch (step) {
-      case 'template':
-        return Boolean(data.templateId);
+      case 'theme':
+        return Boolean(data.themeId);
       case 'basic':
         return Boolean(data.targetPosition);
       case 'contact':
@@ -108,8 +111,8 @@ export function useResumeBuilder() {
     if (targetOrder === currentOrder + 1) {
       // Check if current step requirements are met
       switch (currentStep) {
-        case 'template':
-          return Boolean(data.templateId);
+        case 'theme':
+          return Boolean(data.themeId);
         case 'basic':
           return Boolean(data.targetPosition);
         case 'contact':
@@ -149,7 +152,7 @@ export function useResumeBuilder() {
   }, []);
 
   const reset = useCallback(() => {
-    setCurrentStep('template');
+    setCurrentStep('theme');
     setData(INITIAL_DATA);
     setLastSaved(null);
     setHasUnsavedChanges(false);

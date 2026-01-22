@@ -1,0 +1,189 @@
+.sr-resume-block__header {
+  display: grid;
+  gap: var(--resume-spacing-sm, 10px);
+  margin-bottom: var(--resume-spacing-lg, 28px);
+  border-bottom: 1px solid var(--resume-border-color, var(--sr-border));
+  padding-bottom: var(--resume-spacing-md, 16px);
+  transition: border-color 0.2s;
+}
+
+.sr-resume-block__header--compact {
+  gap: var(--resume-spacing-sm, 6px);
+  margin-bottom: var(--resume-spacing-md, 18px);
+}
+
+.sr-resume-block__header--hero {
+  border-bottom: 2px solid var(--resume-accent, var(--sr-accent));
+  padding-bottom: calc(var(--resume-spacing-md, 16px) + 6px);
+}
+
+.sr-resume-block__header--center {
+  text-align: center;
+}
+
+.sr-resume-block__header--center .sr-resume-block__contact {
+  justify-content: center;
+}
+
+.sr-resume-block__name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--resume-ink, var(--sr-ink));
+  font-family: var(--resume-heading-font, inherit);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__position {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--resume-accent-secondary, var(--sr-ink-subtle));
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--sr-ink-muted);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__contact span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__contact--stacked {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sr-resume-block__section {
+  display: grid;
+  gap: var(--resume-spacing-sm, 10px);
+  margin-bottom: var(--resume-section-gap, 18px);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.sr-resume-block__section.is-breakable {
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+.sr-resume-block__section-content {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sr-resume-block__section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--resume-accent, var(--sr-accent));
+  font-family: var(--resume-heading-font, inherit);
+  border-bottom: 1px solid var(--resume-border-color, var(--sr-border));
+  padding-bottom: 6px;
+  overflow-wrap: anywhere;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.sr-resume-block__section--accent .sr-resume-block__section-title {
+  color: var(--resume-ink, var(--sr-ink));
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-size: 13px;
+}
+
+.sr-resume-block__summary {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--sr-ink);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__item {
+  margin-bottom: var(--resume-spacing-md, 16px);
+}
+
+.sr-resume-block__item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sr-resume-block__item-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--resume-ink, var(--sr-ink));
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__item-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--resume-accent-secondary, var(--sr-ink-muted));
+  white-space: nowrap;
+}
+
+.sr-resume-block__item-company {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--resume-accent-secondary, var(--sr-ink-subtle));
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__item-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--sr-ink);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sr-resume-block__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sr-resume-block__skill-tag {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--resume-accent-soft, rgba(var(--sr-accent-rgb), 0.12));
+  color: var(--resume-accent, var(--sr-accent));
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+}
+
+@media (max-width: 768px) {
+  .sr-resume-block__item-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .sr-resume-block__name {
+    font-size: 24px;
+  }
+}

@@ -82,6 +82,14 @@
   opacity: 1;
 }
 
+.sr-date-picker .react-date-picker__calendar {
+  z-index: var(--sr-layer-floating);
+}
+
+.sr-date-picker .react-date-picker__calendar--open {
+  position: absolute;
+}
+
 .sr-date-picker-hint {
   margin: 0;
   font-size: 12px;

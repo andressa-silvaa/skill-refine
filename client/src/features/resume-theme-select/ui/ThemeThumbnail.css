@@ -1,0 +1,26 @@
+.sr-theme-thumb {
+  width: 100%;
+  height: 100%;
+}
+
+.sr-theme-thumb__surface {
+  fill: var(--sr-surface-2);
+  stroke: var(--sr-border);
+  stroke-width: 1;
+}
+
+.sr-theme-thumb__line {
+  fill: var(--sr-border);
+  stroke: none;
+}
+
+.sr-theme-thumb__line-strong {
+  fill: var(--sr-border);
+  stroke: none;
+}
+
+.sr-theme-thumb__dot {
+  fill: transparent;
+  stroke: var(--sr-border);
+  stroke-width: 1.4;
+}

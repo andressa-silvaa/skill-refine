@@ -69,7 +69,7 @@ function EducationCard(props: EducationCardProps) {
   return (
     <div className="sr-education-card">
       <div className="sr-education-card__header">
-        <h4 className="sr-education-card__title">Formação {education.id.slice(-4)}</h4>
+        <h4 className="sr-education-card__title">Formação</h4>
         <Button variant="ghost" onClick={onRemove}>
           <i className="fa-solid fa-trash" aria-hidden />
         </Button>

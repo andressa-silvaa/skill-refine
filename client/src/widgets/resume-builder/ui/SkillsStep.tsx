@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { Button, Input, CustomSelect } from '@/shared/ui';
+import { Button, Input, CustomSelect, Checkbox } from '@/shared/ui';
 import type { Skill, SkillLevel } from '@/entities/resume';
 
 import './SkillsStep.css';
@@ -46,10 +46,12 @@ export function SkillsStep(props: Props) {
       </div>
 
       <div className="sr-skills-step__options">
-        <label className="sr-skills-step__toggle">
-          <input type="checkbox" checked={showLevels} onChange={(e) => setShowLevels(e.target.checked)} />
-          <span>Mostrar níveis de proficiência</span>
-        </label>
+        <Checkbox
+          className="sr-skills-step__toggle"
+          checked={showLevels}
+          onChange={setShowLevels}
+          label="Mostrar níveis de proficiência"
+        />
       </div>
 
       <div className="sr-skills-step__list">

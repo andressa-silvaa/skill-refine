@@ -19,3 +19,13 @@ export function getResumeStatusTone(status: ResumeStatus) {
   if (status === 'analyzing') return 'warning';
   return 'neutral';
 }
+
+export function formatMonthYear(dateStr: string): string {
+  if (!dateStr) return '';
+  const [year, month] = dateStr.split('-');
+  if (!year || !month) return dateStr;
+  const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const monthIndex = parseInt(month, 10) - 1;
+  if (monthIndex < 0 || monthIndex >= monthNames.length) return dateStr;
+  return `${monthNames[monthIndex]} ${year}`;
+}

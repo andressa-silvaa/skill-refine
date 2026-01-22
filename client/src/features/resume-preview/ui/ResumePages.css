@@ -1,0 +1,77 @@
+.sr-resume-pages {
+  display: grid;
+  gap: 24px;
+  width: 100%;
+}
+
+.sr-resume-page {
+  width: 100%;
+  height: auto;
+  background: var(--resume-paper-bg, #ffffff);
+  border-radius: var(--resume-radius, 6px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: var(--resume-page-padding, 24px);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.sr-resume-page__content {
+  height: auto;
+  display: grid;
+  gap: var(--resume-section-gap, 18px);
+}
+
+.sr-resume-page__content--measure {
+  height: auto;
+  padding: 0;
+  gap: 0;
+}
+
+.sr-resume-page__block {
+  break-inside: avoid;
+}
+
+.sr-resume-page__block[data-breakable='true'] {
+  break-inside: auto;
+}
+
+.sr-resume-pages__measure {
+  position: absolute;
+  inset: -9999px;
+  width: var(--resume-page-width, 794px);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .sr-resume-page {
+    width: var(--resume-page-width, 794px);
+    height: var(--resume-page-height, 1123px);
+    padding: var(--resume-page-padding, 48px);
+  }
+
+  .sr-resume-page__content {
+    height: calc(var(--resume-page-height, 1123px) - 2 * var(--resume-page-padding, 48px));
+  }
+}
+
+@media print {
+  .sr-resume-pages {
+    gap: 0;
+  }
+
+  .sr-resume-page {
+    box-shadow: none;
+    border-radius: 0;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .sr-resume-page__block {
+    page-break-inside: avoid;
+  }
+
+  .sr-resume-page__block[data-breakable='true'] {
+    page-break-inside: auto;
+  }
+}

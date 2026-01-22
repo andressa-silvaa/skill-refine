@@ -1,4 +1,4 @@
-export type BuilderStep = 'template' | 'basic' | 'contact' | 'experience' | 'education' | 'skills' | 'languages' | 'summary' | 'review';
+export type BuilderStep = 'theme' | 'basic' | 'contact' | 'experience' | 'education' | 'skills' | 'languages' | 'summary' | 'review';
 
 export type StepConfig = {
   id: BuilderStep;
@@ -7,7 +7,7 @@ export type StepConfig = {
 };
 
 export const BUILDER_STEPS: StepConfig[] = [
-  { id: 'template', label: 'Modelo', order: 1 },
+  { id: 'theme', label: 'Tema', order: 1 },
   { id: 'basic', label: 'Básico', order: 2 },
   { id: 'contact', label: 'Contato', order: 3 },
   { id: 'experience', label: 'Experiência', order: 4 },

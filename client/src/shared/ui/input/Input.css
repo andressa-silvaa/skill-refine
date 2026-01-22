@@ -53,3 +53,27 @@
   font-weight: 600;
   color: var(--danger);
 }
+
+/* ========================================
+   EXTRA SMALL: <= 374px
+   ======================================== */
+@media (max-width: 374px) {
+  .sr-input-wrapper {
+    gap: 5px;
+  }
+
+  .sr-input-label {
+    font-size: 12px;
+  }
+
+  .sr-input {
+    padding: 9px 12px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  .sr-input-hint,
+  .sr-input-error {
+    font-size: 11px;
+  }
+}

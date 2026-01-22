@@ -1,41 +1,35 @@
 import { useMemo, useState } from 'react';
 
-import { Button, Card, Modal } from '@/shared/ui';
+import { Button, Modal } from '@/shared/ui';
+import { ResumeThemePicker } from '@/features/resume-theme-select';
+import { DEFAULT_RESUME_THEME_ID, resumeThemes, type ResumeThemeId } from '@/entities/resume';
 
 import './NewResumeModal.css';
-
-type TemplateId = 'tech' | 'business' | 'minimal';
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { name: string; templateId: TemplateId }) => void;
+  onCreate: (data: { name: string; themeId: ResumeThemeId }) => void;
 };
-
-const TEMPLATES = [
-  { id: 'tech', title: 'Tech', desc: 'Ideal para devs e produto.' },
-  { id: 'business', title: 'Business', desc: 'Foco em resultados e gestão.' },
-  { id: 'minimal', title: 'Minimal', desc: 'Limpo e direto ao ponto.' },
-] as const;
 
 export function NewResumeModal(props: Props) {
   const { open, onClose, onCreate } = props;
 
   const [step, setStep] = useState(1);
-  const [templateId, setTemplateId] = useState<TemplateId>('tech');
+  const [themeId, setThemeId] = useState<ResumeThemeId>(resumeThemes[0]?.id ?? DEFAULT_RESUME_THEME_ID);
   const [name, setName] = useState('');
 
   const canNext = useMemo(() => {
-    if (step === 1) return Boolean(templateId);
+    if (step === 1) return Boolean(themeId);
     if (step === 2) return name.trim().length >= 3;
     return true;
-  }, [name, step, templateId]);
+  }, [name, step, themeId]);
 
   const close = () => {
     onClose();
     window.setTimeout(() => {
       setStep(1);
-      setTemplateId('tech');
+      setThemeId(resumeThemes[0]?.id ?? DEFAULT_RESUME_THEME_ID);
       setName('');
     }, 0);
   };
@@ -49,7 +43,7 @@ export function NewResumeModal(props: Props) {
 
   const finish = () => {
     if (!canNext) return;
-    onCreate({ name: name.trim(), templateId });
+    onCreate({ name: name.trim(), themeId });
     close();
   };
 
@@ -77,33 +71,10 @@ export function NewResumeModal(props: Props) {
         <div className="sr-new-resume__content">
           {step === 1 ? (
             <div className="sr-new-resume__panel">
-              <h3 className="sr-new-resume__h3">Selecione seu modelo</h3>
-              <p className="sr-new-resume__muted">Para começar, selecione um modelo de currículo abaixo.</p>
+              <h3 className="sr-new-resume__h3">Selecione um tema</h3>
+              <p className="sr-new-resume__muted">Para começar, selecione um tema visual abaixo.</p>
 
-              <div className="sr-new-resume__carousel" role="list">
-                {TEMPLATES.map((t) => (
-                  <Card
-                    key={t.id}
-                    className={`sr-new-resume__template${templateId === t.id ? ' is-selected' : ''}`}
-                    role="listitem"
-                  >
-                    <div className="sr-new-resume__preview" aria-hidden />
-                    <div className="sr-new-resume__template-body">
-                      <div className="sr-new-resume__template-text">
-                        <div className="sr-new-resume__template-title">{t.title}</div>
-                        <div className="sr-new-resume__template-desc">{t.desc}</div>
-                      </div>
-
-                      <Button
-                        variant={templateId === t.id ? 'primary' : 'secondary'}
-                        onClick={() => setTemplateId(t.id)}
-                      >
-                        Selecionar
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+              <ResumeThemePicker selectedId={themeId} onSelect={setThemeId} variant="carousel" cardSize="compact" />
             </div>
           ) : step === 2 ? (
             <div className="sr-new-resume__panel">

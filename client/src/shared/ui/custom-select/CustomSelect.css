@@ -47,7 +47,7 @@
 
 .sr-custom-select-menu {
   position: absolute;
-  z-index: 130;
+  z-index: var(--sr-layer-floating);
   top: calc(100% + 8px);
   left: 0;
   right: 0;

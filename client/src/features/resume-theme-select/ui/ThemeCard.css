@@ -1,0 +1,111 @@
+.sr-theme-card {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sr-theme-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sr-elev-2);
+}
+
+.sr-theme-card.is-selected {
+  border-color: var(--sr-accent);
+  box-shadow: 0 0 0 2px rgba(var(--sr-accent-rgb), 0.15);
+}
+
+.sr-theme-card__preview {
+  height: 150px;
+  border-radius: 12px;
+  border: 1px solid var(--sr-border);
+  background: linear-gradient(160deg, rgba(var(--sr-accent-rgb), 0.05), rgba(var(--sr-accent-rgb), 0.01));
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sr-theme-card__body {
+  display: grid;
+  gap: 8px;
+}
+
+.sr-theme-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sr-theme-card__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--sr-ink);
+}
+
+.sr-theme-card__tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(var(--sr-accent-rgb), 0.12);
+  color: var(--sr-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.sr-theme-card__description {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink-subtle);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sr-theme-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sr-theme-card__pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--sr-surface-2);
+  color: var(--sr-ink-muted);
+  border: 1px solid var(--sr-border);
+}
+
+.sr-theme-card--compact .sr-theme-card__preview {
+  height: 120px;
+  padding: 12px;
+}
+
+.sr-theme-card--compact .sr-theme-card__description {
+  -webkit-line-clamp: 2;
+}
+
+@media (max-width: 768px) {
+  .sr-theme-card__preview {
+    height: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-theme-card__preview {
+    height: 110px;
+  }
+}
