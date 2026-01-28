@@ -22,6 +22,34 @@
   color: var(--sr-ink-muted);
 }
 
+.sr-theme-selection__palettes {
+  display: grid;
+  gap: 10px;
+}
+
+.sr-theme-selection__palettes-header {
+  display: grid;
+  gap: 4px;
+}
+
+.sr-theme-selection__palettes-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--sr-ink);
+}
+
+.sr-theme-selection__palettes-subtitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sr-ink-muted);
+}
+
+.sr-theme-selection__palettes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 
 @media (max-width: 768px) {
   .sr-theme-selection {

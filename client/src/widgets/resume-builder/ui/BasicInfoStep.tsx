@@ -6,10 +6,14 @@ import './BasicInfoStep.css';
 type Props = {
   data: Pick<ResumeData, 'targetPosition'>;
   onChange: (updates: Partial<ResumeData>) => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 export function BasicInfoStep(props: Props) {
-  const { data, onChange } = props;
+  const { data, onChange, getError, shouldShowError, onFieldTouched } = props;
+  const targetError = shouldShowError('targetPosition') ? getError('targetPosition') : undefined;
 
   return (
     <div className="sr-basic-info-step">
@@ -20,11 +24,13 @@ export function BasicInfoStep(props: Props) {
 
       <div className="sr-basic-info-step__fields">
         <Input
-          label="Cargo alvo"
+          label="Cargo alvo *"
           placeholder="Ex.: Desenvolvedor Frontend"
           value={data.targetPosition}
           onChange={(e) => onChange({ targetPosition: e.target.value })}
+          onBlur={() => onFieldTouched('targetPosition')}
           hint="O cargo que você está buscando"
+          error={targetError}
         />
       </div>
     </div>

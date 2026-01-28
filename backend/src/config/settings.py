@@ -54,6 +54,25 @@ DATABASES = {
     "default": env.db(),
 }
 
+# Cache (required for AI cache + rate limit)
+# Default: in-memory cache for local/dev. Can be swapped to Redis via env.
+REDIS_URL = env.str("REDIS_URL", default="")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": REDIS_URL,
+            "KEY_PREFIX": env.str("DJANGO_CACHE_KEY_PREFIX", default="sr"),
+        }
+    }
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "skill-refine",
+        }
+    }
+
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "UTC"
 USE_I18N = True
@@ -87,6 +106,7 @@ CORS_ALLOWED_ORIGINS = env.list(
     default=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://host.docker.internal:3000",  # Para Playwright acessar o frontend no host
     ],
 )
 CORS_ALLOW_CREDENTIALS = True
@@ -135,6 +155,23 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="no-reply@skillrefine.local")
+
+# ----------------------------
+# AI Rewrite (local-first + fallback cloud)
+# ----------------------------
+AI_REWRITE_MODE = env.str("AI_REWRITE_MODE", default="local_first")  # local_first | cloud_only | local_only
+AI_REWRITE_CACHE_TTL_SECONDS = env.int("AI_REWRITE_CACHE_TTL_SECONDS", default=600)
+
+# Local (Ollama)
+AI_LOCAL_BASE_URL = env.str("AI_LOCAL_BASE_URL", default="http://localhost:11434")
+AI_LOCAL_MODEL = env.str("AI_LOCAL_MODEL", default="llama3")
+AI_LOCAL_TIMEOUT_SECONDS = env.int("AI_LOCAL_TIMEOUT_SECONDS", default=10)
+
+# Cloud (OpenAI-compatible chat completions, e.g. Groq)
+AI_CLOUD_BASE_URL = env.str("AI_CLOUD_BASE_URL", default="")
+AI_CLOUD_API_KEY = env.str("AI_CLOUD_API_KEY", default="")
+AI_CLOUD_MODEL = env.str("AI_CLOUD_MODEL", default="")
+AI_CLOUD_TIMEOUT_SECONDS = env.int("AI_CLOUD_TIMEOUT_SECONDS", default=15)
 
 
 REST_FRAMEWORK = {

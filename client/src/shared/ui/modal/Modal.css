@@ -133,6 +133,13 @@
   max-width: 100%;
   width: 100%;
   box-sizing: border-box;
+  min-height: 0;
+}
+
+.sr-modal__body:has(.sr-resume-builder-wizard) {
+  overflow-y: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .sr-modal__body > * {

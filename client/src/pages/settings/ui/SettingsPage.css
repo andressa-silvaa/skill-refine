@@ -60,6 +60,11 @@
   box-shadow: none;
 }
 
+.sr-settings__card[data-lang-open='true'] {
+  position: relative;
+  z-index: 10;
+}
+
 [data-sr-theme-scope][data-theme='dark'] .sr-settings__side-col .sr-settings__card {
   background: var(--sr-surface-soft);
   box-shadow: none;

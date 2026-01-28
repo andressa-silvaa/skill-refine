@@ -30,7 +30,7 @@ export function Modal(props: Props) {
       <div className="sr-modal__panel" style={{ width: `min(${width}px, 100%)` }}>
         <div className="sr-modal__header">
           <div className="sr-modal__header-content">
-            <h3 id={labelId} className="sr-modal__title">
+            <h3 id={labelId} className="sr-modal__title" tabIndex={-1}>
               {title}
             </h3>
             {subtitle ? <p className="sr-modal__subtitle">{subtitle}</p> : null}

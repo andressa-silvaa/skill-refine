@@ -1,21 +1,39 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useSession, useSessionActions } from '@/entities/session';
+import { notify } from '@/shared/lib/notify';
 
-function errorMessage(code: string) {
-  switch (code) {
-    case 'invalid_state':
-      return 'Sessão do Google expirada. Tente novamente.';
-    case 'token_exchange_failed':
-      return 'Falha ao concluir login com Google. Tente novamente.';
-    case 'missing_id_token':
-      return 'Falha ao concluir login com Google. Tente novamente.';
-    case 'google_token_invalid':
-      return 'Não foi possível validar sua conta do Google.';
-    default:
-      return 'Não foi possível concluir o login com Google.';
+function getErrorMessage(oauthError: string | null, googleError: string | null): string {
+  // Erros do OAuth (backend)
+  if (oauthError) {
+    switch (oauthError) {
+      case 'invalid_state':
+        return 'Sessão do Google expirada. Tente novamente.';
+      case 'token_exchange_failed':
+        return 'Falha ao concluir login com Google. Tente novamente.';
+      case 'missing_id_token':
+        return 'Falha ao concluir login com Google. Tente novamente.';
+      case 'google_token_invalid':
+        return 'Não foi possível validar sua conta do Google. Tente novamente.';
+      default:
+        return 'Ocorreu um erro inesperado ao tentar entrar com o Google. Tente novamente.';
+    }
   }
+
+  // Erros do Google OAuth
+  if (googleError) {
+    switch (googleError) {
+      case 'access_denied':
+        return 'Login com Google foi cancelado.';
+      case 'popup_closed_by_user':
+        return 'Login com Google foi cancelado.';
+      default:
+        return 'Ocorreu um erro inesperado ao tentar entrar com o Google. Tente novamente.';
+    }
+  }
+
+  return 'Ocorreu um erro inesperado ao tentar entrar com o Google. Tente novamente.';
 }
 
 export function OAuthCallbackPage() {
@@ -28,54 +46,87 @@ export function OAuthCallbackPage() {
 
   const session = useSession();
   const { bootstrap } = useSessionActions();
+  const bootstrapAttemptedRef = useRef(false);
+  const errorHandledRef = useRef(false);
+  const [isBootstraping, setIsBootstraping] = useState(false);
 
-  const [localError, setLocalError] = useState<string | null>(null);
-
-  const msg = useMemo(() => (oauthError ? errorMessage(oauthError) : null), [oauthError]);
-
+  // Tratamento de erro explícito da URL
   useEffect(() => {
-    if (oauthError) return;
+    if (!oauthError && !googleError) return;
+    if (errorHandledRef.current) return;
+
+    errorHandledRef.current = true;
+
+    const errorDetails = {
+      oauth_error: oauthError,
+      google_error: googleError,
+      google_error_description: googleErrorDescription,
+      status,
+    };
+
+    // Log do erro para debug
+    console.error('Erro no login com Google', errorDetails);
+
+    // Exibir alert global de erro com mensagem específica
+    const errorMessage = getErrorMessage(oauthError, googleError);
+    notify.error(errorMessage);
+
+    // Redirecionar para login
+    navigate('/login', { replace: true });
+  }, [oauthError, googleError, googleErrorDescription, status, navigate]);
+
+  // Bootstrap da sessão em caso de sucesso (sem erros na URL)
+  useEffect(() => {
+    if (oauthError || googleError) return;
+    if (bootstrapAttemptedRef.current) return;
+    if (isBootstraping) return;
+
+    bootstrapAttemptedRef.current = true;
+    setIsBootstraping(true);
+
     void (async () => {
       try {
+        // Aguardar um pouco para garantir que os cookies foram configurados
+        await new Promise((resolve) => setTimeout(resolve, 100));
         await bootstrap({ force: true });
-      } catch {
+      } catch (error) {
+        console.error('Erro no login com Google ao fazer bootstrap', error);
+        // Não mostrar erro ainda - vamos aguardar o status da sessão
+      } finally {
+        setIsBootstraping(false);
       }
     })();
-  }, [bootstrap, oauthError]);
+  }, [bootstrap, oauthError, googleError, isBootstraping]);
 
+  // Redirecionamento após autenticação bem-sucedida ou tratamento de erro
   useEffect(() => {
-    if (oauthError) return;
-    if (session.status === 'authenticated') navigate('/protected', { replace: true });
-    if (session.status === 'anonymous') {
-      setLocalError('Login concluído no Google, mas a sessão não foi criada. Verifique cookies e URL do backend.');
+    if (oauthError || googleError) return;
+    if (errorHandledRef.current) return;
+    if (isBootstraping) return;
+
+    if (session.status === 'authenticated') {
+      navigate('/protected', { replace: true });
+      return;
     }
-  }, [navigate, oauthError, session.status]);
 
-  return (
-    <main style={{ padding: 24 }}>
-      <h2>Concluindo login…</h2>
-      {msg ? <p>{msg}</p> : null}
-      {oauthError ? (
-        <pre style={{ background: '#f6f6f6', padding: 12, borderRadius: 8 }}>
-          {JSON.stringify(
-            {
-              oauth_error: oauthError,
-              status,
-              google_error: googleError,
-              google_error_description: googleErrorDescription,
-            },
-            null,
-            2
-          )}
-        </pre>
-      ) : null}
-      {localError ? <p>{localError}</p> : null}
+    // Se o bootstrap foi executado e a sessão ainda está anonymous, tratar como erro
+    if (session.status === 'anonymous' && bootstrapAttemptedRef.current) {
+      errorHandledRef.current = true;
 
-      <button type="button" onClick={() => navigate('/login', { replace: true })}>
-        Voltar para login
-      </button>
-    </main>
-  );
+      console.error('Erro no login com Google: Login concluído no Google, mas a sessão não foi criada.', {
+        oauthError,
+        googleError,
+        status,
+        bootstrapAttempted: bootstrapAttemptedRef.current,
+      });
+
+      notify.error('Não foi possível criar a sessão após o login com Google. Verifique se os cookies estão habilitados e tente novamente.');
+      navigate('/login', { replace: true });
+    }
+  }, [navigate, oauthError, googleError, session.status, status, isBootstraping]);
+
+  // Não renderizar nada - apenas processar o callback
+  return null;
 }
 
 

@@ -6,10 +6,11 @@ type Props = {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  isLoading?: boolean;
 };
 
 export function ConfirmDeleteResumeModal(props: Props) {
-  const { open, onClose, onConfirm } = props;
+  const { open, onClose, onConfirm, isLoading = false } = props;
 
   return (
     <Modal open={open} title="Excluir currículo" onClose={onClose} width={360}>
@@ -20,11 +21,11 @@ export function ConfirmDeleteResumeModal(props: Props) {
         <p className="sr-confirm-del__text">Essa ação é permanente.</p>
         <p className="sr-confirm-del__text">Você pode recriar depois, mas o conteúdo será perdido.</p>
         <div className="sr-confirm-del__actions">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button variant="danger" onClick={onConfirm}>
-            Excluir
+          <Button variant="danger" onClick={onConfirm} disabled={isLoading}>
+            {isLoading ? 'Excluindo...' : 'Excluir'}
           </Button>
         </div>
       </div>

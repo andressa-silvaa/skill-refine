@@ -1,0 +1,70 @@
+@page {
+  size: A4;
+  margin: 0;
+}
+
+body[data-sr-print='true'] {
+  margin: 0;
+  padding: 0;
+  background: var(--sr-page-bg, #f4f4f5);
+}
+
+body[data-sr-print='true'] .app-shell {
+  min-height: auto;
+  margin: 0;
+  padding: 0;
+}
+
+body[data-sr-print='true'] #root {
+  margin: 0;
+  padding: 0;
+}
+
+body[data-sr-print='true'] .sr-resume-pages > *:first-child {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+body[data-sr-print='true'] .sr-resume-pages > *:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.sr-resume-print {
+  min-height: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.sr-resume-print__loading,
+.sr-resume-print__error {
+  font-size: 14px;
+  color: var(--sr-ink-subtle, #6b7280);
+}
+
+@media print {
+  body[data-sr-print='true'] {
+    background: #ffffff;
+    margin: 0;
+    padding: 0;
+  }
+
+  body[data-sr-print='true'] * {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .sr-resume-print {
+    padding: 0;
+    gap: 0;
+    margin: 0;
+  }
+
+  .sr-resume-print__loading,
+  .sr-resume-print__error {
+    display: none;
+  }
+}

@@ -7,6 +7,7 @@ import { RegisterPage } from '@/pages/auth/register';
 import { ResetCodePage, ResetEmailPage, ResetNewPasswordPage, ResetSuccessPage } from '@/pages/auth/reset-password';
 import { VerifyEmailPage } from '@/pages/auth/verify-email';
 import { ProfilePage } from '@/pages/profile';
+import { ResumePrintPage } from '@/pages/resume-print';
 import { SettingsPage } from '@/pages/settings';
 import { ResumesPage } from '@/pages/curriculos';
 
@@ -25,6 +26,7 @@ export function AppRouter() {
       <Route path="/reset/code" element={<ResetCodePage />} />
       <Route path="/reset/new" element={<ResetNewPasswordPage />} />
       <Route path="/reset/success" element={<ResetSuccessPage />} />
+      <Route path="/resume/print/:resumeId" element={<ResumePrintPage />} />
 
       <Route
         path="/protected"

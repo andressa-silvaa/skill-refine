@@ -12,11 +12,109 @@
 .sr-settings-general__hint {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(20, 20, 20, 0.5);
+  color: var(--sr-ink-muted);
 }
 
 @media (max-width: 920px) {
   .sr-settings-general__grid {
     grid-template-columns: 1fr;
   }
+}
+
+.sr-settings-general__select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.sr-settings-general__select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  /* garante fundo sólido em todos os temas */
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid var(--sr-input-border);
+  background: var(--sr-input-bg);
+  color: var(--sr-ink);
+  font: 500 14px 'Poppins', sans-serif;
+  box-sizing: border-box;
+}
+
+.sr-settings-general__select-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.sr-settings-general__select-caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid var(--sr-ink-subtle);
+  flex: 0 0 auto;
+  transition: transform 0.2s;
+}
+
+.sr-settings-general__select-trigger[aria-expanded='true'] .sr-settings-general__select-caret {
+  transform: rotate(180deg);
+}
+
+.sr-settings-general__select-menu {
+  position: absolute;
+  z-index: 1100;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--sr-surface);
+  border: 1px solid var(--sr-border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--sr-elev-1);
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-settings-general__select-menu {
+  background: var(--sr-surface-soft);
+}
+
+.sr-settings-general__select-option {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--sr-ink);
+  padding: 12px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sr-settings-general__select-option:hover,
+.sr-settings-general__select-option.is-active {
+  background: rgba(var(--sr-accent-rgb), 0.1);
+}
+
+.sr-settings-general__select-option.is-selected {
+  background: rgba(var(--sr-accent-rgb), 0.16);
+}
+
+.sr-settings-general__select-option.is-selected::after {
+  content: '✓';
+  float: right;
+  color: var(--sr-accent);
+}
+
+.sr-settings-general__select-trigger:focus-visible {
+  outline: 2px solid var(--sr-accent);
+  outline-offset: 2px;
 }

@@ -14,7 +14,7 @@ export function ReviewStep(props: Props) {
   const calculateScore = (): number => {
     let score = 0;
     if (data.targetPosition) score += 10;
-    if (data.contact.fullName && data.contact.email && data.contact.phone) score += 15;
+    if (data.contact.fullName && data.contact.email) score += 15;
     if (data.experiences.length > 0) score += 20;
     if (data.educations.length > 0) score += 10;
     if (data.skills.length > 0) score += 15;

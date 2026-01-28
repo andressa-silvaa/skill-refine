@@ -6,10 +6,13 @@ import './ExperienceStep.css';
 type Props = {
   experiences: Experience[];
   onChange: (experiences: Experience[]) => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 export function ExperienceStep(props: Props) {
-  const { experiences, onChange } = props;
+  const { experiences, onChange, getError, shouldShowError, onFieldTouched } = props;
 
   const addExperience = () => {
     const newExp: Experience = {
@@ -59,15 +62,19 @@ export function ExperienceStep(props: Props) {
       </div>
 
       <div className="sr-experience-step__list">
-        {experiences.map((exp) => (
+        {experiences.map((exp, index) => (
           <ExperienceCard
             key={exp.id}
             experience={exp}
+            index={index}
             onUpdate={(updates) => updateExperience(exp.id, updates)}
             onRemove={() => removeExperience(exp.id)}
             onUpdateDescription={updateDescription}
             onAddBullet={addBullet}
             onRemoveBullet={removeBullet}
+            getError={getError}
+            shouldShowError={shouldShowError}
+            onFieldTouched={onFieldTouched}
           />
         ))}
       </div>
@@ -82,15 +89,25 @@ export function ExperienceStep(props: Props) {
 
 type ExperienceCardProps = {
   experience: Experience;
+  index: number;
   onUpdate: (updates: Partial<Experience>) => void;
   onRemove: () => void;
   onUpdateDescription: (id: string, index: number, value: string) => void;
   onAddBullet: (id: string) => void;
   onRemoveBullet: (id: string, index: number) => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 function ExperienceCard(props: ExperienceCardProps) {
-  const { experience, onUpdate, onRemove, onUpdateDescription, onAddBullet, onRemoveBullet } = props;
+  const { experience, index, onUpdate, onRemove, onUpdateDescription, onAddBullet, onRemoveBullet, getError, shouldShowError, onFieldTouched } = props;
+  const basePath = `experiences.${index}`;
+  const companyError = shouldShowError(`${basePath}.company`) ? getError(`${basePath}.company`) : undefined;
+  const positionError = shouldShowError(`${basePath}.position`) ? getError(`${basePath}.position`) : undefined;
+  const startDateError = shouldShowError(`${basePath}.startDate`) ? getError(`${basePath}.startDate`) : undefined;
+  const endDateError = shouldShowError(`${basePath}.endDate`) ? getError(`${basePath}.endDate`) : undefined;
+  const descriptionError = shouldShowError(`${basePath}.description`) ? getError(`${basePath}.description`) : undefined;
 
   return (
     <div className="sr-experience-card">
@@ -103,28 +120,40 @@ function ExperienceCard(props: ExperienceCardProps) {
 
       <div className="sr-experience-card__fields">
         <Input
-          label="Empresa"
+          label="Empresa *"
           placeholder="Nome da empresa"
           value={experience.company}
           onChange={(e) => onUpdate({ company: e.target.value })}
+          onBlur={() => onFieldTouched(`${basePath}.company`)}
+          error={companyError}
         />
         <Input
-          label="Cargo"
+          label="Cargo *"
           placeholder="Seu cargo"
           value={experience.position}
           onChange={(e) => onUpdate({ position: e.target.value })}
+          onBlur={() => onFieldTouched(`${basePath}.position`)}
+          error={positionError}
         />
         <div className="sr-experience-card__row">
           <DatePicker
-            label="Data início"
+            label="Data início *"
             value={experience.startDate}
-            onChange={(value) => onUpdate({ startDate: value })}
+            onChange={(value) => {
+              onUpdate({ startDate: value });
+              onFieldTouched(`${basePath}.startDate`);
+            }}
+            error={startDateError}
           />
           {!experience.isCurrent ? (
             <DatePicker
-              label="Data fim"
+              label="Data fim *"
               value={experience.endDate || ''}
-              onChange={(value) => onUpdate({ endDate: value })}
+              onChange={(value) => {
+                onUpdate({ endDate: value });
+                onFieldTouched(`${basePath}.endDate`);
+              }}
+              error={endDateError}
             />
           ) : null}
         </div>
@@ -134,14 +163,17 @@ function ExperienceCard(props: ExperienceCardProps) {
           onChange={(checked) => onUpdate({ isCurrent: checked, endDate: checked ? undefined : experience.endDate })}
           label="Trabalho atual"
         />
-        <div className="sr-experience-card__bullets">
-          <label className="sr-experience-card__bullets-label">Descrição (bullet points)</label>
+        <div className={`sr-experience-card__bullets${descriptionError ? ' is-invalid' : ''}`} tabIndex={descriptionError ? -1 : undefined}>
+          <label className="sr-experience-card__bullets-label">Descrição (bullet points) *</label>
+          {descriptionError ? <p className="sr-input-error">{descriptionError}</p> : null}
           {experience.description.map((bullet, idx) => (
             <div key={idx} className="sr-experience-card__bullet">
               <Input
                 placeholder="Descreva uma conquista ou responsabilidade"
                 value={bullet}
                 onChange={(e) => onUpdateDescription(experience.id, idx, e.target.value)}
+                onBlur={() => onFieldTouched(`${basePath}.description.${idx}`)}
+                error={shouldShowError(`${basePath}.description.${idx}`) ? getError(`${basePath}.description.${idx}`) : undefined}
               />
               <Button variant="ghost" onClick={() => onRemoveBullet(experience.id, idx)}>
                 <i className="fa-solid fa-times" aria-hidden />

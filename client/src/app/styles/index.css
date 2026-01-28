@@ -46,7 +46,8 @@
 }
 
 [data-sr-theme-scope][data-theme='dark'] {
-  --input-bg: rgba(255, 255, 255, 0.08);
+  /* inputs/selects não podem ser transparentes no dark mode */
+  --input-bg: #181a21;
   --input-text: rgba(255, 255, 255, 0.9);
 
   --text-dark: rgba(255, 255, 255, 0.92);
@@ -55,9 +56,10 @@
 
   --sr-page-bg: #0f1116;
 
-  --sr-surface: rgba(24, 26, 33, 0.92);
-  --sr-surface-soft: rgba(20, 22, 28, 0.78);
-  --sr-surface-2: rgba(34, 36, 44, 0.88);
+  /* superfícies no dark mode também sem transparência */
+  --sr-surface: #181a21;
+  --sr-surface-soft: #141821;
+  --sr-surface-2: #20232b;
   --sr-surface-hover: rgba(255, 255, 255, 0.04);
 
   --sr-border: rgba(255, 255, 255, 0.10);
@@ -68,7 +70,7 @@
   --sr-elev-1: 0 14px 34px rgba(0, 0, 0, 0.45);
   --sr-elev-2: 0 22px 60px rgba(0, 0, 0, 0.58);
 
-  --sr-input-bg: rgba(255, 255, 255, 0.06);
+  --sr-input-bg: #181a21;
   --sr-input-border: rgba(255, 255, 255, 0.12);
   --sr-input-placeholder: rgba(255, 255, 255, 0.42);
 

@@ -16,19 +16,19 @@ export function NotificationProvider() {
       toastOptions={{
         duration: 3600,
         style: {
-          background: '#ffffff',
-          color: '#1e1a1d',
-          border: '1px solid #f1c3ea',
+          background: 'var(--sr-surface)',
+          color: 'var(--sr-ink)',
+          border: '1px solid rgba(var(--sr-accent-rgb), 0.18)',
           borderRadius: 14,
           padding: 12,
-          boxShadow: '0 14px 32px rgba(0,0,0,0.14)',
+          boxShadow: 'var(--sr-elev-1)',
           maxWidth: 420,
         },
         success: {
-          iconTheme: { primary: '#c72cb8', secondary: '#ffffff' },
+          iconTheme: { primary: 'var(--sr-accent)', secondary: '#ffffff' },
         },
         error: {
-          iconTheme: { primary: '#9a1b1b', secondary: '#ffffff' },
+          iconTheme: { primary: 'var(--danger)', secondary: '#ffffff' },
         },
       }}
     >
@@ -46,9 +46,9 @@ export function NotificationProvider() {
                   width: 28,
                   height: 28,
                   borderRadius: 10,
-                  border: '1px solid #f1c3ea',
-                  background: '#ffffff',
-                  color: '#775f73',
+                  border: '1px solid var(--sr-border)',
+                  background: 'var(--sr-surface)',
+                  color: 'var(--sr-ink-muted)',
                   cursor: 'pointer',
                   fontSize: 16,
                   lineHeight: '26px',

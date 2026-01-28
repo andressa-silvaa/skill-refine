@@ -2,6 +2,7 @@
   display: grid;
   gap: 20px;
   height: 100%;
+  min-height: 0;
   grid-template-rows: auto auto 1fr auto;
   overflow-x: hidden;
   overflow-y: visible;
@@ -37,13 +38,29 @@
 
 .sr-resume-builder-wizard__content {
   min-height: 400px;
-  max-height: none;
+  max-height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 8px;
   flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
   width: 100%;
+}
+
+.sr-resume-builder-wizard__loading {
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  color: var(--sr-ink-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sr-resume-builder-wizard__loading i {
+  font-size: 18px;
+  animation: sr-spin 1s linear infinite;
 }
 
 .sr-resume-builder-wizard__content > * {
@@ -62,6 +79,15 @@
 .sr-resume-builder-wizard__content::-webkit-scrollbar-thumb {
   background: var(--sr-border);
   border-radius: 999px;
+}
+
+@keyframes sr-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .sr-resume-builder-wizard__actions {

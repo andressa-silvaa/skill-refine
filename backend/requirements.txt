@@ -10,5 +10,6 @@ requests>=2.32,<3.0
 cryptography>=43.0,<44.0
 ruff>=0.6,<1.0
 cloudinary>=1.44,<2.0
+playwright
 
 

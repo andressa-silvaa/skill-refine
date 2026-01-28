@@ -1,4 +1,13 @@
 services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: skill-refine-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - skill_refine_ollama_data:/root/.ollama
+
   postgres:
     image: postgres:16-alpine
     container_name: skill-refine-postgres
@@ -28,9 +37,12 @@ services:
       - DATABASE_URL=postgres://skill_refine:skill_refine@postgres:5432/skill_refine
       - DJANGO_DEBUG=1
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+      - AI_LOCAL_BASE_URL=http://ollama:11434
     depends_on:
       postgres:
         condition: service_healthy
+      ollama:
+        condition: service_started
     ports:
       - "8000:8000"
     volumes:
@@ -40,5 +52,5 @@ services:
 
 volumes:
   skill_refine_postgres_data:
-
+  skill_refine_ollama_data:
 

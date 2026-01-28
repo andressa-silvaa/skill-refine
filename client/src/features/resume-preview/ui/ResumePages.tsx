@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import type { ThemeLayoutData, ThemeBlock } from './ThemeRenderer';
 import { ThemePageLayout } from './ThemeRenderer';
@@ -22,9 +22,10 @@ const parsePx = (value?: string, fallback = 0) => {
 type Props = {
   layout: ThemeLayoutData;
   sectionGap: string | undefined;
+  onReady?: (pageCount: number) => void;
 };
 
-export function ResumePages({ layout, sectionGap }: Props) {
+export function ResumePages({ layout, sectionGap, onReady }: Props) {
   const gap = parsePx(sectionGap, 16);
   const contentHeight = A4_PAGE.height - DEFAULT_PADDING * 2;
 
@@ -49,6 +50,14 @@ export function ResumePages({ layout, sectionGap }: Props) {
     [mainPages, sidebarPages, pageCount]
   );
 
+  useEffect(() => {
+    if (!onReady) return;
+    const raf = window.requestAnimationFrame(() => {
+      onReady(pages.length);
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [onReady, pages]);
+
   const mainHeaderBlocks = layout.type === 'two-column' && layout.headerPlacement === 'full'
     ? layout.main.map((block, index) => ({ block, index })).filter(({ block }) => block.kind === 'header')
     : [];
@@ -59,7 +68,10 @@ export function ResumePages({ layout, sectionGap }: Props) {
     : [];
 
   return (
-    <div className="sr-resume-pages" style={{ '--resume-page-width': `${A4_PAGE.width}px`, '--resume-page-height': `${A4_PAGE.height}px` } as React.CSSProperties}>
+    <div
+      className="sr-resume-pages"
+      style={{ '--resume-page-width': `${A4_PAGE.width}px`, '--resume-page-height': `${A4_PAGE.height}px` } as React.CSSProperties}
+    >
       {pages.map((page, index) => (
         <div key={`page-${index}`} className="sr-resume-page" role="article" aria-label={`Página ${index + 1}`}>
           <div className="sr-resume-page__content">

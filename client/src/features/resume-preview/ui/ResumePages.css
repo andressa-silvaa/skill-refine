@@ -2,6 +2,11 @@
   display: grid;
   gap: 24px;
   width: 100%;
+  position: relative;
+}
+
+body[data-sr-print='true'] .sr-resume-pages {
+  gap: 0;
 }
 
 .sr-resume-page {
@@ -37,8 +42,11 @@
 
 .sr-resume-pages__measure {
   position: absolute;
-  inset: -9999px;
+  top: 0;
+  left: 0;
   width: var(--resume-page-width, 794px);
+  height: 0;
+  overflow: hidden;
   visibility: hidden;
   pointer-events: none;
 }
@@ -65,6 +73,11 @@
     border-radius: 0;
     page-break-after: always;
     break-after: page;
+  }
+
+  .sr-resume-page:last-child {
+    page-break-after: auto;
+    break-after: auto;
   }
 
   .sr-resume-page__block {

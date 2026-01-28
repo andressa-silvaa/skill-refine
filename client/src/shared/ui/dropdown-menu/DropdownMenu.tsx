@@ -201,12 +201,15 @@ export function DropdownMenu(props: Props) {
     </div>
   ) : null;
 
+  const portalRoot =
+    typeof document !== 'undefined'
+      ? document.querySelector('[data-sr-theme-scope]') ?? document.body
+      : null;
+
   return (
     <div ref={rootRef} className="sr-dd">
       {triggerElement}
-      {typeof document !== 'undefined' && menuContent 
-        ? createPortal(menuContent, document.body) 
-        : null}
+      {portalRoot && menuContent ? createPortal(menuContent, portalRoot) : null}
     </div>
   );
 }

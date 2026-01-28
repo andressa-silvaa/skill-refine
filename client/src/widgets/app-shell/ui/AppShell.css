@@ -95,3 +95,9 @@
     width: var(--sr-sidebar-width-expanded);
   }
 }
+
+@media (max-width: 480px) {
+  .sr-app-shell__main {
+    padding-left: 0;
+  }
+}

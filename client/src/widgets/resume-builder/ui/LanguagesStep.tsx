@@ -6,6 +6,9 @@ import './LanguagesStep.css';
 type Props = {
   languages: Language[];
   onChange: (languages: Language[]) => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 const LEVEL_OPTIONS = [
@@ -17,7 +20,7 @@ const LEVEL_OPTIONS = [
 ];
 
 export function LanguagesStep(props: Props) {
-  const { languages, onChange } = props;
+  const { languages, onChange, getError, shouldShowError, onFieldTouched } = props;
 
   const addLanguage = () => {
     const newLang: Language = {
@@ -44,12 +47,16 @@ export function LanguagesStep(props: Props) {
       </div>
 
       <div className="sr-languages-step__list">
-        {languages.map((lang) => (
+        {languages.map((lang, index) => (
           <LanguageCard
             key={lang.id}
             language={lang}
+            index={index}
             onUpdate={(updates) => updateLanguage(lang.id, updates)}
             onRemove={() => removeLanguage(lang.id)}
+            getError={getError}
+            shouldShowError={shouldShowError}
+            onFieldTouched={onFieldTouched}
           />
         ))}
       </div>
@@ -64,27 +71,40 @@ export function LanguagesStep(props: Props) {
 
 type LanguageCardProps = {
   language: Language;
+  index: number;
   onUpdate: (updates: Partial<Language>) => void;
   onRemove: () => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 function LanguageCard(props: LanguageCardProps) {
-  const { language, onUpdate, onRemove } = props;
+  const { language, index, onUpdate, onRemove, getError, shouldShowError, onFieldTouched } = props;
+  const basePath = `languages.${index}`;
+  const nameError = shouldShowError(`${basePath}.name`) ? getError(`${basePath}.name`) : undefined;
+  const levelError = shouldShowError(`${basePath}.level`) ? getError(`${basePath}.level`) : undefined;
 
   return (
     <div className="sr-language-card">
       <div className="sr-language-card__row">
         <Input
-          label="Idioma"
+          label="Idioma *"
           placeholder="Ex.: Inglês, Espanhol, Francês"
           value={language.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
+          onBlur={() => onFieldTouched(`${basePath}.name`)}
+          error={nameError}
         />
         <CustomSelect
-          label="Nível"
+          label="Nível *"
           options={LEVEL_OPTIONS}
           value={language.level}
-          onChange={(value) => onUpdate({ level: value as LanguageLevel })}
+          onChange={(value) => {
+            onUpdate({ level: value as LanguageLevel });
+            onFieldTouched(`${basePath}.level`);
+          }}
+          error={levelError}
         />
       </div>
       <Button variant="ghost" onClick={onRemove}>

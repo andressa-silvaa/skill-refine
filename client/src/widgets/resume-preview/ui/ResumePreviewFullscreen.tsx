@@ -50,8 +50,6 @@ export function ResumePreviewFullscreen(props: Props) {
             ...stressResumeData,
             themeId: data.themeId,
             themePaletteId: data.themePaletteId,
-            themeAccentOverride: data.themeAccentOverride,
-            themeSecondaryOverride: data.themeSecondaryOverride,
           }
         : data,
     [data, useStress]
@@ -90,8 +88,6 @@ export function ResumePreviewFullscreen(props: Props) {
               <ResumeColorEditor
                 theme={theme}
                 paletteId={previewData.themePaletteId}
-                accentOverride={previewData.themeAccentOverride}
-                secondaryOverride={previewData.themeSecondaryOverride}
                 onChange={onUpdateData}
               />
             </aside>

@@ -209,3 +209,15 @@
   --sr-border: #1e293b;
   color: #e2e8f0;
 }
+
+@media print {
+  .sr-resume-preview {
+    margin: 0;
+    padding: 0;
+  }
+
+  .sr-resume-preview__paper {
+    margin: 0;
+    padding: 0;
+  }
+}

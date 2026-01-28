@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { Button, Input, CustomSelect, Checkbox } from '@/shared/ui';
 import type { Skill, SkillLevel } from '@/entities/resume';
 
@@ -8,6 +6,11 @@ import './SkillsStep.css';
 type Props = {
   skills: Skill[];
   onChange: (skills: Skill[]) => void;
+  showLevels: boolean;
+  onToggleShowLevels: (next: boolean) => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 const LEVEL_OPTIONS = [
@@ -19,8 +22,8 @@ const LEVEL_OPTIONS = [
 ];
 
 export function SkillsStep(props: Props) {
-  const { skills, onChange } = props;
-  const [showLevels, setShowLevels] = useState(false);
+  const { skills, onChange, showLevels, onToggleShowLevels, getError, shouldShowError, onFieldTouched } = props;
+  const listError = shouldShowError('skills') ? getError('skills') : undefined;
 
   const addSkill = () => {
     const newSkill: Skill = {
@@ -49,19 +52,24 @@ export function SkillsStep(props: Props) {
         <Checkbox
           className="sr-skills-step__toggle"
           checked={showLevels}
-          onChange={setShowLevels}
+          onChange={onToggleShowLevels}
           label="Mostrar níveis de proficiência"
         />
       </div>
 
-      <div className="sr-skills-step__list">
-        {skills.map((skill) => (
+      <div className={`sr-skills-step__list${listError ? ' is-invalid' : ''}`} tabIndex={listError ? -1 : undefined}>
+        {listError ? <p className="sr-input-error">{listError}</p> : null}
+        {skills.map((skill, index) => (
           <SkillCard
             key={skill.id}
             skill={skill}
+            index={index}
             showLevel={showLevels}
             onUpdate={(updates) => updateSkill(skill.id, updates)}
             onRemove={() => removeSkill(skill.id)}
+            getError={getError}
+            shouldShowError={shouldShowError}
+            onFieldTouched={onFieldTouched}
           />
         ))}
       </div>
@@ -76,28 +84,41 @@ export function SkillsStep(props: Props) {
 
 type SkillCardProps = {
   skill: Skill;
+  index: number;
   showLevel: boolean;
   onUpdate: (updates: Partial<Skill>) => void;
   onRemove: () => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 function SkillCard(props: SkillCardProps) {
-  const { skill, showLevel, onUpdate, onRemove } = props;
+  const { skill, index, showLevel, onUpdate, onRemove, getError, shouldShowError, onFieldTouched } = props;
+  const basePath = `skills.${index}`;
+  const nameError = shouldShowError(`${basePath}.name`) ? getError(`${basePath}.name`) : undefined;
+  const levelError = shouldShowError(`${basePath}.level`) ? getError(`${basePath}.level`) : undefined;
 
   return (
     <div className="sr-skill-card">
       <Input
-        label="Nome da habilidade"
+        label="Nome da habilidade *"
         placeholder="Ex.: React, Python, Gestão de Projetos"
         value={skill.name}
         onChange={(e) => onUpdate({ name: e.target.value })}
+        onBlur={() => onFieldTouched(`${basePath}.name`)}
+        error={nameError}
       />
       {showLevel ? (
         <CustomSelect
-          label="Nível"
+          label="Nível *"
           options={LEVEL_OPTIONS}
           value={skill.level || ''}
-          onChange={(value) => onUpdate({ level: value ? (value as SkillLevel) : undefined })}
+          onChange={(value) => {
+            onUpdate({ level: value ? (value as SkillLevel) : undefined });
+            onFieldTouched(`${basePath}.level`);
+          }}
+          error={levelError}
         />
       ) : null}
       <Button variant="ghost" onClick={onRemove}>

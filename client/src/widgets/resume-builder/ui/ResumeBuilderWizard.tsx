@@ -1,31 +1,113 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Button, Modal, ProgressBar, Stepper } from '@/shared/ui';
-import type { ResumeThemeId } from '@/entities/resume';
+import type { Resume, ResumeData, ResumeStatus } from '@/entities/resume';
+import type { ResumeDraftPayload } from '@/features/resume/api/resumeApi';
 import { useResumeBuilder, type BuilderStep } from '@/features/resume-builder';
-import { useResumePreview } from '@/features/resume-preview';
+import { notify } from '@/shared/lib/notify';
+import { getApiFieldErrors } from '@/shared/api';
 import { ResumePreviewFullscreen } from '@/widgets/resume-preview';
 import { AutoSaveIndicator } from './AutoSaveIndicator';
 import { ResumeBuilderStepContent } from './ResumeBuilderStepContent';
+import { ConfirmDiscardChangesModal } from './ConfirmDiscardChangesModal';
 
 import './ResumeBuilderWizard.css';
 
 type Props = {
+  title: string;
   open: boolean;
   onClose: () => void;
-  onCreate: (data: { name: string; themeId: ResumeThemeId }) => void;
+  onSaveDraft: (data: { payload: ResumeDraftPayload; resumeId?: string | null }) => Promise<Resume>;
+  onFinish: (data: { payload: ResumeDraftPayload; resumeId?: string | null }) => Promise<Resume>;
+  isSavingDraft?: boolean;
+  isSubmitting?: boolean;
+  isLoading?: boolean;
+  initialData?: ResumeData | null;
+  initialResumeId?: string | null;
+  initialStatus?: ResumeStatus | null;
+  initialLastStep?: BuilderStep | null;
 };
 
 export function ResumeBuilderWizard(props: Props) {
-  const { open, onClose, onCreate } = props;
+  const {
+    title,
+    open,
+    onClose,
+    onSaveDraft,
+    onFinish,
+    isSavingDraft = false,
+    isSubmitting = false,
+    isLoading = false,
+    initialData,
+    initialResumeId,
+    initialStatus,
+    initialLastStep,
+  } = props;
   const builder = useResumeBuilder();
-  const preview = useResumePreview();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const builderRef = useRef(builder);
+  const prevOpenRef = useRef(false);
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const skipDiscardRef = useRef(false);
+  builderRef.current = builder;
+
+  useEffect(() => {
+    if (prevOpenRef.current && !open) {
+      builderRef.current.reset();
+    }
+    prevOpenRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    window.setTimeout(() => {
+      const title = document.querySelector<HTMLElement>('.sr-modal__title');
+      title?.focus();
+    }, 0);
+  }, [open]);
+  
+  useEffect(() => {
+    if (!open && isPreviewOpen) setIsPreviewOpen(false);
+  }, [open, isPreviewOpen]);
+
+  const hydratedRef = useRef<string | null>(null);
+
+  const inferStepFromData = (data: ResumeData): BuilderStep => {
+    if (!data.themeId) return 'theme';
+    if (!data.targetPosition) return 'basic';
+    if (!data.contact.fullName || !data.contact.email) return 'contact';
+    if (!data.experiences.length) return 'experience';
+    if (!data.educations.length) return 'education';
+    if (!data.skills.length) return 'skills';
+    if (!data.languages.length) return 'languages';
+    if (!data.summary) return 'summary';
+    return 'review';
+  };
+
+  useEffect(() => {
+    if (!open || !initialData) return;
+    const key = `${initialResumeId ?? 'new'}:${initialStatus ?? ''}:${initialLastStep ?? ''}`;
+    if (hydratedRef.current === key) return;
+    hydratedRef.current = key;
+
+    let step: BuilderStep = 'theme';
+    if (initialStatus === 'complete') {
+      step = 'review';
+    } else if (initialLastStep) {
+      step = initialLastStep;
+    } else {
+      step = inferStepFromData(initialData);
+    }
+
+    builderRef.current.hydrate(initialData, initialResumeId ?? null, step);
+  }, [open, initialData, initialResumeId, initialStatus, initialLastStep]);
 
   useEffect(() => {
     if (!open) {
-      builder.reset();
+      hydratedRef.current = null;
     }
-  }, [open, builder]);
+  }, [open]);
 
   useEffect(() => {
     if (!open || !builder.hasUnsavedChanges) return;
@@ -38,32 +120,91 @@ export function ResumeBuilderWizard(props: Props) {
   }, [open, builder.hasUnsavedChanges]);
 
   const handleClose = () => {
-    if (builder.hasUnsavedChanges) {
-      if (!window.confirm('Você tem alterações não salvas. Deseja realmente sair?')) {
-        return;
-      }
+    if (skipDiscardRef.current) {
+      skipDiscardRef.current = false;
+      onClose();
+      return;
+    }
+    if (builderRef.current.isDirty) {
+      setDiscardOpen(true);
+      return;
     }
     onClose();
   };
 
-  const handleSaveDraft = () => {
-    builder.saveDraft();
-    onCreate({
+  const handleSaveDraft = async () => {
+    const payload: ResumeDraftPayload = {
+      ...builder.data,
       name: builder.data.targetPosition || 'Novo Currículo',
-      themeId: builder.data.themeId,
-    });
-    handleClose();
+      status: 'draft',
+      lastStep: builder.currentStep,
+    };
+
+    try {
+      const resume = await onSaveDraft({ payload, resumeId: builder.resumeId });
+      builder.setResumeId(resume.id);
+      builder.saveDraft();
+      skipDiscardRef.current = true;
+      onClose();
+    } catch (err) {
+      const fields = getApiFieldErrors(err);
+      if (fields) {
+        builder.setServerErrors(fields);
+        const step = builder.getFirstErrorStep(fields);
+        if (step) {
+          builder.goToStep(step);
+          builder.markStepSubmitted(step);
+        }
+        focusFirstError();
+      }
+      return;
+    }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (builder.currentStep === 'review') {
-      onCreate({
+      const validation = builder.validateAll();
+      if (!validation.isValid) {
+        const firstStep = builder.getFirstErrorStep(validation.errors);
+        if (firstStep) {
+          builder.goToStep(firstStep);
+          builder.markStepSubmitted(firstStep);
+        }
+        notify.error('Revise os campos obrigatórios antes de concluir.');
+        focusFirstError();
+        return;
+      }
+      const payload: ResumeDraftPayload = {
+        ...builder.data,
         name: builder.data.targetPosition || 'Novo Currículo',
-        themeId: builder.data.themeId,
-      });
-      handleClose();
+        status: 'complete',
+        lastStep: 'review',
+      };
+      try {
+        const resume = await onFinish({ payload, resumeId: builder.resumeId });
+        builder.setResumeId(resume.id);
+        skipDiscardRef.current = true;
+        onClose();
+      } catch (err) {
+        const fields = getApiFieldErrors(err);
+        if (fields) {
+          builder.setServerErrors(fields);
+          const step = builder.getFirstErrorStep(fields);
+          if (step) {
+            builder.goToStep(step);
+            builder.markStepSubmitted(step);
+          }
+          focusFirstError();
+        }
+        return;
+      }
     } else {
-      builder.nextStep();
+      const currentOrder = builder.steps.find((s) => s.id === builder.currentStep)?.order ?? 0;
+      const nextStep = builder.steps.find((s) => s.order === currentOrder + 1)?.id as BuilderStep | undefined;
+      if (nextStep && !builder.tryNavigateToStep(nextStep)) {
+        focusFirstError();
+        return;
+      }
     }
   };
 
@@ -87,9 +228,21 @@ export function ResumeBuilderWizard(props: Props) {
   const currentStepNum = currentStepIndex + 1;
   const totalSteps = builder.steps.length;
 
+  const focusFirstError = () => {
+    window.setTimeout(() => {
+      const container = containerRef.current ?? document;
+      const invalidElement = container.querySelector<HTMLElement>('.is-invalid, [aria-invalid="true"]');
+      if (!invalidElement) return;
+      invalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (typeof invalidElement.focus === 'function') {
+        invalidElement.focus();
+      }
+    }, 0);
+  };
+
   return (
-    <Modal open={open} title="Criar Currículo" subtitle="Preencha as informações para criar seu currículo" onClose={handleClose} width={900}>
-      <div className="sr-resume-builder-wizard">
+    <Modal open={open} title={title} subtitle="Preencha as informações para criar seu currículo" onClose={handleClose} width={900}>
+      <div className="sr-resume-builder-wizard" ref={containerRef}>
         <div className="sr-resume-builder-wizard__progress">
           <ProgressBar
             current={currentStepNum}
@@ -106,8 +259,8 @@ export function ResumeBuilderWizard(props: Props) {
             currentStep={currentStepNum}
             onStepClick={(stepId) => {
               const targetStep = stepId as BuilderStep;
-              if (builder.canGoToStep(targetStep)) {
-                builder.goToStep(targetStep);
+              if (!builder.tryNavigateToStep(targetStep)) {
+                focusFirstError();
               }
             }}
             isStepClickable={(stepId, stepNum) => {
@@ -118,24 +271,31 @@ export function ResumeBuilderWizard(props: Props) {
         </div>
 
         <div className="sr-resume-builder-wizard__content">
-          <ResumeBuilderStepContent builder={builder} onStepEdit={handleStepEdit} />
+          {isLoading ? (
+            <div className="sr-resume-builder-wizard__loading" role="status" aria-live="polite">
+              <i className="fa-solid fa-circle-notch" aria-hidden />
+              Carregando currículo...
+            </div>
+          ) : (
+            <ResumeBuilderStepContent builder={builder} onStepEdit={handleStepEdit} />
+          )}
         </div>
 
         <div className="sr-resume-builder-wizard__actions">
           <div className="sr-resume-builder-wizard__actions-back">
-            <Button variant="secondary" onClick={builder.currentStep === 'theme' ? handleClose : builder.prevStep}>
+            <Button variant="secondary" onClick={builder.currentStep === 'theme' ? handleClose : builder.prevStep} disabled={isLoading}>
               {builder.currentStep === 'theme' ? 'Cancelar' : 'Voltar'}
             </Button>
           </div>
 
           <div className="sr-resume-builder-wizard__actions-secondary">
             {builder.currentStep !== 'review' && builder.hasUnsavedChanges ? (
-              <Button variant="ghost" onClick={handleSaveDraft}>
-                Salvar rascunho
+              <Button variant="ghost" onClick={handleSaveDraft} disabled={isSavingDraft || isSubmitting || isLoading}>
+                {isSavingDraft ? 'Salvando...' : 'Salvar rascunho'}
               </Button>
             ) : null}
             {builder.currentStep !== 'theme' ? (
-              <Button variant="ghost" onClick={() => preview.openPreview(builder.data)}>
+              <Button variant="ghost" onClick={() => setIsPreviewOpen(true)} disabled={isSavingDraft || isSubmitting || isLoading}>
                 <i className="fa-solid fa-eye" aria-hidden />
                 Visualizar
               </Button>
@@ -143,8 +303,8 @@ export function ResumeBuilderWizard(props: Props) {
           </div>
 
           <div className="sr-resume-builder-wizard__actions-primary">
-            <Button variant="primary" onClick={handleNext} disabled={!builder.canGoNext}>
-              {builder.currentStep === 'review' ? 'Concluir' : 'Próximo'}
+            <Button variant="primary" onClick={handleNext} disabled={!builder.canGoNext || isSavingDraft || isSubmitting || isLoading}>
+              {builder.currentStep === 'review' ? (isSubmitting ? 'Salvando...' : 'Concluir') : 'Próximo'}
               {builder.currentStep !== 'review' ? <i className="fa-solid fa-arrow-right" aria-hidden /> : null}
             </Button>
           </div>
@@ -152,11 +312,21 @@ export function ResumeBuilderWizard(props: Props) {
       </div>
 
       <ResumePreviewFullscreen
-        open={preview.isOpen}
+        open={isPreviewOpen}
         data={builder.data}
-        onClose={preview.closePreview}
+        onClose={() => setIsPreviewOpen(false)}
         enableStressToggle={process.env.NODE_ENV === 'development'}
         onUpdateData={builder.updateData}
+      />
+
+      <ConfirmDiscardChangesModal
+        open={discardOpen}
+        onClose={() => setDiscardOpen(false)}
+        onDiscard={() => {
+          setDiscardOpen(false);
+          builder.reset();
+          onClose();
+        }}
       />
     </Modal>
   );

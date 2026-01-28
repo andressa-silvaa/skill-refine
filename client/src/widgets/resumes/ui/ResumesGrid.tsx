@@ -12,10 +12,12 @@ type Props = {
   onDuplicate: (id: string) => void;
   onExport: (id: string) => void;
   onDelete: (id: string) => void;
+  duplicateLoadingId?: string | null;
+  downloadLoadingId?: string | null;
 };
 
 export function ResumesGrid(props: Props) {
-  const { items, onEdit, onDuplicate, onExport, onDelete } = props;
+  const { items, onEdit, onDuplicate, onExport, onDelete, duplicateLoadingId, downloadLoadingId } = props;
 
   return (
     <div className="sr-resumes-grid" role="list">
@@ -38,8 +40,24 @@ export function ResumesGrid(props: Props) {
               }
               items={[
                 { key: 'edit', label: 'Abrir/Editar', iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
-                { key: 'dup', label: 'Duplicar', iconClass: 'fa-regular fa-copy', onClick: () => onDuplicate(vm.id) },
-                { key: 'pdf', label: 'Exportar PDF', iconClass: 'fa-regular fa-file-pdf', onClick: () => onExport(vm.id) },
+                {
+                  key: 'dup',
+                  label: duplicateLoadingId === vm.id ? 'Duplicando...' : 'Duplicar',
+                  iconClass: duplicateLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-copy',
+                  onClick: () => {
+                    if (duplicateLoadingId === vm.id) return;
+                    onDuplicate(vm.id);
+                  },
+                },
+                {
+                  key: 'pdf',
+                  label: downloadLoadingId === vm.id ? 'Gerando PDF...' : 'Baixar PDF',
+                  iconClass: downloadLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-file-pdf',
+                  onClick: () => {
+                    if (downloadLoadingId === vm.id) return;
+                    onExport(vm.id);
+                  },
+                },
                 { key: 'del', label: 'Excluir', iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
               ]}
             />

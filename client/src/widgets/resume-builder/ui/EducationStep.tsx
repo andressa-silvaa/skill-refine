@@ -6,6 +6,9 @@ import './EducationStep.css';
 type Props = {
   educations: Education[];
   onChange: (educations: Education[]) => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 const STATUS_OPTIONS = [
@@ -14,7 +17,7 @@ const STATUS_OPTIONS = [
 ];
 
 export function EducationStep(props: Props) {
-  const { educations, onChange } = props;
+  const { educations, onChange, getError, shouldShowError, onFieldTouched } = props;
 
   const addEducation = () => {
     const newEdu: Education = {
@@ -44,8 +47,17 @@ export function EducationStep(props: Props) {
       </div>
 
       <div className="sr-education-step__list">
-        {educations.map((edu) => (
-          <EducationCard key={edu.id} education={edu} onUpdate={(updates) => updateEducation(edu.id, updates)} onRemove={() => removeEducation(edu.id)} />
+        {educations.map((edu, index) => (
+          <EducationCard
+            key={edu.id}
+            education={edu}
+            index={index}
+            onUpdate={(updates) => updateEducation(edu.id, updates)}
+            onRemove={() => removeEducation(edu.id)}
+            getError={getError}
+            shouldShowError={shouldShowError}
+            onFieldTouched={onFieldTouched}
+          />
         ))}
       </div>
 
@@ -59,12 +71,23 @@ export function EducationStep(props: Props) {
 
 type EducationCardProps = {
   education: Education;
+  index: number;
   onUpdate: (updates: Partial<Education>) => void;
   onRemove: () => void;
+  getError: (path: string) => string | undefined;
+  shouldShowError: (path: string) => boolean;
+  onFieldTouched: (path: string) => void;
 };
 
 function EducationCard(props: EducationCardProps) {
-  const { education, onUpdate, onRemove } = props;
+  const { education, index, onUpdate, onRemove, getError, shouldShowError, onFieldTouched } = props;
+  const basePath = `educations.${index}`;
+  const institutionError = shouldShowError(`${basePath}.institution`) ? getError(`${basePath}.institution`) : undefined;
+  const courseError = shouldShowError(`${basePath}.course`) ? getError(`${basePath}.course`) : undefined;
+  const degreeError = shouldShowError(`${basePath}.degree`) ? getError(`${basePath}.degree`) : undefined;
+  const startDateError = shouldShowError(`${basePath}.startDate`) ? getError(`${basePath}.startDate`) : undefined;
+  const endDateError = shouldShowError(`${basePath}.endDate`) ? getError(`${basePath}.endDate`) : undefined;
+  const statusError = shouldShowError(`${basePath}.status`) ? getError(`${basePath}.status`) : undefined;
 
   return (
     <div className="sr-education-card">
@@ -77,42 +100,60 @@ function EducationCard(props: EducationCardProps) {
 
       <div className="sr-education-card__fields">
         <Input
-          label="Instituição"
+          label="Instituição *"
           placeholder="Nome da instituição"
           value={education.institution}
           onChange={(e) => onUpdate({ institution: e.target.value })}
+          onBlur={() => onFieldTouched(`${basePath}.institution`)}
+          error={institutionError}
         />
         <Input
-          label="Curso"
+          label="Curso *"
           placeholder="Nome do curso"
           value={education.course}
           onChange={(e) => onUpdate({ course: e.target.value })}
+          onBlur={() => onFieldTouched(`${basePath}.course`)}
+          error={courseError}
         />
         <Input
           label="Grau"
           placeholder="Ex.: Bacharelado, Mestrado, Doutorado"
           value={education.degree}
           onChange={(e) => onUpdate({ degree: e.target.value })}
+          onBlur={() => onFieldTouched(`${basePath}.degree`)}
+          error={degreeError}
         />
         <div className="sr-education-card__row">
           <DatePicker
-            label="Data início"
+            label="Data início *"
             value={education.startDate}
-            onChange={(value) => onUpdate({ startDate: value })}
+            onChange={(value) => {
+              onUpdate({ startDate: value });
+              onFieldTouched(`${basePath}.startDate`);
+            }}
+            error={startDateError}
           />
           {education.status === 'completed' ? (
             <DatePicker
-              label="Data conclusão"
+              label="Data conclusão *"
               value={education.endDate || ''}
-              onChange={(value) => onUpdate({ endDate: value })}
+              onChange={(value) => {
+                onUpdate({ endDate: value });
+                onFieldTouched(`${basePath}.endDate`);
+              }}
+              error={endDateError}
             />
           ) : null}
         </div>
         <CustomSelect
-          label="Status"
+          label="Status *"
           options={STATUS_OPTIONS}
           value={education.status}
-          onChange={(value) => onUpdate({ status: value as EducationStatus, endDate: value === 'in_progress' ? undefined : education.endDate })}
+          onChange={(value) => {
+            onUpdate({ status: value as EducationStatus, endDate: value === 'in_progress' ? undefined : education.endDate });
+            onFieldTouched(`${basePath}.status`);
+          }}
+          error={statusError}
         />
       </div>
     </div>

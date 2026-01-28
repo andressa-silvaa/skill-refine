@@ -38,6 +38,7 @@ class Resume(UUIDPrimaryKeyModel, TimestampedModel, SoftDeleteModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
     name = models.CharField(max_length=160, default="", blank=True)
     status = models.CharField(max_length=24, choices=ResumeStatus.choices, default=ResumeStatus.DRAFT)
+    last_step = models.CharField(max_length=32, null=True, blank=True)
     target_position = models.CharField(max_length=160, default="", blank=True)
     summary = models.TextField(default="", blank=True)
     theme_id = models.CharField(max_length=64, default="classic-one-column")

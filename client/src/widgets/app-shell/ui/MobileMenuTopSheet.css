@@ -1,0 +1,113 @@
+.sr-mobile-menu__backdrop {
+  display: none;
+}
+
+.sr-mobile-menu {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .sr-mobile-menu__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease;
+    z-index: 80;
+  }
+
+  .sr-mobile-menu__backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sr-mobile-menu {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    max-height: min(80vh, 560px);
+    overflow: hidden;
+    background: var(--sr-surface);
+    border-bottom: 1px solid rgba(199, 44, 184, 0.14);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+    transform: translateY(-105%);
+    transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 90;
+  }
+
+  .sr-mobile-menu.is-open {
+    transform: translateY(0);
+  }
+
+  .sr-mobile-menu__nav {
+    max-height: min(80vh, 560px);
+    overflow: auto;
+    padding: 12px 12px 16px;
+  }
+
+  .sr-mobile-menu__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .sr-mobile-menu__divider {
+    height: 1px;
+    background: rgba(199, 44, 184, 0.14);
+    margin: 12px 0;
+  }
+
+  .sr-mobile-menu__item {
+    width: 100%;
+    min-height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    border: 1px solid transparent;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--sr-ink);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .sr-mobile-menu__item:active {
+    transform: scale(0.99);
+  }
+
+  .sr-mobile-menu__item.is-active {
+    background: rgba(var(--sr-accent-rgb), 0.16);
+    border-color: rgba(var(--sr-accent-rgb), 0.35);
+  }
+
+  .sr-mobile-menu__item--muted {
+    color: var(--sr-ink-subtle);
+  }
+
+  .sr-mobile-menu__icon {
+    width: 44px;
+    display: grid;
+    place-items: center;
+    color: var(--sr-ink-muted);
+  }
+
+  .sr-mobile-menu__label {
+    font-size: 14px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+

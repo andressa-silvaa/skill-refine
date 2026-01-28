@@ -9,27 +9,27 @@ import './ResumePreviewContent.css';
 
 type Props = {
   data: ResumeData;
+  onReady?: (pageCount: number) => void;
 };
 
 export function ResumePreviewContent(props: Props) {
-  const { data } = props;
+  const { data, onReady } = props;
   const theme = getResumeThemeById(data.themeId);
   const palette = getResumeThemePalette(theme, data.themePaletteId);
-  const accent = data.themeAccentOverride ?? palette.accent;
-  const accentSoft = data.themeAccentOverride ? toRgba(accent, 0.12) : palette.accentSoft;
-  const secondary = data.themeSecondaryOverride ?? '';
+  // Removido suporte a cores personalizadas: usamos apenas paletas prontas.
+  const accent = palette.accent;
+  const accentSoft = palette.accentSoft;
   const styleTokens = toThemeStyleVars({
     ...theme.styleTokens,
     accent,
     accentSoft,
-    ...(secondary ? { secondary } : {}),
   });
   const layout = getThemeLayoutData(theme, data);
 
   return (
     <div className="sr-resume-preview">
       <div className={`sr-resume-preview__paper sr-resume-theme sr-resume-theme--${theme.id}`} style={styleTokens}>
-        <ResumePages layout={layout} sectionGap={theme.styleTokens.sectionGap} />
+        <ResumePages layout={layout} sectionGap={theme.styleTokens.sectionGap} onReady={onReady} />
       </div>
     </div>
   );
@@ -54,11 +54,4 @@ function toThemeStyleVars(tokens: ResumeThemeStyleTokens & { secondary?: string 
   } as React.CSSProperties;
 }
 
-function toRgba(hex: string, alpha: number): string {
-  const normalized = hex.replace('#', '');
-  if (normalized.length !== 6) return `rgba(0,0,0,${alpha})`;
-  const r = parseInt(normalized.slice(0, 2), 16);
-  const g = parseInt(normalized.slice(2, 4), 16);
-  const b = parseInt(normalized.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
+// Overrides removidos: paletas prontas apenas.
