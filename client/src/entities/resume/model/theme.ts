@@ -42,6 +42,7 @@ export type ResumeThemeStyleTokens = Partial<{
 export type ResumeThemePalette = {
   id: string;
   name: string;
+  nameKey?: string;
   accent: string;
   accentSoft: string;
 };

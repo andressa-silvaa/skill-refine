@@ -28,13 +28,15 @@ export const optionalTrimmedText = (min: number, max: number, messages: { min: s
 
 const monthRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
 
-export const monthString = (message: string) =>
-  z.preprocess(trimValue, z.string().min(1, message).refine((value) => monthRegex.test(value), 'Informe uma data válida'));
+const DEFAULT_DATE_INVALID = 'Invalid date';
 
-export const optionalMonthString = () =>
+export const monthString = (requiredMessage: string, dateInvalidMessage: string = DEFAULT_DATE_INVALID) =>
+  z.preprocess(trimValue, z.string().min(1, requiredMessage).refine((value) => monthRegex.test(String(value)), dateInvalidMessage));
+
+export const optionalMonthString = (dateInvalidMessage: string = DEFAULT_DATE_INVALID) =>
   z.preprocess(
     emptyToUndefined,
-    z.string().refine((value) => monthRegex.test(value), 'Informe uma data válida').optional(),
+    z.string().refine((value) => !value || monthRegex.test(String(value)), dateInvalidMessage).optional(),
   );
 
 export const optionalPhoneAllowEmpty = (message: string) =>

@@ -1,12 +1,12 @@
 export type ThemeMode = 'light' | 'dark';
 export type AccentKey = 'pink' | 'purple' | 'blue' | 'green' | 'orange';
 
-export const ACCENTS: Array<{ key: AccentKey; label: string; color: string }> = [
-  { key: 'pink', label: 'Rosa', color: '#c72cb8' },
-  { key: 'purple', label: 'Roxo', color: '#8b2e80' },
-  { key: 'blue', label: 'Azul', color: '#2f6feb' },
-  { key: 'green', label: 'Verde', color: '#2bbf5a' },
-  { key: 'orange', label: 'Laranja', color: '#d45a00' },
+export const ACCENTS: Array<{ key: AccentKey; label: string; labelKey?: string; color: string }> = [
+  { key: 'pink', label: 'Rosa', labelKey: 'accent.pink', color: '#c72cb8' },
+  { key: 'purple', label: 'Roxo', labelKey: 'accent.purple', color: '#8b2e80' },
+  { key: 'blue', label: 'Azul', labelKey: 'accent.blue', color: '#2f6feb' },
+  { key: 'green', label: 'Verde', labelKey: 'accent.green', color: '#2bbf5a' },
+  { key: 'orange', label: 'Laranja', labelKey: 'accent.orange', color: '#d45a00' },
 ];
 
 const ACCENT_VARS: Record<AccentKey, { primary: string; textPurple: string; rightPanel: string; rgb: string }> = {

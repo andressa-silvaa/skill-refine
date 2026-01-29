@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useResumes } from '@/features/resume';
 import { getResumeThemeById, type ResumeData, type ResumeStatus } from '@/entities/resume';
@@ -24,6 +25,7 @@ import '@/shared/ui/sr-controls/SrControls.css';
 import './ResumesPage.css';
 
 export function ResumesPage() {
+  const { t } = useTranslation();
   const resumes = useResumes();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [newOpen, setNewOpen] = useState(false);
@@ -66,11 +68,11 @@ export function ResumesPage() {
 
   useEffect(() => {
     if (resumes.error) {
-      notify.error(getApiErrorMessage(resumes.error, 'Não foi possível carregar seus currículos.'));
+      notify.error(getApiErrorMessage(resumes.error, t('resume.errorLoadFailed')));
     }
-  }, [resumes.error]);
+  }, [resumes.error, t]);
 
-  const openFilters = () => notify.info('Filtros em breve.');
+  const openFilters = () => notify.info(t('resume.filtersComingSoon'));
   const onEdit = async (id: string) => {
     setEditOpen(true);
     setEditLoading(true);
@@ -85,7 +87,7 @@ export function ResumesPage() {
       setEditStatus(detail.status);
       setEditLastStep((detail.lastStep as BuilderStep) ?? null);
     } catch (err) {
-      notify.error(getApiErrorMessage(err, 'Não foi possível carregar o currículo.'));
+      notify.error(getApiErrorMessage(err, t('resume.errorEditFailed')));
       setEditOpen(false);
       setEditResumeId(null);
       setEditData(null);
@@ -101,8 +103,8 @@ export function ResumesPage() {
     setDuplicateLoadingId(id);
     resumes
       .duplicateResume(id)
-      .then(() => notify.success('Currículo duplicado com sucesso.'))
-      .catch((err) => notify.error(getApiErrorMessage(err, 'Não foi possível duplicar o currículo.')))
+      .then(() => notify.success(t('resume.toastDuplicated')))
+      .catch((err) => notify.error(getApiErrorMessage(err, t('resume.errorDuplicateFailed'))))
       .finally(() => setDuplicateLoadingId(null));
   };
 
@@ -117,11 +119,11 @@ export function ResumesPage() {
       .downloadPdf(id)
       .then(({ blob, filename }) => {
         downloadBlob(blob, filename || fallbackName);
-        notify.success('Download feito com sucesso.');
+        notify.success(t('resume.toastDownloadDone'));
         setPdfProgress(100);
       })
       .catch((err) => {
-        notify.error(getApiErrorMessage(err, 'Não foi possível gerar o PDF.'));
+        notify.error(getApiErrorMessage(err, t('resume.errorPdfFailed')));
       })
       .finally(() => {
         // deixa o usuário "ver" o 100% rapidamente antes de fechar
@@ -142,10 +144,10 @@ export function ResumesPage() {
       .deleteResume(deleteId)
       .then(() => {
         setDeleteId(null);
-        notify.success('Currículo excluído com sucesso.');
+        notify.success(t('resume.toastDeleted'));
       })
       .catch((err) => {
-        notify.error(getApiErrorMessage(err, 'Não foi possível excluir o currículo. Tente novamente.'));
+        notify.error(getApiErrorMessage(err, t('resume.errorDeleteFailed')));
       })
       .finally(() => setIsDeleting(false));
   };
@@ -157,10 +159,10 @@ export function ResumesPage() {
       const resume = resumeId
         ? await resumes.updateDraft(resumeId, payload)
         : await resumes.createDraft(payload);
-      notify.success('Rascunho salvo com sucesso.');
+      notify.success(t('resume.toastDraftSaved'));
       return resume;
     } catch (err) {
-      notify.error(getApiErrorMessage(err, 'Não foi possível salvar o rascunho.'));
+      notify.error(getApiErrorMessage(err, t('resume.errorSaveDraftFailed')));
       throw err;
     } finally {
       setIsSavingDraft(false);
@@ -174,10 +176,10 @@ export function ResumesPage() {
       const resume = resumeId
         ? await resumes.updateDraft(resumeId, payload)
         : await resumes.createDraft(payload);
-      notify.success(resumeId ? 'Currículo editado com sucesso.' : 'Currículo criado com sucesso.');
+      notify.success(resumeId ? t('resume.toastSaved') : t('resume.toastCreated'));
       return resume;
     } catch (err) {
-      notify.error(getApiErrorMessage(err, 'Não foi possível salvar o currículo.'));
+      notify.error(getApiErrorMessage(err, t('resume.errorSaveFailed')));
       throw err;
     } finally {
       setIsSubmitting(false);
@@ -186,7 +188,7 @@ export function ResumesPage() {
 
   return (
     <AppShell>
-      <main className="sr-resumes" aria-label="Currículos">
+      <main className="sr-resumes" aria-label={t('resume.mainAria')}>
         <ResumesHeader onCreate={() => setNewOpen(true)} />
 
         <ResumesToolbar
@@ -228,7 +230,7 @@ export function ResumesPage() {
         </section>
 
         <ResumeBuilderWizard
-          title="Criar Currículo"
+          title={t('resume.createTitle')}
           open={newOpen}
           onClose={() => setNewOpen(false)}
           onSaveDraft={handleSaveDraft}
@@ -238,7 +240,7 @@ export function ResumesPage() {
         />
 
         <ResumeBuilderWizard
-          title="Editar Currículo"
+          title={t('resume.editTitle')}
           open={editOpen}
           onClose={() => {
             setEditOpen(false);
@@ -267,8 +269,8 @@ export function ResumesPage() {
 
         <Modal
           open={Boolean(downloadLoadingId)}
-          title="Gerando PDF"
-          subtitle={pdfVm?.name ? `Preparando o PDF de “${pdfVm.name}”...` : 'Preparando seu PDF...'}
+          title={t('resume.pdfModalTitle')}
+          subtitle={pdfVm?.name ? t('resume.pdfModalPreparingName', { name: pdfVm.name }) : t('resume.pdfModalPreparing')}
           onClose={() => {
             // Não cancelamos a request (blob), mas permitimos fechar o aviso.
             // O botão "Baixar PDF" continua bloqueado pelo loadingId.
@@ -280,7 +282,7 @@ export function ResumesPage() {
           <div style={{ display: 'grid', gap: 12 }}>
             <ProgressBar current={pdfProgress} total={100} rightContent={<span style={{ fontWeight: 800 }}>{pdfProgress}%</span>} />
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--sr-ink-muted)' }}>
-              Isso pode levar alguns segundos dependendo do tamanho do currículo.
+              {t('resume.pdfModalHint')}
             </div>
           </div>
         </Modal>

@@ -3,6 +3,7 @@ import type { ZodError } from 'zod';
 import type { ResumeData } from '@/entities/resume';
 import type { BuilderStep } from '../types';
 import { BUILDER_STEPS } from '../types';
+import type { TFunction } from './schemas';
 import { getResumeSchema, getStepSchema } from './schemas';
 
 type ValidationOptions = {
@@ -24,8 +25,8 @@ const mapZodErrors = (error: ZodError): ValidationErrors => {
   return errors;
 };
 
-export const validateStep = (step: BuilderStep, data: ResumeData, options: ValidationOptions) => {
-  const schema = getStepSchema(step, options);
+export const validateStep = (step: BuilderStep, data: ResumeData, options: ValidationOptions, t: TFunction) => {
+  const schema = getStepSchema(step, options, t);
   const parsed = schema.safeParse(data);
   if (parsed.success) {
     return { isValid: true, errors: {} as ValidationErrors, data: parsed.data };
@@ -33,8 +34,8 @@ export const validateStep = (step: BuilderStep, data: ResumeData, options: Valid
   return { isValid: false, errors: mapZodErrors(parsed.error), data };
 };
 
-export const validateResume = (data: ResumeData, options: ValidationOptions) => {
-  const schema = getResumeSchema(options);
+export const validateResume = (data: ResumeData, options: ValidationOptions, t: TFunction) => {
+  const schema = getResumeSchema(options, t);
   const parsed = schema.safeParse(data);
   if (parsed.success) {
     return { isValid: true, errors: {} as ValidationErrors, data: parsed.data };

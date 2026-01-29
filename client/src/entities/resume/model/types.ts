@@ -79,7 +79,10 @@ export type Resume = {
   name: string;
   updatedAt: string;
   status: ResumeStatus;
-  score: number;
+  /** Score 0–100. null/undefined quando ausente. */
+  score?: number | null;
   tags: string[];
+  /** Top skills para listagem/cards (ex.: GET /resumes). Opcional. */
+  skills?: string[];
   data?: ResumeData;
 };

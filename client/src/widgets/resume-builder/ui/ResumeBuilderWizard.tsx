@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button, Modal, ProgressBar, Stepper } from '@/shared/ui';
-import type { Resume, ResumeData, ResumeStatus } from '@/entities/resume';
+import { calculateCompletenessScore, type Resume, type ResumeData, type ResumeStatus } from '@/entities/resume';
 import type { ResumeDraftPayload } from '@/features/resume/api/resumeApi';
-import { useResumeBuilder, type BuilderStep } from '@/features/resume-builder';
+import { useResumeBuilder, type BuilderStep, type StepConfig } from '@/features/resume-builder';
 import { notify } from '@/shared/lib/notify';
 import { getApiFieldErrors } from '@/shared/api';
 import { ResumePreviewFullscreen } from '@/widgets/resume-preview';
@@ -43,9 +44,19 @@ export function ResumeBuilderWizard(props: Props) {
     initialStatus,
     initialLastStep,
   } = props;
+  const { t } = useTranslation();
   const builder = useResumeBuilder();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const stepsWithLabels = useMemo(
+    () =>
+      builder.steps.map((step) => ({
+        ...step,
+        label: t(`resume.step${step.id.charAt(0).toUpperCase() + step.id.slice(1)}`),
+      })),
+    [builder.steps, t]
+  );
   const builderRef = useRef(builder);
   const prevOpenRef = useRef(false);
   const [discardOpen, setDiscardOpen] = useState(false);
@@ -135,9 +146,10 @@ export function ResumeBuilderWizard(props: Props) {
   const handleSaveDraft = async () => {
     const payload: ResumeDraftPayload = {
       ...builder.data,
-      name: builder.data.targetPosition || 'Novo Currículo',
+      name: builder.data.targetPosition || t('resume.builderDefaultName'),
       status: 'draft',
       lastStep: builder.currentStep,
+      score: calculateCompletenessScore(builder.data),
     };
 
     try {
@@ -170,15 +182,16 @@ export function ResumeBuilderWizard(props: Props) {
           builder.goToStep(firstStep);
           builder.markStepSubmitted(firstStep);
         }
-        notify.error('Revise os campos obrigatórios antes de concluir.');
+        notify.error(t('resume.builderReviewRequired'));
         focusFirstError();
         return;
       }
       const payload: ResumeDraftPayload = {
         ...builder.data,
-        name: builder.data.targetPosition || 'Novo Currículo',
+        name: builder.data.targetPosition || t('resume.builderDefaultName'),
         status: 'complete',
         lastStep: 'review',
+        score: calculateCompletenessScore(builder.data),
       };
       try {
         const resume = await onFinish({ payload, resumeId: builder.resumeId });
@@ -241,7 +254,7 @@ export function ResumeBuilderWizard(props: Props) {
   };
 
   return (
-    <Modal open={open} title={title} subtitle="Preencha as informações para criar seu currículo" onClose={handleClose} width={900}>
+    <Modal open={open} title={title} subtitle={t('resume.builderSubtitle')} onClose={handleClose} width={900}>
       <div className="sr-resume-builder-wizard" ref={containerRef}>
         <div className="sr-resume-builder-wizard__progress">
           <ProgressBar
@@ -255,7 +268,7 @@ export function ResumeBuilderWizard(props: Props) {
 
         <div className="sr-resume-builder-wizard__stepper">
           <Stepper
-            steps={builder.steps.map((step) => ({ id: step.id, label: step.label }))}
+            steps={stepsWithLabels.map((step: StepConfig) => ({ id: step.id, label: step.label }))}
             currentStep={currentStepNum}
             onStepClick={(stepId) => {
               const targetStep = stepId as BuilderStep;
@@ -274,7 +287,7 @@ export function ResumeBuilderWizard(props: Props) {
           {isLoading ? (
             <div className="sr-resume-builder-wizard__loading" role="status" aria-live="polite">
               <i className="fa-solid fa-circle-notch" aria-hidden />
-              Carregando currículo...
+              {t('resume.builderLoading')}
             </div>
           ) : (
             <ResumeBuilderStepContent builder={builder} onStepEdit={handleStepEdit} />
@@ -284,27 +297,27 @@ export function ResumeBuilderWizard(props: Props) {
         <div className="sr-resume-builder-wizard__actions">
           <div className="sr-resume-builder-wizard__actions-back">
             <Button variant="secondary" onClick={builder.currentStep === 'theme' ? handleClose : builder.prevStep} disabled={isLoading}>
-              {builder.currentStep === 'theme' ? 'Cancelar' : 'Voltar'}
+              {builder.currentStep === 'theme' ? t('resume.builderCancel') : t('resume.builderBack')}
             </Button>
           </div>
 
           <div className="sr-resume-builder-wizard__actions-secondary">
             {builder.currentStep !== 'review' && builder.hasUnsavedChanges ? (
               <Button variant="ghost" onClick={handleSaveDraft} disabled={isSavingDraft || isSubmitting || isLoading}>
-                {isSavingDraft ? 'Salvando...' : 'Salvar rascunho'}
+                {isSavingDraft ? t('resume.builderSaving') : t('resume.builderSaveDraft')}
               </Button>
             ) : null}
             {builder.currentStep !== 'theme' ? (
               <Button variant="ghost" onClick={() => setIsPreviewOpen(true)} disabled={isSavingDraft || isSubmitting || isLoading}>
                 <i className="fa-solid fa-eye" aria-hidden />
-                Visualizar
+                {t('resume.builderPreview')}
               </Button>
             ) : null}
           </div>
 
           <div className="sr-resume-builder-wizard__actions-primary">
             <Button variant="primary" onClick={handleNext} disabled={!builder.canGoNext || isSavingDraft || isSubmitting || isLoading}>
-              {builder.currentStep === 'review' ? (isSubmitting ? 'Salvando...' : 'Concluir') : 'Próximo'}
+              {builder.currentStep === 'review' ? (isSubmitting ? t('resume.builderSaving') : t('resume.builderFinish')) : t('resume.builderNext')}
               {builder.currentStep !== 'review' ? <i className="fa-solid fa-arrow-right" aria-hidden /> : null}
             </Button>
           </div>

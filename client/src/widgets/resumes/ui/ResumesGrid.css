@@ -131,3 +131,22 @@
     font-size: 11px;
   }
 }
+
+@media (max-width: 360px) {
+  .sr-resumes-grid {
+    gap: 8px;
+  }
+
+  .sr-resumes-grid__card {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .sr-resumes-grid__name {
+    font-size: 12px;
+  }
+
+  .sr-resumes-grid__updated {
+    font-size: 10px;
+  }
+}

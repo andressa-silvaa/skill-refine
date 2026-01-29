@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ResumeViewModel } from '@/entities/resume';
 import { Badge, DropdownMenu, IconButton, Tooltip } from '@/shared/ui';
 import { useIsTruncated } from '@/shared/lib/hooks/useIsTruncated';
@@ -65,17 +67,18 @@ function TruncatedSpan({ text }: { text: string }) {
 
 export function ResumesList(props: Props) {
   const { items, onEdit, onDuplicate, onExport, onDelete, duplicateLoadingId, downloadLoadingId } = props;
+  const { t } = useTranslation();
 
   return (
-    <div className="sr-resumes-list" role="table" aria-label="Lista de currículos">
+    <div className="sr-resumes-list" role="table" aria-label={t('resume.mainAria')}>
       <div className="sr-resumes-list__head" role="row">
-        <div role="columnheader">Nome</div>
-        <div role="columnheader">Status</div>
+        <div role="columnheader">{t('resume.sortName')}</div>
+        <div role="columnheader">{t('profile.accountStatus')}</div>
         <div className="sr-resumes-list__hide-sm" role="columnheader">
-          Última atualização
+          {t('resume.listLastUpdate')}
         </div>
-        <div role="columnheader">Score</div>
-        <div role="columnheader" className="sr-resumes-list__head-actions" aria-label="Ações" />
+        <div role="columnheader">{t('resume.listScore')}</div>
+        <div role="columnheader" className="sr-resumes-list__head-actions" aria-label={t('resume.actions')} />
       </div>
 
       {items.map((vm) => (
@@ -97,21 +100,21 @@ export function ResumesList(props: Props) {
           </div>
 
           <div className="sr-resumes-list__actions">
-            <IconButton aria-label="Editar" onClick={() => onEdit(vm.id)}>
+            <IconButton aria-label={t('resume.openEdit')} onClick={() => onEdit(vm.id)}>
               <i className="fa-regular fa-pen-to-square" aria-hidden />
             </IconButton>
 
             <DropdownMenu
               trigger={
-                <IconButton aria-label="Mais ações">
+                <IconButton aria-label={t('resume.actions')}>
                   <i className="fa-solid fa-ellipsis-vertical" aria-hidden />
                 </IconButton>
               }
               items={[
-                { key: 'edit', label: 'Abrir/Editar', iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
+                { key: 'edit', label: t('resume.openEdit'), iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
                 {
                   key: 'dup',
-                  label: duplicateLoadingId === vm.id ? 'Duplicando...' : 'Duplicar',
+                  label: duplicateLoadingId === vm.id ? t('resume.duplicating') : t('resume.duplicate'),
                   iconClass: duplicateLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-copy',
                   onClick: () => {
                     if (duplicateLoadingId === vm.id) return;
@@ -120,14 +123,14 @@ export function ResumesList(props: Props) {
                 },
                 {
                   key: 'pdf',
-                  label: downloadLoadingId === vm.id ? 'Gerando PDF...' : 'Baixar PDF',
+                  label: downloadLoadingId === vm.id ? t('resume.generatingPdf') : t('resume.exportPdf'),
                   iconClass: downloadLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-file-pdf',
                   onClick: () => {
                     if (downloadLoadingId === vm.id) return;
                     onExport(vm.id);
                   },
                 },
-                { key: 'del', label: 'Excluir', iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
+                { key: 'del', label: t('resume.delete'), iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
               ]}
             />
           </div>

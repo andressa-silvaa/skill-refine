@@ -35,6 +35,7 @@ export function AccentColorSettingsCard() {
       <div className="sr-accent" role="list" aria-label={t('settings.accentTitle')}>
         {ACCENTS.map((a) => {
           const isActive = ui.draftKey === a.key;
+          const displayLabel = a.labelKey ? t(a.labelKey) : a.label;
           const style = {
             background: a.color,
             ['--sr-accent-color' as unknown as keyof CSSProperties]: a.color,
@@ -45,7 +46,7 @@ export function AccentColorSettingsCard() {
               type="button"
               className={`sr-accent__dot${isActive ? ' is-active' : ''}`}
               style={style}
-              aria-label={a.label}
+              aria-label={displayLabel}
               aria-pressed={isActive}
               disabled={!ui.isEditing || ui.isSaving}
               onClick={() => {

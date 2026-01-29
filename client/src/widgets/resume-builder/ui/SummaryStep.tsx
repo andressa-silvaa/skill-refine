@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button, Textarea } from '@/shared/ui';
 import { resumeApi } from '@/features/resume/api/resumeApi';
@@ -17,25 +18,26 @@ type Props = {
 
 export function SummaryStep(props: Props) {
   const { summary, onChange, getError, shouldShowError, onFieldTouched } = props;
+  const { t } = useTranslation();
   const summaryError = shouldShowError('summary') ? getError('summary') : undefined;
   const [isImproving, setIsImproving] = useState(false);
 
   return (
     <div className="sr-summary-step">
       <div className="sr-summary-step__header">
-        <h3 className="sr-summary-step__title">Resumo profissional</h3>
-        <p className="sr-summary-step__subtitle">Um resumo conciso que destaque seus principais pontos fortes</p>
+        <h3 className="sr-summary-step__title">{t('resume.summaryStepTitle')}</h3>
+        <p className="sr-summary-step__subtitle">{t('resume.summaryStepSubtitle')}</p>
       </div>
 
       <Textarea
-        label="Resumo"
-        placeholder="Ex.: Desenvolvedor Full Stack com 5+ anos de experiência em React, Node.js e TypeScript. Especialista em arquitetura de software escalável e liderança de equipes técnicas."
+        label={t('resume.summaryStepLabel')}
+        placeholder={t('resume.summaryStepPlaceholder')}
         value={summary}
         onChange={(e) => onChange(e.target.value)}
         onBlur={() => onFieldTouched('summary')}
         showCount
         maxLength={500}
-        hint="Dica: Use palavras-chave relevantes para ATS e seja específico sobre suas conquistas."
+        hint={t('resume.summaryStepHint')}
         error={summaryError}
       />
 
@@ -46,7 +48,7 @@ export function SummaryStep(props: Props) {
           disabled={isImproving}
           onClick={async () => {
             if (!summary.trim()) {
-              notify.error('Digite um resumo antes de aprimorar com IA.');
+              notify.error(t('resume.summaryStepImproveError'));
               return;
             }
             setIsImproving(true);
@@ -54,14 +56,14 @@ export function SummaryStep(props: Props) {
               const result = await resumeApi.rewriteSummaryWithAI(summary);
               onChange(result.suggestedText);
             } catch (err) {
-              notify.error(getApiErrorMessage(err, 'Não foi possível aprimorar o resumo agora. Tente novamente em instantes.'));
+              notify.error(getApiErrorMessage(err, t('resume.summaryStepApiError')));
             } finally {
               setIsImproving(false);
             }
           }}
         >
           {isImproving ? <i className="fa-solid fa-circle-notch fa-spin" aria-hidden /> : <i className="fa-solid fa-wand-magic-sparkles" aria-hidden />}
-          {isImproving ? 'Aprimorando...' : 'Aprimorar com IA'}
+          {isImproving ? t('resume.summaryStepImproving') : t('resume.summaryStepImprove')}
         </Button>
       </div>
     </div>

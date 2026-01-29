@@ -115,6 +115,12 @@ def _resume_payload(resume: Resume) -> dict[str, Any]:
         .order_by("position_index")
         .values_list("label", flat=True)
     )
+    skills = list(
+        ResumeSkill.objects.filter(resume=resume)
+        .order_by("position_index")[:5]
+        .values_list("name", flat=True)
+    )
+    skills = [s for s in skills if (s or "").strip()]
     status_value = resume.status
     if status_value not in (ResumeStatus.DRAFT, ResumeStatus.COMPLETE, ResumeStatus.ANALYZING):
         status_value = ResumeStatus.DRAFT
@@ -123,8 +129,9 @@ def _resume_payload(resume: Resume) -> dict[str, Any]:
         "name": resume.name or resume.target_position or "Novo Currículo",
         "updatedAt": resume.updated_at.isoformat(),
         "status": status_value,
-        "score": resume.score or 0,
+        "score": resume.score,
         "tags": tags,
+        "skills": skills,
     }
 
 
@@ -181,12 +188,16 @@ def _build_resume_pdf_from_preview(url: str) -> bytes:
     Gera PDF a partir da URL de preview usando browser reutilizado.
     Usa uma nova página (tab) do browser singleton, mantendo o browser aberto.
     """
+    import logging
+    logger = logging.getLogger(__name__)
     page: Page | None = None
     console_messages = []
     
     try:
         # Cria nova página no browser singleton (não fecha o browser)
+        logger.info("Criando nova página no browser Playwright...")
         page = create_pdf_page(viewport={"width": 1280, "height": 720})
+        logger.info("Página criada com sucesso")
         
         def handle_console(msg):
             console_messages.append(f"{msg.type}: {msg.text}")
@@ -196,21 +207,28 @@ def _build_resume_pdf_from_preview(url: str) -> bytes:
         # "networkidle" pode demorar muito (especialmente com polling/requests longas).
         # Como já aguardamos um sinal explícito de prontidão (__resumePdfReady),
         # basta "load" para iniciar e depois aguardar o ready.
+        logger.info(f"Navegando para URL: {url}")
         page.goto(url, wait_until="load", timeout=PDF_RENDER_TIMEOUT_MS)
+        logger.info("Página carregada (evento 'load' disparado)")
         page.emulate_media(media="screen")
+        logger.info("Media emulado como 'screen'")
         # Fonts podem ser lentas; não vale segurar o PDF por 60s só por isso.
         # Tentamos aguardar um pouco e seguimos mesmo em timeout.
+        logger.info("Aguardando carregamento de fontes...")
         try:
             page.wait_for_function(
                 "document.fonts && document.fonts.status === 'loaded'",
                 timeout=10_000,
             )
-        except Exception:
-            pass
+            logger.info("Fontes carregadas")
+        except Exception as e:
+            logger.warning(f"Timeout ao aguardar fontes: {e}")
         
         # Aguardar o ready ou error
+        logger.info("Aguardando sinal __resumePdfReady...")
         try:
             page.wait_for_function("window.__resumePdfReady === true", timeout=PDF_RENDER_TIMEOUT_MS)
+            logger.info("Sinal __resumePdfReady recebido")
         except Exception as e:
             # Se timeout, verificar se há erro
             error = page.evaluate("window.__resumePdfError || null")
@@ -236,13 +254,17 @@ def _build_resume_pdf_from_preview(url: str) -> bytes:
         error = page.evaluate("window.__resumePdfError || null")
         if error:
             console_log = "\n".join(console_messages[-10:])
+            logger.error(f"Erro reportado pelo frontend: {error}")
+            logger.error(f"Console do navegador: {console_log}")
             raise RuntimeError(f"Frontend error: {error}. Console: {console_log}")
         
+        logger.info("Gerando PDF...")
         pdf_bytes = page.pdf(
             format="A4",
             print_background=True,
             margin={"top": "0", "right": "0", "bottom": "0", "left": "0"},
         )
+        logger.info(f"PDF gerado: {len(pdf_bytes)} bytes")
         
         return pdf_bytes
     finally:
@@ -478,6 +500,7 @@ class ResumeListCreateView(APIView):
                 theme_palette_id=_normalize_optional(data.get("themePaletteId")),
                 theme_accent_override=_normalize_optional(data.get("themeAccentOverride")),
                 theme_secondary_override=_normalize_optional(data.get("themeSecondaryOverride")),
+                score=data.get("score") if data.get("score") is not None else None,
             )
 
             contact = data.get("contact")
@@ -571,6 +594,8 @@ class ResumeDraftUpdateView(APIView):
                 resume.theme_secondary_override = _normalize_optional(data.get("themeSecondaryOverride"))
             if "lastStep" in data:
                 resume.last_step = (data.get("lastStep") or "").strip() or None
+            if "score" in data:
+                resume.score = data.get("score") if data.get("score") is not None else None
             if status_value == "complete":
                 resume.status = ResumeStatus.COMPLETE
             elif status_value == "draft":
@@ -653,7 +678,7 @@ class ResumeDuplicateView(APIView):
                 theme_accent_override=resume.theme_accent_override,
                 theme_secondary_override=resume.theme_secondary_override,
                 last_step=resume.last_step,
-                score=None,
+                score=resume.score,
             )
 
             if contact:
@@ -785,25 +810,71 @@ class ResumePdfView(APIView):
         if not resume:
             return _error("not_found", "Currículo não encontrado.", status.HTTP_404_NOT_FOUND)
 
+        import logging
+        import os
+        import socket
+        
+        logger = logging.getLogger(__name__)
         token = _create_pdf_token(str(resume.id), str(user_id))
         frontend_url = settings.FRONTEND_URL.rstrip("/")
-        # Se estiver rodando dentro do Docker e a URL for localhost, usar host.docker.internal
-        if frontend_url.startswith("http://localhost") or frontend_url.startswith("http://127.0.0.1"):
-            frontend_url = frontend_url.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+        
+        # Detectar se estamos rodando em Docker
+        is_docker = os.path.exists('/.dockerenv') or os.path.exists('/run/.containerenv')
+        
+        # Se estiver rodando dentro do Docker e a URL for localhost, tentar usar host.docker.internal
+        if is_docker and (frontend_url.startswith("http://localhost") or frontend_url.startswith("http://127.0.0.1")):
+            # Tentar host.docker.internal primeiro (funciona no Docker Desktop Windows/Mac)
+            try:
+                socket.create_connection(("host.docker.internal", 3000), timeout=2).close()
+                frontend_url = frontend_url.replace("localhost", "host.docker.internal").replace("127.0.0.1", "host.docker.internal")
+                logger.info("Usando host.docker.internal para acessar frontend")
+            except (socket.error, socket.timeout):
+                # Se host.docker.internal não funcionar, tentar o IP do gateway
+                try:
+                    gateway_ip = socket.gethostbyname('host.docker.internal')
+                    frontend_url = frontend_url.replace("localhost", gateway_ip).replace("127.0.0.1", gateway_ip)
+                    logger.info(f"Usando gateway IP {gateway_ip} para acessar frontend")
+                except socket.gaierror:
+                    # Último recurso: tentar o IP do gateway do Docker
+                    import subprocess
+                    try:
+                        result = subprocess.run(
+                            ["ip", "route", "show", "default"],
+                            capture_output=True,
+                            text=True,
+                            timeout=2
+                        )
+                        if result.returncode == 0:
+                            gateway = result.stdout.split()[2]
+                            frontend_url = frontend_url.replace("localhost", gateway).replace("127.0.0.1", gateway)
+                            logger.info(f"Usando Docker gateway {gateway} para acessar frontend")
+                    except Exception as e:
+                        logger.warning(f"Não foi possível detectar IP do host: {e}. Usando localhost.")
+        
         # URL do backend que o frontend deve usar quando renderizado pelo Playwright
         # O Playwright está rodando dentro do container do backend, então localhost:8000 funciona
         backend_url = "http://localhost:8000"
         print_url = frontend_url + f"/resume/print/{resume.id}?token={quote(token)}&apiUrl={quote(backend_url)}"
 
         try:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"Gerando PDF para currículo {resume.id}")
+            logger.info(f"URL de print: {print_url}")
             pdf_bytes = _build_resume_pdf_from_preview(print_url)
+            logger.info(f"PDF gerado com sucesso ({len(pdf_bytes)} bytes)")
         except Exception as e:
             import traceback
+            import logging
+            logger = logging.getLogger(__name__)
             error_msg = str(e)
-            traceback.print_exc()
+            stack_trace = traceback.format_exc()
+            logger.error(f"Erro ao gerar PDF: {error_msg}")
+            logger.error(f"Stack trace: {stack_trace}")
+            logger.error(f"URL tentada: {print_url}")
             return _error(
                 "pdf_generation_failed",
-                f"Não foi possível gerar o PDF agora: {error_msg}",
+                f"Não foi possível gerar o PDF. Verifique se o frontend está acessível e os logs do backend para mais detalhes. Erro: {error_msg}",
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

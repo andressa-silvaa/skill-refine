@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Button, Input, CustomSelect, Checkbox } from '@/shared/ui';
 import type { Skill, SkillLevel } from '@/entities/resume';
 
@@ -13,17 +16,21 @@ type Props = {
   onFieldTouched: (path: string) => void;
 };
 
-const LEVEL_OPTIONS = [
-  { value: '', label: 'Sem nível' },
-  { value: 'beginner', label: 'Iniciante' },
-  { value: 'intermediate', label: 'Intermediário' },
-  { value: 'advanced', label: 'Avançado' },
-  { value: 'expert', label: 'Especialista' },
-];
-
 export function SkillsStep(props: Props) {
   const { skills, onChange, showLevels, onToggleShowLevels, getError, shouldShowError, onFieldTouched } = props;
+  const { t } = useTranslation();
   const listError = shouldShowError('skills') ? getError('skills') : undefined;
+
+  const levelOptions = useMemo(
+    () => [
+      { value: '', label: t('resume.skillsStepLevelNone') },
+      { value: 'beginner', label: t('resume.skillsStepLevelBeginner') },
+      { value: 'intermediate', label: t('resume.skillsStepLevelIntermediate') },
+      { value: 'advanced', label: t('resume.skillsStepLevelAdvanced') },
+      { value: 'expert', label: t('resume.skillsStepLevelExpert') },
+    ],
+    [t]
+  );
 
   const addSkill = () => {
     const newSkill: Skill = {
@@ -44,8 +51,8 @@ export function SkillsStep(props: Props) {
   return (
     <div className="sr-skills-step">
       <div className="sr-skills-step__header">
-        <h3 className="sr-skills-step__title">Habilidades</h3>
-        <p className="sr-skills-step__subtitle">Adicione suas habilidades técnicas e profissionais</p>
+        <h3 className="sr-skills-step__title">{t('resume.skillsStepTitle')}</h3>
+        <p className="sr-skills-step__subtitle">{t('resume.skillsStepSubtitle')}</p>
       </div>
 
       <div className="sr-skills-step__options">
@@ -53,7 +60,7 @@ export function SkillsStep(props: Props) {
           className="sr-skills-step__toggle"
           checked={showLevels}
           onChange={onToggleShowLevels}
-          label="Mostrar níveis de proficiência"
+          label={t('resume.skillsStepShowLevels')}
         />
       </div>
 
@@ -70,13 +77,14 @@ export function SkillsStep(props: Props) {
             getError={getError}
             shouldShowError={shouldShowError}
             onFieldTouched={onFieldTouched}
+            levelOptions={levelOptions}
           />
         ))}
       </div>
 
       <Button variant="secondary" onClick={addSkill}>
         <i className="fa-solid fa-plus" aria-hidden />
-        Adicionar habilidade
+        {t('resume.skillsStepAdd')}
       </Button>
     </div>
   );
@@ -91,10 +99,11 @@ type SkillCardProps = {
   getError: (path: string) => string | undefined;
   shouldShowError: (path: string) => boolean;
   onFieldTouched: (path: string) => void;
+  levelOptions: { value: string; label: string }[];
 };
 
 function SkillCard(props: SkillCardProps) {
-  const { skill, index, showLevel, onUpdate, onRemove, getError, shouldShowError, onFieldTouched } = props;
+  const { skill, index, showLevel, onUpdate, onRemove, getError, shouldShowError, onFieldTouched, levelOptions } = props;
   const basePath = `skills.${index}`;
   const nameError = shouldShowError(`${basePath}.name`) ? getError(`${basePath}.name`) : undefined;
   const levelError = shouldShowError(`${basePath}.level`) ? getError(`${basePath}.level`) : undefined;
@@ -112,7 +121,7 @@ function SkillCard(props: SkillCardProps) {
       {showLevel ? (
         <CustomSelect
           label="Nível *"
-          options={LEVEL_OPTIONS}
+          options={levelOptions}
           value={skill.level || ''}
           onChange={(value) => {
             onUpdate({ level: value ? (value as SkillLevel) : undefined });

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ResumeData } from '../model/types';
 import { formatMonthYear } from '../lib/format';
@@ -17,13 +18,14 @@ type HeaderProps = {
 };
 
 export function ResumeHeader({ data, variant = 'default', align = 'left', showContact = true }: HeaderProps) {
+  const { t } = useTranslation();
   const { contact } = data;
 
   return (
     <header className={`sr-resume-block__header sr-resume-block__header--${variant} sr-resume-block__header--${align}`}>
       <div className="sr-resume-block__header-main">
-        <h1 className="sr-resume-block__name">{contact.fullName || 'Nome completo'}</h1>
-        <p className="sr-resume-block__position">{data.targetPosition || 'Cargo alvo'}</p>
+        <h1 className="sr-resume-block__name">{contact.fullName || t('resume.blockFullName')}</h1>
+        <p className="sr-resume-block__position">{data.targetPosition || t('resume.blockPosition')}</p>
       </div>
       {showContact ? <ResumeContactList contact={contact} variant="inline" /> : null}
     </header>
@@ -79,19 +81,21 @@ export function ResumeSummary({ summary }: { summary: string }) {
 }
 
 export function ResumeExperienceItem({ experience, variant = 'default' }: { experience: ResumeData['experiences'][0]; variant?: SectionVariant }) {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language;
   const dateRange = experience.isCurrent
-    ? `${formatMonthYear(experience.startDate)} - Atual`
+    ? `${formatMonthYear(experience.startDate, locale)} - ${t('resume.dateCurrent')}`
     : experience.endDate
-    ? `${formatMonthYear(experience.startDate)} - ${formatMonthYear(experience.endDate)}`
-    : formatMonthYear(experience.startDate);
+    ? `${formatMonthYear(experience.startDate, locale)} - ${formatMonthYear(experience.endDate, locale)}`
+    : formatMonthYear(experience.startDate, locale);
 
   return (
     <div className={`sr-resume-block__item sr-resume-block__item--${variant}`}>
       <div className="sr-resume-block__item-header">
-        <h3 className="sr-resume-block__item-title">{experience.position || 'Cargo'}</h3>
+        <h3 className="sr-resume-block__item-title">{experience.position || t('resume.experienceStepPosition').replace(' *', '')}</h3>
         <span className="sr-resume-block__item-date">{dateRange}</span>
       </div>
-      <p className="sr-resume-block__item-company">{experience.company || 'Empresa'}</p>
+      <p className="sr-resume-block__item-company">{experience.company || t('resume.blockCompany')}</p>
       {experience.description.length > 0 ? (
         <ul className="sr-resume-block__item-list">
           {experience.description.map((bullet, idx) => (

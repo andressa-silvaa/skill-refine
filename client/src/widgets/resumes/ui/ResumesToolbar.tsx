@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { IconButton } from '@/shared/ui';
 
 import { SortSelect } from './SortSelect';
@@ -17,14 +20,18 @@ type Props = {
   onOpenFilters: () => void;
 };
 
-const SORT_OPTIONS = [
-  { value: 'recent', label: 'Mais recentes' },
-  { value: 'score', label: 'Melhor score' },
-  { value: 'name', label: 'Nome' },
-];
-
 export function ResumesToolbar(props: Props) {
   const { query, onQueryChange, view, onViewChange, sort, onSortChange, onOpenFilters } = props;
+  const { t } = useTranslation();
+
+  const sortOptions = useMemo(
+    () => [
+      { value: 'recent', label: t('resume.sortRecent') },
+      { value: 'score', label: t('resume.sortScore') },
+      { value: 'name', label: t('resume.sortName') },
+    ],
+    [t]
+  );
 
   return (
     <div className="sr-resumes-toolbar" role="search">
@@ -33,27 +40,27 @@ export function ResumesToolbar(props: Props) {
         <input
           className="sr-resumes-toolbar__input"
           value={query}
-          placeholder="Buscar currículos…"
+          placeholder={t('resume.searchPlaceholder')}
           onChange={(e) => onQueryChange(e.target.value)}
         />
       </div>
 
       <div className="sr-resumes-toolbar__right">
         <div className="sr-resumes-toolbar__filters-wrapper">
-          <button type="button" className="sr-btn sr-btn--secondary" onClick={onOpenFilters} title="Filtrar currículos por status, tags e outros critérios">
+          <button type="button" className="sr-btn sr-btn--secondary" onClick={onOpenFilters} title={t('resume.filtersHint')}>
             <i className="fa-solid fa-filter" aria-hidden />
-            Filtros
+            {t('resume.filters')}
           </button>
-          <span className="sr-resumes-toolbar__filters-hint">Filtrar por status, tags e mais</span>
+          <span className="sr-resumes-toolbar__filters-hint">{t('resume.filtersHint')}</span>
         </div>
 
-        <SortSelect value={sort} options={SORT_OPTIONS} onChange={(v) => onSortChange(v as SortKey)} />
+        <SortSelect value={sort} options={sortOptions} onChange={(v) => onSortChange(v as SortKey)} />
 
-        <div className="sr-resumes-toolbar__toggle" aria-label="Modo de visualização">
-          <IconButton aria-label="Grid" isActive={view === 'grid'} onClick={() => onViewChange('grid')}>
+        <div className="sr-resumes-toolbar__toggle" aria-label={t('resume.viewGrid')}>
+          <IconButton aria-label={t('resume.viewGrid')} isActive={view === 'grid'} onClick={() => onViewChange('grid')}>
             <i className="fa-solid fa-grip" aria-hidden />
           </IconButton>
-          <IconButton aria-label="Lista" isActive={view === 'list'} onClick={() => onViewChange('list')}>
+          <IconButton aria-label={t('resume.viewList')} isActive={view === 'list'} onClick={() => onViewChange('list')}>
             <i className="fa-solid fa-list" aria-hidden />
           </IconButton>
         </div>

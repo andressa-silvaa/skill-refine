@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Button, Input, DatePicker, Checkbox } from '@/shared/ui';
 import type { Experience } from '@/entities/resume';
 
@@ -54,11 +56,13 @@ export function ExperienceStep(props: Props) {
     updateExperience(id, { description: exp.description.filter((_, i) => i !== index) });
   };
 
+  const { t } = useTranslation();
+
   return (
     <div className="sr-experience-step">
       <div className="sr-experience-step__header">
-        <h3 className="sr-experience-step__title">Experiência profissional</h3>
-        <p className="sr-experience-step__subtitle">Adicione suas experiências de trabalho</p>
+        <h3 className="sr-experience-step__title">{t('resume.experienceStepTitle')}</h3>
+        <p className="sr-experience-step__subtitle">{t('resume.experienceStepSubtitle')}</p>
       </div>
 
       <div className="sr-experience-step__list">
@@ -81,7 +85,7 @@ export function ExperienceStep(props: Props) {
 
       <Button variant="secondary" onClick={addExperience}>
         <i className="fa-solid fa-plus" aria-hidden />
-        Adicionar experiência
+        {t('resume.experienceStepAdd')}
       </Button>
     </div>
   );
@@ -102,6 +106,7 @@ type ExperienceCardProps = {
 
 function ExperienceCard(props: ExperienceCardProps) {
   const { experience, index, onUpdate, onRemove, onUpdateDescription, onAddBullet, onRemoveBullet, getError, shouldShowError, onFieldTouched } = props;
+  const { t } = useTranslation();
   const basePath = `experiences.${index}`;
   const companyError = shouldShowError(`${basePath}.company`) ? getError(`${basePath}.company`) : undefined;
   const positionError = shouldShowError(`${basePath}.position`) ? getError(`${basePath}.position`) : undefined;
@@ -112,7 +117,7 @@ function ExperienceCard(props: ExperienceCardProps) {
   return (
     <div className="sr-experience-card">
       <div className="sr-experience-card__header">
-        <h4 className="sr-experience-card__title">Experiência</h4>
+        <h4 className="sr-experience-card__title">{t('resume.experienceStepTitle')}</h4>
         <Button variant="ghost" onClick={onRemove}>
           <i className="fa-solid fa-trash" aria-hidden />
         </Button>
@@ -120,16 +125,16 @@ function ExperienceCard(props: ExperienceCardProps) {
 
       <div className="sr-experience-card__fields">
         <Input
-          label="Empresa *"
-          placeholder="Nome da empresa"
+          label={t('resume.experienceStepCompany')}
+          placeholder={t('resume.experienceStepCompanyPlaceholder')}
           value={experience.company}
           onChange={(e) => onUpdate({ company: e.target.value })}
           onBlur={() => onFieldTouched(`${basePath}.company`)}
           error={companyError}
         />
         <Input
-          label="Cargo *"
-          placeholder="Seu cargo"
+          label={t('resume.experienceStepPosition')}
+          placeholder={t('resume.experienceStepPositionPlaceholder')}
           value={experience.position}
           onChange={(e) => onUpdate({ position: e.target.value })}
           onBlur={() => onFieldTouched(`${basePath}.position`)}
@@ -137,7 +142,7 @@ function ExperienceCard(props: ExperienceCardProps) {
         />
         <div className="sr-experience-card__row">
           <DatePicker
-            label="Data início *"
+            label={t('resume.experienceStepStartDateLabel')}
             value={experience.startDate}
             onChange={(value) => {
               onUpdate({ startDate: value });
@@ -147,7 +152,7 @@ function ExperienceCard(props: ExperienceCardProps) {
           />
           {!experience.isCurrent ? (
             <DatePicker
-              label="Data fim *"
+              label={t('resume.experienceStepEndDateLabel')}
               value={experience.endDate || ''}
               onChange={(value) => {
                 onUpdate({ endDate: value });
@@ -161,15 +166,15 @@ function ExperienceCard(props: ExperienceCardProps) {
           className="sr-experience-card__checkbox"
           checked={experience.isCurrent}
           onChange={(checked) => onUpdate({ isCurrent: checked, endDate: checked ? undefined : experience.endDate })}
-          label="Trabalho atual"
+          label={t('resume.experienceStepCurrent')}
         />
         <div className={`sr-experience-card__bullets${descriptionError ? ' is-invalid' : ''}`} tabIndex={descriptionError ? -1 : undefined}>
-          <label className="sr-experience-card__bullets-label">Descrição (bullet points) *</label>
+          <label className="sr-experience-card__bullets-label">{t('resume.experienceStepDescriptionLabel')}</label>
           {descriptionError ? <p className="sr-input-error">{descriptionError}</p> : null}
           {experience.description.map((bullet, idx) => (
             <div key={idx} className="sr-experience-card__bullet">
               <Input
-                placeholder="Descreva uma conquista ou responsabilidade"
+                placeholder={t('resume.experienceStepBulletPlaceholder')}
                 value={bullet}
                 onChange={(e) => onUpdateDescription(experience.id, idx, e.target.value)}
                 onBlur={() => onFieldTouched(`${basePath}.description.${idx}`)}
@@ -182,7 +187,7 @@ function ExperienceCard(props: ExperienceCardProps) {
           ))}
           <Button variant="secondary" onClick={() => onAddBullet(experience.id)}>
             <i className="fa-solid fa-plus" aria-hidden />
-            Adicionar ponto
+            {t('resume.experienceStepAddBullet')}
           </Button>
         </div>
       </div>

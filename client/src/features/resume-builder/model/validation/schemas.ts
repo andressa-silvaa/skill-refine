@@ -14,160 +14,169 @@ import {
   optionalPhoneAllowEmpty,
 } from './common';
 
+export type TFunction = (key: string) => string;
+
 type ValidationOptions = {
   showSkillLevels: boolean;
 };
 
-const themeSchema = z.object({
-  themeId: z.string().min(1, 'Selecione um tema'),
-  themePaletteId: z.string().min(1, 'Selecione uma paleta'),
-  themeAccentOverride: optionalHexColor('Informe uma cor válida (#RRGGBB)'),
-  themeSecondaryOverride: optionalHexColor('Informe uma cor válida (#RRGGBB)'),
-});
+const createThemeSchema = (t: TFunction) =>
+  z.object({
+    themeId: z.string().min(1, t('validation.themeRequired')),
+    themePaletteId: z.string().min(1, t('validation.paletteRequired')),
+    themeAccentOverride: optionalHexColor(t('validation.hexColorInvalid')),
+    themeSecondaryOverride: optionalHexColor(t('validation.hexColorInvalid')),
+  });
 
-const basicSchema = z.object({
-  targetPosition: requiredTrimmedString(2, 80, {
-    min: 'Informe o cargo alvo',
-    max: 'O cargo alvo deve ter no máximo 80 caracteres',
-  }),
-});
+const createBasicSchema = (t: TFunction) =>
+  z.object({
+    targetPosition: requiredTrimmedString(2, 80, {
+      min: t('validation.targetPositionMin'),
+      max: t('validation.targetPositionMax'),
+    }),
+  });
 
-const contactSchema = z.object({
-  contact: z.object({
-    fullName: requiredTrimmedString(3, 80, {
-      min: 'Informe seu nome completo',
-      max: 'O nome deve ter no máximo 80 caracteres',
+const createContactSchema = (t: TFunction) =>
+  z.object({
+    contact: z.object({
+      fullName: requiredTrimmedString(3, 80, {
+        min: t('validation.fullNameMin'),
+        max: t('validation.fullNameMax'),
+      }),
+      email: z.preprocess(
+        (value) => (typeof value === 'string' ? value.trim() : value),
+        z.string().email(t('validation.emailInvalid'))
+      ),
+      phone: optionalPhoneAllowEmpty(t('validation.phoneInvalid')),
+      city: optionalTrimmedStringAllowEmpty(60, t('validation.cityMax')),
+      country: optionalTrimmedStringAllowEmpty(60, t('validation.countryMax')),
+      linkedin: optionalUrl(t('validation.urlInvalid'), t('validation.urlMax')),
+      portfolio: optionalUrl(t('validation.urlInvalid'), t('validation.urlMax')),
+      github: optionalUrl(t('validation.urlInvalid'), t('validation.urlMax')),
+      website: optionalUrl(t('validation.urlInvalid'), t('validation.urlMax')),
     }),
-    email: z.preprocess(
-      (value) => (typeof value === 'string' ? value.trim() : value),
-      z.string().email('Informe um e-mail válido'),
-    ),
-    phone: optionalPhoneAllowEmpty('Informe um telefone válido'),
-    city: optionalTrimmedStringAllowEmpty(60, 'A cidade deve ter no máximo 60 caracteres'),
-    country: optionalTrimmedStringAllowEmpty(60, 'O país deve ter no máximo 60 caracteres'),
-    linkedin: optionalUrl('Informe uma URL válida', 'O link deve ter no máximo 255 caracteres'),
-    portfolio: optionalUrl('Informe uma URL válida', 'O link deve ter no máximo 255 caracteres'),
-    github: optionalUrl('Informe uma URL válida', 'O link deve ter no máximo 255 caracteres'),
-    website: optionalUrl('Informe uma URL válida', 'O link deve ter no máximo 255 caracteres'),
-  }),
-});
+  });
 
-const experienceItemSchema = z
-  .object({
-    id: z.string().min(1),
-    company: requiredTrimmedString(2, 80, {
-      min: 'Informe a empresa',
-      max: 'A empresa deve ter no máximo 80 caracteres',
-    }),
-    position: requiredTrimmedString(2, 80, {
-      min: 'Informe o cargo',
-      max: 'O cargo deve ter no máximo 80 caracteres',
-    }),
-    startDate: monthString('Informe a data de início'),
-    endDate: optionalMonthString(),
-    isCurrent: z.boolean(),
-    description: z
-      .array(
-        requiredTrimmedString(10, 200, {
-          min: 'Descreva com pelo menos 10 caracteres',
-          max: 'A descrição deve ter no máximo 200 caracteres',
-        }),
-      )
-      .min(1, 'Adicione pelo menos 1 descrição')
-      .max(8, 'Limite de 8 pontos de descrição'),
-  })
-  .superRefine((value, ctx) => {
-    if (value.isCurrent) {
+const createExperienceItemSchema = (t: TFunction) =>
+  z
+    .object({
+      id: z.string().min(1),
+      company: requiredTrimmedString(2, 80, {
+        min: t('validation.companyMin'),
+        max: t('validation.companyMax'),
+      }),
+      position: requiredTrimmedString(2, 80, {
+        min: t('validation.positionMin'),
+        max: t('validation.positionMax'),
+      }),
+      startDate: monthString(t('validation.startDateRequired'), t('validation.dateInvalid')),
+      endDate: optionalMonthString(t('validation.dateInvalid')),
+      isCurrent: z.boolean(),
+      description: z
+        .array(
+          requiredTrimmedString(10, 200, {
+            min: t('validation.descriptionMin'),
+            max: t('validation.descriptionMax'),
+          })
+        )
+        .min(1, t('validation.descriptionCountMin'))
+        .max(8, t('validation.descriptionCountMax')),
+    })
+    .superRefine((value, ctx) => {
+      if (value.isCurrent) {
+        if (value.endDate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['endDate'],
+            message: t('validation.endDateOrCurrent'),
+          });
+        }
+      } else if (!value.endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['endDate'],
+          message: t('validation.endDateOrCurrent'),
+        });
+      }
+
+      if (value.endDate && !value.isCurrent) {
+        const validOrder = compareMonth(value.startDate, value.endDate);
+        if (validOrder === false) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['endDate'],
+            message: t('validation.endDateAfterStart'),
+          });
+        }
+      }
+    });
+
+const createExperienceSchema = (t: TFunction) =>
+  z.object({
+    experiences: z.array(createExperienceItemSchema(t)),
+  });
+
+const createEducationItemSchema = (t: TFunction) =>
+  z
+    .object({
+      id: z.string().min(1),
+      institution: requiredTrimmedString(2, 100, {
+        min: t('validation.institutionMin'),
+        max: t('validation.institutionMax'),
+      }),
+      course: requiredTrimmedString(2, 100, {
+        min: t('validation.courseMin'),
+        max: t('validation.courseMax'),
+      }),
+      degree: optionalTrimmedStringAllowEmpty(60, t('validation.degreeMax')),
+      startDate: monthString(t('validation.startDateRequired'), t('validation.dateInvalid')),
+      endDate: optionalMonthString(t('validation.dateInvalid')),
+      status: z.enum(['completed', 'in_progress']),
+    })
+    .superRefine((value, ctx) => {
+      if (value.status === 'completed' && !value.endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['endDate'],
+          message: t('validation.completionDate'),
+        });
+      }
+
       if (value.endDate) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['endDate'],
-          message: 'Informe a data de término ou marque "Trabalho atual"',
-        });
+        const validOrder = compareMonth(value.startDate, value.endDate);
+        if (validOrder === false) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['endDate'],
+            message: t('validation.endDateAfterStart'),
+          });
+        }
       }
-    } else if (!value.endDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['endDate'],
-        message: 'Informe a data de término ou marque "Trabalho atual"',
-      });
-    }
+    });
 
-    if (value.endDate && !value.isCurrent) {
-      const validOrder = compareMonth(value.startDate, value.endDate);
-      if (validOrder === false) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['endDate'],
-          message: 'A data final não pode ser anterior à inicial',
-        });
-      }
-    }
+const createEducationSchema = (t: TFunction) =>
+  z.object({
+    educations: z.array(createEducationItemSchema(t)),
   });
 
-const experienceSchema = z.object({
-  experiences: z.array(experienceItemSchema),
-});
-
-const educationItemSchema = z
-  .object({
-    id: z.string().min(1),
-    institution: requiredTrimmedString(2, 100, {
-      min: 'Informe a instituição',
-      max: 'A instituição deve ter no máximo 100 caracteres',
-    }),
-    course: requiredTrimmedString(2, 100, {
-      min: 'Informe o curso',
-      max: 'O curso deve ter no máximo 100 caracteres',
-    }),
-    degree: optionalTrimmedStringAllowEmpty(60, 'O grau deve ter no máximo 60 caracteres'),
-    startDate: monthString('Informe a data de início'),
-    endDate: optionalMonthString(),
-    status: z.enum(['completed', 'in_progress']),
-  })
-  .superRefine((value, ctx) => {
-    if (value.status === 'completed' && !value.endDate) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['endDate'],
-        message: 'Informe a data de conclusão',
-      });
-    }
-
-    if (value.endDate) {
-      const validOrder = compareMonth(value.startDate, value.endDate);
-      if (validOrder === false) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['endDate'],
-          message: 'A data final não pode ser anterior à inicial',
-        });
-      }
-    }
-  });
-
-const educationSchema = z.object({
-  educations: z.array(educationItemSchema),
-});
-
-const createSkillSchema = (showSkillLevels: boolean) =>
+const createSkillSchema = (showSkillLevels: boolean, t: TFunction) =>
   z.object({
     id: z.string().min(1),
     name: requiredTrimmedString(2, 40, {
-      min: 'Informe a habilidade',
-      max: 'A habilidade deve ter no máximo 40 caracteres',
+      min: t('validation.skillMin'),
+      max: t('validation.skillMax'),
     }),
     level: showSkillLevels
       ? z.enum(['beginner', 'intermediate', 'advanced', 'expert'], {
-          required_error: 'Informe o nível',
+          required_error: t('validation.skillLevelRequired'),
         })
       : z.enum(['beginner', 'intermediate', 'advanced', 'expert']).optional(),
   });
 
-const createSkillsSchema = (showSkillLevels: boolean) =>
+const createSkillsSchema = (showSkillLevels: boolean, t: TFunction) =>
   z
-    .array(createSkillSchema(showSkillLevels))
-    .min(1, 'Adicione pelo menos uma habilidade')
+    .array(createSkillSchema(showSkillLevels, t))
+    .min(1, t('validation.skillsMin'))
     .superRefine((skills, ctx) => {
       const seen = new Map<string, number>();
       skills.forEach((skill, idx) => {
@@ -178,12 +187,12 @@ const createSkillsSchema = (showSkillLevels: boolean) =>
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: [idx, 'name'],
-            message: 'Habilidade duplicada',
+            message: t('validation.skillDuplicate'),
           });
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: [existing, 'name'],
-            message: 'Habilidade duplicada',
+            message: t('validation.skillDuplicate'),
           });
         } else {
           seen.set(key, idx);
@@ -191,76 +200,80 @@ const createSkillsSchema = (showSkillLevels: boolean) =>
       });
     });
 
-const createSkillsStepSchema = (options: ValidationOptions) =>
+const createSkillsStepSchema = (options: ValidationOptions, t: TFunction) =>
   z.object({
-    skills: createSkillsSchema(options.showSkillLevels),
+    skills: createSkillsSchema(options.showSkillLevels, t),
   });
 
-const languageItemSchema = z.object({
-  id: z.string().min(1),
-  name: requiredTrimmedString(2, 40, {
-    min: 'Informe o idioma',
-    max: 'O idioma deve ter no máximo 40 caracteres',
-  }),
-  level: z.enum(['basic', 'intermediate', 'advanced', 'fluent', 'native']),
-});
+const createLanguageItemSchema = (t: TFunction) =>
+  z.object({
+    id: z.string().min(1),
+    name: requiredTrimmedString(2, 40, {
+      min: t('validation.languageMin'),
+      max: t('validation.languageMax'),
+    }),
+    level: z.enum(['basic', 'intermediate', 'advanced', 'fluent', 'native']),
+  });
 
-const languagesSchema = z
-  .array(languageItemSchema)
-  .superRefine((languages, ctx) => {
-    const seen = new Map<string, number>();
-    languages.forEach((lang, idx) => {
-      const key = lang.name.trim().toLowerCase();
-      if (!key) return;
-      const existing = seen.get(key);
-      if (existing !== undefined) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: [idx, 'name'],
-          message: 'Idioma duplicado',
-        });
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: [existing, 'name'],
-          message: 'Idioma duplicado',
-        });
-      } else {
-        seen.set(key, idx);
-      }
+const createLanguagesSchema = (t: TFunction) =>
+  z
+    .array(createLanguageItemSchema(t))
+    .superRefine((languages, ctx) => {
+      const seen = new Map<string, number>();
+      languages.forEach((lang, idx) => {
+        const key = lang.name.trim().toLowerCase();
+        if (!key) return;
+        const existing = seen.get(key);
+        if (existing !== undefined) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [idx, 'name'],
+            message: t('validation.languageDuplicate'),
+          });
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: [existing, 'name'],
+            message: t('validation.languageDuplicate'),
+          });
+        } else {
+          seen.set(key, idx);
+        }
+      });
     });
+
+const createLanguagesStepSchema = (t: TFunction) =>
+  z.object({
+    languages: createLanguagesSchema(t),
   });
 
-const languagesStepSchema = z.object({
-  languages: languagesSchema,
-});
-
-const summarySchema = z.object({
-  summary: optionalTrimmedText(30, 500, {
-    min: 'O resumo deve ter pelo menos 30 caracteres',
-    max: 'O resumo deve ter no máximo 500 caracteres',
-  }),
-});
+const createSummarySchema = (t: TFunction) =>
+  z.object({
+    summary: optionalTrimmedText(30, 500, {
+      min: t('validation.summaryMin'),
+      max: t('validation.summaryMax'),
+    }),
+  });
 
 const reviewSchema = z.object({});
 
-export const getStepSchema = (step: BuilderStep, options: ValidationOptions) => {
+export const getStepSchema = (step: BuilderStep, options: ValidationOptions, t: TFunction) => {
   switch (step) {
     case 'theme':
-      return themeSchema;
+      return createThemeSchema(t);
     case 'basic':
-      return basicSchema;
+      return createBasicSchema(t);
     case 'contact':
-      return contactSchema;
+      return createContactSchema(t);
     case 'experience':
-      return experienceSchema;
+      return createExperienceSchema(t);
     case 'education':
-      return educationSchema;
+      return createEducationSchema(t);
     case 'skills':
-      return createSkillsStepSchema(options);
+      return createSkillsStepSchema(options, t);
     case 'languages':
-      return languagesStepSchema;
+      return createLanguagesStepSchema(t);
     case 'summary':
-      return summarySchema;
+      return createSummarySchema(t);
     case 'review':
       return reviewSchema;
     default:
@@ -268,14 +281,14 @@ export const getStepSchema = (step: BuilderStep, options: ValidationOptions) => 
   }
 };
 
-export const getResumeSchema = (options: ValidationOptions) =>
+export const getResumeSchema = (options: ValidationOptions, t: TFunction) =>
   z.object({
-    ...themeSchema.shape,
-    ...basicSchema.shape,
-    ...contactSchema.shape,
-    ...experienceSchema.shape,
-    ...educationSchema.shape,
-    ...createSkillsStepSchema(options).shape,
-    ...languagesStepSchema.shape,
-    ...summarySchema.shape,
+    ...createThemeSchema(t).shape,
+    ...createBasicSchema(t).shape,
+    ...createContactSchema(t).shape,
+    ...createExperienceSchema(t).shape,
+    ...createEducationSchema(t).shape,
+    ...createSkillsStepSchema(options, t).shape,
+    ...createLanguagesStepSchema(t).shape,
+    ...createSummarySchema(t).shape,
   });

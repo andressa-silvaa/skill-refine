@@ -1,5 +1,24 @@
+/**
+ * ViewModel para listagem/cards de currículos.
+ *
+ * Causa raiz dos bugs corrigidos:
+ * - Score "—": o label usava `resume.score > 0 ? ... : '—'`, tratando 0 como ausente.
+ *   O backend enviava null como 0, então tanto 0 quanto null viravam "—".
+ * - Skills não apareciam: o GET /resumes só retornava `tags`; os cards usam skills.
+ *   Tags costumam estar vazias; skills vêm do detail. Incluímos "top skills" no list e
+ *   usamos skills (com fallback para tags) nos chips.
+ */
 import type { Resume } from '../model/types';
-import { formatDatePt, getResumeStatusLabel, getResumeStatusTone } from './format';
+import type { TFunction } from './format';
+import {
+  formatDatePt,
+  formatScore,
+  getResumeStatusLabel,
+  getResumeStatusTone,
+  getTopSkills,
+} from './format';
+
+const DEFAULT_MAX_SKILLS = 3;
 
 export type ResumeViewModel = {
   id: string;
@@ -13,19 +32,24 @@ export type ResumeViewModel = {
   tagsOverflow: number;
 };
 
-export function toResumeViewModel(resume: Resume, options?: { maxTags?: number }): ResumeViewModel {
-  const maxTags = options?.maxTags ?? 3;
-  const tagsVisible = resume.tags.slice(0, maxTags);
-  const tagsOverflow = Math.max(0, resume.tags.length - tagsVisible.length);
+export function toResumeViewModel(
+  resume: Resume,
+  options?: { maxTags?: number; maxSkills?: number; t?: TFunction }
+): ResumeViewModel {
+  const maxSkills = options?.maxSkills ?? DEFAULT_MAX_SKILLS;
+  const t = options?.t ?? ((key: string) => key);
+  const skillsSource = (resume.skills?.length ? resume.skills : resume.tags ?? []).filter(Boolean);
+  const { visible: tagsVisible, overflow: tagsOverflow } = getTopSkills(skillsSource, maxSkills);
+  const dateStr = formatDatePt(resume.updatedAt);
 
   return {
     id: resume.id,
     name: resume.name,
-    updatedAtLabel: `Atualizado em ${formatDatePt(resume.updatedAt)}`,
-    statusLabel: getResumeStatusLabel(resume.status),
+    updatedAtLabel: t('resume.updatedAt', { date: dateStr }),
+    statusLabel: getResumeStatusLabel(resume.status, t),
     statusTone: getResumeStatusTone(resume.status),
-    scoreValue: resume.score,
-    scoreLabel: resume.score > 0 ? `${resume.score}/100` : '—',
+    scoreValue: resume.score ?? 0,
+    scoreLabel: formatScore(resume.score),
     tagsVisible,
     tagsOverflow,
   };

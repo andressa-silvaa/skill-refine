@@ -5,6 +5,8 @@ export type ResumeDraftPayload = ResumeData & {
   name?: string;
   status?: ResumeStatus;
   lastStep?: string;
+  /** Score de completude (0–100). Persistido ao salvar. */
+  score?: number;
 };
 
 export type ResumeListResponse = {
@@ -22,7 +24,7 @@ export type ResumeDetailResponse = {
 
 export type AiRewriteResponse = {
   suggestedText: string;
-  provider?: 'local' | 'cloud';
+  provider?: 'cloud';
   fromCache?: boolean;
 };
 

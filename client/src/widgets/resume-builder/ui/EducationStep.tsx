@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Button, Input, CustomSelect, DatePicker } from '@/shared/ui';
 import type { Education, EducationStatus } from '@/entities/resume';
 
@@ -11,13 +14,17 @@ type Props = {
   onFieldTouched: (path: string) => void;
 };
 
-const STATUS_OPTIONS = [
-  { value: 'completed', label: 'Concluído' },
-  { value: 'in_progress', label: 'Em andamento' },
-];
-
 export function EducationStep(props: Props) {
   const { educations, onChange, getError, shouldShowError, onFieldTouched } = props;
+  const { t } = useTranslation();
+
+  const statusOptions = useMemo(
+    () => [
+      { value: 'completed', label: t('resume.educationStepCompleted') },
+      { value: 'in_progress', label: t('resume.educationStepInProgress') },
+    ],
+    [t]
+  );
 
   const addEducation = () => {
     const newEdu: Education = {
@@ -42,8 +49,8 @@ export function EducationStep(props: Props) {
   return (
     <div className="sr-education-step">
       <div className="sr-education-step__header">
-        <h3 className="sr-education-step__title">Formação acadêmica</h3>
-        <p className="sr-education-step__subtitle">Adicione sua formação e cursos</p>
+        <h3 className="sr-education-step__title">{t('resume.educationStepTitle')}</h3>
+        <p className="sr-education-step__subtitle">{t('resume.educationStepSubtitle')}</p>
       </div>
 
       <div className="sr-education-step__list">
@@ -57,13 +64,14 @@ export function EducationStep(props: Props) {
             getError={getError}
             shouldShowError={shouldShowError}
             onFieldTouched={onFieldTouched}
+            statusOptions={statusOptions}
           />
         ))}
       </div>
 
       <Button variant="secondary" onClick={addEducation}>
         <i className="fa-solid fa-plus" aria-hidden />
-        Adicionar formação
+        {t('resume.educationStepAdd')}
       </Button>
     </div>
   );
@@ -77,10 +85,12 @@ type EducationCardProps = {
   getError: (path: string) => string | undefined;
   shouldShowError: (path: string) => boolean;
   onFieldTouched: (path: string) => void;
+  statusOptions: { value: string; label: string }[];
 };
 
 function EducationCard(props: EducationCardProps) {
-  const { education, index, onUpdate, onRemove, getError, shouldShowError, onFieldTouched } = props;
+  const { education, index, onUpdate, onRemove, getError, shouldShowError, onFieldTouched, statusOptions } = props;
+  const { t } = useTranslation();
   const basePath = `educations.${index}`;
   const institutionError = shouldShowError(`${basePath}.institution`) ? getError(`${basePath}.institution`) : undefined;
   const courseError = shouldShowError(`${basePath}.course`) ? getError(`${basePath}.course`) : undefined;
@@ -92,7 +102,7 @@ function EducationCard(props: EducationCardProps) {
   return (
     <div className="sr-education-card">
       <div className="sr-education-card__header">
-        <h4 className="sr-education-card__title">Formação</h4>
+        <h4 className="sr-education-card__title">{t('resume.educationStepTitle')}</h4>
         <Button variant="ghost" onClick={onRemove}>
           <i className="fa-solid fa-trash" aria-hidden />
         </Button>
@@ -100,24 +110,24 @@ function EducationCard(props: EducationCardProps) {
 
       <div className="sr-education-card__fields">
         <Input
-          label="Instituição *"
-          placeholder="Nome da instituição"
+          label={t('resume.educationStepInstitution')}
+          placeholder={t('resume.educationStepInstitutionPlaceholder')}
           value={education.institution}
           onChange={(e) => onUpdate({ institution: e.target.value })}
           onBlur={() => onFieldTouched(`${basePath}.institution`)}
           error={institutionError}
         />
         <Input
-          label="Curso *"
-          placeholder="Nome do curso"
+          label={t('resume.educationStepCourse')}
+          placeholder={t('resume.educationStepCoursePlaceholder')}
           value={education.course}
           onChange={(e) => onUpdate({ course: e.target.value })}
           onBlur={() => onFieldTouched(`${basePath}.course`)}
           error={courseError}
         />
         <Input
-          label="Grau"
-          placeholder="Ex.: Bacharelado, Mestrado, Doutorado"
+          label={t('resume.educationStepDegree')}
+          placeholder={t('resume.educationStepDegreePlaceholder')}
           value={education.degree}
           onChange={(e) => onUpdate({ degree: e.target.value })}
           onBlur={() => onFieldTouched(`${basePath}.degree`)}
@@ -125,7 +135,7 @@ function EducationCard(props: EducationCardProps) {
         />
         <div className="sr-education-card__row">
           <DatePicker
-            label="Data início *"
+            label={t('resume.educationStepStartDateLabel')}
             value={education.startDate}
             onChange={(value) => {
               onUpdate({ startDate: value });
@@ -135,7 +145,7 @@ function EducationCard(props: EducationCardProps) {
           />
           {education.status === 'completed' ? (
             <DatePicker
-              label="Data conclusão *"
+              label={t('resume.educationStepEndDateLabel')}
               value={education.endDate || ''}
               onChange={(value) => {
                 onUpdate({ endDate: value });
@@ -146,8 +156,8 @@ function EducationCard(props: EducationCardProps) {
           ) : null}
         </div>
         <CustomSelect
-          label="Status *"
-          options={STATUS_OPTIONS}
+          label={t('resume.educationStepStatusLabel')}
+          options={statusOptions}
           value={education.status}
           onChange={(value) => {
             onUpdate({ status: value as EducationStatus, endDate: value === 'in_progress' ? undefined : education.endDate });

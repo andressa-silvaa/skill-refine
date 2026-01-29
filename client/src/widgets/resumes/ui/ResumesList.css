@@ -199,3 +199,26 @@
     font-size: 11px;
   }
 }
+
+@media (max-width: 360px) {
+  .sr-resumes-list {
+    --px: 10px;
+    --py: 10px;
+    --gap: 8px;
+
+    --col-name: 160px;
+    --col-status: 100px;
+    --col-updated: 140px;
+    --col-score: 90px;
+    --col-actions: 76px;
+  }
+
+  .sr-resumes-list__head {
+    font-size: 10px;
+  }
+
+  .sr-resumes-list__score {
+    font-size: 10px;
+    gap: 6px;
+  }
+}

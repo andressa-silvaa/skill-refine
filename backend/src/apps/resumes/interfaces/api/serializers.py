@@ -47,6 +47,7 @@ class ResumeDraftSerializer(serializers.Serializer):
     name = serializers.CharField(required=False, allow_blank=True, max_length=160)
     status = serializers.ChoiceField(required=False, choices=["draft", "complete", "analyzing"])
     lastStep = serializers.CharField(required=False, allow_blank=True, max_length=32)
+    score = serializers.IntegerField(required=False, allow_null=True, min_value=0, max_value=100)
     themeId = serializers.CharField(required=False, allow_blank=True, max_length=64)
     themePaletteId = serializers.CharField(required=False, allow_blank=True, max_length=64)
     themeAccentOverride = serializers.CharField(required=False, allow_blank=True, max_length=16)

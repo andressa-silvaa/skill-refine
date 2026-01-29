@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import './AutoSaveIndicator.css';
 
@@ -10,6 +11,7 @@ type Props = {
 
 export function AutoSaveIndicator(props: Props) {
   const { lastSaved, hasUnsavedChanges, onSave } = props;
+  const { t } = useTranslation();
   const [timeAgo, setTimeAgo] = useState<string>('');
 
   useEffect(() => {
@@ -21,20 +23,20 @@ export function AutoSaveIndicator(props: Props) {
     const updateTimeAgo = () => {
       const seconds = Math.floor((Date.now() - lastSaved.getTime()) / 1000);
       if (seconds < 60) {
-        setTimeAgo(`Salvo há ${seconds}s`);
+        setTimeAgo(t('resume.autoSaveAgo', { value: String(seconds), unit: t('resume.autoSaveSeconds') }));
       } else if (seconds < 3600) {
         const minutes = Math.floor(seconds / 60);
-        setTimeAgo(`Salvo há ${minutes}min`);
+        setTimeAgo(t('resume.autoSaveAgo', { value: String(minutes), unit: t('resume.autoSaveMinutes') }));
       } else {
         const hours = Math.floor(seconds / 3600);
-        setTimeAgo(`Salvo há ${hours}h`);
+        setTimeAgo(t('resume.autoSaveAgo', { value: String(hours), unit: t('resume.autoSaveHours') }));
       }
     };
 
     updateTimeAgo();
     const interval = setInterval(updateTimeAgo, 1000);
     return () => clearInterval(interval);
-  }, [lastSaved]);
+  }, [lastSaved, t]);
 
   if (!lastSaved && !hasUnsavedChanges) {
     return null;
@@ -45,7 +47,7 @@ export function AutoSaveIndicator(props: Props) {
       {hasUnsavedChanges ? (
         <span className="sr-auto-save-indicator__unsaved">
           <i className="fa-solid fa-circle" aria-hidden />
-          Alterações não salvas
+          {t('resume.autoSaveUnsaved')}
         </span>
       ) : (
         <span className="sr-auto-save-indicator__saved">

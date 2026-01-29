@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import type { ResumeViewModel } from '@/entities/resume';
 import { Card, DropdownMenu, IconButton } from '@/shared/ui';
 
@@ -18,6 +20,7 @@ type Props = {
 
 export function ResumesGrid(props: Props) {
   const { items, onEdit, onDuplicate, onExport, onDelete, duplicateLoadingId, downloadLoadingId } = props;
+  const { t } = useTranslation();
 
   return (
     <div className="sr-resumes-grid" role="list">
@@ -34,15 +37,15 @@ export function ResumesGrid(props: Props) {
 
             <DropdownMenu
               trigger={
-                <IconButton aria-label="Ações">
+                <IconButton aria-label={t('resume.actions')}>
                   <i className="fa-solid fa-ellipsis-vertical" aria-hidden />
                 </IconButton>
               }
               items={[
-                { key: 'edit', label: 'Abrir/Editar', iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
+                { key: 'edit', label: t('resume.openEdit'), iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
                 {
                   key: 'dup',
-                  label: duplicateLoadingId === vm.id ? 'Duplicando...' : 'Duplicar',
+                  label: duplicateLoadingId === vm.id ? t('resume.duplicating') : t('resume.duplicate'),
                   iconClass: duplicateLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-copy',
                   onClick: () => {
                     if (duplicateLoadingId === vm.id) return;
@@ -51,14 +54,14 @@ export function ResumesGrid(props: Props) {
                 },
                 {
                   key: 'pdf',
-                  label: downloadLoadingId === vm.id ? 'Gerando PDF...' : 'Baixar PDF',
+                  label: downloadLoadingId === vm.id ? t('resume.generatingPdf') : t('resume.exportPdf'),
                   iconClass: downloadLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-file-pdf',
                   onClick: () => {
                     if (downloadLoadingId === vm.id) return;
                     onExport(vm.id);
                   },
                 },
-                { key: 'del', label: 'Excluir', iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
+                { key: 'del', label: t('resume.delete'), iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
               ]}
             />
           </div>

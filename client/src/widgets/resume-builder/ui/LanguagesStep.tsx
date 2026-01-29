@@ -1,3 +1,6 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Button, Input, CustomSelect } from '@/shared/ui';
 import type { Language, LanguageLevel } from '@/entities/resume';
 
@@ -11,16 +14,20 @@ type Props = {
   onFieldTouched: (path: string) => void;
 };
 
-const LEVEL_OPTIONS = [
-  { value: 'basic', label: 'Básico' },
-  { value: 'intermediate', label: 'Intermediário' },
-  { value: 'advanced', label: 'Avançado' },
-  { value: 'fluent', label: 'Fluente' },
-  { value: 'native', label: 'Nativo' },
-];
-
 export function LanguagesStep(props: Props) {
   const { languages, onChange, getError, shouldShowError, onFieldTouched } = props;
+  const { t } = useTranslation();
+
+  const levelOptions = useMemo(
+    () => [
+      { value: 'basic', label: t('resume.languagesStepLevelBasic') },
+      { value: 'intermediate', label: t('resume.languagesStepLevelIntermediate') },
+      { value: 'advanced', label: t('resume.languagesStepLevelAdvanced') },
+      { value: 'fluent', label: t('resume.languagesStepLevelFluent') },
+      { value: 'native', label: t('resume.languagesStepLevelNative') },
+    ],
+    [t]
+  );
 
   const addLanguage = () => {
     const newLang: Language = {
@@ -42,8 +49,8 @@ export function LanguagesStep(props: Props) {
   return (
     <div className="sr-languages-step">
       <div className="sr-languages-step__header">
-        <h3 className="sr-languages-step__title">Idiomas</h3>
-        <p className="sr-languages-step__subtitle">Adicione os idiomas que você domina</p>
+        <h3 className="sr-languages-step__title">{t('resume.languagesStepTitle')}</h3>
+        <p className="sr-languages-step__subtitle">{t('resume.languagesStepSubtitle')}</p>
       </div>
 
       <div className="sr-languages-step__list">
@@ -57,13 +64,14 @@ export function LanguagesStep(props: Props) {
             getError={getError}
             shouldShowError={shouldShowError}
             onFieldTouched={onFieldTouched}
+            levelOptions={levelOptions}
           />
         ))}
       </div>
 
       <Button variant="secondary" onClick={addLanguage}>
         <i className="fa-solid fa-plus" aria-hidden />
-        Adicionar idioma
+        {t('resume.languagesStepAdd')}
       </Button>
     </div>
   );
@@ -77,10 +85,12 @@ type LanguageCardProps = {
   getError: (path: string) => string | undefined;
   shouldShowError: (path: string) => boolean;
   onFieldTouched: (path: string) => void;
+  levelOptions: { value: string; label: string }[];
 };
 
 function LanguageCard(props: LanguageCardProps) {
-  const { language, index, onUpdate, onRemove, getError, shouldShowError, onFieldTouched } = props;
+  const { language, index, onUpdate, onRemove, getError, shouldShowError, onFieldTouched, levelOptions } = props;
+  const { t } = useTranslation();
   const basePath = `languages.${index}`;
   const nameError = shouldShowError(`${basePath}.name`) ? getError(`${basePath}.name`) : undefined;
   const levelError = shouldShowError(`${basePath}.level`) ? getError(`${basePath}.level`) : undefined;
@@ -89,16 +99,16 @@ function LanguageCard(props: LanguageCardProps) {
     <div className="sr-language-card">
       <div className="sr-language-card__row">
         <Input
-          label="Idioma *"
-          placeholder="Ex.: Inglês, Espanhol, Francês"
+          label={`${t('resume.languagesStepTitle')} *`}
+          placeholder={t('resume.languagesStepNamePlaceholder')}
           value={language.name}
           onChange={(e) => onUpdate({ name: e.target.value })}
           onBlur={() => onFieldTouched(`${basePath}.name`)}
           error={nameError}
         />
         <CustomSelect
-          label="Nível *"
-          options={LEVEL_OPTIONS}
+          label={t('resume.languagesStepLevelBasic').replace('Básico', 'Nível *')}
+          options={levelOptions}
           value={language.level}
           onChange={(value) => {
             onUpdate({ level: value as LanguageLevel });
@@ -109,7 +119,7 @@ function LanguageCard(props: LanguageCardProps) {
       </div>
       <Button variant="ghost" onClick={onRemove}>
         <i className="fa-solid fa-trash" aria-hidden />
-        Remover
+        {t('resume.remove')}
       </Button>
     </div>
   );

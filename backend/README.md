@@ -91,4 +91,40 @@ Crie uma conexão Postgres com:
 
 Se você mudar os valores no `backend/.env`, use os mesmos no Beekeeper.
 
+### 7) AI Rewrite (cloud)
+
+O "Aprimorar com IA" no resumo do currículo usa **cloud** (API OpenAI‑compatível, ex. Groq, OpenAI). Configure `AI_CLOUD_BASE_URL`, `AI_CLOUD_API_KEY` e `AI_CLOUD_MODEL` no `backend/.env`. Ver `backend/env.example` (bloco "AI Rewrite").
+
+### 8) Geração de PDF (Playwright)
+
+A geração de PDF usa Playwright (Chromium headless) rodando dentro do container do backend. O backend precisa acessar o frontend para renderizar o currículo antes de gerar o PDF.
+
+**Configuração necessária:**
+
+Se você estiver rodando o backend em Docker e o frontend localmente (fora do Docker), o backend precisa conseguir acessar o frontend. Por padrão, o sistema tenta usar `host.docker.internal`, mas se isso não funcionar:
+
+1. **Opção 1 (Recomendada)**: Habilitar `host.docker.internal` no Docker Desktop:
+   - Abra Docker Desktop > Settings > Resources > Network
+   - Certifique-se de que "Enable host networking" está ativado
+
+2. **Opção 2**: Configurar o IP manualmente no `.env`:
+   ```env
+   FRONTEND_URL=http://192.168.1.X:3000  # Substitua pelo IP da sua máquina
+   ```
+   
+   Para descobrir seu IP no Windows:
+   ```bash
+   ipconfig | findstr IPv4
+   ```
+
+3. **Opção 3**: Rodar o frontend também em Docker (adicionar ao `docker-compose.yml`)
+
+**Testando a conectividade:**
+
+Dentro do container do backend, teste se consegue acessar o frontend:
+```bash
+docker exec skill-refine-backend python -c "import urllib.request; print(urllib.request.urlopen('http://host.docker.internal:3000').read()[:100])"
+```
+
+Se der timeout, use a Opção 2 acima.
 

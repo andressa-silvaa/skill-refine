@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { resumeApi, type ResumeDraftPayload } from '../api/resumeApi';
 import { toResumeViewModel, type Resume, type ResumeViewModel } from '@/entities/resume';
@@ -15,6 +16,7 @@ type State = {
 };
 
 export function useResumes() {
+  const { t } = useTranslation();
   const [state, setState] = useState<State>({
     items: [],
     query: '',
@@ -36,8 +38,8 @@ export function useResumes() {
       return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
     });
 
-    return sorted.map((r) => toResumeViewModel(r));
-  }, [state.items, state.query, state.sort]);
+    return sorted.map((r) => toResumeViewModel(r, { t }));
+  }, [state.items, state.query, state.sort, t]);
 
   const setQuery = (query: string) => setState((s) => ({ ...s, query }));
   const setView = (view: ResumesViewMode) => setState((s) => ({ ...s, view }));
@@ -59,7 +61,7 @@ export function useResumes() {
     const next: Resume = {
       ...src,
       id: `copy-${Date.now()}`,
-      name: `${src.name} (cópia)`,
+      name: `${src.name} ${t('resume.copySuffix')}`,
       updatedAt: new Date().toISOString(),
       status: 'draft',
     };

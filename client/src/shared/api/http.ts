@@ -23,8 +23,7 @@ export class ApiError extends Error {
   }
 }
 
-const RAW_API_URL = process.env.REACT_APP_API_URL ?? 'http://localhost:8000';
-const API_URL = (RAW_API_URL.split('REACT_APP_')[0] ?? '').trim();
+const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:8000').trim().replace(/\/+$/, '');
 
 export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getAccessToken();
@@ -33,7 +32,8 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   if (!headers.has('Content-Type') && typeof init.body === 'string') headers.set('Content-Type', 'application/json');
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+  const res = await fetch(url, {
     ...init,
     headers,
     credentials: 'include',
@@ -89,7 +89,8 @@ export async function apiRequestBlob(path: string, init: RequestInit = {}): Prom
   const headers = new Headers(init.headers);
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+  const res = await fetch(url, {
     ...init,
     headers,
     credentials: 'include',

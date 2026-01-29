@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Input } from '@/shared/ui';
 import type { Contact } from '@/entities/resume';
 
@@ -13,6 +15,7 @@ type Props = {
 
 export function ContactStep(props: Props) {
   const { contact, onChange, getError, shouldShowError, onFieldTouched } = props;
+  const { t } = useTranslation();
 
   const updateField = (field: keyof Contact, value: string) => {
     onChange({ ...contact, [field]: value });
@@ -35,14 +38,14 @@ export function ContactStep(props: Props) {
   return (
     <div className="sr-contact-step">
       <div className="sr-contact-step__header">
-        <h3 className="sr-contact-step__title">Informações de contato</h3>
-        <p className="sr-contact-step__subtitle">Como os recrutadores podem entrar em contato com você</p>
+        <h3 className="sr-contact-step__title">{t('resume.contactStepTitle')}</h3>
+        <p className="sr-contact-step__subtitle">{t('resume.contactStepSubtitle')}</p>
       </div>
 
       <div className="sr-contact-step__fields">
         <Input
-          label="Nome completo *"
-          placeholder="Seu nome completo"
+          label={t('resume.contactStepFullName')}
+          placeholder={t('resume.contactStepFullNamePlaceholder')}
           value={contact.fullName}
           onChange={(e) => updateField('fullName', e.target.value)}
           onBlur={() => onFieldTouched('contact.fullName')}
@@ -51,9 +54,9 @@ export function ContactStep(props: Props) {
         />
         <div className="sr-contact-step__row">
           <Input
-            label="E-mail *"
+            label={t('resume.contactStepEmail')}
             type="email"
-            placeholder="seu@email.com"
+            placeholder={t('resume.contactStepEmailPlaceholder')}
             value={contact.email}
             onChange={(e) => updateField('email', e.target.value)}
             onBlur={() => onFieldTouched('contact.email')}
@@ -61,9 +64,9 @@ export function ContactStep(props: Props) {
             error={emailError}
           />
           <Input
-            label="Telefone"
+            label={t('resume.contactStepPhone')}
             type="tel"
-            placeholder="(00) 00000-0000"
+            placeholder={t('resume.contactStepPhonePlaceholder')}
             value={contact.phone}
             onChange={(e) => updateField('phone', e.target.value)}
             onBlur={() => onFieldTouched('contact.phone')}
@@ -72,16 +75,16 @@ export function ContactStep(props: Props) {
         </div>
         <div className="sr-contact-step__row">
           <Input
-            label="Cidade"
-            placeholder="São Paulo"
+            label={t('resume.contactStepCity')}
+            placeholder={t('resume.contactStepCityPlaceholder')}
             value={contact.city}
             onChange={(e) => updateField('city', e.target.value)}
             onBlur={() => onFieldTouched('contact.city')}
             error={cityError}
           />
           <Input
-            label="País"
-            placeholder="Brasil"
+            label={t('resume.contactStepCountry')}
+            placeholder={t('resume.contactStepCountryPlaceholder')}
             value={contact.country}
             onChange={(e) => updateField('country', e.target.value)}
             onBlur={() => onFieldTouched('contact.country')}
@@ -89,19 +92,19 @@ export function ContactStep(props: Props) {
           />
         </div>
         <Input
-          label="LinkedIn"
+          label={t('resume.contactStepLinkedin')}
           type="url"
-          placeholder="linkedin.com/in/seu-perfil"
+          placeholder={t('resume.contactStepLinkedinPlaceholder')}
           value={contact.linkedin || ''}
           onChange={(e) => updateField('linkedin', e.target.value)}
           onBlur={() => onFieldTouched('contact.linkedin')}
-          hint="Opcional"
+          hint={t('resume.contactStepOptional')}
           error={linkedinError}
         />
         <Input
-          label="Portfólio / GitHub / Site"
+          label={t('resume.contactStepPortfolio')}
           type="url"
-          placeholder="github.com/seu-usuario ou seuportfolio.com"
+          placeholder={t('resume.contactStepPortfolioPlaceholder')}
           value={compositeValue}
           onChange={(e) => {
             const url = e.target.value;
@@ -126,7 +129,7 @@ export function ContactStep(props: Props) {
               onFieldTouched('contact.portfolio');
             }
           }}
-          hint="Opcional"
+          hint={t('resume.contactStepOptional')}
           error={compositeError}
         />
       </div>

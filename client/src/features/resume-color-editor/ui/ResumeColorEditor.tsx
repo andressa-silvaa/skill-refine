@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ResumeTheme } from '@/entities/resume';
 import { getResumeThemePalette } from '@/entities/resume';
@@ -13,14 +14,15 @@ type Props = {
 };
 
 export function ResumeColorEditor(props: Props) {
+  const { t } = useTranslation();
   const { theme, paletteId, onChange } = props;
   const palette = useMemo(() => getResumeThemePalette(theme, paletteId), [theme, paletteId]);
 
   return (
-    <div className="sr-resume-color-editor" role="region" aria-label="Editar cores do currículo">
+    <div className="sr-resume-color-editor" role="region" aria-label={t('resume.colorEditorAria')}>
       <div className="sr-resume-color-editor__panel">
         <div className="sr-resume-color-editor__section">
-          <span className="sr-resume-color-editor__label">Paletas</span>
+          <span className="sr-resume-color-editor__label">{t('resume.colorEditorPalettes')}</span>
           <div className="sr-resume-color-editor__palette">
             {theme.palettes.map((item) => (
               <PaletteChip
@@ -50,7 +52,7 @@ export function ResumeColorEditor(props: Props) {
               })
             }
           >
-            Resetar
+            {t('resume.colorEditorReset')}
           </Button>
         </div>
       </div>

@@ -42,10 +42,26 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
   width: 100%;
   max-width: 100%;
+  max-height: 5em;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.sr-resume-meta__chip {
+  max-width: 7em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sr-resume-meta__ellipsis {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sr-ink-subtle);
+  flex-shrink: 0;
 }
 
 .sr-resume-meta.is-compact {
@@ -69,5 +85,42 @@
 
   .sr-resume-meta__tags {
     gap: 6px;
+    max-height: 2.4em;
+  }
+
+  .sr-resume-meta__chip {
+    max-width: 6em;
+  }
+
+  .sr-resume-meta__ellipsis {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .sr-resume-meta {
+    gap: 6px;
+  }
+
+  .sr-resume-meta__top {
+    gap: 6px;
+  }
+
+  .sr-resume-meta__score {
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .sr-resume-meta__tags {
+    gap: 4px;
+    max-height: 2.2em;
+  }
+
+  .sr-resume-meta__chip {
+    max-width: 5em;
+  }
+
+  .sr-resume-meta__ellipsis {
+    font-size: 10px;
   }
 }

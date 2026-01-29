@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { ResumeData } from '@/entities/resume';
 import { DEFAULT_RESUME_THEME_ID } from '@/entities/resume';
@@ -79,6 +80,7 @@ const INITIAL_DATA: ResumeData = {
 };
 
 export function useResumeBuilder() {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState<BuilderStep>('theme');
   const [data, setData] = useState<ResumeData>(INITIAL_DATA);
   const [resumeId, setResumeId] = useState<string | null>(null);
@@ -93,8 +95,8 @@ export function useResumeBuilder() {
   const validationOptions = useMemo(() => ({ showSkillLevels }), [showSkillLevels]);
 
   const currentValidation = useMemo(
-    () => validateStep(currentStep, data, validationOptions),
-    [currentStep, data, validationOptions],
+    () => validateStep(currentStep, data, validationOptions, t),
+    [currentStep, data, validationOptions, t],
   );
 
   const currentSnapshot = useMemo(() => JSON.stringify(normalizeResumeData(data)), [data]);
@@ -120,8 +122,8 @@ export function useResumeBuilder() {
   }, [currentStep, getStepOrder]);
 
   const isStepComplete = useCallback(
-    (step: BuilderStep): boolean => validateStep(step, data, validationOptions).isValid,
-    [data, validationOptions],
+    (step: BuilderStep): boolean => validateStep(step, data, validationOptions, t).isValid,
+    [data, validationOptions, t],
   );
 
   const canGoToStep = useCallback((targetStep: BuilderStep): boolean => {
@@ -162,7 +164,7 @@ export function useResumeBuilder() {
         return true;
       }
 
-      const validation = validateStep(currentStep, data, validationOptions);
+      const validation = validateStep(currentStep, data, validationOptions, t);
       if (!validation.isValid) {
         setSubmittedSteps((prev) => ({ ...prev, [currentStep]: true }));
         return false;
@@ -170,7 +172,7 @@ export function useResumeBuilder() {
       setCurrentStep(targetStep);
       return true;
     },
-    [currentStep, data, getStepOrder, validationOptions],
+    [currentStep, data, getStepOrder, validationOptions, t],
   );
 
   const updateData = useCallback((updates: Partial<ResumeData>) => {
@@ -217,7 +219,7 @@ export function useResumeBuilder() {
   );
 
   const validateCurrentStep = useCallback(() => {
-    const result = validateStep(currentStep, data, validationOptions);
+    const result = validateStep(currentStep, data, validationOptions, t);
     if (!result.isValid) {
       setSubmittedSteps((prev) => ({ ...prev, [currentStep]: true }));
     } else {
@@ -225,16 +227,16 @@ export function useResumeBuilder() {
       if (Object.keys(serverErrors).length) setServerErrors({});
     }
     return result;
-  }, [currentStep, data, updateData, validationOptions, serverErrors]);
+  }, [currentStep, data, updateData, validationOptions, serverErrors, t]);
 
   const validateAll = useCallback(() => {
-    const result = validateResume(data, validationOptions);
+    const result = validateResume(data, validationOptions, t);
     if (result.isValid) {
       updateData(result.data as Partial<ResumeData>);
       if (Object.keys(serverErrors).length) setServerErrors({});
     }
     return result;
-  }, [data, updateData, validationOptions, serverErrors]);
+  }, [data, updateData, validationOptions, serverErrors, t]);
 
   const saveDraft = useCallback(() => {
     setLastSaved(new Date());

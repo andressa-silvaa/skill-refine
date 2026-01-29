@@ -62,74 +62,7 @@ def _rate_limit(request, limit: int = 10, window_seconds: int = 60) -> None:
     cache.set(key, int(current) + 1, timeout=window_seconds)
 
 
-def _rewrite_with_local(text: str, context: str, options: dict[str, Any] | None) -> str:
-    mode = getattr(settings, "AI_REWRITE_MODE", "local_first")
-    if mode == "cloud_only":
-        raise AIProviderError("Local provider disabled by configuration.")
-
-    base_url = getattr(settings, "AI_LOCAL_BASE_URL", "http://localhost:11434").rstrip("/")
-    model = getattr(settings, "AI_LOCAL_MODEL", "llama3")
-    timeout = int(getattr(settings, "AI_LOCAL_TIMEOUT_SECONDS", 10))
-
-    language = (options or {}).get("language") or "pt-BR"
-    tone = (options or {}).get("tone") or "professional"
-    max_length = int((options or {}).get("maxLength") or 600)
-
-    prompt = (
-        "Você é um assistente especializado em aprimorar resumos de currículo em português do Brasil.\n\n"
-        f"Contexto: {context}\n"
-        f"Idioma: {language}\n"
-        f"Tom desejado: {tone}\n"
-        f"Tamanho máximo aproximado: {max_length} caracteres.\n\n"
-        "Reescreva o texto abaixo deixando-o mais claro, profissional e conciso, "
-        "adequado para a seção de resumo de currículo. Não altere o idioma e não adicione informações fictícias.\n\n"
-        "Texto original:\n\"\"\"\n"
-        f"{text}\n"
-        "\"\"\"\n\n"
-        "Texto aprimorado:"
-    )
-
-    try:
-        resp = requests.post(
-            f"{base_url}/api/generate",
-            json={"model": model, "prompt": prompt, "stream": False},
-            timeout=timeout,
-        )
-    except requests.RequestException as exc:
-        raise AIProviderError(f"Local provider request failed: {exc}") from exc
-
-    if resp.status_code >= 500:
-        raise AIProviderError(f"Local provider returned {resp.status_code}.")
-
-    try:
-        data = resp.json()
-    except ValueError as exc:
-        raise AIProviderError("Local provider returned invalid JSON.") from exc
-
-    suggestion = (
-        data.get("response")
-        or data.get("generated_text")
-        or data.get("output")
-        or ""
-    )
-    suggestion = str(suggestion or "").strip()
-    # Alguns modelos retornam o texto entre aspas; removemos aspas externas se existirem.
-    if (suggestion.startswith('"') and suggestion.endswith('"')) or (
-        suggestion.startswith("'") and suggestion.endswith("'")
-    ):
-        suggestion = suggestion[1:-1].strip()
-    if not suggestion:
-        raise AIProviderError("Local provider returned empty response.")
-    if len(suggestion) > max_length:
-        suggestion = suggestion[: max_length].rstrip()
-    return suggestion
-
-
 def _rewrite_with_cloud(text: str, context: str, options: dict[str, Any] | None) -> str:
-    mode = getattr(settings, "AI_REWRITE_MODE", "local_first")
-    if mode == "local_only":
-        raise AIProviderError("Cloud provider disabled by configuration.")
-
     base_url = getattr(settings, "AI_CLOUD_BASE_URL", "").rstrip("/")
     api_key = getattr(settings, "AI_CLOUD_API_KEY", "")
     model = getattr(settings, "AI_CLOUD_MODEL", "")
@@ -213,52 +146,30 @@ def rewrite_text_orchestrated(text: str, context: str, options: dict[str, Any] |
 
     cached: RewriteResult | None = cache.get(cache_key)  # type: ignore[assignment]
     if cached:
-        # Preserve provider information but mark that it came from cache.
         cached["from_cache"] = True
         logger.info(
             "AI rewrite cache hit",
-            extra={"provider": cached.get("provider"), "context": context},
+            extra={"provider": "cloud", "context": context},
         )
         return cached
 
-    mode = getattr(settings, "AI_REWRITE_MODE", "local_first")
-    errors: list[str] = []
-
-    # local-first by default
-    providers_order: list[str]
-    if mode == "cloud_only":
-        providers_order = ["cloud"]
-    elif mode == "local_only":
-        providers_order = ["local"]
-    else:
-        providers_order = ["local", "cloud"]
-
-    for provider in providers_order:
-        try:
-            if provider == "local":
-                suggestion = _rewrite_with_local(text, context, options)
-            else:
-                suggestion = _rewrite_with_cloud(text, context, options)
-            result: RewriteResult = {
-                "suggested_text": suggestion,
-                "provider": provider,
-                "from_cache": False,
-            }
-            cache.set(cache_key, result, timeout=cache_ttl_seconds)
-            return result
-        except AIProviderError as exc:
-            errors.append(f"{provider}: {exc}")
-            logger.warning(
-                "AI rewrite provider failed",
-                extra={
-                    "provider": provider,
-                    "context": context,
-                    "error": str(exc),
-                },
-            )
-            continue
-
-    raise AIUnavailableError("; ".join(errors))
+    logger.info("AI rewrite provider=cloud", extra={"provider": "cloud", "context": context})
+    try:
+        suggestion = _rewrite_with_cloud(text, context, options)
+    except AIProviderError as exc:
+        logger.warning(
+            "AI rewrite provider failed (provider=cloud): %s",
+            exc,
+            extra={"provider": "cloud", "context": context, "error": str(exc)},
+        )
+        raise AIUnavailableError(str(exc)) from exc
+    result: RewriteResult = {
+        "suggested_text": suggestion,
+        "provider": "cloud",
+        "from_cache": False,
+    }
+    cache.set(cache_key, result, timeout=cache_ttl_seconds)
+    return result
 
 
 class AiRewriteView(APIView):

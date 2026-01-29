@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import type { ResumeData } from '@/entities/resume';
 import { stressResumeData } from '@/entities/resume/mocks/stressResume';
@@ -19,6 +20,7 @@ type Props = {
 
 export function ResumePreviewFullscreen(props: Props) {
   const { open, data, onClose, enableStressToggle = false, onUpdateData } = props;
+  const { t } = useTranslation();
   const [useStress, setUseStress] = useState(false);
 
   useEffect(() => {
@@ -61,11 +63,11 @@ export function ResumePreviewFullscreen(props: Props) {
   const portalRoot = document.querySelector('[data-sr-theme-scope]') ?? document.body;
 
   return createPortal(
-    <div className="sr-resume-preview-fullscreen" role="dialog" aria-modal="true" aria-label="Pré-visualização do currículo">
+    <div className="sr-resume-preview-fullscreen" role="dialog" aria-modal="true" aria-label={t('resume.previewTitle')}>
       <div className="sr-resume-preview-fullscreen__header">
         <div className="sr-resume-preview-fullscreen__header-left">
-          <span className="sr-resume-preview-fullscreen__badge">Pré-visualização</span>
-          <span className="sr-resume-preview-fullscreen__title">Visualização do currículo</span>
+          <span className="sr-resume-preview-fullscreen__badge">{t('resume.previewBadge')}</span>
+          <span className="sr-resume-preview-fullscreen__title">{t('resume.previewTitle')}</span>
         </div>
         {enableStressToggle ? (
           <button
@@ -74,10 +76,10 @@ export function ResumePreviewFullscreen(props: Props) {
             aria-pressed={useStress}
             onClick={() => setUseStress((prev) => !prev)}
           >
-            {useStress ? 'Voltar' : 'Stress'}
+            {useStress ? t('resume.previewBack') : t('resume.previewStress')}
           </button>
         ) : null}
-        <button type="button" className="sr-resume-preview-fullscreen__close" aria-label="Fechar" onClick={onClose}>
+        <button type="button" className="sr-resume-preview-fullscreen__close" aria-label={t('resume.previewClose')} onClick={onClose}>
           ×
         </button>
       </div>

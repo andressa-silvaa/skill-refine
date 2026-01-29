@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { ResumeThemePicker } from '@/features/resume-theme-select';
 import type { ResumeTheme, ResumeThemeId } from '@/entities/resume';
 import { PaletteChip } from '@/shared/ui';
@@ -23,11 +25,13 @@ export function ThemeSelectionStep({
   errorMessage,
   paletteErrorMessage,
 }: Props) {
+  const { t } = useTranslation();
+
   return (
     <div className={`sr-theme-selection${errorMessage ? ' is-invalid' : ''}`} tabIndex={errorMessage ? -1 : undefined}>
       <div className="sr-theme-selection__header">
-        <h3 className="sr-theme-selection__title">Selecione um tema visual *</h3>
-        <p className="sr-theme-selection__subtitle">Escolha o estilo que melhor representa sua identidade profissional</p>
+        <h3 className="sr-theme-selection__title">{t('resume.themeStepTitle')}</h3>
+        <p className="sr-theme-selection__subtitle">{t('resume.themeStepSubtitle')}</p>
       </div>
 
       <ResumeThemePicker selectedId={selectedId} onSelect={onSelect} />
@@ -35,10 +39,10 @@ export function ThemeSelectionStep({
 
       <div className={`sr-theme-selection__palettes${paletteErrorMessage ? ' is-invalid' : ''}`}>
         <div className="sr-theme-selection__palettes-header">
-          <div className="sr-theme-selection__palettes-title">Selecione uma paleta *</div>
-          <div className="sr-theme-selection__palettes-subtitle">A cor do currículo (visualização e PDF) seguirá esta paleta.</div>
+          <div className="sr-theme-selection__palettes-title">{t('resume.themeStepPaletteTitle')}</div>
+          <div className="sr-theme-selection__palettes-subtitle">{t('resume.themeStepPaletteSubtitle')}</div>
         </div>
-        <div className="sr-theme-selection__palettes-grid" role="list" aria-label="Paletas do tema">
+        <div className="sr-theme-selection__palettes-grid" role="list" aria-label={t('resume.themeStepPalettesAria')}>
           {theme.palettes.map((p) => (
             <PaletteChip
               key={p.id}
