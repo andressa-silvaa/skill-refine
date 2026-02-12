@@ -15,13 +15,13 @@
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",
     "bootstrap": "^5.3.8",
+    "i18next": "^23.8.2",
     "react": "^19.2.3",
     "react-calendar": "^6.0.0",
     "react-date-picker": "^12.0.1",
     "react-dom": "^19.2.3",
     "react-hook-form": "^7.70.0",
     "react-hot-toast": "^2.6.0",
-    "i18next": "^23.8.2",
     "react-i18next": "^14.1.3",
     "react-router-dom": "^7.11.0",
     "react-scripts": "5.0.1",
@@ -33,7 +33,15 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:max-lines": "eslint src --ext .ts,.tsx --rule 'max-lines: [error, { max: 300, skipBlankLines: true, skipComments: true }]'",
+    "deps:cycles": "madge --circular --extensions ts,tsx src",
+    "i18n:check": "npx tsx src/shared/lib/i18n/scripts/check-i18n-keys.ts",
+    "ci:check": "npm run lint && npm run deps:cycles && npm run i18n:check"
+  },
+  "devDependencies": {
+    "madge": "^6.1.0"
   },
   "eslintConfig": {
     "extends": [

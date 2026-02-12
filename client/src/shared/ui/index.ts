@@ -21,3 +21,4 @@ export { Tooltip } from './tooltip/Tooltip';
 export { Checkbox } from './checkbox/Checkbox';
 export { ColorPicker } from './color-picker/ColorPicker';
 export { PaletteChip } from './palette-chip/PaletteChip';
+export { PageLoader } from './page-loader';

@@ -1,6 +1,6 @@
-import { enUS } from './enUS';
-import { esES } from './esES';
-import { ptBR } from './ptBR';
+import { enUS } from './locales/enUS';
+import { esES } from './locales/esES';
+import { ptBR } from './locales/ptBR';
 
 export const resources = {
   'pt-BR': ptBR,

@@ -1,4 +1,4 @@
-import { registerSchema } from '@/features/auth/register/model/schema';
+import { registerSchema } from '@/features/auth';
 
 export function validateFullName(fullName: string): string | null {
   const next = fullName.trim();

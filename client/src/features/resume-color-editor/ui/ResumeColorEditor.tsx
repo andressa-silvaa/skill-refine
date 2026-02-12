@@ -1,8 +1,6 @@
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ResumeTheme } from '@/entities/resume';
-import { getResumeThemePalette } from '@/entities/resume';
 import { Button, PaletteChip } from '@/shared/ui';
 
 import './ResumeColorEditor.css';
@@ -16,7 +14,6 @@ type Props = {
 export function ResumeColorEditor(props: Props) {
   const { t } = useTranslation();
   const { theme, paletteId, onChange } = props;
-  const palette = useMemo(() => getResumeThemePalette(theme, paletteId), [theme, paletteId]);
 
   return (
     <div className="sr-resume-color-editor" role="region" aria-label={t('resume.colorEditorAria')}>

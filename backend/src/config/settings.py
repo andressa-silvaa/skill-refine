@@ -50,8 +50,20 @@ WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
 
+def _get_db_config():
+    """Database config with fallback for empty DATABASE_URL (common in Docker)."""
+    url = env.str("DATABASE_URL", default="")
+    if not url or url.strip() == "":
+        # Fallback when DATABASE_URL is unset or empty (e.g. some Docker setups)
+        return {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": str(BACKEND_DIR / "db.sqlite3"),
+        }
+    return env.db()
+
+
 DATABASES = {
-    "default": env.db(),
+    "default": _get_db_config(),
 }
 
 # Cache (required for AI cache + rate limit)
@@ -72,6 +84,17 @@ else:
             "LOCATION": "skill-refine",
         }
     }
+
+# Celery (broker = Redis; fallback for local dev without Redis)
+CELERY_BROKER_URL = env.str("CELERY_BROKER_URL", default=REDIS_URL or "redis://localhost:6379/1")
+CELERY_RESULT_BACKEND = env.str("CELERY_RESULT_BACKEND", default=REDIS_URL or "redis://localhost:6379/2")
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TIMEZONE = "UTC"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 300  # 5 min max per task
+CELERY_TASKS_ENABLED = env.bool("CELERY_TASKS_ENABLED", default=True)
 
 LANGUAGE_CODE = "pt-br"
 TIME_ZONE = "UTC"
@@ -158,6 +181,17 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="no-reply@skillrefine.local")
+
+# ----------------------------
+# Analysis Inference (local TF-IDF / HuggingFace)
+# ----------------------------
+ANALYSIS_MODEL_DIR = env.str("ANALYSIS_MODEL_DIR", default="")
+ANALYSIS_TFIDF_MODEL_PATH = env.str("ANALYSIS_TFIDF_MODEL_PATH", default="")
+ANALYSIS_MODEL_NAME = env.str("ANALYSIS_MODEL_NAME", default="tfidf-logreg-seniority")
+ANALYSIS_MODEL_VERSION = env.str("ANALYSIS_MODEL_VERSION", default="analysis_v1")
+ANALYSIS_MAX_CHARS_RESUME = env.int("ANALYSIS_MAX_CHARS_RESUME", default=12_000)
+ANALYSIS_MAX_CHARS_JOB = env.int("ANALYSIS_MAX_CHARS_JOB", default=8_000)
+ANALYSIS_MULTILANG = env.bool("ANALYSIS_MULTILANG", default=False)
 
 # ----------------------------
 # AI Rewrite (cloud only, OpenAI-compatible)

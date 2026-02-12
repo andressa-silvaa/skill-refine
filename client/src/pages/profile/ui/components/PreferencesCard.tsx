@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useSession, useSessionActions } from '@/entities/session';
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
+import { profileApi } from '@/entities/session';
+import { handleApiSaveError } from '@/shared/api';
 import { useDirtyState } from '@/shared/lib/hooks/useDirtyState';
-import { notify } from '@/shared/lib/notify';
 
 import './PreferencesCard.css';
 
@@ -97,10 +96,11 @@ export function PreferencesCard() {
                 updatePreferences({ email_notifications_enabled: value });
                 setIsEditing(false);
               } catch (e) {
-                const fields = getApiFieldErrors(e);
-                const errMsg = fields?.email_notifications_enabled;
-                if (errMsg) setFieldError(errMsg);
-                else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
+                handleApiSaveError(e, {
+                  fallbackMessage: t('common.errors.saveFailed'),
+                  fieldKey: 'email_notifications_enabled',
+                  onFieldError: setFieldError,
+                });
               } finally {
                 setIsSaving(false);
               }

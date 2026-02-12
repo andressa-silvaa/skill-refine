@@ -22,7 +22,6 @@ export function getResumeStatusTone(status: ResumeStatus) {
   return 'neutral';
 }
 
-/** Format YYYY-MM to locale-aware "Mon YYYY". Pass locale (e.g. from i18n.language) for translated months. */
 export function formatMonthYear(dateStr: string, locale?: string): string {
   if (!dateStr) return '';
   const [year, month] = dateStr.split('-');
@@ -43,14 +42,12 @@ export function formatScore(score: number | null | undefined): string {
   return `${score}/100`;
 }
 
-/** Retorna as primeiras N skills e o overflow. Usado em cards/lista. */
 export function getTopSkills(skills: string[], max: number): { visible: string[]; overflow: number } {
   const visible = skills.slice(0, max);
   const overflow = Math.max(0, skills.length - visible.length);
   return { visible, overflow };
 }
 
-/** Score de completude (0–100) usado na revisão e persistido no backend. Mesma lógica do ReviewStep. */
 export function calculateCompletenessScore(data: ResumeData): number {
   let score = 0;
   if (data.targetPosition) score += 10;

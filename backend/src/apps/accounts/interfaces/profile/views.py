@@ -12,6 +12,10 @@ from apps.accounts.infrastructure.email_sender import DjangoEmailSender
 from apps.accounts.infrastructure.models import UserPreferences
 from apps.accounts.infrastructure.repositories import OrmSessionRepository, OrmUserRepository
 from apps.audit.infrastructure.logger import OrmAuditLogger
+from shared.api.responses import (
+    error_response as _error,
+    field_error_response as _field_error,
+)
 from shared.auth.drf import request_meta
 from shared.auth.jwt import now_utc
 
@@ -21,31 +25,6 @@ from .serializers import (
     PreferencesSerializer,
     ProfileUpdateSerializer,
 )
-
-
-def _canonical_error_code(code: str) -> str:
-    return (code or "").strip().upper()
-
-
-def _error(code: str, message: str, http_status: int) -> Response:
-    canonical = _canonical_error_code(code)
-    payload = {
-        "error": {"code": code, "error_code": canonical, "message": message},
-        "error_code": canonical,
-        "message": message,
-    }
-    return Response(payload, status=http_status)
-
-
-def _field_error(code: str, message: str, fields: dict[str, str], http_status: int) -> Response:
-    canonical = _canonical_error_code(code)
-    payload = {
-        "error": {"code": code, "error_code": canonical, "message": message},
-        "error_code": canonical,
-        "message": message,
-        "fields": fields,
-    }
-    return Response(payload, status=http_status)
 
 
 def _avatar_url(public_id: str | None) -> str | None:

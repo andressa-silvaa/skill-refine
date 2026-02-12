@@ -1,0 +1,17 @@
+{
+  "language": "en",
+  "description": "Common section headers for heuristic detection (EN-US). Used for Task B (line classification).",
+  "sections": {
+    "EXPERIENCE": ["work experience", "experience", "employment", "professional experience", "career", "work history"],
+    "EDUCATION": ["education", "academic", "qualifications", "degrees", "training"],
+    "SKILLS": ["skills", "technical skills", "competencies", "technologies", "tools", "expertise"],
+    "PROJECTS": ["projects", "key projects", "portfolio", "selected projects"],
+    "SUMMARY": ["summary", "professional summary", "objective", "profile", "about", "overview"],
+    "CONTACT": ["contact", "contact information", "personal information"],
+    "OTHER": []
+  },
+  "header_patterns": [
+    "^\\s*#?\\s*(experience|education|skills|projects|summary|contact|objective|profile|employment)",
+    "^\\s*[A-Z][a-z]+\\s*:?\\s*$"
+  ]
+}

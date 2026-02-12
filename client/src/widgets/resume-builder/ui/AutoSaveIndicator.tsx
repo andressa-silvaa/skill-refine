@@ -10,7 +10,7 @@ type Props = {
 };
 
 export function AutoSaveIndicator(props: Props) {
-  const { lastSaved, hasUnsavedChanges, onSave } = props;
+  const { lastSaved, hasUnsavedChanges } = props;
   const { t } = useTranslation();
   const [timeAgo, setTimeAgo] = useState<string>('');
 

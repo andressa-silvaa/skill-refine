@@ -2,8 +2,7 @@ import type { CSSProperties } from 'react';
 
 import type { ResumeData, ResumeThemeStyleTokens } from '@/entities/resume';
 import { getResumeThemeById, getResumeThemePalette } from '@/entities/resume';
-import { getThemeLayoutData } from '@/features/resume-preview/ui/ThemeRenderer';
-import { ResumePages } from '@/features/resume-preview/ui/ResumePages';
+import { getThemeLayoutData, ResumePages } from '@/features/resume-preview';
 
 import './ResumePreviewContent.css';
 
@@ -16,7 +15,6 @@ export function ResumePreviewContent(props: Props) {
   const { data, onReady } = props;
   const theme = getResumeThemeById(data.themeId);
   const palette = getResumeThemePalette(theme, data.themePaletteId);
-  // Removido suporte a cores personalizadas: usamos apenas paletas prontas.
   const accent = palette.accent;
   const accentSoft = palette.accentSoft;
   const styleTokens = toThemeStyleVars({
@@ -54,4 +52,3 @@ function toThemeStyleVars(tokens: ResumeThemeStyleTokens & { secondary?: string 
   } as React.CSSProperties;
 }
 
-// Overrides removidos: paletas prontas apenas.

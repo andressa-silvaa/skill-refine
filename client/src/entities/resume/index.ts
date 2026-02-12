@@ -12,3 +12,16 @@ export {
 } from './lib/format';
 export { toResumeViewModel } from './lib/viewModel';
 export type { ResumeViewModel } from './lib/viewModel';
+
+export { stressResumeData } from './mocks/stressResume';
+
+export {
+  ResumeHeader,
+  ResumeContactList,
+  ResumeSection,
+  ResumeSummary,
+  ResumeExperienceItem,
+  ResumeEducationItem,
+  ResumeLanguageItem,
+  ResumeSkillTags,
+} from './ui';

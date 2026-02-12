@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Stable label mappings for ML pipeline and API. Used by scripts and backend.",
+  "seniority": {
+    "intern": "analysis.seniority.intern",
+    "junior": "analysis.seniority.junior",
+    "mid": "analysis.seniority.mid",
+    "senior": "analysis.seniority.senior"
+  },
+  "quality_level": {
+    "poor": "analysis.quality.poor",
+    "ok": "analysis.quality.ok",
+    "good": "analysis.quality.good",
+    "excellent": "analysis.quality.excellent"
+  },
+  "insight_keys": {
+    "strengths": [
+      "analysis.insights.strengths.clear_structure",
+      "analysis.insights.strengths.education_aligned",
+      "analysis.insights.strengths.professional_summary",
+      "analysis.insights.strengths.relevant_experience",
+      "analysis.insights.strengths.ats_keywords"
+    ],
+    "improvements": [
+      "analysis.insights.improvements.add_metrics",
+      "analysis.insights.improvements.ats_keywords",
+      "analysis.insights.improvements.executive_summary",
+      "analysis.insights.improvements.relevant_links",
+      "analysis.insights.improvements.action_verbs",
+      "analysis.insights.improvements.clarity_conciseness"
+    ]
+  },
+  "languages": ["pt", "en", "es"],
+  "priority_values": ["high", "medium", "low"]
+}

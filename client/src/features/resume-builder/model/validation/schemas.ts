@@ -6,7 +6,6 @@ import {
   monthString,
   optionalHexColor,
   optionalMonthString,
-  optionalTrimmedString,
   optionalTrimmedStringAllowEmpty,
   optionalTrimmedText,
   optionalUrl,

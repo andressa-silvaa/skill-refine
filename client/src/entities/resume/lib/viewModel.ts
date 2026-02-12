@@ -1,13 +1,3 @@
-/**
- * ViewModel para listagem/cards de currículos.
- *
- * Causa raiz dos bugs corrigidos:
- * - Score "—": o label usava `resume.score > 0 ? ... : '—'`, tratando 0 como ausente.
- *   O backend enviava null como 0, então tanto 0 quanto null viravam "—".
- * - Skills não apareciam: o GET /resumes só retornava `tags`; os cards usam skills.
- *   Tags costumam estar vazias; skills vêm do detail. Incluímos "top skills" no list e
- *   usamos skills (com fallback para tags) nos chips.
- */
 import type { Resume } from '../model/types';
 import type { TFunction } from './format';
 import {

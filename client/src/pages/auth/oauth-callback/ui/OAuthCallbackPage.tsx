@@ -5,7 +5,6 @@ import { useSession, useSessionActions } from '@/entities/session';
 import { notify } from '@/shared/lib/notify';
 
 function getErrorMessage(oauthError: string | null, googleError: string | null): string {
-  // Erros do OAuth (backend)
   if (oauthError) {
     switch (oauthError) {
       case 'invalid_state':
@@ -21,7 +20,6 @@ function getErrorMessage(oauthError: string | null, googleError: string | null):
     }
   }
 
-  // Erros do Google OAuth
   if (googleError) {
     switch (googleError) {
       case 'access_denied':
@@ -64,18 +62,14 @@ export function OAuthCallbackPage() {
       status,
     };
 
-    // Log do erro para debug
     console.error('Erro no login com Google', errorDetails);
 
-    // Exibir alert global de erro com mensagem específica
     const errorMessage = getErrorMessage(oauthError, googleError);
     notify.error(errorMessage);
 
-    // Redirecionar para login
     navigate('/login', { replace: true });
   }, [oauthError, googleError, googleErrorDescription, status, navigate]);
 
-  // Bootstrap da sessão em caso de sucesso (sem erros na URL)
   useEffect(() => {
     if (oauthError || googleError) return;
     if (bootstrapAttemptedRef.current) return;
@@ -86,19 +80,16 @@ export function OAuthCallbackPage() {
 
     void (async () => {
       try {
-        // Aguardar um pouco para garantir que os cookies foram configurados
         await new Promise((resolve) => setTimeout(resolve, 100));
         await bootstrap({ force: true });
       } catch (error) {
         console.error('Erro no login com Google ao fazer bootstrap', error);
-        // Não mostrar erro ainda - vamos aguardar o status da sessão
       } finally {
         setIsBootstraping(false);
       }
     })();
   }, [bootstrap, oauthError, googleError, isBootstraping]);
 
-  // Redirecionamento após autenticação bem-sucedida ou tratamento de erro
   useEffect(() => {
     if (oauthError || googleError) return;
     if (errorHandledRef.current) return;
@@ -109,7 +100,6 @@ export function OAuthCallbackPage() {
       return;
     }
 
-    // Se o bootstrap foi executado e a sessão ainda está anonymous, tratar como erro
     if (session.status === 'anonymous' && bootstrapAttemptedRef.current) {
       errorHandledRef.current = true;
 
@@ -125,7 +115,6 @@ export function OAuthCallbackPage() {
     }
   }, [navigate, oauthError, googleError, session.status, status, isBootstraping]);
 
-  // Não renderizar nada - apenas processar o callback
   return null;
 }
 

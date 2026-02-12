@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useSession, useSessionActions } from '@/entities/session';
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
-import { notify } from '@/shared/lib/notify';
+import { profileApi } from '@/entities/session';
+import { handleApiSaveError } from '@/shared/api';
 import { useDirtyState } from '@/shared/lib/hooks/useDirtyState';
 import { applyAppearancePreferences, type AccentKey } from '@/shared/lib/theme/appearance';
 
 export function useAccentColorSettings() {
+  const { t } = useTranslation();
   const { preferences } = useSession();
   const { updatePreferences } = useSessionActions();
   const accent = useDirtyState<AccentKey>('pink');
@@ -69,10 +70,11 @@ export function useAccentColorSettings() {
       updatePreferences({ accent_color: next });
       setIsEditing(false);
     } catch (e) {
-      const fields = getApiFieldErrors(e);
-      const errMsg = fields?.accent_color;
-      if (errMsg) setFieldError(errMsg);
-      else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
+      handleApiSaveError(e, {
+        fallbackMessage: t('common.errors.saveFailed'),
+        fieldKey: 'accent_color',
+        onFieldError: setFieldError,
+      });
     } finally {
       setIsSaving(false);
     }

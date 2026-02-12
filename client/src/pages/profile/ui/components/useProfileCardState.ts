@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { useSession, useSessionActions } from '@/entities/session';
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
+import { profileApi } from '@/entities/session';
+import { handleApiSaveError } from '@/shared/api';
 import { notify } from '@/shared/lib/notify';
 import { validateAvatarFile } from './profileCardAvatarValidation';
 import { validateFullName } from './profileCardFullNameValidation';
 
 type ProfileDraft = { fullName: string; email: string };
 export function useProfileCardState() {
+  const { t } = useTranslation();
   const { user } = useSession();
   const { updateUser } = useSessionActions();
   const [draft, setDraft] = useState<ProfileDraft>(() => ({ fullName: user?.full_name ?? '', email: user?.email ?? '' }));
@@ -122,10 +125,11 @@ export function useProfileCardState() {
       if (fileInputRef.current) fileInputRef.current.value = '';
       setIsEditing(false);
     } catch (e) {
-      const fields = getApiFieldErrors(e);
-      const nameErr = fields?.full_name;
-      if (nameErr) setFullNameError(nameErr);
-      else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
+      handleApiSaveError(e, {
+        fallbackMessage: t('common.errors.saveFailed'),
+        fieldKey: 'full_name',
+        onFieldError: setFullNameError,
+      });
     } finally {
       setIsSaving(false);
     }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 import { useSessionActions } from '@/entities/session';
-import { RegisterForm } from '@/features/auth/register';
+import { RegisterForm } from '@/features/auth';
 import { API_ERROR_CODES, asApiError, getApiErrorMessage } from '@/shared/api';
 
 import './RegisterPage.css';

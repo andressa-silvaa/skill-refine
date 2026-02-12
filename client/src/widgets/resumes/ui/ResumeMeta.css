@@ -38,6 +38,18 @@
   color: #f2b01e;
 }
 
+.sr-resume-meta__ai-status,
+.sr-resume-meta__ai-score {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sr-ink-subtle);
+  white-space: nowrap;
+}
+
+.sr-resume-meta__ai-score {
+  color: var(--sr-ink-muted);
+}
+
 .sr-resume-meta__tags {
   display: flex;
   gap: 8px;

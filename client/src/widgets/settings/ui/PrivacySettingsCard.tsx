@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { privacyApi } from '@/entities/session/api/privacyApi';
-import { useSessionActions } from '@/entities/session/model/SessionProvider';
+import { privacyApi, useSessionActions } from '@/entities/session';
 import { getApiErrorMessage } from '@/shared/api';
 import { notify } from '@/shared/lib/notify';
 

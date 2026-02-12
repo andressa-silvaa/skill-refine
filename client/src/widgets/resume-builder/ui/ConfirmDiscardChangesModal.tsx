@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Button, Modal } from '@/shared/ui';
 
-import '@/widgets/resumes/ui/ConfirmDeleteResumeModal.css';
+import './ConfirmDiscardChangesModal.css';
 
 type Props = {
   open: boolean;

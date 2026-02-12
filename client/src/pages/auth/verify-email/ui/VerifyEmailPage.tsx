@@ -1,13 +1,13 @@
 import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { useEmailConfirmationResend } from '@/features/auth/email-confirmation';
+import { useEmailConfirmationResend } from '@/features/auth';
 import { asApiError, getApiErrorMessage } from '@/shared/api';
 import { isValidEmail } from '@/shared/lib/forms';
 import { notify } from '@/shared/lib/notify';
-import { AlertMessage, PrimaryButton } from '@/features/auth/ui';
+import { AlertMessage, PrimaryButton } from '@/features/auth';
 import { LinkButton } from '@/shared/ui';
-import { AuthLayout } from '@/widgets/auth/auth-layout';
+import { AuthLayout } from '@/widgets/auth';
 
 type LocationState = { email?: string; emailConfirmationSent?: boolean } | null;
 

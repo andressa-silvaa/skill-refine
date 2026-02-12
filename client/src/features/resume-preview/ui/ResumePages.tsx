@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 
-import type { ThemeLayoutData, ThemeBlock } from './ThemeRenderer';
+import type { ThemeLayoutData } from './ThemeRenderer';
 import { ThemePageLayout } from './ThemeRenderer';
 import { usePaginatedBlocks } from '../model/usePaginatedBlocks';
 

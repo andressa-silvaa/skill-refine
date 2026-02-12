@@ -1,0 +1,36 @@
+.sr-metrics-grid {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) repeat(3, minmax(120px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.sr-metrics-grid .sr-metric-card,
+.sr-metrics-grid .sr-score-card {
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .sr-metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .sr-metrics-grid .sr-score-card {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .sr-metrics-grid .sr-score-card {
+    grid-column: span 1;
+  }
+}

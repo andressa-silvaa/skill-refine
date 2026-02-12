@@ -1,0 +1,47 @@
+{
+  "file": "..\\data\\processed\\labeled.jsonl",
+  "stats": {
+    "total": 1000,
+    "by_task": {
+      "unified": 1000
+    },
+    "by_language": {
+      "pt": 1000
+    },
+    "by_label": {},
+    "by_seniority": {
+      "mid": 250,
+      "junior": 250,
+      "intern": 250,
+      "senior": 250
+    },
+    "by_label_source": {
+      "synthetic": 1000
+    },
+    "by_source": {
+      "synthetic": 1000
+    },
+    "samples_by_seniority": {
+      "mid": [
+        "Resumo Profissional com 3 anos de experi\u00eancia em design. Foco em entrega de valor. Analista Pleno. Experi\u00eancia Profissio...",
+        "Resumo Profissional com 6 anos de experi\u00eancia em produto. Foco em entrega de valor. Analista Pleno. Experi\u00eancia Profissi...",
+        "Resumo Profissional com 5 anos de experi\u00eancia em design. Foco em entrega de valor. Analista Pleno. Experi\u00eancia Profissio..."
+      ],
+      "junior": [
+        "Resumo Profissional com 3 anos de experi\u00eancia em produto. Foco em entrega de valor. Desenvolvedor J\u00fanior. Experi\u00eancia Pr...",
+        "Resumo Profissional com 2 anos de experi\u00eancia em design. Foco em lideran\u00e7a t\u00e9cnica. Desenvolvedor J\u00fanior. Experi\u00eancia Pr...",
+        "Resumo Profissional com 1 anos de experi\u00eancia em produto. Foco em lideran\u00e7a t\u00e9cnica. Desenvolvedor J\u00fanior. Experi\u00eancia P..."
+      ],
+      "intern": [
+        "Resumo Profissional com 0 anos de experi\u00eancia em engenharia. Foco em lideran\u00e7a t\u00e9cnica. Estagi\u00e1rio. Experi\u00eancia Profissi...",
+        "Resumo Profissional com 0 anos de experi\u00eancia em engenharia. Foco em qualidade. Estagi\u00e1rio. Experi\u00eancia Profissional \u2022 D...",
+        "Resumo Profissional com 0 anos de experi\u00eancia em ci\u00eancia de dados. Foco em lideran\u00e7a t\u00e9cnica. Estagi\u00e1rio. Experi\u00eancia Pr..."
+      ],
+      "senior": [
+        "Resumo Profissional com 9 anos de experi\u00eancia em produto. Foco em qualidade. Engenheiro S\u00eanior. Experi\u00eancia Profissional...",
+        "Resumo Profissional com 7 anos de experi\u00eancia em desenvolvimento de software. Foco em qualidade. Engenheiro S\u00eanior. Expe...",
+        "Resumo Profissional com 10 anos de experi\u00eancia em design. Foco em lideran\u00e7a t\u00e9cnica. Engenheiro S\u00eanior. Experi\u00eancia Prof..."
+      ]
+    }
+  }
+}

@@ -1,4 +1,16 @@
 services:
+  redis:
+    image: redis:7-alpine
+    container_name: skill-refine-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   postgres:
     image: postgres:16-alpine
     container_name: skill-refine-postgres
@@ -26,10 +38,15 @@ services:
       - ./backend/.env
     environment:
       - DATABASE_URL=postgres://skill_refine:skill_refine@postgres:5432/skill_refine
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - DJANGO_DEBUG=1
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "8000:8000"
@@ -43,6 +60,29 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skill-refine-celery
+    restart: unless-stopped
+    env_file:
+      - ./backend/env.example
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=postgres://skill_refine:skill_refine@postgres:5432/skill_refine
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/2
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A config.celery worker -l info
 
 volumes:
   skill_refine_postgres_data:

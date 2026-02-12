@@ -11,7 +11,7 @@ import {
 } from '@/features/auth/password-recovery';
 import { getApiErrorMessage } from '@/shared/api';
 import { notify } from '@/shared/lib/notify';
-import { AuthLayout } from '@/widgets/auth/auth-layout';
+import { AuthLayout } from '@/widgets/auth';
 
 export function ResetCodePage() {
   const navigate = useNavigate();

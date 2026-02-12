@@ -1,0 +1,29 @@
+.sr-page-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--sr-page-bg, #fbf7fb);
+  box-sizing: border-box;
+}
+
+[data-sr-theme-scope][data-theme='dark'] .sr-page-loader {
+  background: var(--sr-page-bg);
+}
+
+.sr-page-loader__spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 3px solid var(--sr-border, rgba(20, 20, 20, 0.08));
+  border-top-color: var(--sr-accent, #c72cb8);
+  animation: sr-page-loader-spin 0.85s linear infinite;
+}
+
+@keyframes sr-page-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

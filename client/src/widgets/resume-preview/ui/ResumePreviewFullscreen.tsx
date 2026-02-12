@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import type { ResumeData } from '@/entities/resume';
-import { stressResumeData } from '@/entities/resume/mocks/stressResume';
+import { stressResumeData } from '@/entities/resume';
 import { getResumeThemeById } from '@/entities/resume';
 import { ResumeColorEditor } from '@/features/resume-color-editor';
 

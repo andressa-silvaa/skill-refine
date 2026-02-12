@@ -1,0 +1,8 @@
+# Training pipeline — Skill Refine TCC
+torch>=2.0.0
+transformers>=4.30.0
+scikit-learn>=1.2.0
+pyyaml>=6.0
+# Optional: correlation, confusion matrix PNG, ONNX
+scipy>=1.10.0
+matplotlib>=3.7.0

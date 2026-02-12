@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
 
-import { accountApi } from '@/entities/session/api/accountApi';
+import { accountApi } from '@/entities/session';
 import { asApiError } from '@/shared/api';
 import { useAsyncRequest } from '@/shared/lib/hooks/useAsyncRequest';
 import { useCooldown } from '@/shared/lib/hooks/useCooldown';

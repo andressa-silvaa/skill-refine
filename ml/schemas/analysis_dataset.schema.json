@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AnalysisDataset",
+  "description": "Unified schema for ML pipeline datasets (multilingual, multi-task). Each row may represent one task; task_type disambiguates.",
+  "type": "object",
+  "required": ["task_type", "language"],
+  "properties": {
+    "task_type": {
+      "type": "string",
+      "enum": ["seniority", "sections", "quality", "matching"]
+    },
+    "language": {
+      "type": "string",
+      "enum": ["pt", "en", "es"]
+    },
+    "resume_id": { "type": "string", "description": "UUID or stable id for split-by-resume (no leakage)" },
+    "input_text": { "type": "string" },
+    "label": {
+      "description": "For seniority: intern|junior|mid|senior. For sections: EXPERIENCE|EDUCATION|...|OTHER"
+    },
+    "label_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "source": { "type": "string", "enum": ["manual", "heuristic", "revisado"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "feature_flags": {
+      "type": "object",
+      "properties": {
+        "has_metrics": { "type": "boolean" },
+        "has_links": { "type": "boolean" },
+        "has_action_verbs": { "type": "boolean" }
+      }
+    },
+    "line_text": { "type": "string", "description": "For Task B: single line/bloco" },
+    "job_text": { "type": "string", "description": "For Task D" },
+    "resume_text": { "type": "string", "description": "For Task D" },
+    "label_match": { "type": "boolean", "description": "For Task D: match / no-match" }
+  },
+  "oneOf": [
+    {
+      "properties": { "task_type": { "const": "seniority" } },
+      "required": ["input_text", "label"]
+    },
+    {
+      "properties": { "task_type": { "const": "sections" } },
+      "required": ["line_text", "label", "resume_id"]
+    },
+    {
+      "properties": { "task_type": { "const": "quality" } },
+      "required": ["input_text", "label_score"]
+    },
+    {
+      "properties": { "task_type": { "const": "matching" } },
+      "required": ["job_text", "resume_text", "resume_id"]
+    }
+  ]
+}

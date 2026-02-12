@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button, Textarea } from '@/shared/ui';
-import { resumeApi } from '@/features/resume/api/resumeApi';
+import { resumeApi } from '@/features/resume';
 import { notify } from '@/shared/lib/notify';
 import { getApiErrorMessage } from '@/shared/api';
 

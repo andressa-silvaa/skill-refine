@@ -5,7 +5,6 @@ export type ResumeDraftPayload = ResumeData & {
   name?: string;
   status?: ResumeStatus;
   lastStep?: string;
-  /** Score de completude (0–100). Persistido ao salvar. */
   score?: number;
 };
 

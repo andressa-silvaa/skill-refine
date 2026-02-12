@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useSession, useSessionActions } from '@/entities/session';
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
-import { notify } from '@/shared/lib/notify';
+import { profileApi } from '@/entities/session';
+import { handleApiSaveError } from '@/shared/api';
 import { useDirtyState } from '@/shared/lib/hooks/useDirtyState';
 import { applyAppearancePreferences, type ThemeMode } from '@/shared/lib/theme/appearance';
 
 export function useAppearanceSettings() {
+  const { t } = useTranslation();
   const { preferences } = useSession();
   const { updatePreferences } = useSessionActions();
   const theme = useDirtyState<ThemeMode>('light');
@@ -69,10 +70,11 @@ export function useAppearanceSettings() {
       updatePreferences({ theme: next });
       setIsEditing(false);
     } catch (e) {
-      const fields = getApiFieldErrors(e);
-      const errMsg = fields?.theme;
-      if (errMsg) setFieldError(errMsg);
-      else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
+      handleApiSaveError(e, {
+        fallbackMessage: t('common.errors.saveFailed'),
+        fieldKey: 'theme',
+        onFieldError: setFieldError,
+      });
     } finally {
       setIsSaving(false);
     }

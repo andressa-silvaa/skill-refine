@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useSession, useSessionActions } from '@/entities/session';
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
+import { profileApi } from '@/entities/session';
+import { handleApiSaveError } from '@/shared/api';
 import { i18n } from '@/shared/lib/i18n';
 import { applyLanguagePreferences } from '@/shared/lib/language/applyLanguagePreferences';
 import { useDirtyState } from '@/shared/lib/hooks/useDirtyState';
-import { notify } from '@/shared/lib/notify';
-
 export function useGeneralSettingsLanguage(options: Array<{ value: string; label: string }>) {
+  const { t } = useTranslation();
   const { preferences } = useSession();
   const { updatePreferences } = useSessionActions();
   const language = useDirtyState<string>('pt-BR');
@@ -85,10 +85,11 @@ export function useGeneralSettingsLanguage(options: Array<{ value: string; label
       updatePreferences({ language: next });
       setIsEditing(false);
     } catch (e) {
-      const fields = getApiFieldErrors(e);
-      const errMsg = (fields as { language?: string } | null)?.language;
-      if (errMsg) setFieldError(errMsg);
-      else notify.error(getApiErrorMessage(e, 'Não foi possível salvar agora.'));
+      handleApiSaveError(e, {
+        fallbackMessage: t('common.errors.saveFailed'),
+        fieldKey: 'language',
+        onFieldError: setFieldError,
+      });
     } finally {
       setIsSaving(false);
     }

@@ -11,7 +11,7 @@ import {
   passwordRecoveryApi,
 } from '@/features/auth/password-recovery';
 import { getApiErrorMessage } from '@/shared/api';
-import { AuthLayout } from '@/widgets/auth/auth-layout';
+import { AuthLayout } from '@/widgets/auth';
 
 export function ResetNewPasswordPage() {
   const navigate = useNavigate();

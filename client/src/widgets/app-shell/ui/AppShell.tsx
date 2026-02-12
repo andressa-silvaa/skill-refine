@@ -33,9 +33,6 @@ export function AppShell(props: Props) {
   }, [preferences?.accent_color, preferences?.theme]);
 
   useEffect(() => {
-    // Important: only react to breakpoint changes.
-    // If we keep `collapsed` as a dependency, toggling the sidebar in md (<=900px)
-    // can immediately get overridden by this effect, causing "flaky" expand/collapse.
     if (isMobile) {
       if (desktopCollapsedRef.current == null) {
         desktopCollapsedRef.current = collapsed;

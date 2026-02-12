@@ -1,0 +1,54 @@
+# Training config — Skill Refine TCC (Hugging Face + PyTorch)
+# Override via CLI; paths relative to repo root or absolute.
+
+# Language mode: mono (PT-BR only, BERTimbau) | multi (PT+EN+ES, mBERT/XLM-R)
+language_mode: mono
+
+# Allowed languages (filter splits)
+languages:
+  - pt-BR
+
+# Base model (Hugging Face id)
+# mono: neuralmind/bert-base-portuguese-cased (BERTimbau)
+# multi: xlm-roberta-base or bert-base-multilingual-cased
+base_model: neuralmind/bert-base-portuguese-cased
+
+# Task: seniority | sections | quality | matching
+task: seniority
+
+# Single-task vs multi-task (multi-task = shared encoder + heads)
+task_mode: single
+
+# Matching: bi_encoder | cross_encoder (only when task=matching)
+matching_mode: bi_encoder
+
+# Paths (override via CLI)
+data_dir: ../data
+splits_dir: ../data/splits
+train_file: train.jsonl
+val_file: val.jsonl
+test_file: test.jsonl
+output_dir: ../models
+reports_dir: ../reports
+
+# Training
+epochs: 3
+batch_size: 8
+max_length: 512
+learning_rate: 2.0e-5
+warmup_ratio: 0.1
+weight_decay: 0.01
+seed: 42
+
+# Evaluation
+eval_steps: 100
+save_steps: 200
+logging_steps: 50
+
+# Ablations (flags: --ablation remove_stopwords | drop_section | drop_metrics_numbers)
+# drop_section value: experience | education | skills (or comma-separated)
+# Applied at preprocessing.
+
+# Versioning
+save_config: true
+save_dataset_version: true

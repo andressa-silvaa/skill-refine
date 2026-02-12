@@ -1,6 +1,8 @@
+import { memo, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { ResumeViewModel } from '@/entities/resume';
+import type { LatestAnalysisInfo } from '@/features/ai-analysis';
 import { Badge, DropdownMenu, IconButton, Tooltip } from '@/shared/ui';
 import { useIsTruncated } from '@/shared/lib/hooks/useIsTruncated';
 
@@ -12,8 +14,10 @@ type Props = {
   onDuplicate: (id: string) => void;
   onExport: (id: string) => void;
   onDelete: (id: string) => void;
+  onAnalyzeWithAI?: (id: string) => void;
   duplicateLoadingId?: string | null;
   downloadLoadingId?: string | null;
+  analysisByResumeId?: Map<string, LatestAnalysisInfo>;
 };
 
 function ResumeNameButton({ name, onClick }: { name: string; onClick: () => void }) {
@@ -65,8 +69,129 @@ function TruncatedSpan({ text }: { text: string }) {
   );
 }
 
+type ListItemProps = {
+  vm: ResumeViewModel;
+  onEdit: (id: string) => void;
+  onDuplicate: (id: string) => void;
+  onExport: (id: string) => void;
+  onDelete: (id: string) => void;
+  onAnalyzeWithAI?: (id: string) => void;
+  duplicateLoadingId?: string | null;
+  downloadLoadingId?: string | null;
+  analysisInfo?: LatestAnalysisInfo | null;
+};
+
+const ResumesListItem = memo(function ResumesListItem(props: ListItemProps) {
+  const { vm, onEdit, onDuplicate, onExport, onDelete, onAnalyzeWithAI, duplicateLoadingId, downloadLoadingId, analysisInfo } = props;
+  const { t } = useTranslation();
+
+  const handleNameClick = useCallback(() => onEdit(vm.id), [vm.id, onEdit]);
+  const handleEditClick = useCallback(() => onEdit(vm.id), [vm.id, onEdit]);
+
+  const isAnalyzing = analysisInfo?.status === 'pending' || analysisInfo?.status === 'running';
+  const aiScoreLabel =
+    analysisInfo?.status === 'done' && analysisInfo.score != null
+      ? t('analysis.cardScore', { score: analysisInfo.score })
+      : null;
+
+  const menuItems = useMemo(() => {
+    const items: Array<{
+      key: string;
+      label: string;
+      iconClass: string;
+      onClick: () => void;
+      danger?: boolean;
+    }> = [
+      { key: 'edit', label: t('resume.openEdit'), iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
+      ...(onAnalyzeWithAI
+        ? [
+            {
+              key: 'analyze',
+              label: t('resume.analyzeWithAI'),
+              iconClass: 'fa-solid fa-wand-magic-sparkles',
+              onClick: () => onAnalyzeWithAI(vm.id),
+            },
+          ]
+        : []),
+      {
+        key: 'dup',
+        label: duplicateLoadingId === vm.id ? t('resume.duplicating') : t('resume.duplicate'),
+        iconClass: duplicateLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-copy',
+        onClick: () => {
+          if (duplicateLoadingId === vm.id) return;
+          onDuplicate(vm.id);
+        },
+      },
+      {
+        key: 'pdf',
+        label: downloadLoadingId === vm.id ? t('resume.generatingPdf') : t('resume.exportPdf'),
+        iconClass: downloadLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-file-pdf',
+        onClick: () => {
+          if (downloadLoadingId === vm.id) return;
+          onExport(vm.id);
+        },
+      },
+      { key: 'del', label: t('resume.delete'), iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
+    ];
+    return items;
+  }, [vm.id, duplicateLoadingId, downloadLoadingId, onEdit, onDuplicate, onExport, onDelete, onAnalyzeWithAI, t]);
+
+  return (
+    <div className="sr-resumes-list__row" role="row">
+      <ResumeNameButton name={vm.name} onClick={handleNameClick} />
+
+      <div className="sr-resumes-list__cell">
+        <TruncatedBadge tone={vm.statusTone}>{vm.statusLabel}</TruncatedBadge>
+      </div>
+
+      <TruncatedText
+        text={vm.updatedAtLabel}
+        className="sr-resumes-list__hide-sm sr-resumes-list__muted sr-resumes-list__truncate"
+      />
+
+      <div className="sr-resumes-list__score">
+        {isAnalyzing ? (
+          <TruncatedSpan text={t('analysis.status.running')} />
+        ) : aiScoreLabel ? (
+          <TruncatedSpan text={aiScoreLabel} />
+        ) : (
+          <>
+            <i className="fa-solid fa-star" aria-hidden />
+            <TruncatedSpan text={vm.scoreLabel} />
+          </>
+        )}
+      </div>
+
+      <div className="sr-resumes-list__actions">
+        <IconButton aria-label={t('resume.openEdit')} onClick={handleEditClick}>
+          <i className="fa-regular fa-pen-to-square" aria-hidden />
+        </IconButton>
+
+        <DropdownMenu
+          trigger={
+            <IconButton aria-label={t('resume.actions')}>
+              <i className="fa-solid fa-ellipsis-vertical" aria-hidden />
+            </IconButton>
+          }
+          items={menuItems}
+        />
+      </div>
+    </div>
+  );
+});
+
 export function ResumesList(props: Props) {
-  const { items, onEdit, onDuplicate, onExport, onDelete, duplicateLoadingId, downloadLoadingId } = props;
+  const {
+    items,
+    onEdit,
+    onDuplicate,
+    onExport,
+    onDelete,
+    onAnalyzeWithAI,
+    duplicateLoadingId,
+    downloadLoadingId,
+    analysisByResumeId,
+  } = props;
   const { t } = useTranslation();
 
   return (
@@ -82,59 +207,18 @@ export function ResumesList(props: Props) {
       </div>
 
       {items.map((vm) => (
-        <div key={vm.id} className="sr-resumes-list__row" role="row">
-          <ResumeNameButton name={vm.name} onClick={() => onEdit(vm.id)} />
-
-          <div className="sr-resumes-list__cell">
-            <TruncatedBadge tone={vm.statusTone}>{vm.statusLabel}</TruncatedBadge>
-          </div>
-
-          <TruncatedText
-            text={vm.updatedAtLabel}
-            className="sr-resumes-list__hide-sm sr-resumes-list__muted sr-resumes-list__truncate"
-          />
-
-          <div className="sr-resumes-list__score">
-            <i className="fa-solid fa-star" aria-hidden />
-            <TruncatedSpan text={vm.scoreLabel} />
-          </div>
-
-          <div className="sr-resumes-list__actions">
-            <IconButton aria-label={t('resume.openEdit')} onClick={() => onEdit(vm.id)}>
-              <i className="fa-regular fa-pen-to-square" aria-hidden />
-            </IconButton>
-
-            <DropdownMenu
-              trigger={
-                <IconButton aria-label={t('resume.actions')}>
-                  <i className="fa-solid fa-ellipsis-vertical" aria-hidden />
-                </IconButton>
-              }
-              items={[
-                { key: 'edit', label: t('resume.openEdit'), iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
-                {
-                  key: 'dup',
-                  label: duplicateLoadingId === vm.id ? t('resume.duplicating') : t('resume.duplicate'),
-                  iconClass: duplicateLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-copy',
-                  onClick: () => {
-                    if (duplicateLoadingId === vm.id) return;
-                    onDuplicate(vm.id);
-                  },
-                },
-                {
-                  key: 'pdf',
-                  label: downloadLoadingId === vm.id ? t('resume.generatingPdf') : t('resume.exportPdf'),
-                  iconClass: downloadLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-file-pdf',
-                  onClick: () => {
-                    if (downloadLoadingId === vm.id) return;
-                    onExport(vm.id);
-                  },
-                },
-                { key: 'del', label: t('resume.delete'), iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
-              ]}
-            />
-          </div>
-        </div>
+        <ResumesListItem
+          key={vm.id}
+          vm={vm}
+          onEdit={onEdit}
+          onDuplicate={onDuplicate}
+          onExport={onExport}
+          onDelete={onDelete}
+          onAnalyzeWithAI={onAnalyzeWithAI}
+          duplicateLoadingId={duplicateLoadingId}
+          downloadLoadingId={downloadLoadingId}
+          analysisInfo={analysisByResumeId?.get(vm.id)}
+        />
       ))}
     </div>
   );

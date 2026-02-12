@@ -3,8 +3,8 @@ import { useParams, useSearchParams } from 'react-router-dom';
 
 import type { ResumeData } from '@/entities/resume';
 import { getResumeThemeById } from '@/entities/resume';
-import type { ResumeDetailResponse } from '@/features/resume/api/resumeApi';
-import { ResumePreviewContent } from '@/widgets/resume-preview/ui/ResumePreviewContent';
+import type { ResumeDetailResponse } from '@/features/resume';
+import { ResumePreviewContent } from '@/widgets/resume-preview';
 
 import './ResumePrintPage.css';
 
@@ -45,8 +45,7 @@ export function ResumePrintPage() {
     }
 
     let cancelled = false;
-    
-    // Função para fazer requisição com URL customizada se disponível
+
     const fetchPdfData = async () => {
       const baseUrl = apiUrl || (process.env.REACT_APP_API_URL ?? 'http://localhost:8000');
       const encoded = encodeURIComponent(token);

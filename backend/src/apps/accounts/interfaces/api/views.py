@@ -9,30 +9,17 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.accounts.application.use_cases import (
-    AccountsAuthConfig,
-    confirm_new_password,
-    confirm_email,
-    login_with_google,
-    login_with_password,
-    refresh_session,
-    register_user,
-    request_email_confirmation,
-    request_password_reset,
-    verify_password_reset_code,
-)
 from apps.accounts.domain.errors import (
     AccountsError,
+    EmailAlreadyInUse,
     EmailConfirmationExpired,
     EmailConfirmationInvalid,
+    EmailNotConfirmed,
     EmailNotRegistered,
-    EmailAlreadyInUse,
     EmailSendFailed,
     EmailServiceNotConfigured,
-    EmailNotConfirmed,
     GoogleLoginNotConfigured,
     InvalidCredentials,
-    UserDisabled,
     PasswordResetExpired,
     PasswordResetGrantInvalid,
     PasswordResetNotFound,
@@ -41,24 +28,29 @@ from apps.accounts.domain.errors import (
     RefreshInvalid,
     RefreshRevoked,
     TooManyRequests,
+    UserDisabled,
 )
-from apps.accounts.infrastructure.email_sender import DjangoEmailSender
-from apps.accounts.infrastructure.google_verifier import GoogleIdTokenVerifier
-from apps.accounts.infrastructure.password_hasher import Argon2PasswordHasher
-from apps.accounts.infrastructure.repositories import (
-    OrmAuthIdentityRepository,
-    OrmEmailConfirmationRepository,
-    OrmPasswordRepository,
-    OrmPasswordResetRepository,
-    OrmSessionRepository,
-    OrmUserRepository,
+from apps.accounts.infrastructure.repositories import OrmUserRepository
+from shared.api.responses import (
+    error_response as _error,
 )
-from apps.audit.infrastructure.logger import OrmAuditLogger
+from shared.api.responses import (
+    extract_error_message,
+)
+from shared.api.responses import (
+    field_error_response as _field_error,
+)
 from shared.auth.drf import request_meta
-from shared.auth.jwt import now_utc
 
-from apps.accounts.infrastructure.cloudinary_avatar import avatar_url
-
+from .payloads import (
+    login_response_payload,
+    me_response_payload,
+    password_reset_verify_payload,
+    refresh_response_payload,
+    register_response_payload,
+    status_ok_payload,
+    user_payload,
+)
 from .serializers import (
     EmailConfirmationConfirmSerializer,
     EmailConfirmationRequestSerializer,
@@ -70,23 +62,21 @@ from .serializers import (
     PasswordResetVerifySerializer,
     RegisterSerializer,
 )
-
-
-def _cfg() -> AccountsAuthConfig:
-    return AccountsAuthConfig(
-        jwt_secret=settings.JWT_SECRET,
-        jwt_issuer=settings.JWT_ISSUER,
-        jwt_access_ttl_minutes=settings.JWT_ACCESS_TTL_MINUTES,
-        refresh_token_pepper=settings.REFRESH_TOKEN_PEPPER,
-        refresh_ttl_days=settings.REFRESH_TTL_DAYS,
-        password_reset_code_ttl_minutes=settings.PASSWORD_RESET_CODE_TTL_MINUTES,
-        password_reset_grant_ttl_minutes=settings.PASSWORD_RESET_GRANT_TTL_MINUTES,
-        password_reset_code_pepper=settings.PASSWORD_RESET_CODE_PEPPER,
-        email_confirmation_token_ttl_hours=settings.EMAIL_CONFIRMATION_TOKEN_TTL_HOURS,
-        email_confirmation_token_pepper=settings.EMAIL_CONFIRMATION_TOKEN_PEPPER,
-        frontend_url=settings.FRONTEND_URL,
-        google_oauth_client_id=settings.GOOGLE_OAUTH_CLIENT_ID,
-    )
+from .services import (
+    WrongCurrentPassword,
+    email_confirmation_confirm_service,
+    email_confirmation_request_service,
+    google_login_service,
+    google_login_with_id_token_service,
+    login_service,
+    logout_service,
+    password_change_service,
+    password_reset_confirm_service,
+    password_reset_request_service,
+    password_reset_verify_service,
+    refresh_service,
+    register_service,
+)
 
 
 def _set_refresh_cookie(response: Response, value: str) -> None:
@@ -108,51 +98,6 @@ def _clear_refresh_cookie(response: Response) -> None:
     )
 
 
-def _canonical_error_code(code: str) -> str:
-    return (code or "").strip().upper()
-
-
-def _error(code: str, message: str, http_status: int) -> Response:
-    canonical = _canonical_error_code(code)
-    payload = {
-        "error": {"code": code, "error_code": canonical, "message": message},
-        "error_code": canonical,
-        "message": message,
-    }
-    return Response(payload, status=http_status)
-
-
-def _field_error(code: str, message: str, fields: dict[str, str], http_status: int) -> Response:
-    canonical = _canonical_error_code(code)
-    payload = {
-        "error": {"code": code, "error_code": canonical, "message": message},
-        "error_code": canonical,
-        "message": message,
-        "fields": fields,
-    }
-    return Response(payload, status=http_status)
-
-
-def _user_payload(*, users: OrmUserRepository, user_id: str, fallback: dict) -> dict:
-    u = users.get_by_id(user_id)
-    if not u:
-        return fallback
-    key = getattr(u, "avatar_storage_key", None)
-    url = avatar_url(str(key) if key else None)
-    return {
-        "id": str(u.id),
-        "email": u.email,
-        "full_name": u.full_name,
-        "email_verified": bool(getattr(u, "email_verified_at", None)),
-        "status": getattr(u, "status", None),
-        "created_at": getattr(u, "created_at", None),
-        "avatar_storage_key": str(key) if key else None,
-        "avatarStorageKey": str(key) if key else None,
-        "avatar_url": url,
-        "avatarUrl": url,
-    }
-
-
 OAUTH_STATE_COOKIE = "sr_google_oauth_state"
 OAUTH_NEXT_COOKIE = "sr_google_oauth_next"
 
@@ -168,6 +113,8 @@ def _safe_next_url(next_url: str | None) -> str:
     if next_url.startswith("http://localhost:3000") or next_url.startswith("http://127.0.0.1:3000"):
         return next_url
     return "http://localhost:3000/oauth/callback"
+
+
 
 
 class GoogleOAuthStartView(APIView):
@@ -269,24 +216,8 @@ class GoogleOAuthCallbackView(APIView):
             return redirect(f"{next_url}?oauth_error=missing_id_token")
 
         meta = request_meta(request)
-        users = OrmUserRepository()
-        identities = OrmAuthIdentityRepository()
-        sessions = OrmSessionRepository()
-        audit = OrmAuditLogger()
-        google = GoogleIdTokenVerifier()
-
         try:
-            result, refresh_cookie = login_with_google(
-                cfg=_cfg(),
-                users=users,
-                identities=identities,
-                sessions=sessions,
-                google=google,
-                audit=audit,
-                id_token=id_token,
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            _, refresh_cookie = google_login_with_id_token_service(id_token, meta)
         except AccountsError:
             return redirect(f"{next_url}?oauth_error=google_token_invalid")
 
@@ -295,6 +226,8 @@ class GoogleOAuthCallbackView(APIView):
         resp.delete_cookie(OAUTH_STATE_COOKIE, path="/")
         resp.delete_cookie(OAUTH_NEXT_COOKIE, path="/")
         return resp
+
+
 
 
 class RegisterView(APIView):
@@ -306,28 +239,10 @@ class RegisterView(APIView):
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
 
-        users = OrmUserRepository()
-        passwords = OrmPasswordRepository()
-        identities = OrmAuthIdentityRepository()
-        hasher = Argon2PasswordHasher()
-        audit = OrmAuditLogger()
-
         try:
-            user = register_user(
-                cfg=_cfg(),
-                users=users,
-                passwords=passwords,
-                identities=identities,
-                password_hasher=hasher,
-                audit=audit,
-                email=ser.validated_data["email"],
-                full_name=ser.validated_data["full_name"],
-                birth_date=ser.validated_data.get("birth_date"),
-                password=ser.validated_data["password"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            user, email_confirmation_sent = register_service(ser.validated_data, meta)
         except EmailAlreadyInUse:
+            users = OrmUserRepository()
             existing = users.get_by_email(ser.validated_data["email"])
             if existing and getattr(existing, "email_verified_at", None) is None:
                 return _error(
@@ -337,34 +252,10 @@ class RegisterView(APIView):
                 )
             return _error("email_already_in_use", "E-mail já cadastrado", status.HTTP_409_CONFLICT)
 
-        email_confirmation_sent = True
-        confirmations = OrmEmailConfirmationRepository()
-        email_sender = DjangoEmailSender()
-        try:
-            request_email_confirmation(
-                cfg=_cfg(),
-                users=users,
-                confirmations=confirmations,
-                email_sender=email_sender,
-                audit=audit,
-                email=ser.validated_data["email"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
-        except (EmailServiceNotConfigured, EmailSendFailed):
-            email_confirmation_sent = False
-        except TooManyRequests:
-            email_confirmation_sent = True
-        except Exception:
-            email_confirmation_sent = False
-
-        return Response(
-            {
-                "user": _user_payload(users=users, user_id=str(user.id), fallback=user.__dict__),
-                "email_confirmation_sent": email_confirmation_sent,
-            },
-            status=status.HTTP_201_CREATED,
-        )
+        users = OrmUserRepository()
+        user_dict = user_payload(users=users, user_id=str(user.id), fallback=user.__dict__)
+        payload = register_response_payload(user_dict, email_confirmation_sent)
+        return Response(payload, status=status.HTTP_201_CREATED)
 
 
 class LoginView(APIView):
@@ -376,27 +267,8 @@ class LoginView(APIView):
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
 
-        users = OrmUserRepository()
-        passwords = OrmPasswordRepository()
-        identities = OrmAuthIdentityRepository()
-        sessions = OrmSessionRepository()
-        hasher = Argon2PasswordHasher()
-        audit = OrmAuditLogger()
-
         try:
-            result, refresh_cookie = login_with_password(
-                cfg=_cfg(),
-                users=users,
-                passwords=passwords,
-                identities=identities,
-                sessions=sessions,
-                password_hasher=hasher,
-                audit=audit,
-                email=ser.validated_data["email"],
-                password=ser.validated_data["password"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            result, refresh_cookie = login_service(ser.validated_data, meta)
         except InvalidCredentials:
             return _error("invalid_credentials", "E-mail ou senha inválidos.", status.HTTP_401_UNAUTHORIZED)
         except UserDisabled:
@@ -404,14 +276,9 @@ class LoginView(APIView):
         except EmailNotConfirmed:
             return _error("email_not_confirmed", "Confirme seu e-mail para fazer login.", status.HTTP_403_FORBIDDEN)
 
-        fallback_user = result.user.__dict__
-        response = Response(
-            {
-                "access_token": result.access_token,
-                "user": _user_payload(users=users, user_id=str(result.user.id), fallback=fallback_user),
-            },
-            status=status.HTTP_200_OK,
-        )
+        users = OrmUserRepository()
+        user_dict = user_payload(users=users, user_id=str(result.user.id), fallback=result.user.__dict__)
+        response = Response(login_response_payload(result.access_token, user_dict), status=status.HTTP_200_OK)
         _set_refresh_cookie(response, refresh_cookie)
         return response
 
@@ -425,37 +292,16 @@ class GoogleLoginView(APIView):
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
 
-        users = OrmUserRepository()
-        identities = OrmAuthIdentityRepository()
-        sessions = OrmSessionRepository()
-        audit = OrmAuditLogger()
-        google = GoogleIdTokenVerifier()
-
         try:
-            result, refresh_cookie = login_with_google(
-                cfg=_cfg(),
-                users=users,
-                identities=identities,
-                sessions=sessions,
-                google=google,
-                audit=audit,
-                id_token=ser.validated_data["credential"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            result, refresh_cookie = google_login_service(ser.validated_data, meta)
         except GoogleLoginNotConfigured:
             return _error("google_not_configured", "Google login não configurado", status.HTTP_503_SERVICE_UNAVAILABLE)
         except AccountsError:
             return _error("google_token_invalid", "Token do Google inválido", status.HTTP_401_UNAUTHORIZED)
 
-        fallback_user = result.user.__dict__
-        response = Response(
-            {
-                "access_token": result.access_token,
-                "user": _user_payload(users=users, user_id=str(result.user.id), fallback=fallback_user),
-            },
-            status=status.HTTP_200_OK,
-        )
+        users = OrmUserRepository()
+        user_dict = user_payload(users=users, user_id=str(result.user.id), fallback=result.user.__dict__)
+        response = Response(login_response_payload(result.access_token, user_dict), status=status.HTTP_200_OK)
         _set_refresh_cookie(response, refresh_cookie)
         return response
 
@@ -471,28 +317,14 @@ class RefreshView(APIView):
 
         meta = request_meta(request)
 
-        users = OrmUserRepository()
-        sessions = OrmSessionRepository()
-        identities = OrmAuthIdentityRepository()
-        audit = OrmAuditLogger()
-
         try:
-            result, new_cookie = refresh_session(
-                cfg=_cfg(),
-                users=users,
-                sessions=sessions,
-                identities=identities,
-                audit=audit,
-                refresh_cookie_value=refresh_cookie,
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            result, new_cookie = refresh_service(refresh_cookie, meta)
         except (RefreshInvalid, RefreshRevoked):
             response = _error("refresh_invalid", "Sessão expirada", status.HTTP_401_UNAUTHORIZED)
             _clear_refresh_cookie(response)
             return response
 
-        response = Response({"access_token": result.access_token}, status=status.HTTP_200_OK)
+        response = Response(refresh_response_payload(result.access_token), status=status.HTTP_200_OK)
         _set_refresh_cookie(response, new_cookie)
         return response
 
@@ -504,24 +336,11 @@ class LogoutView(APIView):
     def post(self, request):
         refresh_cookie = request.COOKIES.get(settings.REFRESH_COOKIE_NAME)
         meta = request_meta(request)
-        audit = OrmAuditLogger()
-        sessions = OrmSessionRepository()
-
         actor_user_id = None
         if getattr(request, "user", None) is not None:
             actor_user_id = str(getattr(request.user, "id", None) or "") or None
 
-        from apps.accounts.application.use_cases import logout as logout_uc
-
-        logout_uc(
-            cfg=_cfg(),
-            sessions=sessions,
-            audit=audit,
-            refresh_cookie_value=refresh_cookie,
-            actor_user_id=actor_user_id,
-            ip=meta["ip"],
-            user_agent=meta["user_agent"],
-        )
+        logout_service(refresh_cookie, actor_user_id, meta)
 
         response = Response(status=status.HTTP_204_NO_CONTENT)
         _clear_refresh_cookie(response)
@@ -537,22 +356,8 @@ class PasswordResetRequestView(APIView):
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
 
-        users = OrmUserRepository()
-        resets = OrmPasswordResetRepository()
-        email_sender = DjangoEmailSender()
-        audit = OrmAuditLogger()
-
         try:
-            request_password_reset(
-                cfg=_cfg(),
-                users=users,
-                password_resets=resets,
-                email_sender=email_sender,
-                audit=audit,
-                email=ser.validated_data["email"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            password_reset_request_service(ser.validated_data["email"], meta)
         except EmailNotRegistered:
             return _error(
                 "email_not_registered",
@@ -568,7 +373,7 @@ class PasswordResetRequestView(APIView):
         except AccountsError:
             return _error("password_reset_request_failed", "Não foi possível processar sua solicitação.", status.HTTP_400_BAD_REQUEST)
 
-        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+        return Response(status_ok_payload(), status=status.HTTP_200_OK)
 
 
 class PasswordResetVerifyView(APIView):
@@ -579,25 +384,19 @@ class PasswordResetVerifyView(APIView):
         ser = PasswordResetVerifySerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
-        resets = OrmPasswordResetRepository()
-        audit = OrmAuditLogger()
 
         try:
-            result = verify_password_reset_code(
-                cfg=_cfg(),
-                password_resets=resets,
-                audit=audit,
-                email=ser.validated_data["email"],
-                code=ser.validated_data["code"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
+            result = password_reset_verify_service(
+                ser.validated_data["email"],
+                ser.validated_data["code"],
+                meta,
             )
         except PasswordResetTooManyAttempts:
             return _error("too_many_attempts", "Muitas tentativas. Solicite um novo código.", status.HTTP_429_TOO_MANY_REQUESTS)
         except (PasswordResetNotFound, PasswordResetExpired):
             return _error("invalid_code", "Código inválido ou expirado", status.HTTP_400_BAD_REQUEST)
 
-        return Response({"reset_token": result.reset_token}, status=status.HTTP_200_OK)
+        return Response(password_reset_verify_payload(result.reset_token), status=status.HTTP_200_OK)
 
 
 class PasswordResetConfirmView(APIView):
@@ -609,30 +408,19 @@ class PasswordResetConfirmView(APIView):
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
 
-        resets = OrmPasswordResetRepository()
-        passwords = OrmPasswordRepository()
-        hasher = Argon2PasswordHasher()
-        audit = OrmAuditLogger()
-
         try:
-            confirm_new_password(
-                cfg=_cfg(),
-                password_resets=resets,
-                passwords=passwords,
-                password_hasher=hasher,
-                audit=audit,
-                email=ser.validated_data["email"],
-                reset_token=ser.validated_data["reset_token"],
-                new_password=ser.validated_data["new_password"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
+            password_reset_confirm_service(
+                ser.validated_data["email"],
+                ser.validated_data["reset_token"],
+                ser.validated_data["new_password"],
+                meta,
             )
         except PasswordResetNotVerified:
             return _error("not_verified", "Confirme o código antes de redefinir", status.HTTP_403_FORBIDDEN)
         except (PasswordResetGrantInvalid, PasswordResetExpired, PasswordResetNotFound):
             return _error("invalid_reset", "Sessão de reset inválida ou expirada", status.HTTP_400_BAD_REQUEST)
 
-        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+        return Response(status_ok_payload(), status=status.HTTP_200_OK)
 
 
 class EmailConfirmationRequestView(APIView):
@@ -644,22 +432,8 @@ class EmailConfirmationRequestView(APIView):
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
 
-        users = OrmUserRepository()
-        confirmations = OrmEmailConfirmationRepository()
-        email_sender = DjangoEmailSender()
-        audit = OrmAuditLogger()
-
         try:
-            request_email_confirmation(
-                cfg=_cfg(),
-                users=users,
-                confirmations=confirmations,
-                email_sender=email_sender,
-                audit=audit,
-                email=ser.validated_data["email"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            email_confirmation_request_service(ser.validated_data["email"], meta)
         except EmailNotRegistered:
             return _error(
                 "email_not_registered",
@@ -691,7 +465,7 @@ class EmailConfirmationRequestView(APIView):
                 status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+        return Response(status_ok_payload(), status=status.HTTP_200_OK)
 
 
 class EmailConfirmationConfirmView(APIView):
@@ -703,20 +477,8 @@ class EmailConfirmationConfirmView(APIView):
         ser.is_valid(raise_exception=True)
         meta = request_meta(request)
 
-        users = OrmUserRepository()
-        confirmations = OrmEmailConfirmationRepository()
-        audit = OrmAuditLogger()
-
         try:
-            confirm_email(
-                cfg=_cfg(),
-                users=users,
-                confirmations=confirmations,
-                audit=audit,
-                token=ser.validated_data["token"],
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-            )
+            email_confirmation_confirm_service(ser.validated_data["token"], meta)
         except EmailConfirmationExpired:
             return _error("token_expired", "Token expirado. Solicite um novo e-mail.", status.HTTP_400_BAD_REQUEST)
         except EmailConfirmationInvalid:
@@ -730,33 +492,14 @@ class EmailConfirmationConfirmView(APIView):
                 status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+        return Response(status_ok_payload(), status=status.HTTP_200_OK)
 
 
 class MeView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        user = request.user
-        key = getattr(user, "avatar_storage_key", None)
-        url = avatar_url(str(key) if key else None)
-        return Response(
-            {
-                "user": {
-                    "id": str(user.id),
-                    "email": user.email,
-                    "full_name": user.full_name,
-                    "email_verified": bool(user.email_verified_at),
-                    "status": getattr(user, "status", None),
-                    "created_at": getattr(user, "created_at", None),
-                    "avatar_storage_key": str(key) if key else None,
-                    "avatar_url": url,
-                    # Backward-friendly alias
-                    "avatarStorageKey": str(key) if key else None,
-                    "avatarUrl": url,
-                }
-            }
-        )
+        return Response(me_response_payload(request.user))
 
 
 class PasswordChangeView(APIView):
@@ -769,7 +512,7 @@ class PasswordChangeView(APIView):
             for key in ("current_password", "new_password", "confirm_new_password"):
                 if key in ser.errors:
                     try:
-                        fields[key] = str(ser.errors[key][0])
+                        fields[key] = extract_error_message(ser.errors[key])
                     except Exception:
                         fields[key] = "Valor inválido."
             return _field_error("validation_error", "Dados inválidos.", fields, status.HTTP_400_BAD_REQUEST)
@@ -786,44 +529,20 @@ class PasswordChangeView(APIView):
                 status.HTTP_400_BAD_REQUEST,
             )
 
-        user = request.user
-        user_id = str(getattr(user, "id", "")) or None
+        user_id = str(getattr(request.user, "id", "")) or None
         if not user_id:
             return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
 
-        passwords = OrmPasswordRepository()
-        hasher = Argon2PasswordHasher()
-        audit = OrmAuditLogger()
         meta = request_meta(request)
 
-        stored_hash = passwords.get_password_hash(user_id=user_id)
-        if not stored_hash or not hasher.verify(stored_hash, current_password):
-            audit.log(
-                action="accounts.password_change_failed",
-                actor_user_id=user_id,
-                subject_user_id=user_id,
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-                metadata={"reason": "wrong_current_password"},
-            )
+        try:
+            password_change_service(user_id, current_password, new_password, meta)
+        except WrongCurrentPassword:
             return _field_error(
                 "invalid_current_password",
                 "Senha atual inválida.",
                 {"current_password": "Senha atual inválida."},
                 status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            now = now_utc()
-            password_hash = hasher.hash(new_password)
-            passwords.set_password(user_id=user_id, password_hash=password_hash, when=now)
-            audit.log(
-                action="accounts.password_changed",
-                actor_user_id=user_id,
-                subject_user_id=user_id,
-                ip=meta["ip"],
-                user_agent=meta["user_agent"],
-                metadata={},
             )
         except Exception:
             return _error(
@@ -832,4 +551,4 @@ class PasswordChangeView(APIView):
                 status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        return Response({"status": "ok"}, status=status.HTTP_200_OK)
+        return Response(status_ok_payload(), status=status.HTTP_200_OK)

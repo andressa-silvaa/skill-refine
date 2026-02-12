@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import { profileApi } from '@/entities/session/api/profileApi';
-import { getApiErrorMessage, getApiFieldErrors } from '@/shared/api';
+import { profileApi } from '@/entities/session';
+import { handleApiSaveError } from '@/shared/api';
 import { hasFormErrors } from '@/shared/lib/forms';
 import { notify } from '@/shared/lib/notify';
 
@@ -102,12 +102,14 @@ export function useChangePasswordForm(props: Props) {
       reset({ current: '', next: '', confirm: '' });
       onSaved?.();
     } catch (e) {
-      const fields = getApiFieldErrors(e);
-      if (fields?.current_password) setError('current', { message: fields.current_password });
-      if (fields?.new_password) setError('next', { message: fields.new_password });
-      if (fields?.confirm_new_password) setError('confirm', { message: fields.confirm_new_password });
-      const hasField = Boolean(fields?.current_password || fields?.new_password || fields?.confirm_new_password);
-      if (!hasField) notify.error(getApiErrorMessage(e, t('changePassword.saveFailed')));
+      handleApiSaveError(e, {
+        fallbackMessage: t('changePassword.saveFailed'),
+        onFieldErrors: (fields) => {
+          if (fields.current_password) setError('current', { message: fields.current_password });
+          if (fields.new_password) setError('next', { message: fields.new_password });
+          if (fields.confirm_new_password) setError('confirm', { message: fields.confirm_new_password });
+        },
+      });
     }
   });
 

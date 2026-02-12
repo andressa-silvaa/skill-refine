@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import { ResetSuccess } from '@/features/auth/password-recovery';
-import { AuthLayout } from '@/widgets/auth/auth-layout';
+import { AuthLayout } from '@/widgets/auth';
 
 export function ResetSuccessPage() {
   const navigate = useNavigate();

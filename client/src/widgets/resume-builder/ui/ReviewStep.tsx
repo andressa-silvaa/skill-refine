@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { Badge, Button } from '@/shared/ui';
+import { Button } from '@/shared/ui';
 import { calculateCompletenessScore, type ResumeData } from '@/entities/resume';
 
 import './ReviewStep.css';

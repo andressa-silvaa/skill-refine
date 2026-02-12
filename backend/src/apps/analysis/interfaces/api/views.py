@@ -234,3 +234,158 @@ class AiRewriteView(APIView):
             status=status.HTTP_200_OK,
         )
 
+
+# --- Analysis run / latest / history (stable contract) ---
+
+from shared.api.responses import (
+    error_response as _error,
+    field_error_response as _field_error,
+    serializer_field_errors as _serializer_field_errors,
+)
+
+from .payloads import analysis_payload
+from .serializers import RunAnalysisSerializer
+from .services import (
+    get_latest_analysis,
+    list_analysis_history,
+    run_analysis,
+    validate_resume_ownership,
+)
+
+HISTORY_LIMIT_MAX = 100
+HISTORY_LIMIT_DEFAULT = 20
+
+
+class RunAnalysisView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user_id = getattr(request.user, "id", None)
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+
+        ser = RunAnalysisSerializer(data=request.data)
+        if not ser.is_valid():
+            fields = _serializer_field_errors(ser)
+            return _field_error(
+                "validation_error",
+                "Dados inválidos.",
+                fields,
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+        data = ser.validated_data
+        resume_id = data["resume_id"]
+        job_description_text = data.get("job_description_text") or ""
+
+        analysis = run_analysis(
+            str(user_id),
+            resume_id,
+            job_description_text.strip() or None,
+        )
+        if analysis is None:
+            return _error(
+                "not_found",
+                "Currículo não encontrado ou você não tem permissão para analisá-lo.",
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            analysis_payload(analysis),
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+
+class LatestAnalysisView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user_id = getattr(request.user, "id", None)
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+
+        resume_id = (request.query_params.get("resume_id") or "").strip()
+        if not resume_id:
+            return _error(
+                "validation_error",
+                "Parâmetro resume_id é obrigatório.",
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not validate_resume_ownership(str(user_id), resume_id):
+            return _error(
+                "not_found",
+                "Currículo não encontrado ou você não tem permissão para acessá-lo.",
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        analysis = get_latest_analysis(str(user_id), resume_id)
+        if analysis is None:
+            return Response({"item": None}, status=status.HTTP_200_OK)
+
+        return Response({"item": analysis_payload(analysis)}, status=status.HTTP_200_OK)
+
+
+class HistoryAnalysisView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user_id = getattr(request.user, "id", None)
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+
+        resume_id = (request.query_params.get("resume_id") or "").strip()
+        if not resume_id:
+            return _error(
+                "validation_error",
+                "Parâmetro resume_id é obrigatório.",
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not validate_resume_ownership(str(user_id), resume_id):
+            return _error(
+                "not_found",
+                "Currículo não encontrado ou você não tem permissão para acessá-lo.",
+                status.HTTP_404_NOT_FOUND,
+            )
+
+        limit_param = request.query_params.get("limit", HISTORY_LIMIT_DEFAULT)
+        offset_param = request.query_params.get("offset", 0)
+        try:
+            limit = int(limit_param) if limit_param not in (None, "") else HISTORY_LIMIT_DEFAULT
+        except (TypeError, ValueError):
+            limit = HISTORY_LIMIT_DEFAULT
+        try:
+            offset = int(offset_param) if offset_param not in (None, "") else 0
+        except (TypeError, ValueError):
+            offset = 0
+
+        if limit < 1 or limit > HISTORY_LIMIT_MAX:
+            return _error(
+                "validation_error",
+                f"Parâmetro limit deve ser entre 1 e {HISTORY_LIMIT_MAX}.",
+                status.HTTP_400_BAD_REQUEST,
+            )
+        if offset < 0:
+            return _error(
+                "validation_error",
+                "Parâmetro offset deve ser maior ou igual a 0.",
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+        page, total = list_analysis_history(str(user_id), resume_id.strip(), limit=limit, offset=offset)
+        next_offset = offset + limit
+        has_next = next_offset < total
+
+        return Response(
+            {
+                "items": [analysis_payload(a) for a in page],
+                "limit": limit,
+                "offset": offset,
+                "total": total,
+                "hasNext": has_next,
+                "nextOffset": next_offset if has_next else None,
+            },
+            status=status.HTTP_200_OK,
+        )
+

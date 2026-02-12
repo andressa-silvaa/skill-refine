@@ -18,7 +18,6 @@ const normalizeResumeData = (input: ResumeData) => {
   return {
     themeId,
     themePaletteId,
-    // Removido suporte a cores personalizadas: mantemos sempre undefined
     themeAccentOverride: undefined,
     themeSecondaryOverride: undefined,
     targetPosition: normalizeText(input.targetPosition),

@@ -1,0 +1,15 @@
+"""
+Celery app configuration for Skill Refine.
+Broker: Redis (when REDIS_URL or CELERY_BROKER_URL set).
+"""
+from __future__ import annotations
+
+import os
+
+from celery import Celery
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+
+app = Celery("skill_refine")
+app.config_from_object("django.conf:settings", namespace="CELERY")
+app.autodiscover_tasks()

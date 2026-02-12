@@ -1,0 +1,17 @@
+{
+  "language": "es",
+  "description": "Verbos de acción para detección heurística de calidad (ES-ES). La presencia contribuye a has_action_verbs.",
+  "verbs": [
+    "lideró", "liderar", "implementó", "implementar", "desarrolló", "desarrollar",
+    "gestionó", "gestionar", "coordinó", "coordinar", "creó", "crear",
+    "aumentó", "aumentar", "redujo", "reducir", "optimizó", "optimizar",
+    "automatizó", "automatizar", "diseñó", "diseñar", "arquitectó", "arquitectar",
+    "orientó", "orientar", "capacitó", "capacitar", "analizó", "analizar",
+    "documentó", "documentar", "integró", "integrar", "lanzó", "lanzar",
+    "expandió", "expandir", "estableció", "establecer", "colaboró", "colaborar",
+    "presentó", "presentar", "negoció", "negociar", "planificó", "planificar",
+    "ejecutó", "ejecutar", "entregó", "entregar", "mejoró", "mejorar",
+    "resolvió", "resolver", "identificó", "identificar", "definió", "definir",
+    "generó", "generar", "validó", "validar", "probó", "probar", "desplegó", "implementó"
+  ]
+}

@@ -14,3 +14,12 @@ class RewriteRequestSerializer(serializers.Serializer):
     context = serializers.CharField(max_length=128)
     options = RewriteOptionsSerializer(required=False)
 
+
+class RunAnalysisSerializer(serializers.Serializer):
+    resume_id = serializers.UUIDField(required=True)
+    job_description_text = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        max_length=10_000,
+    )
+
