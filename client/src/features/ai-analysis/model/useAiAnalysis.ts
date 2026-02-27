@@ -5,8 +5,6 @@ import { useSession } from '@/entities/session';
 import { notify } from '@/shared/lib/notify';
 import { useResumes } from '@/features/resume';
 
-import { ApiError } from '@/shared/api';
-
 import { runAnalysis as runAnalysisApi, getLatestAnalysis } from '../api/analysisApi';
 import { apiPayloadToResult } from './apiPayloadMapper';
 import type {
@@ -16,6 +14,8 @@ import type {
 } from './types';
 
 const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_DURATION_MS = 120_000;
+const MAX_STAGNANT_PENDING_TICKS = 12;
 
 export function useAiAnalysis(initialResumeId?: string) {
   const { t } = useTranslation();
@@ -28,6 +28,10 @@ export function useAiAnalysis(initialResumeId?: string) {
   const [latestPayload, setLatestPayload] = useState<Awaited<ReturnType<typeof getLatestAnalysis>>['item'] | null>(null);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollInFlightRef = useRef(false);
+  const pollStartedAtRef = useRef<number | null>(null);
+  const lastPendingUpdatedAtRef = useRef<string | null>(null);
+  const stagnantPendingTicksRef = useRef(0);
 
   const resumeOptions: ResumeOption[] = resumes.viewModels.map((vm) => ({
     value: vm.id,
@@ -39,85 +43,116 @@ export function useAiAnalysis(initialResumeId?: string) {
       clearInterval(pollRef.current);
       pollRef.current = null;
     }
+    pollInFlightRef.current = false;
+    pollStartedAtRef.current = null;
+    lastPendingUpdatedAtRef.current = null;
+    stagnantPendingTicksRef.current = 0;
   }, []);
 
-  const fetchLatest = useCallback(
-    async (options?: { onDone?: () => void; onFailed?: () => void }) => {
-      if (!selectedResumeId) return null;
-      try {
-        const res = await getLatestAnalysis(selectedResumeId);
-        setLatestPayload(res.item);
-        if (res.item?.status === 'done') {
-          setResult(apiPayloadToResult(res.item, t));
-          setStatus('success');
-          stopPolling();
-          options?.onDone?.();
-          return res.item;
-        }
-        if (res.item?.status === 'failed') {
-          setStatus('error');
-          stopPolling();
-          options?.onFailed?.();
-          return res.item;
-        }
-        return res.item;
-      } catch (err) {
-        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
-          stopPolling();
-        }
-        return null;
-      }
-    },
-    [selectedResumeId, t, stopPolling]
-  );
+  const fetchLatest = useCallback(async (resumeId: string) => {
+    const res = await getLatestAnalysis(resumeId);
+    setLatestPayload(res.item);
+
+    if (res.item?.status === 'done') {
+      setResult(apiPayloadToResult(res.item, t));
+      setStatus('success');
+      return { state: 'done' as const, updatedAt: res.item.updatedAt };
+    }
+
+    if (res.item?.status === 'failed') {
+      setResult(null);
+      setStatus('error');
+      return { state: 'failed' as const, updatedAt: res.item.updatedAt };
+    }
+
+    return { state: 'pending' as const, updatedAt: res.item?.updatedAt ?? null };
+  }, [t]);
 
   useEffect(() => {
     if (initialResumeId) setSelectedResumeId(initialResumeId);
   }, [initialResumeId]);
 
   useEffect(() => {
-    if (sessionStatus !== 'authenticated' || !selectedResumeId) {
-      if (!selectedResumeId) {
-        setLatestPayload(null);
-        setResult(null);
-        setStatus('idle');
-      }
-      return;
-    }
-    getLatestAnalysis(selectedResumeId)
-      .then((res) => {
-        setLatestPayload(res.item);
-        if (res.item?.status === 'done') {
-          setResult(apiPayloadToResult(res.item, t));
-          setStatus('success');
-        } else if (res.item?.status === 'failed') {
-          setStatus('error');
-        } else if (res.item?.status === 'pending' || res.item?.status === 'running') {
-          setStatus('loading');
-          setResult(null);
-        }
-      })
-      .catch(() => {});
-  }, [sessionStatus, selectedResumeId, t]);
+    stopPolling();
+    // Selection only updates local state; never preload previous analysis.
+    setStatus('idle');
+    setResult(null);
+    setLatestPayload(null);
+  }, [selectedResumeId, stopPolling]);
 
   const runAnalysis = useCallback(async () => {
     if (!selectedResumeId || sessionStatus !== 'authenticated') return;
 
     setStatus('loading');
     setResult(null);
+    setLatestPayload(null);
     stopPolling();
 
     try {
       await runAnalysisApi(selectedResumeId);
-      setLatestPayload(null);
-      pollRef.current = setInterval(
-        () =>
-          fetchLatest({
-            onDone: () => notify.success(t('analysis.toast.done')),
-            onFailed: () => notify.error(t('analysis.toast.failed')),
-          }),
-        POLL_INTERVAL_MS
-      );
+
+      const pollResumeId = selectedResumeId;
+      const tick = async (): Promise<boolean> => {
+        if (pollInFlightRef.current) return false;
+        pollInFlightRef.current = true;
+        try {
+          const latest = await fetchLatest(pollResumeId);
+          if (latest.state === 'done') {
+            stopPolling();
+            notify.success(t('analysis.toast.done'));
+            return true;
+          }
+          if (latest.state === 'failed') {
+            stopPolling();
+            notify.error(t('analysis.toast.failed'));
+            return true;
+          }
+
+          if (
+            pollStartedAtRef.current &&
+            Date.now() - pollStartedAtRef.current > MAX_POLL_DURATION_MS
+          ) {
+            stopPolling();
+            setStatus('error');
+            notify.error(t('analysis.toast.failed'));
+            return true;
+          }
+
+          if (latest.updatedAt && lastPendingUpdatedAtRef.current === latest.updatedAt) {
+            stagnantPendingTicksRef.current += 1;
+          } else {
+            lastPendingUpdatedAtRef.current = latest.updatedAt;
+            stagnantPendingTicksRef.current = 0;
+          }
+
+          if (stagnantPendingTicksRef.current >= MAX_STAGNANT_PENDING_TICKS) {
+            stopPolling();
+            setStatus('error');
+            notify.error(t('analysis.toast.failed'));
+            return true;
+          }
+
+          return false;
+        } catch (err) {
+          stopPolling();
+          setStatus('error');
+          notify.error(t('analysis.toast.failed'));
+          return true;
+        } finally {
+          pollInFlightRef.current = false;
+        }
+      };
+
+      // First check immediately after run to avoid a blind wait.
+      pollStartedAtRef.current = Date.now();
+      lastPendingUpdatedAtRef.current = null;
+      stagnantPendingTicksRef.current = 0;
+      const hasFinished = await tick();
+      if (!hasFinished && !pollRef.current) {
+        pollRef.current = setInterval(() => {
+          void tick();
+        }, POLL_INTERVAL_MS);
+      }
     } catch {
       setStatus('error');
       notify.error(t('analysis.toast.failed'));
@@ -137,7 +172,7 @@ export function useAiAnalysis(initialResumeId?: string) {
     };
   }, [stopPolling]);
 
-  const isAnalyzing = status === 'loading' || latestPayload?.status === 'pending' || latestPayload?.status === 'running';
+  const isAnalyzing = status === 'loading';
 
   return {
     resumeOptions,
@@ -149,6 +184,6 @@ export function useAiAnalysis(initialResumeId?: string) {
     runAnalysis,
     retry,
     isAnalyzing,
-    lastAnalysisAt: latestPayload?.status === 'done' ? latestPayload.updatedAt : null,
+    lastAnalysisAt: null,
   };
 }

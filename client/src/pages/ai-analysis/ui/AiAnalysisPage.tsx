@@ -15,17 +15,6 @@ import {
 import '@/shared/ui/sr-controls/SrControls.css';
 import './AiAnalysisPage.css';
 
-function formatLastAnalysisDate(iso: string): { dateStr: string; timeStr: string } | null {
-  try {
-    const d = new Date(iso);
-    const dateStr = d.toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' });
-    const timeStr = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-    return { dateStr, timeStr };
-  } catch {
-    return null;
-  }
-}
-
 export function AiAnalysisPage() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
@@ -39,7 +28,6 @@ export function AiAnalysisPage() {
     result,
     runAnalysis,
     retry,
-    lastAnalysisAt,
   } = useAiAnalysis(resumeIdFromQuery);
 
   const isEmpty = status === 'idle' && !result;
@@ -67,18 +55,6 @@ export function AiAnalysisPage() {
             selectPlaceholder={t('analysis.selectPlaceholder')}
             analyzeButtonLabel={t('analysis.analyzeButton')}
           />
-
-          {lastAnalysisAt && (() => {
-            const formatted = formatLastAnalysisDate(lastAnalysisAt);
-            const dateLabel = formatted
-              ? `${formatted.dateStr} às ${formatted.timeStr}`
-              : lastAnalysisAt;
-            return (
-              <p className="sr-ai-analysis__last" aria-live="polite">
-                {t('analysis.lastAnalysis', { date: dateLabel })}
-              </p>
-            );
-          })()}
 
           <section className="sr-ai-analysis__content">
             {isLoading && <AnalysisSkeleton />}

@@ -16,6 +16,8 @@ def _normalize_strength(s: dict | str) -> dict[str, Any]:
         return {"key": "analysis.insights.strengths.other", "params": {}}
     key = s.get("key")
     if key:
+        if not str(key).startswith("analysis.insights.strengths."):
+            key = "analysis.insights.strengths.other"
         return {"key": key, "params": s.get("params") or {}}
     # Legacy: title/description -> synthesize key for backward compat (front can still have key for "other")
     return {"key": "analysis.insights.strengths.other", "params": {"title": s.get("title") or ""}}
@@ -27,6 +29,8 @@ def _normalize_improvement(i: dict | str) -> dict[str, Any]:
         return {"key": "analysis.insights.improvements.other", "priority": "medium", "params": {}}
     key = i.get("key")
     if key:
+        if not str(key).startswith("analysis.insights.improvements."):
+            key = "analysis.insights.improvements.other"
         out = {"key": key, "params": i.get("params") or {}}
         if i.get("priority") in ("high", "medium", "low"):
             out["priority"] = i["priority"]

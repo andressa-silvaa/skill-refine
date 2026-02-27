@@ -54,6 +54,9 @@ export const analysisDomain = {
     senioritySenior: 'Sênior',
     insights: {
       strengths: {
+        has_metrics: 'Uso de métricas e resultados quantificáveis no currículo.',
+        has_links: 'Links relevantes incluídos (LinkedIn, GitHub ou portfólio).',
+        has_action_verbs: 'Boa utilização de verbos de ação para destacar conquistas.',
         clear_structure: 'Estrutura do currículo organizada e clara.',
         education_aligned: 'Formação acadêmica alinhada à área.',
         professional_summary: 'Resumo profissional objetivo e claro.',
@@ -63,6 +66,8 @@ export const analysisDomain = {
       },
       improvements: {
         add_metrics: 'Incluir métricas e resultados quantificáveis na seção {{section}}.',
+        use_action_verbs: 'Usar mais verbos de ação para descrever conquistas.',
+        improve_summary: 'Melhorar o resumo profissional para deixá-lo mais objetivo e impactante.',
         ats_keywords: 'Destacar palavras-chave para melhor compatibilidade ATS.',
         executive_summary: 'Adicionar resumo executivo no topo do currículo.',
         relevant_links: 'Incluir links relevantes (LinkedIn, GitHub, portfólio).',

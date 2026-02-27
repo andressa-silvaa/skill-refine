@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useSession } from '@/entities/session';
 
@@ -20,10 +20,9 @@ export function useLatestAnalyses(resumeIds: string[]): Map<string, LatestAnalys
   const { status: sessionStatus } = useSession();
   const [map, setMap] = useState<Map<string, LatestAnalysisInfo>>(new Map());
 
-  const resumeIdsKey = resumeIds.join(',');
+  const ids = useMemo(() => resumeIds.slice(), [resumeIds]);
 
   useEffect(() => {
-    const ids = resumeIds;
     if (sessionStatus !== 'authenticated' || ids.length === 0) {
       setMap(new Map());
       return;
@@ -57,7 +56,7 @@ export function useLatestAnalyses(resumeIds: string[]): Map<string, LatestAnalys
     };
 
     void fetchAll();
-  }, [sessionStatus, resumeIdsKey]);
+  }, [sessionStatus, ids]);
 
   return map;
 }

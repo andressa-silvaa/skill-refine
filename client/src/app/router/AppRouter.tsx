@@ -55,7 +55,7 @@ export function AppRouter() {
             path="/protected"
             element={
               <RequireAuth>
-                <Navigate to="/protected/profile" replace />
+                <Navigate to="/protected/resumes" replace />
               </RequireAuth>
             }
           />

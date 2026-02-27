@@ -54,6 +54,9 @@ export const analysisDomain = {
     loading: 'Cargando análisis...',
     insights: {
       strengths: {
+        has_metrics: 'Incluye métricas y resultados cuantificables.',
+        has_links: 'Incluye enlaces relevantes (LinkedIn, GitHub o portafolio).',
+        has_action_verbs: 'Buen uso de verbos de acción para destacar logros.',
         clear_structure: 'Estructura del currículo clara y organizada.',
         education_aligned: 'Formación académica alineada con el área.',
         professional_summary: 'Resumen profesional objetivo y claro.',
@@ -63,6 +66,8 @@ export const analysisDomain = {
       },
       improvements: {
         add_metrics: 'Incluir métricas y resultados cuantificables en la sección {{section}}.',
+        use_action_verbs: 'Usar más verbos de acción para describir logros.',
+        improve_summary: 'Mejorar el resumen profesional para que sea más claro e impactante.',
         ats_keywords: 'Destacar palabras clave para mejor compatibilidad ATS.',
         executive_summary: 'Añadir resumen ejecutivo al inicio del currículo.',
         relevant_links: 'Incluir enlaces relevantes (LinkedIn, GitHub, portafolio).',
