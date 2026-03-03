@@ -1,5 +1,6 @@
 export type ThemeMode = 'light' | 'dark';
 export type AccentKey = 'pink' | 'purple' | 'blue' | 'green' | 'orange';
+export const APPEARANCE_CHANGE_EVENT = 'sr:appearance-change';
 
 export const ACCENTS: Array<{ key: AccentKey; label: string; labelKey?: string; color: string }> = [
   { key: 'pink', label: 'Rosa', labelKey: 'accent.pink', color: '#c72cb8' },
@@ -36,6 +37,17 @@ export function applyAppearancePreferences(prefs: { theme?: ThemeMode | null; ac
     root.style.setProperty('--right-panel', accent.rightPanel);
     root.style.setProperty('--sr-accent', accent.primary);
     root.style.setProperty('--sr-accent-rgb', accent.rgb);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent(APPEARANCE_CHANGE_EVENT, {
+        detail: {
+          theme: nextTheme,
+          accentColor: prefs.accent_color ?? null,
+        },
+      })
+    );
   }
 }
 

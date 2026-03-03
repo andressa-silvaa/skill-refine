@@ -1,0 +1,47 @@
+.sr-dash-section-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.sr-dash-section-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--sr-border);
+}
+
+.sr-dash-section-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--sr-ink);
+  margin: 0;
+}
+
+.sr-dash-section-card__action {
+  flex-shrink: 0;
+}
+
+.sr-dash-section-card__action button,
+.sr-dash-section-card__action a {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sr-accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.sr-dash-section-card__action button:hover,
+.sr-dash-section-card__action a:hover {
+  opacity: 0.75;
+}
+
+.sr-dash-section-card__body {
+  padding: 16px 20px;
+  flex: 1;
+}

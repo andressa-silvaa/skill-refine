@@ -7,6 +7,7 @@ import {
   VersionHistoryFilters,
   VersionHistoryList,
   VersionHistoryEmptyState,
+  VersionViewModal,
   versionHistoryApi,
 } from '@/features/version-history';
 import { useResumes } from '@/features/resume';
@@ -15,21 +16,11 @@ import { notify } from '@/shared/lib/notify';
 
 import type { VersionHistoryItem } from '@/features/version-history';
 
+import '@/shared/ui/sr-controls/SrControls.css';
 import './VersionHistoryPage.css';
 
-function formatDate(iso: string, locale: string): string {
-  const d = new Date(iso);
-  return new Intl.DateTimeFormat(locale, {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(d);
-}
-
 export function VersionHistoryPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const resumes = useResumes();
   const {
     versions,
@@ -44,16 +35,8 @@ export function VersionHistoryPage() {
 
   const [viewModalItem, setViewModalItem] = useState<VersionHistoryItem | null>(null);
   const [restoreModalItem, setRestoreModalItem] = useState<VersionHistoryItem | null>(null);
-
-  const handleView = (item: VersionHistoryItem) => {
-    setViewModalItem(item);
-  };
-
-  const handleRestore = (item: VersionHistoryItem) => {
-    setRestoreModalItem(item);
-  };
-
   const [restoring, setRestoring] = useState(false);
+
   const confirmRestore = async () => {
     if (!restoreModalItem) return;
     setRestoring(true);
@@ -109,51 +92,26 @@ export function VersionHistoryPage() {
             {!loading && !showError && !showEmpty && (
               <VersionHistoryList
                 items={versions}
-                onView={handleView}
-                onRestore={handleRestore}
+                onView={setViewModalItem}
+                onRestore={setRestoreModalItem}
               />
             )}
           </section>
         </div>
       </main>
 
-      <Modal
+      <VersionViewModal
         open={!!viewModalItem}
-        title={viewModalItem ? `${viewModalItem.resumeTitle} — v${viewModalItem.version}` : ''}
-        subtitle={
-          viewModalItem
-            ? formatDate(viewModalItem.createdAt, i18n.language)
-            : undefined
-        }
+        item={viewModalItem}
         onClose={() => setViewModalItem(null)}
-      >
-        {viewModalItem && (
-          <div className="sr-version-view-modal">
-            <p className="sr-version-view-modal__score">
-              {t('versionHistory.score')}: <strong>{viewModalItem.score}</strong>
-            </p>
-            {viewModalItem.changes.length > 0 && (
-              <>
-                <h4 className="sr-version-view-modal__changes-title">
-                  {t('versionHistory.viewModalChanges')}
-                </h4>
-                <ul className="sr-version-view-modal__changes-list">
-                  {viewModalItem.changes.map((c, i) => (
-                    <li key={i}>{c}</li>
-                  ))}
-                </ul>
-              </>
-            )}
-            <p className="sr-version-view-modal__hint">{t('versionHistory.viewModalHint')}</p>
-          </div>
-        )}
-      </Modal>
+      />
 
       <Modal
         open={!!restoreModalItem}
         title={t('versionHistory.restoreModalTitle')}
         subtitle={t('versionHistory.restoreModalSubtitle')}
         onClose={() => setRestoreModalItem(null)}
+        width={420}
       >
         {restoreModalItem && (
           <div className="sr-version-restore-modal">
@@ -167,7 +125,11 @@ export function VersionHistoryPage() {
               <Button variant="secondary" onClick={() => setRestoreModalItem(null)}>
                 {t('common.cancel')}
               </Button>
-              <Button variant="primary" onClick={() => void confirmRestore()} disabled={restoring}>
+              <Button
+                variant="primary"
+                onClick={() => void confirmRestore()}
+                disabled={restoring}
+              >
                 {restoring ? t('versionHistory.restoring') : t('versionHistory.restoreConfirm')}
               </Button>
             </div>

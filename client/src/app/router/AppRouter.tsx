@@ -18,6 +18,9 @@ import { VerifyEmailPage } from '@/pages/auth/verify-email';
 import { RequireAuth } from './RequireAuth';
 import { RouteLoadErrorBoundary } from './RouteLoadErrorBoundary';
 
+const DashboardPage = lazy(() =>
+  import('@/pages/dashboard').then((m) => ({ default: m.DashboardPage }))
+);
 const ProfilePage = lazy(() =>
   import('@/pages/profile').then((m) => ({ default: m.ProfilePage }))
 );
@@ -58,7 +61,16 @@ export function AppRouter() {
             path="/protected"
             element={
               <RequireAuth>
-                <Navigate to="/protected/resumes" replace />
+                <Navigate to="/protected/dashboard" replace />
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/protected/dashboard"
+            element={
+              <RequireAuth>
+                <DashboardPage />
               </RequireAuth>
             }
           />

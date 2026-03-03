@@ -4,7 +4,9 @@
 .sr-modal .sr-btn,
 .sr-resume-preview-fullscreen .sr-btn,
 .sr-resume-preview .sr-btn,
-.sr-ai-analysis .sr-btn {
+.sr-ai-analysis .sr-btn,
+.sr-dashboard .sr-btn,
+.sr-route-load-error .sr-btn {
   height: 40px;
   padding: 0 14px;
   border: 0;
@@ -21,7 +23,9 @@
 .sr-modal .sr-btn:disabled,
 .sr-resume-preview-fullscreen .sr-btn:disabled,
 .sr-resume-preview .sr-btn:disabled,
-.sr-ai-analysis .sr-btn:disabled {
+.sr-ai-analysis .sr-btn:disabled,
+.sr-dashboard .sr-btn:disabled,
+.sr-route-load-error .sr-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -32,7 +36,9 @@
 .sr-modal .sr-btn--primary,
 .sr-resume-preview-fullscreen .sr-btn--primary,
 .sr-resume-preview .sr-btn--primary,
-.sr-ai-analysis .sr-btn--primary {
+.sr-ai-analysis .sr-btn--primary,
+.sr-dashboard .sr-btn--primary,
+.sr-route-load-error .sr-btn--primary {
   background: rgba(var(--sr-accent-rgb), 0.06);
   color: var(--text-purple);
   border: 1px solid rgba(var(--sr-accent-rgb), 0.28);
@@ -44,7 +50,9 @@
 .sr-modal .sr-btn--primary:hover,
 .sr-resume-preview-fullscreen .sr-btn--primary:hover,
 .sr-resume-preview .sr-btn--primary:hover,
-.sr-ai-analysis .sr-btn--primary:hover {
+.sr-ai-analysis .sr-btn--primary:hover,
+.sr-dashboard .sr-btn--primary:hover,
+.sr-route-load-error .sr-btn--primary:hover {
   background: rgba(var(--sr-accent-rgb), 0.1);
   border-color: rgba(var(--sr-accent-rgb), 0.4);
 }
@@ -55,7 +63,8 @@
 .sr-modal .sr-btn--secondary,
 .sr-resume-preview-fullscreen .sr-btn--secondary,
 .sr-resume-preview .sr-btn--secondary,
-.sr-ai-analysis .sr-btn--secondary {
+.sr-ai-analysis .sr-btn--secondary,
+.sr-dashboard .sr-btn--secondary {
   background: transparent;
   color: var(--sr-ink-subtle);
   border: 1px solid var(--sr-input-border);
@@ -67,7 +76,8 @@
 .sr-modal .sr-btn--secondary:hover,
 .sr-resume-preview-fullscreen .sr-btn--secondary:hover,
 .sr-resume-preview .sr-btn--secondary:hover,
-.sr-ai-analysis .sr-btn--secondary:hover {
+.sr-ai-analysis .sr-btn--secondary:hover,
+.sr-dashboard .sr-btn--secondary:hover {
   border-color: rgba(var(--sr-accent-rgb), 0.28);
   background: rgba(var(--sr-accent-rgb), 0.06);
 }
@@ -78,7 +88,8 @@
 .sr-modal .sr-btn--danger,
 .sr-resume-preview-fullscreen .sr-btn--danger,
 .sr-resume-preview .sr-btn--danger,
-.sr-ai-analysis .sr-btn--danger {
+.sr-ai-analysis .sr-btn--danger,
+.sr-dashboard .sr-btn--danger {
   background: var(--sr-accent);
   color: #fff;
   border: 1px solid rgba(var(--sr-accent-rgb), 0.55);
@@ -90,7 +101,8 @@
 .sr-modal .sr-btn--danger:hover,
 .sr-resume-preview-fullscreen .sr-btn--danger:hover,
 .sr-resume-preview .sr-btn--danger:hover,
-.sr-ai-analysis .sr-btn--danger:hover {
+.sr-ai-analysis .sr-btn--danger:hover,
+.sr-dashboard .sr-btn--danger:hover {
   filter: brightness(0.92);
   border-color: rgba(var(--sr-accent-rgb), 0.7);
 }
@@ -101,7 +113,8 @@
 .sr-modal .sr-btn--danger:focus-visible,
 .sr-resume-preview-fullscreen .sr-btn--danger:focus-visible,
 .sr-resume-preview .sr-btn--danger:focus-visible,
-.sr-ai-analysis .sr-btn--danger:focus-visible {
+.sr-ai-analysis .sr-btn--danger:focus-visible,
+.sr-dashboard .sr-btn--danger:focus-visible {
   outline: 2px solid var(--sr-accent);
   outline-offset: 2px;
 }
@@ -112,7 +125,8 @@
 .sr-modal .sr-btn--ghost,
 .sr-resume-preview-fullscreen .sr-btn--ghost,
 .sr-resume-preview .sr-btn--ghost,
-.sr-ai-analysis .sr-btn--ghost {
+.sr-ai-analysis .sr-btn--ghost,
+.sr-dashboard .sr-btn--ghost {
   background: rgba(20, 20, 20, 0.06);
   color: var(--sr-ink-subtle);
 }
@@ -123,7 +137,9 @@
 .sr-modal .sr-btn:focus-visible,
 .sr-resume-preview-fullscreen .sr-btn:focus-visible,
 .sr-resume-preview .sr-btn:focus-visible,
-.sr-ai-analysis .sr-btn:focus-visible {
+.sr-ai-analysis .sr-btn:focus-visible,
+.sr-dashboard .sr-btn:focus-visible,
+.sr-route-load-error .sr-btn:focus-visible {
   outline: 2px solid var(--sr-accent);
   outline-offset: 2px;
 }

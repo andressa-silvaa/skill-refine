@@ -1,0 +1,25 @@
+.sr-dash-score-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.sr-dash-score-chart__svg {
+  width: 100%;
+  height: 140px;
+  display: block;
+  overflow: visible;
+}
+
+.sr-dash-score-chart__labels {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.sr-dash-score-chart__month {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--sr-ink-muted);
+}

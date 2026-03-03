@@ -1,0 +1,32 @@
+.sr-dashboard {
+  min-height: 100%;
+  background: var(--sr-page-bg);
+  padding-bottom: 40px;
+}
+
+.sr-dashboard__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sr-dashboard__section {
+  display: contents;
+}
+
+@media (max-width: 768px) {
+  .sr-dashboard__container {
+    padding: 24px 16px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sr-dashboard__container {
+    padding: 20px 12px;
+    gap: 16px;
+  }
+}

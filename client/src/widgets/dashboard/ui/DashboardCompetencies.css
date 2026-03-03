@@ -1,0 +1,44 @@
+.sr-dash-competencies {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.sr-dash-competencies__row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sr-dash-competencies__row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sr-dash-competencies__label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sr-ink);
+}
+
+.sr-dash-competencies__value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--sr-ink-muted);
+}
+
+.sr-dash-competencies__track {
+  width: 100%;
+  height: 7px;
+  background: var(--sr-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.sr-dash-competencies__bar {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}

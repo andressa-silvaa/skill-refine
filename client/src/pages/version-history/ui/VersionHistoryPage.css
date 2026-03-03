@@ -76,46 +76,6 @@
   color: var(--sr-ink);
 }
 
-/* View modal content */
-.sr-version-view-modal {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.sr-version-view-modal__score {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--sr-ink);
-}
-
-.sr-version-view-modal__changes-title {
-  margin: 0;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--sr-ink-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.sr-version-view-modal__changes-list {
-  margin: 0;
-  padding-left: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--sr-ink);
-  line-height: 1.7;
-}
-
-.sr-version-view-modal__hint {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--sr-ink-subtle);
-  line-height: 1.5;
-}
-
 /* Restore modal */
 .sr-version-restore-modal {
   display: flex;

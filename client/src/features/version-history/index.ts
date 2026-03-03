@@ -5,3 +5,4 @@ export { VersionHistoryFilters } from './ui/VersionHistoryFilters';
 export { VersionHistoryList } from './ui/VersionHistoryList';
 export { VersionHistoryCard } from './ui/VersionHistoryCard';
 export { VersionHistoryEmptyState } from './ui/VersionHistoryEmptyState';
+export { VersionViewModal } from './ui/VersionViewModal';

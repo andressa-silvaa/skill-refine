@@ -1,0 +1,11 @@
+.sr-dash-bottom-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .sr-dash-bottom-section {
+    grid-template-columns: 1fr;
+  }
+}

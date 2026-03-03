@@ -1,0 +1,1 @@
+export { useBrowserBranding } from './useBrowserBranding';
