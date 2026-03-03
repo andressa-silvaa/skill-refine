@@ -4,6 +4,7 @@ import { commonDomain } from './common';
 import { profileDomain } from './profile';
 import { resumeDomain } from './resume';
 import { settingsDomain } from './settings';
+import { versionHistoryDomain } from './versionHistory';
 
 const translation = {
   ...commonDomain,
@@ -12,6 +13,7 @@ const translation = {
   ...settingsDomain,
   ...resumeDomain,
   ...analysisDomain,
+  ...versionHistoryDomain,
 } as const;
 
 export const ptBR = { translation } as const;

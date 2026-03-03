@@ -10,7 +10,7 @@ export const mainNav: NavItem[] = [
   { key: 'dashboard', icon: <i className="fa-solid fa-house" aria-hidden /> },
   { key: 'curriculos', icon: <i className="fa-regular fa-file-lines" aria-hidden />, to: '/protected/resumes' },
   { key: 'analiseComIA', icon: <i className="fa-solid fa-wand-magic-sparkles" aria-hidden />, to: '/protected/ai-analysis' },
-  { key: 'historico', icon: <i className="fa-solid fa-clock-rotate-left" aria-hidden /> },
+  { key: 'historico', icon: <i className="fa-solid fa-clock-rotate-left" aria-hidden />, to: '/protected/version-history' },
 ];
 
 export const bottomNav: NavItem[] = [

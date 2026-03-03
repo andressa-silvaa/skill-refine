@@ -47,10 +47,10 @@ export function useResumeWizardHydration(options: Options) {
     hydratedRef.current = key;
 
     let step: BuilderStep = 'theme';
-    if (initialStatus === 'complete') {
-      step = 'review';
-    } else if (initialLastStep) {
+    if (initialLastStep) {
       step = initialLastStep;
+    } else if (initialStatus === 'complete') {
+      step = 'review';
     } else {
       step = inferStepFromData(initialData);
     }

@@ -23,9 +23,20 @@ from shared.api.responses import (
 )
 from shared.auth.drf import request_meta
 
-from .payloads import resume_detail_payload, resume_payload
+from .payloads import (
+    resume_detail_payload,
+    resume_payload,
+    version_detail_payload,
+    version_list_item_payload,
+)
 from .pdf_browser import create_pdf_page
 from .serializers import ResumeDraftSerializer
+from .version_services import (
+    get_version_by_id,
+    list_versions,
+    maybe_create_version_after_save,
+    restore_version,
+)
 from .services import (
     create_pdf_token,
     create_resume_draft,
@@ -208,6 +219,7 @@ class ResumeListCreateView(APIView):
         _ = request_meta(request)
 
         resume = create_resume_draft(user_id, data)
+        maybe_create_version_after_save(user_id, str(resume.id))
         return Response(resume_payload(resume), status=status.HTTP_201_CREATED)
 
 
@@ -260,6 +272,8 @@ class ResumeDraftUpdateView(APIView):
                 return _field_error("validation_error", "Dados inválidos.", fields, status.HTTP_400_BAD_REQUEST)
 
         resume = update_resume_draft(user_id, resume_id, data)
+        if resume:
+            maybe_create_version_after_save(user_id, resume_id)
         return Response(resume_payload(resume), status=status.HTTP_200_OK)
 
     def delete(self, request, resume_id):
@@ -401,3 +415,42 @@ class ResumePdfView(APIView):
         response = HttpResponse(pdf_bytes, content_type="application/pdf")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
+
+
+class ResumeVersionListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user_id = getattr(request.user, "id", None)
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+        resume_id = request.query_params.get("resume_id")
+        qs = list_versions(user_id, resume_id=resume_id)
+        items = [version_list_item_payload(v) for v in qs]
+        return Response({"items": items}, status=status.HTTP_200_OK)
+
+
+class ResumeVersionDetailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, resume_id, version_id):
+        user_id = getattr(request.user, "id", None)
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+        version = get_version_by_id(user_id, resume_id, version_id)
+        if not version:
+            return _error("not_found", "Versão não encontrada.", status.HTTP_404_NOT_FOUND)
+        return Response(version_detail_payload(version), status=status.HTTP_200_OK)
+
+
+class ResumeVersionRestoreView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, resume_id, version_id):
+        user_id = getattr(request.user, "id", None)
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+        resume = restore_version(user_id, resume_id, version_id)
+        if not resume:
+            return _error("not_found", "Versão ou currículo não encontrado.", status.HTTP_404_NOT_FOUND)
+        return Response(resume_payload(resume), status=status.HTTP_200_OK)

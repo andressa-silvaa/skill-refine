@@ -1,0 +1,31 @@
+export const versionHistoryDomain = {
+  versionHistory: {
+    title: 'Version History',
+    subtitle: 'Track all changes to your resumes.',
+    filtersLabel: 'Filter by resume',
+    filters: {
+      all: 'All',
+    },
+    current: 'Current',
+    score: 'Score',
+    actions: {
+      view: 'View version',
+      restore: 'Restore version',
+    },
+    emptyTitle: 'No versions found',
+    emptySubtitle: 'Change the filter above or create versions in your resumes to see history here.',
+    mainAria: 'Version history page',
+    viewModalChanges: 'Changes in this version',
+    viewModalHint: 'Full version preview will be available soon.',
+    restoreModalTitle: 'Restore version',
+    restoreModalSubtitle: 'This will create a new version from the selected one.',
+    restoreModalText: 'Restore "{{title}}" to version v{{version}}?',
+    restoreConfirm: 'Restore',
+    restoreSuccess: 'Version restored successfully.',
+    restoreFailed: 'Could not restore version. Please try again.',
+    loading: 'Loading history...',
+    errorLoad: 'Could not load version history.',
+    retry: 'Try again',
+    restoring: 'Restoring...',
+  },
+} as const;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useResumes } from '@/features/resume';
@@ -31,8 +31,10 @@ import './ResumesPage.css';
 export function ResumesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const resumes = useResumes();
   const { state: pageState, actions: pageActions } = useResumesPageState();
+  const handledApplyContextRef = useRef<string | null>(null);
 
   const resumeIds = useMemo(() => resumes.viewModels.map((vm) => vm.id), [resumes.viewModels]);
   const analysisByResumeId = useLatestAnalyses(resumeIds);
@@ -81,7 +83,13 @@ export function ResumesPage() {
   }, [t]);
 
   const onEdit = useCallback(
-    async (id: string) => {
+    async (
+      id: string,
+      options?: {
+        targetStep?: BuilderStep | null;
+        suggestedText?: string | null;
+      }
+    ) => {
       pageActions.openEdit(id);
       try {
         const detail = await resumes.fetchById(id);
@@ -92,8 +100,11 @@ export function ResumesPage() {
             themePaletteId: detail.data.themePaletteId || theme.defaultPaletteId,
           },
           status: detail.status,
-          lastStep: (detail.lastStep as BuilderStep) ?? null,
+          lastStep: options?.targetStep ?? ((detail.lastStep as BuilderStep) ?? null),
         });
+        if (options?.suggestedText?.trim()) {
+          notify.info(t('analysis.applyGuidedSuggestion', { text: options.suggestedText.trim() }));
+        }
       } catch (err) {
         notify.error(getApiErrorMessage(err, t('resume.errorEditFailed')));
         pageActions.closeEdit();
@@ -101,6 +112,35 @@ export function ResumesPage() {
     },
     [pageActions, resumes.fetchById, t]
   );
+
+  useEffect(() => {
+    const editResumeId = searchParams.get('editResumeId');
+    if (!editResumeId) return;
+
+    const targetStepParam = searchParams.get('targetStep');
+    const suggestedText = searchParams.get('suggestedText');
+    const allSteps: BuilderStep[] = ['theme', 'basic', 'contact', 'experience', 'education', 'skills', 'languages', 'summary', 'review'];
+    const targetStep = targetStepParam && allSteps.includes(targetStepParam as BuilderStep)
+      ? (targetStepParam as BuilderStep)
+      : null;
+
+    const contextKey = `${editResumeId}:${targetStep ?? ''}:${suggestedText ?? ''}`;
+    if (handledApplyContextRef.current === contextKey) return;
+    handledApplyContextRef.current = contextKey;
+
+    void onEdit(editResumeId, {
+      targetStep,
+      suggestedText,
+    });
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('editResumeId');
+    nextParams.delete('targetStep');
+    nextParams.delete('fieldTarget');
+    nextParams.delete('improvementKey');
+    nextParams.delete('suggestedText');
+    setSearchParams(nextParams, { replace: true });
+  }, [onEdit, searchParams, setSearchParams]);
 
   const onDuplicate = useCallback(
     (id: string) => {

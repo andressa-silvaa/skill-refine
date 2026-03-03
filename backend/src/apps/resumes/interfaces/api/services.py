@@ -128,12 +128,23 @@ def replace_languages(resume: Resume, languages: Iterable[dict[str, Any]]) -> No
         )
 
 
-def unique_copy_name(user_id: str, base_name: str) -> str | None:
+def unique_copy_name(user_id: str, base_name: str) -> str:
+    """Return a unique name for a duplicated resume (e.g. 'Cópia de X' or 'Cópia de X (2)')."""
     base = base_name.strip() or "Currículo"
     candidate = f"Cópia de {base}"
-    if not Resume.objects.filter(user_id=user_id, name=candidate, deleted_at__isnull=True).exists():
+    existing = set(
+        Resume.objects.filter(
+            user_id=user_id,
+            name__startswith=candidate,
+            deleted_at__isnull=True,
+        ).values_list("name", flat=True)
+    )
+    if candidate not in existing:
         return candidate
-    return None
+    suffix = 2
+    while f"{candidate} ({suffix})" in existing:
+        suffix += 1
+    return f"{candidate} ({suffix})"
 
 
 def section_order(resume: Resume) -> list[str]:

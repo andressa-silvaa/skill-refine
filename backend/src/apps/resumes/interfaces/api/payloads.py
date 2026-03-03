@@ -19,6 +19,7 @@ from apps.resumes.infrastructure.models import (
     ResumeSkill,
     ResumeStatus,
 )
+from apps.resumes.infrastructure.models import ResumeVersion
 
 
 def format_month(value: date | None) -> str:
@@ -161,4 +162,34 @@ def resume_detail_payload(resume: Resume) -> dict[str, Any]:
             "skills": skill_payload,
             "languages": lang_payload,
         },
+    }
+
+
+def version_list_item_payload(version: ResumeVersion) -> dict[str, Any]:
+    """Single version for list (all or filtered by resume)."""
+    resume = version.resume
+    return {
+        "id": str(version.id),
+        "resumeId": str(version.resume_id),
+        "resumeTitle": resume.name or resume.target_position or "Novo Currículo",
+        "version": version.version_number,
+        "isCurrent": version.is_current,
+        "score": version.score,
+        "createdAt": version.created_at.isoformat(),
+        "changes": version.change_summary_json or [],
+    }
+
+
+def version_detail_payload(version: ResumeVersion) -> dict[str, Any]:
+    """Full version detail with snapshot for view/restore."""
+    return {
+        "id": str(version.id),
+        "resumeId": str(version.resume_id),
+        "resumeTitle": (version.resume.name or version.resume.target_position or "Novo Currículo"),
+        "version": version.version_number,
+        "isCurrent": version.is_current,
+        "score": version.score,
+        "createdAt": version.created_at.isoformat(),
+        "changes": version.change_summary_json or [],
+        "snapshot": version.snapshot_json,
     }

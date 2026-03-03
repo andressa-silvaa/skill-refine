@@ -66,7 +66,7 @@ export function AiAnalysisPage() {
             {isSuccess && result && (
               <>
                 <MetricsGrid result={result} />
-                <InsightList result={result} />
+                <InsightList result={result} selectedResumeId={selectedResumeId} />
               </>
             )}
           </section>

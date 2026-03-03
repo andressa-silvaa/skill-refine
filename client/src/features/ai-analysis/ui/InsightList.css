@@ -52,10 +52,50 @@
   gap: 10px;
 }
 
+.sr-insight-list__example-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.sr-insight-list__example-card {
+  border: 1px solid var(--sr-border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--sr-surface);
+}
+
+.sr-insight-list__example-card--before {
+  border-color: rgba(234, 179, 8, 0.45);
+}
+
+.sr-insight-list__example-card--after {
+  border-color: rgba(34, 197, 94, 0.45);
+}
+
+.sr-insight-list__example-heading {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--sr-ink);
+}
+
+.sr-insight-list__example-text {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--sr-ink-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 @media (max-width: 768px) {
   .sr-insight-list {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+
+  .sr-insight-list__example-grid {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -13,6 +13,11 @@ export type InsightItem = {
 
 export type ImprovementInsightItem = InsightItem & {
   priority?: ImprovementPriority;
+  exampleKey?: string;
+  exampleText?: string;
+  actionType?: string;
+  section?: string;
+  fieldTarget?: string;
 };
 
 /** Legacy: text-only (mock or backward compat). */

@@ -169,3 +169,30 @@ class ResumeSectionOrder(UUIDPrimaryKeyModel):
         indexes = [
             models.Index(fields=["resume", "position_index"], name="idx_resume_section_order"),
         ]
+
+
+class ResumeVersion(UUIDPrimaryKeyModel, TimestampedModel):
+    """
+    Snapshot of a resume at a point in time. Used for history and restore.
+    Each resume has one current version (is_current=True); older versions are kept for audit.
+    """
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, db_column="resume_id")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
+    version_number = models.PositiveIntegerField()
+    is_current = models.BooleanField(default=False)
+    snapshot_json = models.JSONField(default=dict)
+    change_summary_json = models.JSONField(default=list)
+    score = models.IntegerField(null=True, blank=True)
+
+    class Meta:
+        db_table = "resume_versions"
+        indexes = [
+            models.Index(fields=["resume", "-version_number"], name="idx_resume_versions_resume"),
+            models.Index(fields=["user", "-created_at"], name="idx_resume_versions_user"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["resume", "version_number"],
+                name="uniq_resume_version_number",
+            ),
+        ]

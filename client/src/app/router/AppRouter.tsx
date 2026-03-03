@@ -33,6 +33,9 @@ const ResumesPage = lazy(() =>
 const AiAnalysisPage = lazy(() =>
   import('@/pages/ai-analysis').then((m) => ({ default: m.AiAnalysisPage }))
 );
+const VersionHistoryPage = lazy(() =>
+  import('@/pages/version-history').then((m) => ({ default: m.VersionHistoryPage }))
+);
 
 export function AppRouter() {
   return (
@@ -92,6 +95,15 @@ export function AppRouter() {
             element={
               <RequireAuth>
                 <AiAnalysisPage />
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/protected/version-history"
+            element={
+              <RequireAuth>
+                <VersionHistoryPage />
               </RequireAuth>
             }
           />

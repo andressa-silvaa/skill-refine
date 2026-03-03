@@ -30,6 +30,20 @@ function seniorityScoreToKey(score: number | null | undefined): string {
   return 'analysis.senioritySenior';
 }
 
+function localizeInsightParams(
+  params: Record<string, string> | undefined,
+  t: (key: string, params?: Record<string, string>) => string
+): Record<string, string> {
+  const normalized = { ...(params ?? {}) };
+  const rawSection = normalized.section?.trim();
+  if (rawSection) {
+    const key = `analysis.sections.${rawSection.toLowerCase()}`;
+    const translated = t(key);
+    normalized.section = translated === key ? rawSection : translated;
+  }
+  return normalized;
+}
+
 export function apiPayloadToResult(
   payload: AnalysisPayload,
   t: (key: string, params?: Record<string, string>) => string
@@ -42,14 +56,27 @@ export function apiPayloadToResult(
 
   const strengths: InsightItem[] = (payload.insights?.strengths ?? []).map((s) => ({
     key: s.key,
-    params: s.params ?? {},
+    params: localizeInsightParams(s.params, t),
   }));
 
-  const improvements: ImprovementInsightItem[] = (payload.insights?.improvements ?? []).map((i) => ({
-    key: i.key,
-    params: i.params ?? {},
-    priority: i.priority,
-  }));
+  const recommendationsByKey = new Map(
+    (payload.recommendations ?? []).map((rec) => [rec.key, rec])
+  );
+
+  const improvements: ImprovementInsightItem[] = (payload.insights?.improvements ?? []).map((i) => {
+    const recommendation = recommendationsByKey.get(i.key);
+    const params = localizeInsightParams(i.params ?? recommendation?.params, t);
+    return {
+      key: i.key,
+      params,
+      priority: i.priority ?? recommendation?.priority,
+      section: params.section ?? recommendation?.section,
+      fieldTarget: params.field_target ?? recommendation?.field_target,
+      actionType: params.action_type ?? recommendation?.action_type,
+      exampleKey: recommendation?.example_key,
+      exampleText: recommendation?.example_params?.text,
+    };
+  });
 
   return {
     score,

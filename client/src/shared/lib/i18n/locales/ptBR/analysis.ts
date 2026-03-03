@@ -32,8 +32,18 @@ export const analysisDomain = {
     priorityLow: 'Baixa',
     seeExample: 'Ver exemplo',
     applyToResume: 'Aplicar no currículo',
+    applying: 'Aplicando...',
     exampleComingSoon: 'Exemplos em breve.',
     applyComingSoon: 'Aplicar ao currículo em breve.',
+    exampleModalTitle: 'Exemplo prático de melhoria',
+    exampleBefore: 'Antes',
+    exampleAfter: 'Depois',
+    exampleSuggestion: 'Sugestão',
+    applySelectResumeFirst: 'Selecione um currículo para aplicar esta melhoria.',
+    applySuccessAuto: 'Melhoria aplicada ao currículo com sucesso.',
+    applyGuidedOpen: 'Abrindo o currículo na seção recomendada para edição.',
+    applyGuidedSuggestion: 'Sugestão da IA: {{text}}',
+    applyFailed: 'Não foi possível aplicar esta melhoria agora.',
     metricsAria: 'Métricas da análise',
     listsAria: 'Pontos fortes e de melhoria',
     errorTitle: 'Erro na análise',
@@ -52,6 +62,16 @@ export const analysisDomain = {
     seniorityJunior: 'Júnior',
     seniorityMid: 'Pleno',
     senioritySenior: 'Sênior',
+    sections: {
+      basic: 'dados básicos',
+      contact: 'contato',
+      experience: 'experiência',
+      education: 'formação',
+      skills: 'habilidades',
+      languages: 'idiomas',
+      summary: 'resumo',
+      review: 'revisão',
+    },
     insights: {
       strengths: {
         has_metrics: 'Uso de métricas e resultados quantificáveis no currículo.',
@@ -74,6 +94,36 @@ export const analysisDomain = {
         action_verbs: 'Usar mais verbos de ação para descrever conquistas.',
         clarity_conciseness: 'Revisar clareza e concisão do texto.',
         other: 'Outra sugestão de melhoria.',
+      },
+    },
+    improvementExamples: {
+      addMetrics: {
+        before: 'Responsável por acompanhar indicadores de performance da equipe.',
+        after: 'Acompanhei indicadores de performance da equipe e aumentei a produtividade em 18% no trimestre.',
+      },
+      actionVerbs: {
+        before: 'Atuação no suporte de demandas técnicas e atendimento ao time.',
+        after: 'Implementei melhorias no suporte técnico, reduzindo em 30% o tempo médio de atendimento ao time.',
+      },
+      improveSummary: {
+        before: 'Profissional dedicado com experiência na área de tecnologia.',
+        after: 'Profissional de tecnologia com 6 anos de experiência em produtos digitais, focado em performance, escalabilidade e impacto de negócio.',
+      },
+      executiveSummary: {
+        before: 'Resumo profissional curto e genérico.',
+        after: 'Executivo de produto com histórico de crescimento em SaaS B2B, liderando times multidisciplinares e aumentando receita recorrente em 22% ao ano.',
+      },
+      relevantLinks: {
+        single: 'Inclua links de LinkedIn, GitHub e portfólio para aumentar a credibilidade do perfil.',
+      },
+      atsKeywords: {
+        single: 'Inclua no currículo termos técnicos da vaga (ex.: React, TypeScript, CI/CD, AWS) em experiências e habilidades.',
+      },
+      clarity: {
+        single: 'Prefira frases curtas e objetivas, removendo redundâncias e deixando as conquistas fáceis de escanear.',
+      },
+      fallback: {
+        single: 'Revise este ponto e ajuste o currículo na seção indicada para aumentar sua aderência à vaga.',
       },
     },
   },

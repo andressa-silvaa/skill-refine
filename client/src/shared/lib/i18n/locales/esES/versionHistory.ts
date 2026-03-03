@@ -1,0 +1,31 @@
+export const versionHistoryDomain = {
+  versionHistory: {
+    title: 'Historial de versiones',
+    subtitle: 'Sigue todos los cambios en tus currículos.',
+    filtersLabel: 'Filtrar por currículo',
+    filters: {
+      all: 'Todos',
+    },
+    current: 'Actual',
+    score: 'Puntuación',
+    actions: {
+      view: 'Ver versión',
+      restore: 'Restaurar versión',
+    },
+    emptyTitle: 'No se encontraron versiones',
+    emptySubtitle: 'Cambia el filtro de arriba o crea versiones en tus currículos para ver el historial aquí.',
+    mainAria: 'Página de historial de versiones',
+    viewModalChanges: 'Cambios en esta versión',
+    viewModalHint: 'La vista previa completa de la versión estará disponible pronto.',
+    restoreModalTitle: 'Restaurar versión',
+    restoreModalSubtitle: 'Esto creará una nueva versión a partir de la seleccionada.',
+    restoreModalText: '¿Restaurar "{{title}}" a la versión v{{version}}?',
+    restoreConfirm: 'Restaurar',
+    restoreSuccess: 'Versión restaurada correctamente.',
+    restoreFailed: 'No se pudo restaurar la versión. Inténtalo de nuevo.',
+    loading: 'Cargando historial...',
+    errorLoad: 'No se pudo cargar el historial de versiones.',
+    retry: 'Reintentar',
+    restoring: 'Restaurando...',
+  },
+} as const;

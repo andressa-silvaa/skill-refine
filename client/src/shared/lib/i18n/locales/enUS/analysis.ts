@@ -32,8 +32,18 @@ export const analysisDomain = {
     priorityLow: 'Low',
     seeExample: 'See example',
     applyToResume: 'Apply to resume',
+    applying: 'Applying...',
     exampleComingSoon: 'Examples coming soon.',
     applyComingSoon: 'Apply to resume coming soon.',
+    exampleModalTitle: 'Practical improvement example',
+    exampleBefore: 'Before',
+    exampleAfter: 'After',
+    exampleSuggestion: 'Suggestion',
+    applySelectResumeFirst: 'Select a resume to apply this improvement.',
+    applySuccessAuto: 'Improvement applied to the resume successfully.',
+    applyGuidedOpen: 'Opening the resume in the recommended section for editing.',
+    applyGuidedSuggestion: 'AI suggestion: {{text}}',
+    applyFailed: 'Could not apply this improvement right now.',
     metricsAria: 'Analysis metrics',
     listsAria: 'Strengths and areas for improvement',
     errorTitle: 'Analysis error',
@@ -52,6 +62,16 @@ export const analysisDomain = {
     seniorityJunior: 'Junior',
     seniorityMid: 'Mid-level',
     senioritySenior: 'Senior',
+    sections: {
+      basic: 'basic information',
+      contact: 'contact',
+      experience: 'experience',
+      education: 'education',
+      skills: 'skills',
+      languages: 'languages',
+      summary: 'summary',
+      review: 'review',
+    },
     insights: {
       strengths: {
         has_metrics: 'Includes metrics and quantifiable outcomes.',
@@ -74,6 +94,36 @@ export const analysisDomain = {
         action_verbs: 'Use more action verbs to describe achievements.',
         clarity_conciseness: 'Review clarity and conciseness of the text.',
         other: 'Other improvement suggestion.',
+      },
+    },
+    improvementExamples: {
+      addMetrics: {
+        before: 'Responsible for tracking team performance indicators.',
+        after: 'Tracked team performance indicators and increased productivity by 18% in the quarter.',
+      },
+      actionVerbs: {
+        before: 'Worked on technical support demands and team assistance.',
+        after: 'Implemented improvements in technical support, reducing average response time by 30% for the team.',
+      },
+      improveSummary: {
+        before: 'Dedicated professional with experience in technology.',
+        after: 'Technology professional with 6 years of experience in digital products, focused on performance, scalability, and business impact.',
+      },
+      executiveSummary: {
+        before: 'Short and generic professional summary.',
+        after: 'Product executive with a track record of growth in B2B SaaS, leading cross-functional teams and increasing recurring revenue by 22% year over year.',
+      },
+      relevantLinks: {
+        single: 'Include LinkedIn, GitHub, and portfolio links to increase profile credibility.',
+      },
+      atsKeywords: {
+        single: 'Include technical terms from the job posting (e.g., React, TypeScript, CI/CD, AWS) in experiences and skills.',
+      },
+      clarity: {
+        single: 'Prefer short and objective sentences, remove redundancy, and make achievements easy to scan.',
+      },
+      fallback: {
+        single: 'Review this point and adjust your resume in the suggested section to improve fit.',
       },
     },
   },

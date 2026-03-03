@@ -21,8 +21,9 @@ type Props =
   | {
       variant: 'improvement';
       insight: ImprovementInsightItem;
-      onSeeExample?: () => void;
-      onApply?: () => void;
+      onSeeExample?: (insight: ImprovementInsightItem) => void;
+      onApply?: (insight: ImprovementInsightItem) => void;
+      applying?: boolean;
     };
 
 export function InsightListItem(props: Props) {
@@ -43,7 +44,7 @@ export function InsightListItem(props: Props) {
     );
   }
 
-  const { insight, onSeeExample, onApply } = props;
+  const { insight, onSeeExample, onApply, applying = false } = props;
   const text = insight.params && Object.keys(insight.params).length > 0
     ? t(insight.key, insight.params)
     : t(insight.key);
@@ -71,13 +72,25 @@ export function InsightListItem(props: Props) {
         ) : null}
         <div className="sr-insight-item__actions">
           {onSeeExample ? (
-            <Button variant="secondary" type="button" onClick={onSeeExample} className="sr-insight-item__btn">
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => onSeeExample(insight)}
+              className="sr-insight-item__btn"
+              disabled={applying}
+            >
               {t('analysis.seeExample')}
             </Button>
           ) : null}
           {onApply ? (
-            <Button variant="ghost" type="button" onClick={onApply} className="sr-insight-item__btn">
-              {t('analysis.applyToResume')}
+            <Button
+              variant="ghost"
+              type="button"
+              onClick={() => onApply(insight)}
+              className="sr-insight-item__btn"
+              disabled={applying}
+            >
+              {applying ? t('analysis.applying') : t('analysis.applyToResume')}
             </Button>
           ) : null}
         </div>

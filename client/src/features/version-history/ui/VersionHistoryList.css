@@ -1,0 +1,21 @@
+.sr-version-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.sr-version-list__item {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .sr-version-list {
+    gap: 12px;
+  }
+}

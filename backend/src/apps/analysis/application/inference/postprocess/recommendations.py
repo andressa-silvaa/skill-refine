@@ -8,29 +8,29 @@ from typing import Any
 
 EXAMPLE_TEMPLATES: dict[str, dict[str, str]] = {
     "analysis.insights.improvements.add_metrics": {
-        "pt-BR": "Troque 'Responsável por X' por 'Liderei X, reduzindo custos em 20%'",
-        "en-US": "Replace 'Responsible for X' with 'Led X, reducing costs by 20%'",
-        "es-ES": "Reemplace 'Responsable de X' por 'Lideré X, reduciendo costos en 20%'",
+        "pt-BR": "Troque 'Responsável por X' por 'Liderei X, reduzindo custos em 20%'.",
+        "en-US": "Replace 'Responsible for X' with 'Led X, reducing costs by 20%'.",
+        "es-ES": "Reemplace 'Responsable de X' por 'Lideré X, reduciendo costos en 20%'.",
     },
     "analysis.insights.improvements.use_action_verbs": {
-        "pt-BR": "Use verbos de ação: desenvolvi, implementei, coordenei, gerenciei",
-        "en-US": "Use action verbs: developed, implemented, coordinated, managed",
-        "es-ES": "Use verbos de acción: desarrollé, implementé, coordiné, gestioné",
+        "pt-BR": "Use verbos de ação: desenvolvi, implementei, coordenei, gerenciei.",
+        "en-US": "Use action verbs: developed, implemented, coordinated, managed.",
+        "es-ES": "Use verbos de acción: desarrollé, implementé, coordiné, gestioné.",
     },
     "analysis.insights.improvements.relevant_links": {
-        "pt-BR": "Adicione links para LinkedIn, GitHub ou portfólio",
-        "en-US": "Add links to LinkedIn, GitHub or portfolio",
-        "es-ES": "Agregue enlaces a LinkedIn, GitHub o portafolio",
+        "pt-BR": "Adicione links para LinkedIn, GitHub ou portfólio.",
+        "en-US": "Add links to LinkedIn, GitHub or portfolio.",
+        "es-ES": "Agregue enlaces a LinkedIn, GitHub o portafolio.",
     },
     "analysis.insights.improvements.improve_summary": {
-        "pt-BR": "Resumo curto. Inclua anos de experiência e área de atuação",
-        "en-US": "Short summary. Include years of experience and focus area",
-        "es-ES": "Resumen corto. Incluya años de experiencia y área de enfoque",
+        "pt-BR": "Resumo curto. Inclua anos de experiência e área de atuação.",
+        "en-US": "Short summary. Include years of experience and focus area.",
+        "es-ES": "Resumen corto. Incluya años de experiencia y área de enfoque.",
     },
     "analysis.insights.improvements.ats_keywords": {
-        "pt-BR": "Inclua palavras-chave da vaga para passar em ATS",
-        "en-US": "Include job keywords to pass ATS screening",
-        "es-ES": "Incluya palabras clave del trabajo para pasar ATS",
+        "pt-BR": "Inclua palavras-chave da vaga para passar em ATS.",
+        "en-US": "Include job keywords to pass ATS screening.",
+        "es-ES": "Incluya palabras clave del trabajo para pasar ATS.",
     },
 }
 

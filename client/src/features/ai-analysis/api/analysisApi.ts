@@ -11,6 +11,14 @@ export type ImprovementItemApi = InsightItemApi & {
   priority?: 'high' | 'medium' | 'low';
 };
 
+export type RecommendationItemApi = ImprovementItemApi & {
+  example_key?: string;
+  example_params?: Record<string, string>;
+  action_type?: string;
+  section?: string;
+  field_target?: string;
+};
+
 export type AnalysisPayload = {
   id: string;
   resumeId: string;
@@ -26,7 +34,7 @@ export type AnalysisPayload = {
     strengths: InsightItemApi[];
     improvements: ImprovementItemApi[];
   };
-  recommendations?: unknown[];
+  recommendations?: RecommendationItemApi[];
   metadata: {
     modelName: string;
     modelVersion: string;
