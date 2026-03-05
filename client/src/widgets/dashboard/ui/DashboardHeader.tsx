@@ -24,7 +24,7 @@ export function DashboardHeader({ userName }: Props) {
       <div className="sr-dash-header__actions">
         <Button
           variant="primary"
-          onClick={() => navigate('/protected/resumes')}
+          onClick={() => navigate('/protected/resumes?create=1')}
         >
           <i className="fa-solid fa-plus" aria-hidden />
           {t('dashboard.newResume')}

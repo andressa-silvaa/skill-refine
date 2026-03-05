@@ -44,6 +44,7 @@
   color: var(--sr-ink-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
 }
 
 .sr-dash-stat-card__value-row {
@@ -58,6 +59,7 @@
   font-weight: 700;
   color: var(--sr-ink);
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .sr-dash-stat-card__badge {
@@ -98,4 +100,19 @@
   font-size: 0.78rem;
   color: var(--sr-ink-muted);
   margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .sr-dash-stat-card {
+    padding: 16px;
+  }
+
+  .sr-dash-stat-card__inner {
+    gap: 10px;
+  }
+
+  .sr-dash-stat-card__value {
+    font-size: 1.3rem;
+  }
 }

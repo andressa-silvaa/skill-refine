@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -32,9 +32,19 @@ export function ResumesPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const resumes = useResumes();
+  const resumes = useResumes({
+    query: searchParams.get('q') ?? '',
+    sort: ((searchParams.get('sort') as 'recent' | 'oldest' | 'score' | 'name' | null) ?? 'recent'),
+    view: ((searchParams.get('view') as 'grid' | 'list' | null) ?? 'grid'),
+    filters: {
+      status: ((searchParams.get('status') as 'all' | 'draft' | 'complete' | 'analyzing' | null) ?? 'all'),
+      score: ((searchParams.get('score') as 'all' | 'none' | '0-50' | '51-70' | '71-85' | '86-100' | null) ?? 'all'),
+      updated: ((searchParams.get('updated') as 'all' | '7d' | '30d' | null) ?? 'all'),
+    },
+  });
   const { state: pageState, actions: pageActions } = useResumesPageState();
   const handledApplyContextRef = useRef<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const resumeIds = useMemo(() => resumes.viewModels.map((vm) => vm.id), [resumes.viewModels]);
   const analysisByResumeId = useLatestAnalyses(resumeIds);
@@ -78,9 +88,36 @@ export function ResumesPage() {
     }
   }, [resumes.error, t]);
 
-  const openFilters = useCallback(() => {
-    notify.info(t('resume.filtersComingSoon'));
-  }, [t]);
+  useEffect(() => {
+    const currentQueryString = searchParams.toString();
+    const nextParams = new URLSearchParams(searchParams);
+    const setOrDelete = (key: string, value: string | null | undefined, fallback = '') => {
+      const normalized = (value ?? '').trim();
+      if (!normalized || normalized === fallback) {
+        nextParams.delete(key);
+        return;
+      }
+      nextParams.set(key, normalized);
+    };
+    setOrDelete('q', resumes.query, '');
+    setOrDelete('sort', resumes.sort, 'recent');
+    setOrDelete('view', resumes.view, 'grid');
+    setOrDelete('status', resumes.filters.status, 'all');
+    setOrDelete('score', resumes.filters.score, 'all');
+    setOrDelete('updated', resumes.filters.updated, 'all');
+    if (nextParams.toString() !== currentQueryString) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [
+    resumes.filters.score,
+    resumes.filters.status,
+    resumes.filters.updated,
+    resumes.query,
+    resumes.sort,
+    resumes.view,
+    searchParams,
+    setSearchParams,
+  ]);
 
   const onEdit = useCallback(
     async (
@@ -112,6 +149,16 @@ export function ResumesPage() {
     },
     [pageActions, resumes.fetchById, t]
   );
+
+  useEffect(() => {
+    const createResume = searchParams.get('create');
+    if (createResume !== '1') return;
+
+    pageActions.openCreate();
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('create');
+    setSearchParams(nextParams, { replace: true });
+  }, [pageActions, searchParams, setSearchParams]);
 
   useEffect(() => {
     const editResumeId = searchParams.get('editResumeId');
@@ -250,14 +297,34 @@ export function ResumesPage() {
           onViewChange={resumes.setView}
           sort={resumes.sort}
           onSortChange={resumes.setSort}
-          onOpenFilters={openFilters}
+          filtersOpen={filtersOpen}
+          onToggleFilters={() => setFiltersOpen((v) => !v)}
+          statusFilter={resumes.filters.status}
+          scoreFilter={resumes.filters.score}
+          updatedFilter={resumes.filters.updated}
+          onStatusFilterChange={resumes.setStatusFilter}
+          onScoreFilterChange={resumes.setScoreFilter}
+          onUpdatedFilterChange={resumes.setUpdatedFilter}
+          onClearFilters={resumes.clearFilters}
+          activeFiltersCount={
+            Number(resumes.filters.status !== 'all') +
+            Number(resumes.filters.score !== 'all') +
+            Number(resumes.filters.updated !== 'all')
+          }
         />
 
         <section className="sr-resumes__content">
           {resumes.loading ? (
             <ResumesSkeleton view={resumes.view} />
           ) : resumes.viewModels.length === 0 ? (
-            <ResumesEmpty onCreate={pageActions.openCreate} />
+            <ResumesEmpty
+              onCreate={pageActions.openCreate}
+              hasActiveFilters={resumes.hasActiveFilters || resumes.query.trim().length > 0}
+              onClearFilters={() => {
+                resumes.clearFilters();
+                resumes.setQuery('');
+              }}
+            />
           ) : resumes.view === 'grid' ? (
             <ResumesGrid
               items={resumes.viewModels}

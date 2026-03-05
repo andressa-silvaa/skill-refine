@@ -2,7 +2,6 @@ export { DashboardHeader } from './ui/DashboardHeader';
 export { DashboardStatsGrid } from './ui/DashboardStatsGrid';
 export { DashboardChartsSection } from './ui/DashboardChartsSection';
 export { DashboardBottomSection } from './ui/DashboardBottomSection';
-export { useDashboardMock } from './model/useDashboardMock';
 export type {
   DashboardData,
   DashboardSummary,
@@ -10,4 +9,4 @@ export type {
   Competency,
   RecentResume,
   AiInsight,
-} from './model/useDashboardMock';
+} from './model/types';

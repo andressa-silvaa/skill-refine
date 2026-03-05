@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { Competency, ScorePoint } from '../model/useDashboardMock';
+import type { Competency, ScorePoint } from '../model/types';
 import { DashboardSectionCard } from './DashboardSectionCard';
 import { DashboardScoreChart } from './DashboardScoreChart';
 import { DashboardCompetencies } from './DashboardCompetencies';
@@ -18,11 +18,19 @@ export function DashboardChartsSection({ scoreEvolution, competencies }: Props) 
   return (
     <div className="sr-dash-charts-section">
       <DashboardSectionCard title={t('dashboard.sections.scoreEvolution')}>
-        <DashboardScoreChart data={scoreEvolution} />
+        {scoreEvolution.length === 0 ? (
+          <p className="sr-dash-chart-empty">{t('dashboard.sections.noChartData')}</p>
+        ) : (
+          <DashboardScoreChart data={scoreEvolution} />
+        )}
       </DashboardSectionCard>
 
       <DashboardSectionCard title={t('dashboard.sections.competencies')}>
-        <DashboardCompetencies data={competencies} />
+        {competencies.length === 0 ? (
+          <p className="sr-dash-chart-empty">{t('dashboard.sections.noCompetenciesData')}</p>
+        ) : (
+          <DashboardCompetencies data={competencies} />
+        )}
       </DashboardSectionCard>
     </div>
   );

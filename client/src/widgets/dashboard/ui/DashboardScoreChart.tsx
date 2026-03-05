@@ -1,4 +1,4 @@
-import type { ScorePoint } from '../model/useDashboardMock';
+import type { ScorePoint } from '../model/types';
 
 import './DashboardScoreChart.css';
 
@@ -12,6 +12,10 @@ const PAD_X = 8;
 const PAD_Y = 16;
 
 function getPoints(data: ScorePoint[]): { x: number; y: number }[] {
+  if (data.length === 0) return [];
+  if (data.length === 1) {
+    return [{ x: CHART_W / 2, y: CHART_H / 2 }];
+  }
   const minScore = Math.min(...data.map((d) => d.score)) - 10;
   const maxScore = Math.max(...data.map((d) => d.score)) + 5;
   const range = maxScore - minScore || 1;

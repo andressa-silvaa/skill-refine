@@ -17,10 +17,13 @@
   font-weight: 700;
   color: var(--sr-ink);
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .sr-dash-section-card__action {
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .sr-dash-section-card__action button,
@@ -34,6 +37,8 @@
   padding: 4px 0;
   text-decoration: none;
   transition: opacity 0.15s;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .sr-dash-section-card__action button:hover,
@@ -44,4 +49,28 @@
 .sr-dash-section-card__body {
   padding: 16px 20px;
   flex: 1;
+}
+
+.sr-dash-list-empty {
+  margin: 0;
+  color: var(--sr-ink-muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .sr-dash-section-card__header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .sr-dash-section-card__action {
+    width: 100%;
+  }
+
+  .sr-dash-section-card__action button,
+  .sr-dash-section-card__action a {
+    padding: 0;
+  }
 }

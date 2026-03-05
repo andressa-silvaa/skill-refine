@@ -1,4 +1,4 @@
-import type { Competency } from '../model/useDashboardMock';
+import type { Competency } from '../model/types';
 
 import './DashboardCompetencies.css';
 

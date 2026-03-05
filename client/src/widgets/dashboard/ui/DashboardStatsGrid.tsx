@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import type { DashboardSummary } from '../model/useDashboardMock';
+import type { DashboardSummary } from '../model/types';
 import { DashboardStatCard } from './DashboardStatCard';
 
 import './DashboardStatsGrid.css';
@@ -34,8 +34,8 @@ export function DashboardStatsGrid({ summary }: Props) {
         icon="fa-solid fa-star"
         iconColor="#f59e0b"
         label={t('dashboard.stats.averageScore')}
-        value={summary.averageScore}
-        badge={`+${summary.averageScoreDelta}%`}
+        value={summary.averageScore ?? '-'}
+        badge={typeof summary.averageScoreDelta === 'number' ? `${summary.averageScoreDelta > 0 ? '+' : ''}${summary.averageScoreDelta}%` : undefined}
         badgeTone="success"
       />
       <DashboardStatCard

@@ -1,18 +1,19 @@
 import { useTranslation } from 'react-i18next';
 
-import type { RecentResume } from '../model/useDashboardMock';
+import type { RecentResume } from '../model/types';
 
 import './RecentResumeItem.css';
 
 type Props = {
   item: RecentResume;
+  onClick?: () => void;
 };
 
-export function RecentResumeItem({ item }: Props) {
+export function RecentResumeItem({ item, onClick }: Props) {
   const { t } = useTranslation();
 
   return (
-    <div className="sr-dash-resume-item">
+    <button className="sr-dash-resume-item" type="button" onClick={onClick}>
       <div className="sr-dash-resume-item__icon">
         <i className="fa-regular fa-file-lines" aria-hidden />
       </div>
@@ -30,6 +31,6 @@ export function RecentResumeItem({ item }: Props) {
         )}
       </div>
       <i className="fa-solid fa-chevron-right sr-dash-resume-item__arrow" aria-hidden />
-    </div>
+    </button>
   );
 }

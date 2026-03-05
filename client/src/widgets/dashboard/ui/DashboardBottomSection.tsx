@@ -1,4 +1,4 @@
-import type { AiInsight, RecentResume } from '../model/useDashboardMock';
+import type { AiInsight, RecentResume } from '../model/types';
 import { DashboardInsights } from './DashboardInsights';
 import { DashboardRecentResumes } from './DashboardRecentResumes';
 

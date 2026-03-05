@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-import type { AiInsight } from '../model/useDashboardMock';
+import type { AiInsight } from '../model/types';
 import { DashboardSectionCard } from './DashboardSectionCard';
 import { InsightItem } from './InsightItem';
 
@@ -14,7 +14,16 @@ export function DashboardInsights({ items }: Props) {
   const navigate = useNavigate();
 
   const action = (
-    <button onClick={() => navigate('/protected/ai-analysis')}>
+    <button
+      onClick={() => {
+        const resumeId = items[0]?.resumeId;
+        if (resumeId) {
+          navigate(`/protected/ai-analysis?resumeId=${encodeURIComponent(resumeId)}`);
+          return;
+        }
+        navigate('/protected/ai-analysis');
+      }}
+    >
       {t('dashboard.actions.analyze')}
     </button>
   );
@@ -24,9 +33,23 @@ export function DashboardInsights({ items }: Props) {
       title={t('dashboard.sections.aiInsights')}
       action={action}
     >
-      {items.map((item) => (
-        <InsightItem key={item.id} item={item} />
-      ))}
+      {items.length === 0 ? (
+        <p className="sr-dash-list-empty">{t('dashboard.sections.noInsights')}</p>
+      ) : (
+        items.map((item) => (
+          <InsightItem
+            key={item.id}
+            item={item}
+            onClick={() => {
+              if (item.resumeId) {
+                navigate(`/protected/ai-analysis?resumeId=${encodeURIComponent(item.resumeId)}`);
+                return;
+              }
+              navigate('/protected/ai-analysis');
+            }}
+          />
+        ))
+      )}
     </DashboardSectionCard>
   );
 }

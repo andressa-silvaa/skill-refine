@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { privacyApi, useSessionActions } from '@/entities/session';
 import { getApiErrorMessage } from '@/shared/api';
+import { downloadBlob } from '@/shared/lib/download/download';
 import { notify } from '@/shared/lib/notify';
 
 import './PrivacySettingsCard.css';
@@ -45,16 +46,19 @@ export function PrivacySettingsCard() {
               if (isExporting || isDeleting) return;
               setIsExporting(true);
               try {
-                await privacyApi.requestDataExport();
-                notify.success(t('toast.exportRequested'));
+                const dateLabel = new Date().toISOString().slice(0, 10);
+                const fallbackName = `skill-refine-data-export-${dateLabel}.json`;
+                const { blob, filename } = await privacyApi.downloadDataExport();
+                downloadBlob(blob, filename || fallbackName);
+                notify.success(t('settings.exportSuccess'));
               } catch (e) {
-                notify.error(getApiErrorMessage(e, t('errors.exportFailed')));
+                notify.error(getApiErrorMessage(e, t('settings.exportError')));
               } finally {
                 setIsExporting(false);
               }
             }}
           >
-            {t('settings.exportData')}
+            {isExporting ? t('settings.exportingData') : t('settings.exportData')}
           </button>
           <span className="sr-privacy__dot" aria-hidden>
             •

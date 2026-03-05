@@ -4,6 +4,13 @@
   gap: 16px;
 }
 
+.sr-dash-chart-empty {
+  margin: 0;
+  color: var(--sr-ink-muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
 @media (max-width: 768px) {
   .sr-dash-charts-section {
     grid-template-columns: 1fr;

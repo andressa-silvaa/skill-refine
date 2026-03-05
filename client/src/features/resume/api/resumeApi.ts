@@ -12,6 +12,17 @@ export type ResumeListResponse = {
   items: Resume[];
 };
 
+export type ResumeListParams = {
+  search?: string;
+  status?: 'draft' | 'complete' | 'analyzing' | 'published' | 'archived';
+  score_min?: number;
+  score_max?: number;
+  include_no_score?: boolean;
+  updated_from?: string;
+  updated_to?: string;
+  sort?: 'recent' | 'oldest' | 'score' | 'name';
+};
+
 export type ResumeDetailResponse = {
   id: string;
   name: string;
@@ -28,8 +39,18 @@ export type AiRewriteResponse = {
 };
 
 export const resumeApi = {
-  list() {
-    return apiRequest<ResumeListResponse>('/resumes/api/resumes');
+  list(params?: ResumeListParams) {
+    const searchParams = new URLSearchParams();
+    if (params?.search?.trim()) searchParams.set('search', params.search.trim());
+    if (params?.status) searchParams.set('status', params.status);
+    if (typeof params?.score_min === 'number') searchParams.set('score_min', String(params.score_min));
+    if (typeof params?.score_max === 'number') searchParams.set('score_max', String(params.score_max));
+    if (params?.include_no_score) searchParams.set('include_no_score', 'true');
+    if (params?.updated_from) searchParams.set('updated_from', params.updated_from);
+    if (params?.updated_to) searchParams.set('updated_to', params.updated_to);
+    if (params?.sort) searchParams.set('sort', params.sort);
+    const query = searchParams.toString();
+    return apiRequest<ResumeListResponse>(`/resumes/api/resumes${query ? `?${query}` : ''}`);
   },
   get(resumeId: string) {
     return apiRequest<ResumeDetailResponse>(`/resumes/api/resumes/${resumeId}`);

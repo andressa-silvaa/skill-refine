@@ -15,12 +15,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .sr-dash-competencies__label {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--sr-ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .sr-dash-competencies__value {

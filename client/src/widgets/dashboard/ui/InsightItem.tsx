@@ -1,14 +1,15 @@
-import type { AiInsight } from '../model/useDashboardMock';
+import type { AiInsight } from '../model/types';
 
 import './InsightItem.css';
 
 type Props = {
   item: AiInsight;
+  onClick?: () => void;
 };
 
-export function InsightItem({ item }: Props) {
+export function InsightItem({ item, onClick }: Props) {
   return (
-    <div className="sr-dash-insight-item">
+    <button type="button" className="sr-dash-insight-item" onClick={onClick}>
       <div className="sr-dash-insight-item__icon">
         <i className={item.icon} aria-hidden />
       </div>
@@ -16,6 +17,6 @@ export function InsightItem({ item }: Props) {
         <span className="sr-dash-insight-item__title">{item.title}</span>
         <p className="sr-dash-insight-item__desc">{item.description}</p>
       </div>
-    </div>
+    </button>
   );
 }

@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpResponse
 from rest_framework import permissions, status
 from rest_framework.parsers import JSONParser
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -25,6 +29,7 @@ from .serializers import (
     PreferencesSerializer,
     ProfileUpdateSerializer,
 )
+from .services import build_user_data_export, export_filename_for_today
 
 
 def _avatar_url(public_id: str | None) -> str | None:
@@ -209,6 +214,31 @@ class PreferencesView(APIView):
 
 class PrivacyExportView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        user_id = str(getattr(user, "id", "") or "")
+        if not user_id:
+            return _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
+
+        export_data = build_user_data_export(user_id)
+        if export_data is None:
+            return _error("not_found", "Usuário não encontrado.", status.HTTP_404_NOT_FOUND)
+
+        meta = request_meta(request)
+        OrmAuditLogger().log(
+            action="accounts.data_export_downloaded",
+            actor_user_id=user_id,
+            subject_user_id=user_id,
+            ip=meta.get("ip"),
+            user_agent=meta.get("user_agent"),
+            metadata={},
+        )
+
+        body = json.dumps(export_data, ensure_ascii=False, indent=2, cls=DjangoJSONEncoder)
+        response = HttpResponse(body.encode("utf-8"), content_type="application/json; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="{export_filename_for_today()}"'
+        return response
 
     def post(self, request):
         user = request.user
