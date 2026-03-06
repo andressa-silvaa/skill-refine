@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useResumes } from '@/features/resume';
 import { versionHistoryApi } from '../api/versionHistoryApi';
 
 import type { ResumeFilterOption, VersionHistoryItem } from './types';
@@ -20,19 +19,20 @@ function mapDtoToItem(dto: import('../api/versionHistoryApi').VersionHistoryItem
   };
 }
 
-export function useVersionHistory() {
-  const resumes = useResumes();
+type UseVersionHistoryParams = {
+  resumeOptions: ResumeFilterOption[];
+};
+
+export function useVersionHistory(params: UseVersionHistoryParams) {
+  const { resumeOptions: sourceResumeOptions } = params;
   const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
   const [versions, setVersions] = useState<VersionHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
 
   const resumeOptions: ResumeFilterOption[] = useMemo(() => {
-    return resumes.viewModels.map((vm) => ({
-      id: vm.id,
-      title: vm.name,
-    }));
-  }, [resumes.viewModels]);
+    return sourceResumeOptions;
+  }, [sourceResumeOptions]);
 
   const fetchVersions = useCallback(async (resumeId: string | null) => {
     setLoading(true);

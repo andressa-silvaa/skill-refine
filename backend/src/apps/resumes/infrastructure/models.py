@@ -196,3 +196,41 @@ class ResumeVersion(UUIDPrimaryKeyModel, TimestampedModel):
                 name="uniq_resume_version_number",
             ),
         ]
+
+
+class ResumeExportType(models.TextChoices):
+    PDF = "pdf", "pdf"
+
+
+class ResumeExportStatus(models.TextChoices):
+    PENDING = "pending", "pending"
+    RUNNING = "running", "running"
+    READY = "ready", "ready"
+    FAILED = "failed", "failed"
+
+
+class ResumeExport(UUIDPrimaryKeyModel, TimestampedModel):
+    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, db_column="resume_id")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id")
+    export_type = models.CharField(max_length=16, choices=ResumeExportType.choices, default=ResumeExportType.PDF)
+    fingerprint = models.CharField(max_length=128)
+    status = models.CharField(max_length=16, choices=ResumeExportStatus.choices, default=ResumeExportStatus.PENDING)
+    storage_path = models.CharField(max_length=500, blank=True, default="")
+    file_size_bytes = models.IntegerField(null=True, blank=True)
+    error_message = models.TextField(blank=True, default="")
+    metrics_json = models.JSONField(default=dict, blank=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "resume_exports"
+        indexes = [
+            models.Index(fields=["resume", "export_type", "status"], name="idx_resume_export_lookup"),
+            models.Index(fields=["user", "-created_at"], name="idx_resume_export_user_created"),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["resume", "export_type", "fingerprint"],
+                name="uniq_resume_export_fingerprint",
+            )
+        ]

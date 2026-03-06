@@ -1,13 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useResumes } from '@/features/resume';
 import { useLatestAnalyses } from '@/features/ai-analysis';
-import { getResumeThemeById } from '@/entities/resume';
-import type { BuilderStep } from '@/features/resume-builder';
-import { downloadBlob } from '@/shared/lib/download/download';
-import type { ResumeDraftPayload } from '@/features/resume';
 import { notify } from '@/shared/lib/notify';
 import { getApiErrorMessage } from '@/shared/api';
 import {
@@ -24,6 +20,10 @@ import { AppShell } from '@/widgets/app-shell';
 import { Modal, ProgressBar } from '@/shared/ui';
 
 import { useResumesPageState } from '../model/useResumesPageState';
+import { usePdfProgressEffect } from '../model/usePdfProgressEffect';
+import { useResumeCrudActions } from '../model/useResumeCrudActions';
+import { useResumePdfExport } from '../model/useResumePdfExport';
+import { useResumesUrlEffects } from '../model/useResumesUrlEffects';
 
 import '@/shared/ui/sr-controls/SrControls.css';
 import './ResumesPage.css';
@@ -43,7 +43,6 @@ export function ResumesPage() {
     },
   });
   const { state: pageState, actions: pageActions } = useResumesPageState();
-  const handledApplyContextRef = useRef<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const resumeIds = useMemo(() => resumes.viewModels.map((vm) => vm.id), [resumes.viewModels]);
@@ -64,23 +63,10 @@ export function ResumesPage() {
     [pageState.downloadLoadingId, resumes.viewModels]
   );
 
-  const pdfProgressRef = useRef(0);
-  useEffect(() => {
-    if (!pageState.downloadLoadingId) {
-      pageActions.setPdfProgress(0);
-      pdfProgressRef.current = 0;
-      return;
-    }
-    pageActions.setPdfProgress(8);
-    pdfProgressRef.current = 8;
-    const interval = window.setInterval(() => {
-      if (pdfProgressRef.current >= 92) return;
-      const step = 3 + Math.floor(Math.random() * 6);
-      pdfProgressRef.current = Math.min(92, pdfProgressRef.current + step);
-      pageActions.setPdfProgress(pdfProgressRef.current);
-    }, 450);
-    return () => window.clearInterval(interval);
-  }, [pageState.downloadLoadingId, pageActions.setPdfProgress]);
+  usePdfProgressEffect({
+    downloadLoadingId: pageState.downloadLoadingId,
+    setPdfProgress: pageActions.setPdfProgress,
+  });
 
   useEffect(() => {
     if (resumes.error) {
@@ -88,202 +74,44 @@ export function ResumesPage() {
     }
   }, [resumes.error, t]);
 
-  useEffect(() => {
-    const currentQueryString = searchParams.toString();
-    const nextParams = new URLSearchParams(searchParams);
-    const setOrDelete = (key: string, value: string | null | undefined, fallback = '') => {
-      const normalized = (value ?? '').trim();
-      if (!normalized || normalized === fallback) {
-        nextParams.delete(key);
-        return;
-      }
-      nextParams.set(key, normalized);
-    };
-    setOrDelete('q', resumes.query, '');
-    setOrDelete('sort', resumes.sort, 'recent');
-    setOrDelete('view', resumes.view, 'grid');
-    setOrDelete('status', resumes.filters.status, 'all');
-    setOrDelete('score', resumes.filters.score, 'all');
-    setOrDelete('updated', resumes.filters.updated, 'all');
-    if (nextParams.toString() !== currentQueryString) {
-      setSearchParams(nextParams, { replace: true });
-    }
-  }, [
-    resumes.filters.score,
-    resumes.filters.status,
-    resumes.filters.updated,
-    resumes.query,
-    resumes.sort,
-    resumes.view,
+  const {
+    onEdit,
+    onDuplicate,
+    onDelete,
+    closeDelete,
+    confirmDelete,
+    handleSaveDraft,
+    handleFinish,
+  } = useResumeCrudActions({
+    duplicateLoadingId: pageState.duplicateLoadingId,
+    deleteResumeId: pageState.deleteResumeId,
+    pageActions,
+    resumes,
+    t,
+  });
+
+  useResumesUrlEffects({
+    resumes,
     searchParams,
     setSearchParams,
-  ]);
-
-  const onEdit = useCallback(
-    async (
-      id: string,
-      options?: {
-        targetStep?: BuilderStep | null;
-        suggestedText?: string | null;
-      }
-    ) => {
-      pageActions.openEdit(id);
-      try {
-        const detail = await resumes.fetchById(id);
-        const theme = getResumeThemeById(detail.data.themeId);
-        pageActions.setEditContext({
-          data: {
-            ...detail.data,
-            themePaletteId: detail.data.themePaletteId || theme.defaultPaletteId,
-          },
-          status: detail.status,
-          lastStep: options?.targetStep ?? ((detail.lastStep as BuilderStep) ?? null),
-        });
-        if (options?.suggestedText?.trim()) {
-          notify.info(t('analysis.applyGuidedSuggestion', { text: options.suggestedText.trim() }));
-        }
-      } catch (err) {
-        notify.error(getApiErrorMessage(err, t('resume.errorEditFailed')));
-        pageActions.closeEdit();
-      }
+    onOpenCreate: pageActions.openCreate,
+    onEditFromQuery: (id, options) => {
+      void onEdit(id, options);
     },
-    [pageActions, resumes.fetchById, t]
-  );
+  });
 
-  useEffect(() => {
-    const createResume = searchParams.get('create');
-    if (createResume !== '1') return;
-
-    pageActions.openCreate();
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete('create');
-    setSearchParams(nextParams, { replace: true });
-  }, [pageActions, searchParams, setSearchParams]);
-
-  useEffect(() => {
-    const editResumeId = searchParams.get('editResumeId');
-    if (!editResumeId) return;
-
-    const targetStepParam = searchParams.get('targetStep');
-    const suggestedText = searchParams.get('suggestedText');
-    const allSteps: BuilderStep[] = ['theme', 'basic', 'contact', 'experience', 'education', 'skills', 'languages', 'summary', 'review'];
-    const targetStep = targetStepParam && allSteps.includes(targetStepParam as BuilderStep)
-      ? (targetStepParam as BuilderStep)
-      : null;
-
-    const contextKey = `${editResumeId}:${targetStep ?? ''}:${suggestedText ?? ''}`;
-    if (handledApplyContextRef.current === contextKey) return;
-    handledApplyContextRef.current = contextKey;
-
-    void onEdit(editResumeId, {
-      targetStep,
-      suggestedText,
-    });
-
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete('editResumeId');
-    nextParams.delete('targetStep');
-    nextParams.delete('fieldTarget');
-    nextParams.delete('improvementKey');
-    nextParams.delete('suggestedText');
-    setSearchParams(nextParams, { replace: true });
-  }, [onEdit, searchParams, setSearchParams]);
-
-  const onDuplicate = useCallback(
-    (id: string) => {
-      if (pageState.duplicateLoadingId === id) return;
-      pageActions.startDuplicate(id);
-      resumes
-        .duplicateResume(id)
-        .then(() => notify.success(t('resume.toastDuplicated')))
-        .catch((err) => notify.error(getApiErrorMessage(err, t('resume.errorDuplicateFailed'))))
-        .finally(() => pageActions.finishDuplicate());
-    },
-    [pageState.duplicateLoadingId, pageActions, resumes.duplicateResume, t]
-  );
-
-  const onExport = useCallback(
-    (id: string) => {
-      if (pageState.downloadLoadingId === id) return;
-      pageActions.startDownload(id);
-      const vm = resumes.viewModels.find((item) => item.id === id);
-      const baseName = vm?.name?.trim() || 'Curriculo';
-      const dateLabel = new Date().toISOString().slice(0, 10);
-      const fallbackName = `Curriculo_${baseName}_${dateLabel}.pdf`;
-      resumes
-        .downloadPdf(id)
-        .then(({ blob, filename }) => {
-          downloadBlob(blob, filename || fallbackName);
-          notify.success(t('resume.toastDownloadDone'));
-          pageActions.setPdfProgress(100);
-        })
-        .catch((err) => {
-          notify.error(getApiErrorMessage(err, t('resume.errorPdfFailed')));
-        })
-        .finally(() => {
-          window.setTimeout(() => pageActions.finishDownload(), 450);
-        });
-    },
-    [pageState.downloadLoadingId, pageActions, resumes.downloadPdf, resumes.viewModels, t]
-  );
-
-  const onDelete = useCallback((id: string) => pageActions.openDelete(id), [pageActions]);
-  const closeDelete = useCallback(() => pageActions.closeDelete(), [pageActions]);
-
-  const confirmDelete = useCallback(() => {
-    if (!pageState.deleteResumeId) return;
-    pageActions.startDeleting();
-    resumes
-      .deleteResume(pageState.deleteResumeId)
-      .then(() => {
-        pageActions.closeDelete();
-        notify.success(t('resume.toastDeleted'));
-      })
-      .catch((err) => {
-        notify.error(getApiErrorMessage(err, t('resume.errorDeleteFailed')));
-      })
-      .finally(() => pageActions.finishDeleting());
-  }, [pageState.deleteResumeId, pageActions, resumes.deleteResume, t]);
-
-  const handleSaveDraft = useCallback(
-    async (data: { payload: ResumeDraftPayload; resumeId?: string | null }) => {
-      const { payload, resumeId } = data;
-      pageActions.startSavingDraft();
-      try {
-        const resume = resumeId
-          ? await resumes.updateDraft(resumeId, payload)
-          : await resumes.createDraft(payload);
-        notify.success(t('resume.toastDraftSaved'));
-        return resume;
-      } catch (err) {
-        notify.error(getApiErrorMessage(err, t('resume.errorSaveDraftFailed')));
-        throw err;
-      } finally {
-        pageActions.finishSavingDraft();
-      }
-    },
-    [pageActions, resumes.updateDraft, resumes.createDraft, t]
-  );
-
-  const handleFinish = useCallback(
-    async (data: { payload: ResumeDraftPayload; resumeId?: string | null }) => {
-      const { payload, resumeId } = data;
-      pageActions.startSubmitting();
-      try {
-        const resume = resumeId
-          ? await resumes.updateDraft(resumeId, payload)
-          : await resumes.createDraft(payload);
-        notify.success(resumeId ? t('resume.toastSaved') : t('resume.toastCreated'));
-        return resume;
-      } catch (err) {
-        notify.error(getApiErrorMessage(err, t('resume.errorSaveFailed')));
-        throw err;
-      } finally {
-        pageActions.finishSubmitting();
-      }
-    },
-    [pageActions, resumes.updateDraft, resumes.createDraft, t]
-  );
+  const { onExport } = useResumePdfExport({
+    downloadLoadingId: pageState.downloadLoadingId,
+    startDownload: pageActions.startDownload,
+    finishDownload: pageActions.finishDownload,
+    setPdfStage: pageActions.setPdfStage,
+    setPdfProgress: pageActions.setPdfProgress,
+    viewModels: resumes.viewModels.map((vm) => ({ id: vm.id, name: vm.name })),
+    startPdfExport: resumes.startPdfExport,
+    getPdfExportStatus: resumes.getPdfExportStatus,
+    downloadPdfExport: resumes.downloadPdfExport,
+    t,
+  });
 
   return (
     <AppShell>
@@ -388,9 +216,13 @@ export function ResumesPage() {
           open={Boolean(pageState.downloadLoadingId)}
           title={t('resume.pdfModalTitle')}
           subtitle={
-            pdfVm?.name
-              ? t('resume.pdfModalPreparingName', { name: pdfVm.name })
-              : t('resume.pdfModalPreparing')
+            pageState.pdfStage === 'downloading'
+              ? pdfVm?.name
+                ? t('resume.pdfModalDownloadingName', { name: pdfVm.name })
+                : t('resume.pdfModalDownloading')
+              : pdfVm?.name
+                ? t('resume.pdfModalPreparingName', { name: pdfVm.name })
+                : t('resume.pdfModalPreparing')
           }
           onClose={pageActions.finishDownload}
           width={520}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { resumeApi, type ResumeDraftPayload } from '../api/resumeApi';
@@ -13,6 +13,7 @@ import type {
 } from './types';
 
 const QUERY_DEBOUNCE_MS = 260;
+const LIST_CACHE_TTL_MS = 15_000;
 
 type ResumeFiltersState = {
   status: ResumeStatusFilter;
@@ -56,6 +57,9 @@ function updatedFilterToRange(updated: ResumeUpdatedFilter) {
 }
 
 export function useResumes(init?: UseResumesInit) {
+  const listCacheRef = useRef<Map<string, { at: number; items: Resume[] }>>(new Map());
+  const requestSeqRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
   const { t } = useTranslation();
   const [state, setState] = useState<State>({
     items: [],
@@ -115,11 +119,30 @@ export function useResumes(init?: UseResumesInit) {
   }, [state.filters.score, state.filters.status, state.filters.updated, state.query, state.sort]);
 
   const reload = useCallback(async () => {
+    const cacheKey = JSON.stringify(listParams);
+    const now = Date.now();
+    const cached = listCacheRef.current.get(cacheKey);
+    if (cached && now - cached.at <= LIST_CACHE_TTL_MS) {
+      setState((s) => ({ ...s, items: cached.items, loading: false, error: null }));
+      return;
+    }
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const reqSeq = requestSeqRef.current + 1;
+    requestSeqRef.current = reqSeq;
+
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
-      const res = await resumeApi.list(listParams);
-      setState((s) => ({ ...s, items: res.items ?? [], loading: false }));
+      const res = await resumeApi.list(listParams, { signal: controller.signal });
+      if (requestSeqRef.current !== reqSeq) return;
+      const items = res.items ?? [];
+      listCacheRef.current.set(cacheKey, { at: now, items });
+      setState((s) => ({ ...s, items, loading: false }));
     } catch (err) {
+      if ((err as { name?: string })?.name === 'AbortError') return;
+      if (requestSeqRef.current !== reqSeq) return;
       setState((s) => ({ ...s, loading: false, error: err }));
       throw err;
     }
@@ -156,12 +179,30 @@ export function useResumes(init?: UseResumesInit) {
     return resumeApi.downloadPdf(resumeId);
   }, []);
 
+  const startPdfExport = useCallback(async (resumeId: string) => {
+    return resumeApi.startPdfExport(resumeId);
+  }, []);
+
+  const getPdfExportStatus = useCallback(async (resumeId: string, exportId: string) => {
+    return resumeApi.getPdfExportStatus(resumeId, exportId);
+  }, []);
+
+  const downloadPdfExport = useCallback(async (resumeId: string, exportId: string) => {
+    return resumeApi.downloadPdf(resumeId, exportId);
+  }, []);
+
   useEffect(() => {
     const id = window.setTimeout(() => {
       void reload().catch(() => null);
     }, QUERY_DEBOUNCE_MS);
     return () => window.clearTimeout(id);
   }, [reload]);
+
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, []);
 
   const hasActiveFilters =
     state.filters.status !== 'all' || state.filters.score !== 'all' || state.filters.updated !== 'all';
@@ -193,5 +234,8 @@ export function useResumes(init?: UseResumesInit) {
     deleteResume,
     duplicateResume,
     downloadPdf,
+    startPdfExport,
+    getPdfExportStatus,
+    downloadPdfExport,
   };
 }

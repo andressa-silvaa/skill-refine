@@ -17,13 +17,16 @@ from shared.api.responses import (
 
 
 class TestCanonicalErrorCode(TestCase):
-    def test_strips_and_uppercases(self):
-        assert canonical_error_code("  invalid_credentials  ") == "INVALID_CREDENTIALS"
-        assert canonical_error_code("not_found") == "NOT_FOUND"
-
-    def test_empty_or_none(self):
-        assert canonical_error_code("") == ""
-        assert canonical_error_code(None) == ""
+    def test_normalization_cases(self):
+        cases = [
+            ("  invalid_credentials  ", "INVALID_CREDENTIALS"),
+            ("not_found", "NOT_FOUND"),
+            ("", ""),
+            (None, ""),
+        ]
+        for raw, expected in cases:
+            with self.subTest(raw=raw):
+                assert canonical_error_code(raw) == expected
 
 
 class TestErrorResponse(TestCase):
@@ -69,20 +72,17 @@ class TestFieldErrorResponse(TestCase):
 
 
 class TestExtractErrorMessage(TestCase):
-    def test_none(self):
-        assert extract_error_message(None) == "Valor inválido."
-
-    def test_empty_list(self):
-        assert extract_error_message([]) == "Valor inválido."
-
-    def test_list_first_element(self):
-        assert extract_error_message(["Campo obrigatório."]) == "Campo obrigatório."
-
-    def test_dict_recursive(self):
-        assert extract_error_message({"email": ["E-mail inválido."]}) == "E-mail inválido."
-
-    def test_string(self):
-        assert extract_error_message("Erro direto") == "Erro direto"
+    def test_extraction_cases(self):
+        cases = [
+            (None, "Valor inválido."),
+            ([], "Valor inválido."),
+            (["Campo obrigatório."], "Campo obrigatório."),
+            ({"email": ["E-mail inválido."]}, "E-mail inválido."),
+            ("Erro direto", "Erro direto"),
+        ]
+        for raw, expected in cases:
+            with self.subTest(raw=raw):
+                assert extract_error_message(raw) == expected
 
 
 class TestSerializerFieldErrors(TestCase):

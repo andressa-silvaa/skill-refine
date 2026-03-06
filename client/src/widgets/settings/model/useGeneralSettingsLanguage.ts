@@ -26,7 +26,7 @@ export function useGeneralSettingsLanguage(options: Array<{ value: string; label
     acceptServer(preferences.language);
     applyLanguagePreferences({ language: preferences.language });
     void i18n.changeLanguage(preferences.language);
-  }, [acceptServer, isEditing, preferences?.language]);
+  }, [acceptServer, isEditing, preferences]);
 
   useEffect(() => {
     return () => {

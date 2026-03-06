@@ -38,8 +38,21 @@ export type AiRewriteResponse = {
   fromCache?: boolean;
 };
 
+export type ResumePdfExportStatus = 'pending' | 'ready' | 'failed';
+
+export type ResumePdfExportResponse = {
+  status: ResumePdfExportStatus;
+  exportId: string;
+  fingerprint?: string;
+  filename?: string;
+  downloadPath?: string;
+  cacheHit?: boolean;
+  retryAfterSeconds?: number;
+  errorMessage?: string;
+};
+
 export const resumeApi = {
-  list(params?: ResumeListParams) {
+  list(params?: ResumeListParams, init?: RequestInit) {
     const searchParams = new URLSearchParams();
     if (params?.search?.trim()) searchParams.set('search', params.search.trim());
     if (params?.status) searchParams.set('status', params.status);
@@ -50,7 +63,7 @@ export const resumeApi = {
     if (params?.updated_to) searchParams.set('updated_to', params.updated_to);
     if (params?.sort) searchParams.set('sort', params.sort);
     const query = searchParams.toString();
-    return apiRequest<ResumeListResponse>(`/resumes/api/resumes${query ? `?${query}` : ''}`);
+    return apiRequest<ResumeListResponse>(`/resumes/api/resumes${query ? `?${query}` : ''}`, init);
   },
   get(resumeId: string) {
     return apiRequest<ResumeDetailResponse>(`/resumes/api/resumes/${resumeId}`);
@@ -91,8 +104,17 @@ export const resumeApi = {
       method: 'POST',
     });
   },
-  downloadPdf(resumeId: string) {
-    return apiRequestBlob(`/resumes/api/resumes/${resumeId}/pdf`);
+  downloadPdf(resumeId: string, exportId?: string) {
+    const query = exportId ? `?export_id=${encodeURIComponent(exportId)}` : '';
+    return apiRequestBlob(`/resumes/api/resumes/${resumeId}/pdf${query}`);
+  },
+  startPdfExport(resumeId: string) {
+    return apiRequest<ResumePdfExportResponse>(`/resumes/api/resumes/${resumeId}/pdf/start`, {
+      method: 'POST',
+    });
+  },
+  getPdfExportStatus(resumeId: string, exportId: string) {
+    return apiRequest<ResumePdfExportResponse>(`/resumes/api/resumes/${resumeId}/pdf/status/${exportId}`);
   },
   getPdfToken(resumeId: string) {
     return apiRequest<{ token: string }>(`/resumes/api/resumes/${resumeId}/pdf-token`);

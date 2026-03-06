@@ -5,6 +5,8 @@ from datetime import timedelta
 from statistics import mean
 from typing import Any
 
+from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Avg, OuterRef, Q, Subquery
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
@@ -292,4 +294,23 @@ def get_dashboard_summary(user_id: str) -> dict[str, Any]:
         "recentResumes": recent_resumes,
         "aiInsights": _build_recurring_insights(latest_done_analyses),
     }
+
+
+def get_dashboard_summary_cached(user_id: str) -> dict[str, Any]:
+    ttl_seconds = int(getattr(settings, "DASHBOARD_SUMMARY_CACHE_TTL_SECONDS", 45))
+    if ttl_seconds <= 0:
+        return get_dashboard_summary(user_id)
+
+    cache_key = f"dashboard:summary:{user_id}"
+    cached = cache.get(cache_key)
+    if isinstance(cached, dict):
+        return cached
+
+    data = get_dashboard_summary(user_id)
+    cache.set(cache_key, data, timeout=ttl_seconds)
+    return data
+
+
+def invalidate_dashboard_summary_cache(user_id: str) -> None:
+    cache.delete(f"dashboard:summary:{user_id}")
 

@@ -84,19 +84,21 @@ class ResumeListPaginationTest(TestCase):
     def test_get_limit_invalid_returns_400(self):
         """limit=0, limit=101, limit=abc → 400 validation_error."""
         for query in [{"limit": "0"}, {"limit": "101"}, {"limit": "abc"}]:
-            resp = self.client.get(self.url, query)
-            self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-            data = resp.json()
-            self.assertIn("error_code", data)
-            self.assertIn("message", data)
+            with self.subTest(query=query):
+                resp = self.client.get(self.url, query)
+                self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+                data = resp.json()
+                self.assertIn("error_code", data)
+                self.assertIn("message", data)
 
     def test_get_offset_invalid_returns_400(self):
         """offset=-1 or offset=abc → 400."""
         for query in [{"offset": "-1"}, {"offset": "abc"}, {"limit": "10", "offset": "-1"}]:
-            resp = self.client.get(self.url, query)
-            self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-            data = resp.json()
-            self.assertIn("error_code", data)
+            with self.subTest(query=query):
+                resp = self.client.get(self.url, query)
+                self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+                data = resp.json()
+                self.assertIn("error_code", data)
 
     def test_get_offset_beyond_total(self):
         """offset beyond total → items=[], has_next=False."""

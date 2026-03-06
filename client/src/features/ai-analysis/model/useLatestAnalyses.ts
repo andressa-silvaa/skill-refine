@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useSession } from '@/entities/session';
 
-import { getLatestAnalysis } from '../api/analysisApi';
+import { getLatestAnalysesBatch } from '../api/analysisApi';
 import type { AnalysisPayload } from '../api/analysisApi';
 
 export type LatestAnalysisInfo = {
@@ -19,6 +19,7 @@ export type LatestAnalysisInfo = {
 export function useLatestAnalyses(resumeIds: string[]): Map<string, LatestAnalysisInfo> {
   const { status: sessionStatus } = useSession();
   const [map, setMap] = useState<Map<string, LatestAnalysisInfo>>(new Map());
+  const cacheRef = useRef<Map<string, { at: number; map: Map<string, LatestAnalysisInfo> }>>(new Map());
 
   const ids = useMemo(() => resumeIds.slice(), [resumeIds]);
 
@@ -28,31 +29,31 @@ export function useLatestAnalyses(resumeIds: string[]): Map<string, LatestAnalys
       return;
     }
 
-    const fetchAll = async () => {
-      const results = await Promise.all(
-        ids.map(async (id) => {
-          try {
-            const res = await getLatestAnalysis(id);
-            if (!res.item) return { id, info: null };
-            return {
-              id,
-              info: {
-                status: res.item.status,
-                score: res.item.score,
-                updatedAt: res.item.updatedAt,
-              } as LatestAnalysisInfo,
-            };
-          } catch {
-            return { id, info: null };
-          }
-        })
-      );
+    const key = ids.join(',');
+    const now = Date.now();
+    const cached = cacheRef.current.get(key);
+    if (cached && now - cached.at <= 15_000) {
+      setMap(new Map(cached.map));
+      return;
+    }
 
-      const next = new Map<string, LatestAnalysisInfo>();
-      for (const { id, info } of results) {
-        if (info) next.set(id, info);
+    const fetchAll = async () => {
+      try {
+        const res = await getLatestAnalysesBatch(ids);
+        const next = new Map<string, LatestAnalysisInfo>();
+        Object.entries(res.items || {}).forEach(([id, item]) => {
+          if (!item) return;
+          next.set(id, {
+            status: item.status,
+            score: item.score,
+            updatedAt: item.updatedAt,
+          });
+        });
+        cacheRef.current.set(key, { at: now, map: new Map(next) });
+        setMap(next);
+      } catch {
+        setMap(new Map());
       }
-      setMap(next);
     };
 
     void fetchAll();

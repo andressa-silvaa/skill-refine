@@ -7,7 +7,6 @@ import type {
   AnalysisStatus,
   ImprovementInsightItem,
   InsightItem,
-  MetricBadgeTone,
   ResumeOption,
 } from './types';
 

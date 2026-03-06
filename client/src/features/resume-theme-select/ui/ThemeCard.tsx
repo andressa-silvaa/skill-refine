@@ -16,7 +16,6 @@ export function ThemeCard({ theme, isSelected, onSelect, size = 'default' }: Pro
     <Card
       className={`sr-theme-card sr-theme-card--${size}${isSelected ? ' is-selected' : ''}`}
       role="listitem"
-      aria-selected={isSelected}
       onClick={onSelect}
     >
       <div className="sr-theme-card__preview" aria-hidden>

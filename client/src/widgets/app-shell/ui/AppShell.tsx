@@ -30,7 +30,7 @@ export function AppShell(props: Props) {
   useEffect(() => {
     if (!preferences) return;
     applyAppearancePreferences({ theme: preferences.theme, accent_color: preferences.accent_color });
-  }, [preferences?.accent_color, preferences?.theme]);
+  }, [preferences]);
 
   useEffect(() => {
     if (isMobile) {
@@ -46,7 +46,7 @@ export function AppShell(props: Props) {
       desktopCollapsedRef.current = null;
       setCollapsed(previousDesktopValue);
     }
-  }, [isMobile]);
+  }, [collapsed, isMobile]);
 
   useEffect(() => {
     if (!isSm) return;

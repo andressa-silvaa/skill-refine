@@ -9,10 +9,12 @@ import time
 
 from celery import shared_task
 from django.db import connection
+from django.utils import timezone
 
 from apps.analysis.application.inference.orchestrator import analyze_resume
 from apps.analysis.application.inference.safety import safe_error_message
 from apps.analysis.models import AnalysisStatus, ResumeAnalysis
+from apps.dashboard.interfaces.api.services import invalidate_dashboard_summary_cache
 from apps.resumes.interfaces.api.payloads import resume_detail_payload
 
 logger = logging.getLogger(__name__)
@@ -60,6 +62,7 @@ def run_resume_analysis_task(self, analysis_id: str) -> None:
     try:
         analysis.status = AnalysisStatus.RUNNING
         analysis.save(update_fields=["status", "updated_at"])
+        queue_wait_ms = int((timezone.now() - analysis.created_at).total_seconds() * 1000)
 
         resume = analysis.resume
         resume_data = resume_detail_payload(resume)
@@ -100,8 +103,10 @@ def run_resume_analysis_task(self, analysis_id: str) -> None:
                 "user_id": str(analysis.user_id),
                 "model_version": analysis.model_version,
                 "duration_ms": duration_ms,
+                "queue_wait_ms": queue_wait_ms,
             },
         )
+        invalidate_dashboard_summary_cache(str(analysis.user_id))
     except Exception as exc:
         logger.exception(
             "Analysis task failed",
@@ -112,6 +117,10 @@ def run_resume_analysis_task(self, analysis_id: str) -> None:
                 status=AnalysisStatus.FAILED,
                 error_message=safe_error_message(exc, max_len=2000),
             )
+        except Exception:
+            pass
+        try:
+            invalidate_dashboard_summary_cache(str(analysis.user_id))
         except Exception:
             pass
         raise

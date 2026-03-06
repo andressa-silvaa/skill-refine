@@ -16,6 +16,10 @@ module.exports = {
             message: 'Use barrel @/features/<slice> instead of deep path (e.g. @/features/resume).',
           },
           {
+            group: ['@/features/*/model/*'],
+            message: 'Use barrel @/features/<slice> instead of deep model imports.',
+          },
+          {
             group: ['@/entities/*/config/*', '@/entities/*/lib/*', '@/entities/*/model/*', '@/entities/*/ui/*', '@/entities/*/mocks/*'],
             message: 'Use barrel @/entities/<slice> instead of deep path (e.g. @/entities/resume).',
           },

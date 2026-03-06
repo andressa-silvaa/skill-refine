@@ -1,6 +1,12 @@
 export { useResumes } from './model/useResumes';
 export { useResumesMock } from './model/useResumesMock';
-export type { ResumesSortKey, ResumesViewMode } from './model/types';
+export type {
+  ResumesSortKey,
+  ResumesViewMode,
+  ResumeScoreFilter,
+  ResumeStatusFilter,
+  ResumeUpdatedFilter,
+} from './model/types';
 
 export { resumeApi } from './api/resumeApi';
 export type {

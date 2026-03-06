@@ -131,6 +131,18 @@ def list_versions(user_id: str, resume_id: str | None = None):
     return qs
 
 
+def list_versions_paginated(
+    user_id: str,
+    limit: int,
+    offset: int,
+    resume_id: str | None = None,
+) -> tuple[list[ResumeVersion], int]:
+    qs = list_versions(user_id, resume_id=resume_id)
+    total = qs.count()
+    page = list(qs[offset : offset + limit])
+    return page, total
+
+
 def get_version_by_id(user_id: str, resume_id: str, version_id: str) -> ResumeVersion | None:
     """Get a single version; must belong to resume and user."""
     return (

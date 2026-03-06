@@ -6,7 +6,7 @@ import type {
   ResumeScoreFilter,
   ResumeStatusFilter,
   ResumeUpdatedFilter,
-} from '@/features/resume/model/types';
+} from '@/features/resume';
 
 import { SortSelect } from './SortSelect';
 import './ResumesToolbar.css';

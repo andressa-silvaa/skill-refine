@@ -1,5 +1,6 @@
 import { getAccessToken } from './token';
 import { normalizeApiErrorCode } from './errorCodes';
+import { trackApiRequest } from '@/shared/lib/performance';
 
 export type ApiErrorBody = {
   error?: { code?: string; error_code?: string; message?: string };
@@ -33,6 +34,7 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
   const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+  trackApiRequest(path);
   const res = await fetch(url, {
     ...init,
     headers,
@@ -90,6 +92,7 @@ export async function apiRequestBlob(path: string, init: RequestInit = {}): Prom
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
   const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+  trackApiRequest(path);
   const res = await fetch(url, {
     ...init,
     headers,

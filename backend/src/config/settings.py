@@ -22,6 +22,7 @@ for candidate in (BACKEND_DIR / ".env", REPO_DIR / ".env"):
 
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 SECRET_KEY = env.str("DJANGO_SECRET_KEY", default="unsafe-dev-key-change-me")
+API_METRICS_ENABLED = env.bool("API_METRICS_ENABLED", default=DEBUG)
 
 ALLOWED_HOSTS = ["*"] if DEBUG else env.list("DJANGO_ALLOWED_HOSTS", default=[])
 
@@ -44,6 +45,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "shared.api.middleware.ApiMetricsMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -112,6 +114,7 @@ MEDIA_ROOT = str(BACKEND_DIR / "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 APP_ENV = env.str("APP_ENV", default="dev")
+ALLOW_INPROCESS_JOB_FALLBACK = env.bool("ALLOW_INPROCESS_JOB_FALLBACK", default=DEBUG)
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 X_FRAME_OPTIONS = "DENY"
@@ -136,6 +139,13 @@ CORS_ALLOWED_ORIGINS = env.list(
         "http://host.docker.internal:5173",
     ],
 )
+# Always allow the configured frontend origin for PDF print/data flow.
+try:
+    frontend_origin = env.str("FRONTEND_URL", default="").rstrip("/")
+    if frontend_origin and frontend_origin not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(frontend_origin)
+except Exception:
+    pass
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -167,6 +177,7 @@ PASSWORD_RESET_CODE_PEPPER = env.str("PASSWORD_RESET_CODE_PEPPER", default=SECRE
 EMAIL_CONFIRMATION_TOKEN_TTL_HOURS = env.int("EMAIL_CONFIRMATION_TOKEN_TTL_HOURS", default=24)
 EMAIL_CONFIRMATION_TOKEN_PEPPER = env.str("EMAIL_CONFIRMATION_TOKEN_PEPPER", default=SECRET_KEY)
 FRONTEND_URL = env.str("FRONTEND_URL", default="http://localhost:3000")
+BACKEND_URL = env.str("BACKEND_URL", default="")
 
 CLOUDINARY_URL = env.str("CLOUDINARY_URL", default="")
 
@@ -199,11 +210,21 @@ ANALYSIS_MULTILANG = env.bool("ANALYSIS_MULTILANG", default=False)
 # ----------------------------
 AI_REWRITE_CACHE_TTL_SECONDS = env.int("AI_REWRITE_CACHE_TTL_SECONDS", default=600)
 
+# ----------------------------
+# Resume PDF Export
+# ----------------------------
+PDF_MAX_CONCURRENT_PAGES = env.int("PDF_MAX_CONCURRENT_PAGES", default=2)
+PDF_POLL_RETRY_AFTER_SECONDS = env.int("PDF_POLL_RETRY_AFTER_SECONDS", default=2)
+PDF_EXPORT_STALE_SECONDS = env.int("PDF_EXPORT_STALE_SECONDS", default=90)
+PDF_EXPORT_RESCUE_SECONDS = env.int("PDF_EXPORT_RESCUE_SECONDS", default=8)
+PDF_EXPORTS_EAGER = env.bool("PDF_EXPORTS_EAGER", default=False)
+
 # Cloud (OpenAI-compatible chat completions, e.g. Groq, OpenAI)
 AI_CLOUD_BASE_URL = env.str("AI_CLOUD_BASE_URL", default="")
 AI_CLOUD_API_KEY = env.str("AI_CLOUD_API_KEY", default="")
 AI_CLOUD_MODEL = env.str("AI_CLOUD_MODEL", default="")
 AI_CLOUD_TIMEOUT_SECONDS = env.int("AI_CLOUD_TIMEOUT_SECONDS", default=15)
+DASHBOARD_SUMMARY_CACHE_TTL_SECONDS = env.int("DASHBOARD_SUMMARY_CACHE_TTL_SECONDS", default=45)
 
 
 REST_FRAMEWORK = {
@@ -213,6 +234,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.ScopedRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "auth": "20/min",
+        "analysis": "40/min",
+        "pdf_export_start": "20/min",
+        "pdf_export_status": "120/min",
+    },
     "UNAUTHENTICATED_USER": None,
     "UNAUTHENTICATED_TOKEN": None,
 }

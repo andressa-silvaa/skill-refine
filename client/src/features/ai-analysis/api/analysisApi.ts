@@ -49,6 +49,10 @@ export type LatestResponse = {
   item: AnalysisPayload | null;
 };
 
+export type LatestBatchResponse = {
+  items: Record<string, AnalysisPayload>;
+};
+
 export type HistoryResponse = {
   items: AnalysisPayload[];
   limit: number;
@@ -71,6 +75,13 @@ export async function runAnalysis(resumeId: string, jobText?: string): Promise<A
 
 export async function getLatestAnalysis(resumeId: string): Promise<LatestResponse> {
   return apiRequest<LatestResponse>(`/analysis/latest?resume_id=${encodeURIComponent(resumeId)}`);
+}
+
+export async function getLatestAnalysesBatch(resumeIds: string[]): Promise<LatestBatchResponse> {
+  const ids = resumeIds.map((id) => id.trim()).filter(Boolean);
+  if (ids.length === 0) return { items: {} };
+  const qs = encodeURIComponent(ids.join(","));
+  return apiRequest<LatestBatchResponse>(`/analysis/latest?resume_ids=${qs}`);
 }
 
 export async function getAnalysisHistory(

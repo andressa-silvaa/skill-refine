@@ -22,7 +22,7 @@ export function PreferencesCard() {
     if (!preferences) return;
     if (isEditing) return;
     acceptServer(preferences.email_notifications_enabled);
-  }, [acceptServer, isEditing, preferences?.email_notifications_enabled]);
+  }, [acceptServer, isEditing, preferences]);
 
   const isDirty = emailNotifications.server !== null && emailNotifications.isDirty;
 

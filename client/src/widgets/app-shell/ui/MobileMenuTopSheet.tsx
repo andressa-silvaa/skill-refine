@@ -48,7 +48,7 @@ export function MobileMenuTopSheet(props: Props) {
   useEffect(() => {
     if (!open) return;
     window.setTimeout(() => {
-      const first = containerRef.current?.querySelector<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex=\"-1\"])');
+      const first = containerRef.current?.querySelector<HTMLElement>("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
       first?.focus?.();
     }, 0);
   }, [open]);

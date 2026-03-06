@@ -21,7 +21,7 @@ export function useAppearanceSettings() {
     if (!preferences) return;
     if (isEditing) return;
     acceptServer(preferences.theme as ThemeMode);
-  }, [acceptServer, isEditing, preferences?.theme]);
+  }, [acceptServer, isEditing, preferences]);
 
   useEffect(() => {
     return () => {

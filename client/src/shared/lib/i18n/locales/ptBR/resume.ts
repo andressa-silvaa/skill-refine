@@ -55,6 +55,8 @@ export const resumeDomain = {
     pdfModalTitle: 'Gerando PDF',
     pdfModalPreparing: 'Preparando seu PDF...',
     pdfModalPreparingName: 'Preparando o PDF de "{{name}}"...',
+    pdfModalDownloading: 'Baixando seu PDF...',
+    pdfModalDownloadingName: 'Baixando o PDF de "{{name}}"...',
     pdfModalHint: 'Isso pode levar alguns segundos dependendo do tamanho do currículo.',
     toastDuplicated: 'Currículo duplicado com sucesso.',
     toastDeleted: 'Currículo excluído com sucesso.',

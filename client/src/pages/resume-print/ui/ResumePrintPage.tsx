@@ -12,6 +12,7 @@ declare global {
   interface Window {
     __resumePdfReady?: boolean;
     __resumePdfError?: string;
+    __resumePdfMetrics?: Record<string, number | string>;
   }
 }
 
@@ -33,6 +34,9 @@ export function ResumePrintPage() {
   useEffect(() => {
     window.__resumePdfReady = false;
     window.__resumePdfError = undefined;
+    window.__resumePdfMetrics = {
+      renderPageStartedAtMs: Math.round(performance.now()),
+    };
   }, []);
 
   useEffect(() => {
@@ -47,19 +51,42 @@ export function ResumePrintPage() {
     let cancelled = false;
 
     const fetchPdfData = async () => {
-      const baseUrl = apiUrl || (process.env.REACT_APP_API_URL ?? 'http://localhost:8000');
+      const fetchStartedAt = performance.now();
+      const candidates = [
+        apiUrl,
+        window.location.origin,
+        process.env.REACT_APP_API_URL ?? '',
+        'http://localhost:8000',
+      ]
+        .map((value) => (value || '').trim().replace(/\/+$/, ''))
+        .filter(Boolean);
+      const uniqueCandidates = Array.from(new Set(candidates));
       const encoded = encodeURIComponent(token);
-      const url = `${baseUrl}/resumes/api/resumes/${resumeId}/pdf-data?token=${encoded}`;
-      
-      const response = await fetch(url, {
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch resume data');
+      let lastError: unknown = null;
+
+      for (const baseUrl of uniqueCandidates) {
+        try {
+          const url = `${baseUrl}/resumes/api/resumes/${resumeId}/pdf-data?token=${encoded}`;
+          const response = await fetch(url, {
+            credentials: 'include',
+          });
+          if (!response.ok) {
+            lastError = new Error(`Failed to fetch resume data (${response.status})`);
+            continue;
+          }
+          const fetchEndedAt = performance.now();
+          window.__resumePdfMetrics = {
+            ...(window.__resumePdfMetrics || {}),
+            dataFetchMs: Math.round(fetchEndedAt - fetchStartedAt),
+            apiBaseUrl: baseUrl,
+          };
+          return response.json() as Promise<ResumeDetailResponse>;
+        } catch (err) {
+          lastError = err;
+        }
       }
-      
-      return response.json() as Promise<ResumeDetailResponse>;
+
+      throw lastError ?? new Error('Failed to fetch resume data');
     };
 
     fetchPdfData()
@@ -86,6 +113,10 @@ export function ResumePrintPage() {
 
   const handleReady = useCallback(() => {
     if (window.__resumePdfReady) return;
+    window.__resumePdfMetrics = {
+      ...(window.__resumePdfMetrics || {}),
+      previewReadyAtMs: Math.round(performance.now()),
+    };
     window.__resumePdfReady = true;
   }, []);
 

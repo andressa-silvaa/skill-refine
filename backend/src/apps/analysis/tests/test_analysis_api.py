@@ -71,6 +71,43 @@ class TestLatestDeniesOtherUserResume(AnalysisAPITestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
 
+class TestLatestBatch(AnalysisAPITestCase):
+    def test_latest_batch_returns_only_owned_resume_items(self):
+        ResumeAnalysis.objects.create(
+            user_id=self.user_a.id,
+            resume_id=self.resume_a.id,
+            status=AnalysisStatus.DONE,
+            score=77,
+            task_scores={},
+            payload_json={},
+            model_name="m",
+            model_version="v",
+            provider="local",
+        )
+        ResumeAnalysis.objects.create(
+            user_id=self.user_b.id,
+            resume_id=self.resume_b.id,
+            status=AnalysisStatus.DONE,
+            score=99,
+            task_scores={},
+            payload_json={},
+            model_name="m",
+            model_version="v",
+            provider="local",
+        )
+
+        self.client.force_authenticate(user=self.user_a)
+        resp = self.client.get(
+            self.latest_url,
+            {"resume_ids": f"{self.resume_a.id},{self.resume_b.id}"},
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.json()
+        self.assertIn("items", data)
+        self.assertIn(str(self.resume_a.id), data["items"])
+        self.assertNotIn(str(self.resume_b.id), data["items"])
+
+
 class TestRunCreatesPendingAnalysis(AnalysisAPITestCase):
     def test_run_creates_pending_and_returns_202(self):
         self.client.force_authenticate(user=self.user_a)

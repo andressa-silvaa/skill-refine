@@ -15,6 +15,7 @@ export type ResumesPageState = {
   isDeleting: boolean;
   duplicateLoadingId: string | null;
   downloadLoadingId: string | null;
+  pdfStage: 'preparing' | 'downloading';
   pdfProgress: number;
   isSavingDraft: boolean;
   isSubmitting: boolean;
@@ -32,6 +33,7 @@ const initialState: ResumesPageState = {
   isDeleting: false,
   duplicateLoadingId: null,
   downloadLoadingId: null,
+  pdfStage: 'preparing',
   pdfProgress: 0,
   isSavingDraft: false,
   isSubmitting: false,
@@ -58,6 +60,7 @@ export type ResumesPageAction =
   | { type: 'START_DUPLICATE'; payload: { id: string } }
   | { type: 'FINISH_DUPLICATE' }
   | { type: 'START_DOWNLOAD'; payload: { id: string } }
+  | { type: 'SET_PDF_STAGE'; payload: 'preparing' | 'downloading' }
   | { type: 'SET_PDF_PROGRESS'; payload: number }
   | { type: 'FINISH_DOWNLOAD' }
   | { type: 'START_SAVING_DRAFT' }
@@ -113,11 +116,13 @@ function resumesPageReducer(state: ResumesPageState, action: ResumesPageAction):
     case 'FINISH_DUPLICATE':
       return { ...state, duplicateLoadingId: null };
     case 'START_DOWNLOAD':
-      return { ...state, downloadLoadingId: action.payload.id, pdfProgress: 0 };
+      return { ...state, downloadLoadingId: action.payload.id, pdfStage: 'preparing', pdfProgress: 0 };
+    case 'SET_PDF_STAGE':
+      return { ...state, pdfStage: action.payload };
     case 'SET_PDF_PROGRESS':
       return { ...state, pdfProgress: action.payload };
     case 'FINISH_DOWNLOAD':
-      return { ...state, downloadLoadingId: null, pdfProgress: 0 };
+      return { ...state, downloadLoadingId: null, pdfStage: 'preparing', pdfProgress: 0 };
     case 'START_SAVING_DRAFT':
       return { ...state, isSavingDraft: true };
     case 'FINISH_SAVING_DRAFT':
@@ -155,6 +160,10 @@ export function useResumesPageState() {
   const finishDuplicate = useCallback(() => dispatch({ type: 'FINISH_DUPLICATE' }), []);
 
   const startDownload = useCallback((id: string) => dispatch({ type: 'START_DOWNLOAD', payload: { id } }), []);
+  const setPdfStage = useCallback(
+    (stage: 'preparing' | 'downloading') => dispatch({ type: 'SET_PDF_STAGE', payload: stage }),
+    []
+  );
   const setPdfProgress = useCallback((n: number) => dispatch({ type: 'SET_PDF_PROGRESS', payload: n }), []);
   const finishDownload = useCallback(() => dispatch({ type: 'FINISH_DOWNLOAD' }), []);
 
@@ -179,6 +188,7 @@ export function useResumesPageState() {
       startDuplicate,
       finishDuplicate,
       startDownload,
+      setPdfStage,
       setPdfProgress,
       finishDownload,
       startSavingDraft,

@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint (warning budget)
+        run: npm run lint -- --max-warnings 0
 
       - name: Check circular dependencies
         run: npm run deps:cycles
@@ -36,3 +36,58 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  backend-fast-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run fast backend regression suite
+        run: >
+          python manage.py test
+          apps.analysis.tests.test_analysis_api
+          apps.resumes.tests.test_resume_list_filters
+          apps.resumes.tests.test_resume_list_pagination
+          apps.resumes.tests.test_pdf_exports
+          apps.resumes.tests.test_version_list_pagination_api
+          apps.accounts.tests.test_privacy_export_api
+          apps.dashboard.tests.test_dashboard_api
+          -v 1
+
+  backend-slow-tests:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run slow backend checks
+        run: >
+          python manage.py test
+          apps.resumes.tests.test_query_count
+          -v 1

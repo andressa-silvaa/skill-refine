@@ -21,7 +21,7 @@ export function useAccentColorSettings() {
     if (!preferences) return;
     if (isEditing) return;
     acceptServer(preferences.accent_color as AccentKey);
-  }, [acceptServer, isEditing, preferences?.accent_color]);
+  }, [acceptServer, isEditing, preferences]);
 
   useEffect(() => {
     return () => {

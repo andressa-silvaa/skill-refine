@@ -241,7 +241,7 @@ export function useResumeBuilder() {
     setLastSaved(new Date());
     setHasUnsavedChanges(false);
     setInitialSnapshot(currentSnapshot);
-  }, []);
+  }, [currentSnapshot]);
 
   const reset = useCallback(() => {
     setCurrentStep('theme');

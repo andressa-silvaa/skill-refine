@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppShell } from '@/widgets/app-shell';
@@ -22,16 +22,20 @@ import './VersionHistoryPage.css';
 export function VersionHistoryPage() {
   const { t } = useTranslation();
   const resumes = useResumes();
+  const resumeOptions = useMemo(
+    () => resumes.viewModels.map((vm) => ({ id: vm.id, title: vm.name })),
+    [resumes.viewModels]
+  );
   const {
     versions,
-    resumeOptions,
+    resumeOptions: historyResumeOptions,
     activeFilterId,
     setFilter,
     allFilterId,
     loading,
     error,
     refetch,
-  } = useVersionHistory();
+  } = useVersionHistory({ resumeOptions });
 
   const [viewModalItem, setViewModalItem] = useState<VersionHistoryItem | null>(null);
   const [restoreModalItem, setRestoreModalItem] = useState<VersionHistoryItem | null>(null);
@@ -68,7 +72,7 @@ export function VersionHistoryPage() {
           </header>
 
           <VersionHistoryFilters
-            options={resumeOptions}
+            options={historyResumeOptions}
             activeId={activeFilterId}
             allFilterId={allFilterId}
             onSelect={setFilter}

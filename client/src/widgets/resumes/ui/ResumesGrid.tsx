@@ -7,6 +7,7 @@ import { Card, DropdownMenu, IconButton } from '@/shared/ui';
 
 import { ResumeMeta } from './ResumeMeta';
 import { ResumeThumb } from './ResumeThumb';
+import { buildResumeActionsMenu } from '../model/buildResumeActionsMenu';
 
 import './ResumesGrid.css';
 
@@ -37,45 +38,17 @@ const ResumeGridCard = memo(function ResumeGridCard(props: GridCardProps) {
   const { t } = useTranslation();
 
   const menuItems = useMemo(() => {
-    const items: Array<{
-      key: string;
-      label: string;
-      iconClass: string;
-      onClick: () => void;
-      danger?: boolean;
-    }> = [
-      { key: 'edit', label: t('resume.openEdit'), iconClass: 'fa-regular fa-pen-to-square', onClick: () => onEdit(vm.id) },
-      ...(onAnalyzeWithAI
-        ? [
-            {
-              key: 'analyze',
-              label: t('resume.analyzeWithAI'),
-              iconClass: 'fa-solid fa-wand-magic-sparkles',
-              onClick: () => onAnalyzeWithAI(vm.id),
-            },
-          ]
-        : []),
-      {
-        key: 'dup',
-        label: duplicateLoadingId === vm.id ? t('resume.duplicating') : t('resume.duplicate'),
-        iconClass: duplicateLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-copy',
-        onClick: () => {
-          if (duplicateLoadingId === vm.id) return;
-          onDuplicate(vm.id);
-        },
-      },
-      {
-        key: 'pdf',
-        label: downloadLoadingId === vm.id ? t('resume.generatingPdf') : t('resume.exportPdf'),
-        iconClass: downloadLoadingId === vm.id ? 'fa-solid fa-circle-notch' : 'fa-regular fa-file-pdf',
-        onClick: () => {
-          if (downloadLoadingId === vm.id) return;
-          onExport(vm.id);
-        },
-      },
-      { key: 'del', label: t('resume.delete'), iconClass: 'fa-regular fa-trash-can', danger: true, onClick: () => onDelete(vm.id) },
-    ];
-    return items;
+    return buildResumeActionsMenu({
+      resumeId: vm.id,
+      duplicateLoadingId,
+      downloadLoadingId,
+      onEdit,
+      onDuplicate,
+      onExport,
+      onDelete,
+      onAnalyzeWithAI,
+      t,
+    });
   }, [vm.id, duplicateLoadingId, downloadLoadingId, onEdit, onDuplicate, onExport, onDelete, onAnalyzeWithAI, t]);
 
   return (
