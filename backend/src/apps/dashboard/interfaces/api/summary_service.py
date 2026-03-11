@@ -1,3 +1,4 @@
+"""Dashboard summary: queries and aggregation."""
 from __future__ import annotations
 
 from collections import defaultdict
@@ -5,8 +6,6 @@ from datetime import timedelta
 from statistics import mean
 from typing import Any
 
-from django.conf import settings
-from django.core.cache import cache
 from django.db.models import Avg, OuterRef, Q, Subquery
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
@@ -63,7 +62,6 @@ def _build_competencies(
     clarity_scores: list[int] = []
     hard_scores: list[int] = []
     soft_scores: list[int] = []
-
     ats_keyword_suggestions = 0
 
     for analysis in latest_done_analyses:
@@ -77,12 +75,10 @@ def _build_competencies(
             ats_scores.append(int(ats))
         if isinstance(clarity, (int, float)):
             clarity_scores.append(int(clarity))
-
         if isinstance(matching, (int, float)):
             hard_scores.append(int(matching))
         elif isinstance(ats, (int, float)):
             hard_scores.append(int(ats))
-
         if isinstance(clarity, (int, float)) and isinstance(seniority, (int, float)):
             soft_scores.append(int(round((float(clarity) + float(seniority)) / 2)))
         elif isinstance(clarity, (int, float)):
@@ -98,10 +94,7 @@ def _build_competencies(
         if has_ats_keyword_suggestion:
             ats_keyword_suggestions += 1
 
-    format_score = 0
-    if total_resumes > 0:
-        format_score = _clamp_score((complete_resumes / total_resumes) * 100)
-
+    format_score = _clamp_score((complete_resumes / total_resumes) * 100) if total_resumes > 0 else 0
     keywords_score = 0
     if latest_done_analyses:
         ratio = ats_keyword_suggestions / len(latest_done_analyses)
@@ -129,7 +122,6 @@ def _build_recurring_insights(latest_done_analyses: list[ResumeAnalysis]) -> lis
             "params": {},
         }
     )
-
     priority_order = {"high": 3, "medium": 2, "low": 1}
 
     for analysis in latest_done_analyses:
@@ -137,16 +129,13 @@ def _build_recurring_insights(latest_done_analyses: list[ResumeAnalysis]) -> lis
             key = str(improvement.get("key") or "").strip()
             if not key:
                 continue
-
             info = stats[key]
             info["count"] += 1
-
             priority = str(improvement.get("priority") or "medium").strip()
             if priority not in priority_order:
                 priority = "medium"
             if priority_order.get(priority, 0) > priority_order.get(info["priority"], 0):
                 info["priority"] = priority
-
             previous_created_at = info["createdAt"] or ""
             current_created_at = analysis.created_at.isoformat()
             if current_created_at >= previous_created_at:
@@ -172,7 +161,6 @@ def _build_recurring_insights(latest_done_analyses: list[ResumeAnalysis]) -> lis
         }
         for key, value in stats.items()
     ]
-
     result.sort(
         key=lambda item: (
             -priority_order.get(str(item.get("priority") or "medium"), 0),
@@ -190,7 +178,6 @@ def get_dashboard_summary(user_id: str) -> dict[str, Any]:
     draft_resumes = resumes_qs.filter(status=ResumeStatus.DRAFT).count()
 
     done_analyses_qs = ResumeAnalysis.objects.filter(user_id=user_id, status=AnalysisStatus.DONE)
-
     latest_done_analysis = done_analyses_qs.select_related("resume").order_by("-created_at").first()
     latest_done_analyses = _latest_done_analyses_by_resume(user_id)
 
@@ -227,10 +214,7 @@ def get_dashboard_summary(user_id: str) -> dict[str, Any]:
         .order_by("month")
     )
     score_evolution = [
-        {
-            "period": row["month"].strftime("%Y-%m") if row.get("month") else "",
-            "score": _clamp_score(row.get("avg_score"), fallback=0),
-        }
+        {"period": row["month"].strftime("%Y-%m") if row.get("month") else "", "score": _clamp_score(row.get("avg_score"), fallback=0)}
         for row in monthly_score_qs
     ][-6:]
 
@@ -251,26 +235,21 @@ def get_dashboard_summary(user_id: str) -> dict[str, Any]:
     recent_resumes = []
     for item in recent_resumes_qs:
         display_name = item["name"] or item["target_position"] or "Novo Currículo"
-        recent_resumes.append(
-            {
-                "id": str(item["id"]),
-                "name": display_name,
-                "updatedAt": item["updated_at"].isoformat() if item.get("updated_at") else None,
-                "status": item["status"],
-                "score": item.get("latest_analysis_score")
-                if item.get("latest_analysis_score") is not None
-                else item.get("score"),
-            }
-        )
+        recent_resumes.append({
+            "id": str(item["id"]),
+            "name": display_name,
+            "updatedAt": item["updated_at"].isoformat() if item.get("updated_at") else None,
+            "status": item["status"],
+            "score": item.get("latest_analysis_score") if item.get("latest_analysis_score") is not None else item.get("score"),
+        })
 
+    last_analyzed_resume_title = None
     if latest_done_analysis:
         last_analyzed_resume_title = (
             latest_done_analysis.resume.name
             or latest_done_analysis.resume.target_position
             or "Novo Currículo"
         )
-    else:
-        last_analyzed_resume_title = None
 
     return {
         "summary": {
@@ -294,23 +273,3 @@ def get_dashboard_summary(user_id: str) -> dict[str, Any]:
         "recentResumes": recent_resumes,
         "aiInsights": _build_recurring_insights(latest_done_analyses),
     }
-
-
-def get_dashboard_summary_cached(user_id: str) -> dict[str, Any]:
-    ttl_seconds = int(getattr(settings, "DASHBOARD_SUMMARY_CACHE_TTL_SECONDS", 45))
-    if ttl_seconds <= 0:
-        return get_dashboard_summary(user_id)
-
-    cache_key = f"dashboard:summary:{user_id}"
-    cached = cache.get(cache_key)
-    if isinstance(cached, dict):
-        return cached
-
-    data = get_dashboard_summary(user_id)
-    cache.set(cache_key, data, timeout=ttl_seconds)
-    return data
-
-
-def invalidate_dashboard_summary_cache(user_id: str) -> None:
-    cache.delete(f"dashboard:summary:{user_id}")
-

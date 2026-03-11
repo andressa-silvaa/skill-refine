@@ -2,16 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { IconButton } from '@/shared/ui';
+import { GlobalSearchModal } from '@/features/global-search';
+import { NotificationsMenu } from '@/features/notifications';
 
 import './Topbar.css';
-
-type Action = {
-  key: string;
-  ariaLabel: string;
-  iconClass: string;
-  badgeClass?: string;
-  onClick?: () => void;
-};
 
 type Props = {
   showHamburger?: boolean;
@@ -24,23 +18,6 @@ export function Topbar(props: Props) {
   const { showHamburger = false, isMenuOpen = false, onToggleMenu, menuControlsId = 'sr-mobile-menu' } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
-
-  const actions: Action[] = [
-    { key: 'search', ariaLabel: t('nav.search'), iconClass: 'fa-solid fa-magnifying-glass' },
-    {
-      key: 'notifications',
-      ariaLabel: t('nav.notifications'),
-      iconClass: 'fa-regular fa-bell',
-      badgeClass: 'sr-topbar__badge--danger',
-    },
-    {
-      key: 'profile',
-      ariaLabel: t('nav.profile'),
-      iconClass: 'fa-regular fa-user',
-      badgeClass: 'sr-topbar__badge--success',
-      onClick: () => navigate('/protected/profile'),
-    },
-  ];
 
   return (
     <header className="sr-topbar">
@@ -58,17 +35,22 @@ export function Topbar(props: Props) {
         ) : null}
       </div>
       <div className="sr-topbar__right" aria-label={t('appShell.userActions')}>
-        {actions.map((a) => (
-          <IconButton
-            key={a.key}
-            aria-label={a.ariaLabel}
-            className={`sr-topbar__icon-btn${a.badgeClass ? ' sr-topbar__icon-btn--badge' : ''}`}
-            onClick={a.onClick}
-          >
-            <i className={a.iconClass} aria-hidden />
-            {a.badgeClass ? <span className={`sr-topbar__badge ${a.badgeClass}`} aria-hidden /> : null}
-          </IconButton>
-        ))}
+        <GlobalSearchModal
+          trigger={
+            <IconButton aria-label={t('nav.search')} className="sr-topbar__icon-btn">
+              <i className="fa-solid fa-magnifying-glass" aria-hidden />
+            </IconButton>
+          }
+        />
+        <NotificationsMenu />
+        <IconButton
+          aria-label={t('nav.profile')}
+          className="sr-topbar__icon-btn sr-topbar__icon-btn--badge"
+          onClick={() => navigate('/protected/profile')}
+        >
+          <i className="fa-regular fa-user" aria-hidden />
+          <span className="sr-topbar__badge sr-topbar__badge--success" aria-hidden />
+        </IconButton>
       </div>
     </header>
   );

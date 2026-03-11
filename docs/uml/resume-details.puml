@@ -1,0 +1,154 @@
+@startuml resume-details
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title Skill Refine - Resume Details (Backend Django Models)
+
+package "shared.db" {
+  abstract class UUIDPrimaryKeyModel {
+    + id : UUID [PK]
+  }
+  abstract class TimestampedModel {
+    + created_at : DateTime
+    + updated_at : DateTime
+  }
+}
+
+package "accounts" #DDDDDD {
+  class User {
+    + id : UUID [PK]
+    + email : Text
+    + full_name : Text
+    + status : Char(16)
+  }
+}
+
+package "resumes" {
+  class Resume {
+    + id : UUID [PK]
+    + user_id : UUID [FK]
+    + name : Char(160)
+    + status : Char(24)
+    + target_position : Char(160)
+    + summary : Text
+    + theme_id : Char(64)
+    + score : Integer?
+    + created_at : DateTime
+    + updated_at : DateTime
+    + deleted_at : DateTime?
+  }
+
+  class ResumeContact {
+    + resume_id : UUID [PK, FK]
+    + full_name : Char(160)
+    + email : Char(254)
+    + phone : Char(32)
+    + city : Char(120)
+    + country : Char(120)
+    + linkedin : Char(255)?
+    + portfolio : Char(255)?
+    + github : Char(255)?
+    + website : Char(255)?
+    + created_at : DateTime
+    + updated_at : DateTime
+  }
+
+  class ResumeExperience {
+    + id : UUID [PK]
+    + resume_id : UUID [FK]
+    + company : Char(180)
+    + position : Char(160)
+    + start_date : Date?
+    + end_date : Date?
+    + is_current : Boolean
+    + position_index : Integer
+    + created_at : DateTime
+    + updated_at : DateTime
+  }
+
+  class ResumeExperienceBullet {
+    + id : UUID [PK]
+    + experience_id : UUID [FK]
+    + content : Text
+    + position_index : Integer
+  }
+
+  class ResumeEducation {
+    + id : UUID [PK]
+    + resume_id : UUID [FK]
+    + institution : Char(180)
+    + course : Char(180)
+    + degree : Char(120)
+    + start_date : Date?
+    + end_date : Date?
+    + status : Char(24)
+    + position_index : Integer
+    + created_at : DateTime
+    + updated_at : DateTime
+  }
+
+  class ResumeSkill {
+    + id : UUID [PK]
+    + resume_id : UUID [FK]
+    + name : Char(120)
+    + level : Char(24)?
+    + position_index : Integer
+  }
+
+  class ResumeLanguage {
+    + id : UUID [PK]
+    + resume_id : UUID [FK]
+    + name : Char(80)
+    + level : Char(24)
+    + position_index : Integer
+  }
+
+  class ResumeTag {
+    + id : UUID [PK]
+    + resume_id : UUID [FK]
+    + label : Char(80)
+    + position_index : Integer
+  }
+
+  class ResumeSectionOrder {
+    + id : UUID [PK]
+    + resume_id : UUID [FK]
+    + section_key : Char(32)
+    + position_index : Integer
+    + is_visible : Boolean
+  }
+}
+
+' Inheritance
+UUIDPrimaryKeyModel <|-- Resume
+TimestampedModel <|-- Resume
+TimestampedModel <|-- ResumeContact
+UUIDPrimaryKeyModel <|-- ResumeExperience
+TimestampedModel <|-- ResumeExperience
+UUIDPrimaryKeyModel <|-- ResumeExperienceBullet
+UUIDPrimaryKeyModel <|-- ResumeEducation
+TimestampedModel <|-- ResumeEducation
+UUIDPrimaryKeyModel <|-- ResumeSkill
+UUIDPrimaryKeyModel <|-- ResumeLanguage
+UUIDPrimaryKeyModel <|-- ResumeTag
+UUIDPrimaryKeyModel <|-- ResumeSectionOrder
+
+' Relationships - User to Resume
+User "1" -- "0..*" Resume : user_id
+
+' Relationships - Resume to details
+Resume "1" -- "0..1" ResumeContact : contact
+Resume "1" -- "0..*" ResumeExperience : experiences
+Resume "1" -- "0..*" ResumeEducation : educations
+Resume "1" -- "0..*" ResumeSkill : skills
+Resume "1" -- "0..*" ResumeLanguage : languages
+Resume "1" -- "0..*" ResumeTag : tags
+Resume "1" -- "0..*" ResumeSectionOrder : section_orders
+
+' Relationships - Experience to Bullets
+ResumeExperience "1" -- "0..*" ResumeExperienceBullet : bullets
+
+@enduml

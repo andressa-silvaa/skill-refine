@@ -100,11 +100,13 @@ export function useAiAnalysis(initialResumeId?: string) {
           if (latest.state === 'done') {
             stopPolling();
             notify.success(t('analysis.toast.done'));
+            window.dispatchEvent(new CustomEvent('skill-refine:notifications-invalidate'));
             return true;
           }
           if (latest.state === 'failed') {
             stopPolling();
             notify.error(t('analysis.toast.failed'));
+            window.dispatchEvent(new CustomEvent('skill-refine:notifications-invalidate'));
             return true;
           }
 

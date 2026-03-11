@@ -56,8 +56,10 @@ export const analysisDomain = {
     },
     lastAnalysis: 'Última análise: {{date}}',
     cardScore: 'Score IA: {{score}}',
-    'toast.done': 'Análise concluída',
-    'toast.failed': 'Falha ao analisar. IA indisponível no momento.',
+    toast: {
+      done: 'Análise concluída',
+      failed: 'Falha ao analisar. IA indisponível no momento.',
+    },
     seniorityIntern: 'Estágio',
     seniorityJunior: 'Júnior',
     seniorityMid: 'Pleno',

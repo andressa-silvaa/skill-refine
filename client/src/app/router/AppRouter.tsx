@@ -6,7 +6,9 @@ import { PageLoader } from '@/shared/ui';
 import { LoginPage } from '@/pages/auth/login';
 import { ConfirmEmailPage } from '@/pages/auth/confirm-email';
 import { OAuthCallbackPage } from '@/pages/auth/oauth-callback';
+import { PrivacyPage } from '@/pages/public/privacy';
 import { RegisterPage } from '@/pages/auth/register';
+import { TermsPage } from '@/pages/public/terms';
 import {
   ResetCodePage,
   ResetEmailPage,
@@ -31,7 +33,7 @@ const SettingsPage = lazy(() =>
   import('@/pages/settings').then((m) => ({ default: m.SettingsPage }))
 );
 const ResumesPage = lazy(() =>
-  import('@/pages/curriculos').then((m) => ({ default: m.ResumesPage }))
+  import('@/pages/resumes').then((m) => ({ default: m.ResumesPage }))
 );
 const AiAnalysisPage = lazy(() =>
   import('@/pages/ai-analysis').then((m) => ({ default: m.AiAnalysisPage }))
@@ -46,6 +48,8 @@ export function AppRouter() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/confirm-email" element={<ConfirmEmailPage />} />
           <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
           <Route path="/register" element={<RegisterPage />} />

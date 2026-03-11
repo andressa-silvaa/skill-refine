@@ -47,6 +47,6 @@ def parse_limit_offset(
 
 
 def invalidate_dashboard_cache_for_user(user_id: str) -> None:
-    from apps.dashboard.interfaces.api.services import invalidate_dashboard_summary_cache
+    from apps.dashboard.interfaces.api.cache import invalidate_dashboard_summary_cache
 
     invalidate_dashboard_summary_cache(str(user_id))

@@ -6,8 +6,8 @@ from rest_framework.views import APIView
 
 from shared.api.responses import error_response as _error
 
+from .cache import get_dashboard_summary_cached
 from .payloads import dashboard_payload
-from .services import get_dashboard_summary_cached
 
 
 class DashboardSummaryView(APIView):

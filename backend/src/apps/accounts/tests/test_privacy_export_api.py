@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 from apps.accounts.infrastructure.models import User, UserPreferences
 from apps.analysis.models import AnalysisStatus, ResumeAnalysis
-from apps.audit.infrastructure.models import AuditLog
+from apps.audit.models import AuditLog
 from apps.resumes.infrastructure.models import Resume, ResumeStatus, ResumeVersion
 
 

@@ -6,3 +6,4 @@ class AnalysisConfig(AppConfig):
     name = "apps.analysis"
 
 
+

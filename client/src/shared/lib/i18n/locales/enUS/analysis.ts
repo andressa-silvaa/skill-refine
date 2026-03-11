@@ -56,8 +56,10 @@ export const analysisDomain = {
     },
     lastAnalysis: 'Last analysis: {{date}}',
     cardScore: 'AI Score: {{score}}',
-    'toast.done': 'Analysis completed',
-    'toast.failed': 'Analysis failed. AI unavailable at the moment.',
+    toast: {
+      done: 'Analysis completed',
+      failed: 'Analysis failed. AI unavailable at the moment.',
+    },
     seniorityIntern: 'Intern',
     seniorityJunior: 'Junior',
     seniorityMid: 'Mid-level',

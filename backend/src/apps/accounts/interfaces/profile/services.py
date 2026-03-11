@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from apps.accounts.infrastructure.models import User, UserPreferences
 from apps.analysis.models import ResumeAnalysis
-from apps.audit.infrastructure.models import AuditLog
+from apps.audit.models import AuditLog
 from apps.resumes.infrastructure.models import Resume, ResumeVersion
 from apps.resumes.interfaces.api.payloads import resume_detail_prefetch
 

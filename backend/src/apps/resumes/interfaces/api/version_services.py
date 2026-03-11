@@ -220,4 +220,15 @@ def restore_version(user_id: str, resume_id: str, version_id: str) -> Resume | N
             change_summary_json=["Versão restaurada"],
             score=version.score,
         )
+        from apps.notifications.services import create_notification
+
+        resume_name = (resume.name or resume.target_position or "Currículo")[:80]
+        create_notification(
+            user_id=str(user_id),
+            type="version_restored",
+            title_key="notifications.versionRestored",
+            params={"name": resume_name, "version": str(version.version_number)},
+            action_url=f"/protected/version-history",
+            entity_ref={"resume_id": str(resume_id), "version_id": str(version.id)},
+        )
     return get_resume_for_edit(user_id, resume_id)

@@ -4,7 +4,7 @@ import logging
 from typing import Any
 
 from apps.audit.domain.ports import AuditLogger
-from apps.audit.infrastructure.models import AuditLog
+from apps.audit.models import AuditLog
 
 
 class OrmAuditLogger(AuditLogger):

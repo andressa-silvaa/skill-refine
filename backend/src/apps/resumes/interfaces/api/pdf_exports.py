@@ -499,6 +499,17 @@ def process_pdf_export(export_id: str) -> None:
                 "metrics": stage_metrics,
             },
         )
+        from apps.notifications.services import create_notification
+
+        resume_name = (export.resume.name or export.resume.target_position or "Currículo")[:80]
+        create_notification(
+            user_id=str(export.user_id),
+            type="pdf_ready",
+            title_key="notifications.pdfReady",
+            params={"name": resume_name},
+            action_url=f"/protected/resumes?editResumeId={export.resume_id}",
+            entity_ref={"resume_id": str(export.resume_id), "export_id": str(export.id)},
+        )
     except Exception as exc:
         error_msg = str(exc)[:2000]
         stage_metrics["task_total_ms"] = int((time.perf_counter() - task_start) * 1000)
@@ -517,4 +528,18 @@ def process_pdf_export(export_id: str) -> None:
                 "fingerprint": export.fingerprint,
             },
         )
+        try:
+            from apps.notifications.services import create_notification
+
+            resume_name = (export.resume.name or export.resume.target_position or "Currículo")[:80]
+            create_notification(
+                user_id=str(export.user_id),
+                type="pdf_failed",
+                title_key="notifications.pdfFailed",
+                params={"name": resume_name},
+                action_url=f"/protected/resumes?editResumeId={export.resume_id}",
+                entity_ref={"resume_id": str(export.resume_id), "export_id": str(export.id)},
+            )
+        except Exception:
+            pass
         raise

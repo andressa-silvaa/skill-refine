@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from django.urls import path
 
-from .views import AvatarUploadView, PreferencesView, PrivacyDeleteAccountView, PrivacyExportView, ProfileView
+from .privacy_views import PrivacyDeleteAccountView, PrivacyExportView
+from .profile_views import AvatarUploadView, PreferencesView, ProfileView
 
 urlpatterns = [
     path("", ProfileView.as_view(), name="profile"),

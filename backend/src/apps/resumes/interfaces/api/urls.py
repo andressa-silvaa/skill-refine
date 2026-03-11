@@ -1,18 +1,14 @@
 from django.urls import path
 
-from .views import (
+from .pdf_views import ResumePdfStartView, ResumePdfStatusView, ResumePdfView
+from .resume_views import (
     ResumeDraftUpdateView,
     ResumeDuplicateView,
     ResumeListCreateView,
     ResumePdfDataView,
-    ResumePdfStartView,
-    ResumePdfStatusView,
     ResumePdfTokenView,
-    ResumePdfView,
-    ResumeVersionDetailView,
-    ResumeVersionListView,
-    ResumeVersionRestoreView,
 )
+from .version_views import ResumeVersionDetailView, ResumeVersionListView, ResumeVersionRestoreView
 
 app_name = "resumes_api"
 

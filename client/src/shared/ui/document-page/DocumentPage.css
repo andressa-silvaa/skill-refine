@@ -1,0 +1,162 @@
+.document-page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 5vw, 48px);
+  background: var(--pink-bg);
+  font-family: 'Poppins', sans-serif;
+}
+
+.document-card {
+  position: relative;
+  width: min(680px, 100%);
+  max-height: min(88vh, 720px);
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.document-header {
+  flex-shrink: 0;
+  padding: 28px 32px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.document-back {
+  background: transparent;
+  border: 0;
+  color: var(--text-purple);
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.document-back:hover {
+  text-decoration: underline;
+}
+
+.document-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.document-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-title {
+  margin: 0;
+  font-size: clamp(22px, 2.6vw, 26px);
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.02em;
+}
+
+.document-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.5);
+  line-height: 1.5;
+}
+
+.document-lang-switch {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.document-lang-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(139, 46, 128, 0.25);
+  border-radius: 8px;
+  background: rgba(247, 208, 241, 0.5);
+  color: var(--text-purple);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.document-lang-btn:hover {
+  background: rgba(247, 208, 241, 0.8);
+  border-color: rgba(139, 46, 128, 0.4);
+}
+
+.document-lang-btn.is-active {
+  background: var(--card-pink);
+  color: var(--text-purple);
+  border-color: var(--primary);
+}
+
+.document-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 32px 32px 40px;
+  overscroll-behavior: contain;
+}
+
+/* Scrollbar harmoniosa */
+.document-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.document-body::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.document-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
+}
+
+.document-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.document-body section {
+  margin-bottom: 36px;
+}
+
+.document-body section:last-child {
+  margin-bottom: 0;
+}
+
+.document-body h2 {
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: -0.01em;
+}
+
+.document-body p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.document-body ul {
+  margin: 12px 0 0;
+  padding-left: 24px;
+}
+
+.document-body li {
+  margin-bottom: 8px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.72);
+}
