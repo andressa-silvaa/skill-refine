@@ -24,7 +24,22 @@ export function getResumeStatusTone(status: ResumeStatus) {
 
 export function formatMonthYear(dateStr: string, locale?: string): string {
   if (!dateStr) return '';
-  const [year, month] = dateStr.split('-');
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const year = parseInt(parts[0]!, 10);
+    const monthIndex = parseInt(parts[1]!, 10) - 1;
+    const day = parseInt(parts[2]!, 10);
+    if (Number.isNaN(year) || monthIndex < 0 || monthIndex >= 12 || Number.isNaN(day)) return dateStr;
+    const date = new Date(year, monthIndex, day);
+    if (date.getFullYear() !== year || date.getMonth() !== monthIndex || date.getDate() !== day) return dateStr;
+    if (locale) {
+      return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric' }).format(date);
+    }
+    const dd = String(day).padStart(2, '0');
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    return `${dd} ${monthNames[monthIndex]} ${year}`;
+  }
+  const [year, month] = parts;
   if (!year || !month) return dateStr;
   const monthIndex = parseInt(month, 10) - 1;
   if (monthIndex < 0 || monthIndex >= 12) return dateStr;

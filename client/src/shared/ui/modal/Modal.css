@@ -28,7 +28,8 @@
   box-shadow: none;
   padding: 14px;
   max-height: 90vh;
-  width: 100%;
+  /* Largura máxima vem de --sr-modal-max-width (prop `width` do Modal); evita inline width que impedia 100% no mobile */
+  width: min(var(--sr-modal-max-width, 560px), 100%);
   max-width: 100%;
   min-width: 0;
   display: flex;
@@ -98,6 +99,10 @@
   font-size: 14px;
   font-weight: 800;
   color: var(--sr-ink);
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
 }
 
 .sr-modal__subtitle {
@@ -106,6 +111,9 @@
   font-weight: 600;
   color: var(--sr-ink-subtle);
   line-height: 1.5;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .sr-modal__close {
@@ -172,6 +180,10 @@
 
   .sr-modal__body {
     padding: 16px;
+    overflow-x: hidden;
+  }
+
+  .sr-modal__body:has(.sr-resume-builder-wizard) {
     overflow-x: visible;
   }
   
@@ -201,8 +213,12 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    overflow-x: visible;
+    overflow-x: hidden;
     width: 100%;
+  }
+
+  .sr-modal__body:has(.sr-resume-builder-wizard) {
+    overflow-x: visible;
   }
   
   .sr-modal__body,
@@ -224,11 +240,12 @@
   }
 
   .sr-modal__panel {
-    width: 100vw;
-    min-width: 320px;
-    max-width: 100vw;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     max-height: 100dvh;
     height: 100dvh;
+    box-sizing: border-box;
   }
 
   .sr-modal__header {

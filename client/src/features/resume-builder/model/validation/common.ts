@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { parseResumeDateToDate } from '@/shared/lib/date/resumeDate';
+
 const trimValue = (value: unknown) => (typeof value === 'string' ? value.trim() : value);
 
 const emptyToUndefined = (value: unknown) => {
@@ -26,17 +28,15 @@ export const optionalTrimmedText = (min: number, max: number, messages: { min: s
       .refine((value) => value.length === 0 || value.length >= min, messages.min),
   );
 
-const monthRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
-
 const DEFAULT_DATE_INVALID = 'Invalid date';
 
-export const monthString = (requiredMessage: string, dateInvalidMessage: string = DEFAULT_DATE_INVALID) =>
-  z.preprocess(trimValue, z.string().min(1, requiredMessage).refine((value) => monthRegex.test(String(value)), dateInvalidMessage));
+export const resumeDateString = (requiredMessage: string, dateInvalidMessage: string = DEFAULT_DATE_INVALID) =>
+  z.preprocess(trimValue, z.string().min(1, requiredMessage).refine((value) => parseResumeDateToDate(String(value)) !== null, dateInvalidMessage));
 
-export const optionalMonthString = (dateInvalidMessage: string = DEFAULT_DATE_INVALID) =>
+export const optionalResumeDateString = (dateInvalidMessage: string = DEFAULT_DATE_INVALID) =>
   z.preprocess(
     emptyToUndefined,
-    z.string().refine((value) => !value || monthRegex.test(String(value)), dateInvalidMessage).optional(),
+    z.string().refine((value) => !value || parseResumeDateToDate(String(value)) !== null, dateInvalidMessage).optional(),
   );
 
 export const optionalPhoneAllowEmpty = (message: string) =>
@@ -55,34 +55,48 @@ const normalizeUrl = (value: string) => {
   return `https://${value}`;
 };
 
+/**
+ * Host plausível para links de currículo.
+ * - Evita `https://abc` (host sem TLD).
+ * - Evita strings só numéricas: o construtor `URL` trata como IPv4 em notação decimal única
+ *   (ex.: `69369` → hostname `0.1.14.249`), o que passava refine indevidamente.
+ */
+const isPlausibleHttpUrl = (raw: string) => {
+  const trimmed = raw.trim();
+  if (!trimmed) return false;
+
+  const hostCandidate = trimmed
+    .replace(/^https?:\/\//i, '')
+    .split('/')[0]
+    ?.split('?')[0]
+    ?.split('#')[0]
+    ?.split(':')[0];
+
+  if (hostCandidate && /^\d+$/.test(hostCandidate)) {
+    return false;
+  }
+
+  try {
+    const u = new URL(normalizeUrl(trimmed));
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+    const host = u.hostname.toLowerCase();
+    if (host === 'localhost' || host.endsWith('.localhost')) return true;
+    if (host.startsWith('[')) return true;
+    if (/^\d{1,3}(\.\d{1,3}){3}$/.test(host)) return true;
+    return host.includes('.');
+  } catch {
+    return false;
+  }
+};
+
 export const optionalUrl = (message: string, maxMessage: string) =>
   z.preprocess(
     emptyToUndefined,
     z
       .string()
       .max(255, maxMessage)
-      .refine((value) => {
-        if (!value) return true;
-        try {
-          new URL(normalizeUrl(value));
-          return true;
-        } catch {
-          return false;
-        }
-      }, message)
+      .refine((value) => !value || isPlausibleHttpUrl(value), message)
       .transform((value) => (value ? normalizeUrl(value) : value))
       .optional(),
   );
 
-export const compareMonth = (start?: string, end?: string) => {
-  if (!start || !end || !monthRegex.test(start) || !monthRegex.test(end)) return null;
-  const [startYearStr, startMonthStr] = start.split('-');
-  const [endYearStr, endMonthStr] = end.split('-');
-  if (!startYearStr || !startMonthStr || !endYearStr || !endMonthStr) return null;
-  const startYear = Number(startYearStr);
-  const startMonth = Number(startMonthStr);
-  const endYear = Number(endYearStr);
-  const endMonth = Number(endMonthStr);
-  if ([startYear, startMonth, endYear, endMonth].some((value) => Number.isNaN(value))) return null;
-  return startYear * 12 + startMonth <= endYear * 12 + endMonth;
-};

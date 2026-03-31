@@ -15,26 +15,24 @@ export function AnalysisSkeleton() {
           <Skeleton width={80} height={12} radius={8} />
           <Skeleton width={60} height={12} radius={8} />
         </Card>
-        <div className="sr-analysis-skeleton__cards">
-          <Card className="sr-analysis-skeleton__card">
-            <Skeleton width={40} height={40} radius={12} />
-            <Skeleton width={60} height={11} radius={6} />
-            <Skeleton width={48} height={20} radius={8} />
-            <Skeleton width={70} height={22} radius={999} />
-          </Card>
-          <Card className="sr-analysis-skeleton__card">
-            <Skeleton width={40} height={40} radius={12} />
-            <Skeleton width={50} height={11} radius={6} />
-            <Skeleton width={48} height={20} radius={8} />
-            <Skeleton width={70} height={22} radius={999} />
-          </Card>
-          <Card className="sr-analysis-skeleton__card">
-            <Skeleton width={40} height={40} radius={12} />
-            <Skeleton width={60} height={11} radius={6} />
-            <Skeleton width={90} height={18} radius={8} />
-            <Skeleton width={70} height={22} radius={999} />
-          </Card>
-        </div>
+        <Card className="sr-analysis-skeleton__card">
+          <Skeleton width={40} height={40} radius={12} />
+          <Skeleton width={60} height={11} radius={6} />
+          <Skeleton width={48} height={20} radius={8} />
+          <Skeleton width={70} height={22} radius={999} />
+        </Card>
+        <Card className="sr-analysis-skeleton__card">
+          <Skeleton width={40} height={40} radius={12} />
+          <Skeleton width={50} height={11} radius={6} />
+          <Skeleton width={48} height={20} radius={8} />
+          <Skeleton width={70} height={22} radius={999} />
+        </Card>
+        <Card className="sr-analysis-skeleton__card">
+          <Skeleton width={40} height={40} radius={12} />
+          <Skeleton width={60} height={11} radius={6} />
+          <Skeleton width={90} height={18} radius={8} />
+          <Skeleton width={70} height={22} radius={999} />
+        </Card>
       </div>
       <div className="sr-analysis-skeleton__lists">
         <Card className="sr-analysis-skeleton__list">

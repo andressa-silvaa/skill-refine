@@ -25,7 +25,7 @@ export function MetricsGrid(props: Props) {
   const clarityBadgeLabel = result.clarityBadge === 'excellent' ? t('analysis.badgeExcellent') : result.clarityBadge === 'good' ? t('analysis.badgeGood') : t('analysis.badgeAttention');
 
   return (
-    <div className="sr-metrics-grid" role="group" aria-label={t('analysis.metricsAria')}>
+    <div className="sr-ai-metrics-grid" role="group" aria-label={t('analysis.metricsAria')}>
       <ScoreCard
         score={result.score}
         scoreLabel={result.scoreLabel}

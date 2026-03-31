@@ -22,7 +22,7 @@ export function ConfirmDiscardChangesModal(props: Props) {
         </div>
         <p className="sr-confirm-del__text">{t('resume.discardModalMessage')}</p>
         <div className="sr-confirm-del__actions">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose} autoFocus>
             {t('resume.discardModalContinueEdit')}
           </Button>
           <Button variant="danger" onClick={onDiscard}>

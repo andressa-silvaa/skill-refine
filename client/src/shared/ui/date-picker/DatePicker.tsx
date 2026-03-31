@@ -1,5 +1,7 @@
 import DatePickerLib from 'react-date-picker';
 
+import { formatResumeDate, parseResumeDateToDate } from '@/shared/lib/date/resumeDate';
+
 import 'react-date-picker/dist/DatePicker.css';
 import './DatePicker.css';
 
@@ -20,20 +22,6 @@ function normalizeDatePickerValue(value: DatePickerValue): Date | null {
   return null;
 }
 
-function toDate(value: string): Date | null {
-  if (!value) return null;
-  const [year, month] = value.split('-');
-  if (!year || !month) return null;
-  return new Date(parseInt(year, 10), parseInt(month, 10) - 1, 1);
-}
-
-function toMonthString(date: Date | null): string {
-  if (!date) return '';
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${year}-${month}`;
-}
-
 export function DatePicker(props: Props) {
   const { value, onChange, label, error, hint, className = '' } = props;
   const inputId = `date-picker-${Math.random().toString(36).substr(2, 9)}`;
@@ -50,26 +38,28 @@ export function DatePicker(props: Props) {
       <DatePickerLib
         onChange={(val: DatePickerValue) => {
           const normalized = normalizeDatePickerValue(val);
-          onChange(toMonthString(normalized));
+          onChange(formatResumeDate(normalized));
         }}
-        value={toDate(value)}
-        format="MM/y"
+        value={parseResumeDateToDate(value)}
+        format="dd/MM/y"
+        dayPlaceholder="dd"
         monthPlaceholder="MM"
         yearPlaceholder="YYYY"
         clearIcon={null}
         calendarIcon={<span className="sr-date-picker-icon">📅</span>}
         className={`sr-date-picker${error ? ' is-invalid' : ''}`}
       />
-      {hint && !error ? (
-        <p id={hintId} className="sr-date-picker-hint">
-          {hint}
-        </p>
-      ) : null}
-      {error ? (
-        <p id={errorId} className="sr-date-picker-error">
-          {error}
-        </p>
-      ) : null}
+      <div className="sr-date-picker-messages" aria-live="polite">
+        {error ? (
+          <p id={errorId} className="sr-date-picker-error">
+            {error}
+          </p>
+        ) : hint ? (
+          <p id={hintId} className="sr-date-picker-hint">
+            {hint}
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

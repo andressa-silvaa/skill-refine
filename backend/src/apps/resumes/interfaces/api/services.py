@@ -32,6 +32,7 @@ from .service_tokens import (
 from .service_utils import (
     normalize_optional,
     parse_month,
+    parse_resume_date,
     replace_educations,
     replace_experiences,
     replace_languages,
@@ -56,6 +57,7 @@ __all__ = [
     "list_resumes_paginated",
     "normalize_optional",
     "parse_month",
+    "parse_resume_date",
     "parse_pdf_token",
     "replace_educations",
     "replace_experiences",

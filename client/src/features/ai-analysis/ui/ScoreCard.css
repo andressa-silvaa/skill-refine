@@ -66,6 +66,28 @@
   margin-top: 2px;
 }
 
+/* md: alinhar ao MetricCard (16px) e reduzir anel para não dominar o grid 2×2 */
+@media (max-width: 900px) and (min-width: 481px) {
+  .sr-score-card {
+    padding: 16px;
+    gap: 8px;
+    max-height: none;
+  }
+
+  .sr-score-card__ring-wrap {
+    width: 72px;
+    height: 72px;
+  }
+
+  .sr-score-card__value {
+    font-size: 20px;
+  }
+
+  .sr-score-card__label {
+    font-size: 10px;
+  }
+}
+
 @media (max-width: 480px) {
   .sr-score-card {
     padding: 16px;

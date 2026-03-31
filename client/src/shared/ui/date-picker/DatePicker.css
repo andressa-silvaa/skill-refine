@@ -1,6 +1,7 @@
 .sr-date-picker-wrapper {
   display: grid;
   gap: 6px;
+  align-content: start;
 }
 
 .sr-date-picker-label {
@@ -135,10 +136,18 @@
   color: var(--sr-ink-muted);
 }
 
+/* Altura mínima igual com ou sem erro — inputs lado a lado permanecem alinhados */
+.sr-date-picker-messages {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: flex-start;
+}
+
 .sr-date-picker-hint {
   margin: 0;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.35;
   color: var(--sr-ink-muted);
 }
 
@@ -146,5 +155,6 @@
   margin: 0;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.35;
   color: var(--danger);
 }

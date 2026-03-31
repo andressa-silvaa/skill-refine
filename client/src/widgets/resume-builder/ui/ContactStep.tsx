@@ -29,11 +29,11 @@ export function ContactStep(props: Props) {
   const linkedinError = shouldShowError('contact.linkedin') ? getError('contact.linkedin') : undefined;
 
   const compositeValue = contact.portfolio || contact.github || contact.website || '';
-  const compositeError =
-    (shouldShowError('contact.github') && getError('contact.github')) ||
-    (shouldShowError('contact.portfolio') && getError('contact.portfolio')) ||
-    (shouldShowError('contact.website') && getError('contact.website')) ||
-    undefined;
+  const compositePaths = ['contact.github', 'contact.portfolio', 'contact.website'] as const;
+  const compositeError = compositePaths.reduce<string | undefined>((acc, path) => {
+    if (acc) return acc;
+    return shouldShowError(path) ? getError(path) : undefined;
+  }, undefined);
 
   return (
     <div className="sr-contact-step">

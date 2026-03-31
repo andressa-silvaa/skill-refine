@@ -1,6 +1,8 @@
 .sr-dash-stat-card {
   padding: 20px;
   transition: box-shadow 0.18s ease;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .sr-dash-stat-card:hover {
@@ -11,6 +13,7 @@
   display: flex;
   align-items: flex-start;
   gap: 14px;
+  min-width: 0;
 }
 
 .sr-dash-stat-card__icon-wrap {
@@ -33,9 +36,28 @@
 .sr-dash-stat-card__body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   min-width: 0;
   flex: 1;
+  overflow: hidden;
+}
+
+/* Tooltip trigger wrappers — flex/grid truncation needs bounded width */
+.sr-dash-stat-card__label-tooltip,
+.sr-dash-stat-card__sub-tooltip {
+  min-width: 0;
+  width: 100%;
+}
+
+.sr-dash-stat-card__value-tooltip {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sr-dash-stat-card__value-tooltip .sr-dash-stat-card__value {
+  display: block;
+  width: 100%;
+  flex: none;
 }
 
 .sr-dash-stat-card__label {
@@ -44,22 +66,35 @@
   color: var(--sr-ink-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: 1.25;
 }
 
 .sr-dash-stat-card__value-row {
   display: flex;
-  align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  min-width: 0;
 }
 
 .sr-dash-stat-card__value {
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--sr-ink);
-  line-height: 1;
-  overflow-wrap: anywhere;
+  line-height: 1.1;
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: normal;
 }
 
 .sr-dash-stat-card__badge {
@@ -68,6 +103,10 @@
   padding: 2px 8px;
   border-radius: 999px;
   white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sr-dash-stat-card__badge--success {
@@ -99,20 +138,51 @@
 .sr-dash-stat-card__sub {
   font-size: 0.78rem;
   color: var(--sr-ink-muted);
-  margin-top: 2px;
-  overflow-wrap: anywhere;
+  margin-top: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: normal;
+  overflow-wrap: break-word;
+  line-height: 1.3;
+  min-width: 0;
 }
 
 @media (max-width: 480px) {
   .sr-dash-stat-card {
-    padding: 16px;
+    padding: 12px 12px 14px;
   }
 
   .sr-dash-stat-card__inner {
     gap: 10px;
   }
 
+  .sr-dash-stat-card__label {
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-size: 0.72rem;
+  }
+
   .sr-dash-stat-card__value {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
+  }
+
+  .sr-dash-stat-card__sub {
+    font-size: 0.74rem;
+  }
+
+  .sr-dash-stat-card__badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+}
+
+@media (max-width: 380px) {
+  .sr-dash-stat-card__icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 1rem;
   }
 }

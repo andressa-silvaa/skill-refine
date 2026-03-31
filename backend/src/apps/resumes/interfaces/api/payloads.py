@@ -22,10 +22,10 @@ from apps.resumes.infrastructure.models import (
 from apps.resumes.infrastructure.models import ResumeVersion
 
 
-def format_month(value: date | None) -> str:
+def format_resume_date(value: date | None) -> str:
     if not value:
         return ""
-    return value.strftime("%Y-%m")
+    return value.strftime("%Y-%m-%d")
 
 
 def resume_detail_prefetch():
@@ -95,8 +95,8 @@ def resume_detail_payload(resume: Resume) -> dict[str, Any]:
                 "id": str(exp.id),
                 "company": exp.company or "",
                 "position": exp.position or "",
-                "startDate": format_month(exp.start_date),
-                "endDate": format_month(exp.end_date),
+                "startDate": format_resume_date(exp.start_date),
+                "endDate": format_resume_date(exp.end_date),
                 "isCurrent": bool(exp.is_current),
                 "description": bullets,
             }
@@ -108,8 +108,8 @@ def resume_detail_payload(resume: Resume) -> dict[str, Any]:
             "institution": edu.institution or "",
             "course": edu.course or "",
             "degree": edu.degree or "",
-            "startDate": format_month(edu.start_date),
-            "endDate": format_month(edu.end_date),
+            "startDate": format_resume_date(edu.start_date),
+            "endDate": format_resume_date(edu.end_date),
             "status": edu.status,
         }
         for edu in educations

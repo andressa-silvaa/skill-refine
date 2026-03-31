@@ -34,16 +34,16 @@ export function ResumeSelectCard(props: Props) {
   ];
 
   return (
-    <Card className="sr-analysis-select-card">
-      <h2 className="sr-analysis-select-card__title">{t('analysis.selectCardTitle')}</h2>
-      <div className="sr-analysis-select-card__row">
-        <div className="sr-analysis-select-card__select-wrap">
+    <Card className="sr-ai-select-card">
+      <h2 className="sr-ai-select-card__title">{t('analysis.selectCardTitle')}</h2>
+      <div className="sr-ai-select-card__row">
+        <div className="sr-ai-select-card__select-wrap">
           <CustomSelect
             value={value}
             options={optionsWithPlaceholder}
             onChange={onChange}
             disabled={loading}
-            className="sr-analysis-select-card__select"
+            className="sr-ai-select-card__select"
           />
         </div>
         <Button
@@ -51,7 +51,7 @@ export function ResumeSelectCard(props: Props) {
           variant="primary"
           onClick={onAnalyze}
           disabled={!value || loading}
-          className="sr-analysis-select-card__btn"
+          className="sr-ai-select-card__btn"
           aria-busy={loading}
         >
           {loading ? (

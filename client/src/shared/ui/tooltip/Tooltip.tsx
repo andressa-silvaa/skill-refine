@@ -8,10 +8,12 @@ type Props = {
   content: string;
   show?: boolean;
   align?: 'top' | 'bottom' | 'left' | 'right';
+  /** Applied to the hover/focus trigger wrapper around `children` (e.g. flex/min-width for truncation). */
+  className?: string;
 };
 
 export function Tooltip(props: Props) {
-  const { children, content, show = true, align = 'top' } = props;
+  const { children, content, show = true, align = 'top', className } = props;
   const [visible, setVisible] = useState(false);
   const [position, setPosition] = useState<{ top?: number; left?: number; right?: number; bottom?: number } | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
@@ -153,6 +155,7 @@ export function Tooltip(props: Props) {
     <>
       <div
         ref={triggerRef}
+        className={className}
         onMouseEnter={() => setVisible(true)}
         onMouseLeave={() => setVisible(false)}
         onFocus={() => setVisible(true)}

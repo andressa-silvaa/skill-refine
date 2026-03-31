@@ -24,7 +24,7 @@ export function ConfirmDeleteResumeModal(props: Props) {
         <p className="sr-confirm-del__text">{t('resume.deleteModalPermanent')}</p>
         <p className="sr-confirm-del__text">{t('resume.deleteModalRecreate')}</p>
         <div className="sr-confirm-del__actions">
-          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
+          <Button variant="secondary" onClick={onClose} disabled={isLoading} autoFocus={!isLoading}>
             {t('resume.deleteModalCancel')}
           </Button>
           <Button variant="danger" onClick={onConfirm} disabled={isLoading}>

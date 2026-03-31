@@ -15,24 +15,30 @@ from apps.resumes.infrastructure.models import (
 )
 
 
-def parse_month(value: str | None) -> Any:
+def parse_resume_date(value: str | None) -> date | None:
+    """Aceita YYYY-MM-DD ou legado YYYY-MM (dia 1)."""
     if not value:
         return None
     raw = value.strip()
     if not raw:
         return None
     parts = raw.split("-")
-    if len(parts) != 2:
-        return None
-    year_str, month_str = parts
     try:
-        year = int(year_str)
-        month = int(month_str)
-    except ValueError:
+        if len(parts) == 3:
+            y, m, d = (int(parts[0]), int(parts[1]), int(parts[2]))
+            return date(y, m, d)
+        if len(parts) == 2:
+            y, m = int(parts[0]), int(parts[1])
+            if m < 1 or m > 12:
+                return None
+            return date(y, m, 1)
+    except (ValueError, TypeError):
         return None
-    if month < 1 or month > 12:
-        return None
-    return date(year, month, 1)
+    return None
+
+
+# Alias usado por código legado / testes
+parse_month = parse_resume_date
 
 
 def normalize_optional(value: str | None) -> str | None:
@@ -64,8 +70,8 @@ def replace_experiences(resume: Resume, experiences: Iterable[dict[str, Any]]) -
             resume=resume,
             company=exp.get("company") or "",
             position=exp.get("position") or "",
-            start_date=parse_month(exp.get("startDate")),
-            end_date=parse_month(exp.get("endDate")),
+            start_date=parse_resume_date(exp.get("startDate")),
+            end_date=parse_resume_date(exp.get("endDate")),
             is_current=bool(exp.get("isCurrent")),
             position_index=idx,
         )
@@ -86,8 +92,8 @@ def replace_educations(resume: Resume, educations: Iterable[dict[str, Any]]) -> 
             institution=edu.get("institution") or "",
             course=edu.get("course") or "",
             degree=edu.get("degree") or "",
-            start_date=parse_month(edu.get("startDate")),
-            end_date=parse_month(edu.get("endDate")),
+            start_date=parse_resume_date(edu.get("startDate")),
+            end_date=parse_resume_date(edu.get("endDate")),
             status=edu.get("status") or "completed",
             position_index=idx,
         )

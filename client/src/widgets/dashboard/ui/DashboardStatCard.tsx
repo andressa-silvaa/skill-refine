@@ -1,4 +1,6 @@
-import { Card } from '@/shared/ui';
+import { useIsTruncated, useIsVerticallyClamped } from '@/shared/lib/hooks/useIsTruncated';
+import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery';
+import { Card, Tooltip } from '@/shared/ui';
 
 import './DashboardStatCard.css';
 
@@ -21,6 +23,13 @@ export function DashboardStatCard({
   badge,
   badgeTone = 'success',
 }: Props) {
+  /** Native title on touch/coarse pointers where hover tooltip does not run. */
+  const canHover = useMediaQuery('(hover: hover)');
+  const valueStr = String(value);
+  const { ref: labelRef, isClamped: labelClamped } = useIsVerticallyClamped<HTMLSpanElement>(label);
+  const { ref: valueRef, isTruncated: valueTruncated } = useIsTruncated<HTMLSpanElement>(valueStr);
+  const { ref: subRef, isClamped: subClamped } = useIsVerticallyClamped<HTMLSpanElement>(sub ?? '');
+
   return (
     <Card className="sr-dash-stat-card">
       <div className="sr-dash-stat-card__inner">
@@ -31,16 +40,42 @@ export function DashboardStatCard({
           <i className={icon} aria-hidden />
         </div>
         <div className="sr-dash-stat-card__body">
-          <span className="sr-dash-stat-card__label">{label}</span>
+          <Tooltip content={label} show={labelClamped} align="top" className="sr-dash-stat-card__label-tooltip">
+            <span
+              ref={labelRef}
+              className="sr-dash-stat-card__label"
+              title={labelClamped && !canHover ? label : undefined}
+            >
+              {label}
+            </span>
+          </Tooltip>
           <div className="sr-dash-stat-card__value-row">
-            <span className="sr-dash-stat-card__value">{value}</span>
+            <Tooltip content={valueStr} show={valueTruncated} align="top" className="sr-dash-stat-card__value-tooltip">
+              <span
+                ref={valueRef}
+                className="sr-dash-stat-card__value"
+                title={valueTruncated && !canHover ? valueStr : undefined}
+              >
+                {value}
+              </span>
+            </Tooltip>
             {badge && (
               <span className={`sr-dash-stat-card__badge sr-dash-stat-card__badge--${badgeTone}`}>
                 {badge}
               </span>
             )}
           </div>
-          {sub && <span className="sr-dash-stat-card__sub">{sub}</span>}
+          {sub && (
+            <Tooltip content={sub} show={subClamped} align="top" className="sr-dash-stat-card__sub-tooltip">
+              <span
+                ref={subRef}
+                className="sr-dash-stat-card__sub"
+                title={subClamped && !canHover ? sub : undefined}
+              >
+                {sub}
+              </span>
+            </Tooltip>
+          )}
         </div>
       </div>
     </Card>

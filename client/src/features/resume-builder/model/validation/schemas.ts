@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
 import type { BuilderStep } from '../types';
+import { compareResumeDates } from '@/shared/lib/date/resumeDate';
 import {
-  compareMonth,
-  monthString,
   optionalHexColor,
-  optionalMonthString,
+  optionalResumeDateString,
   optionalTrimmedStringAllowEmpty,
   optionalTrimmedText,
   optionalUrl,
   requiredTrimmedString,
   optionalPhoneAllowEmpty,
+  resumeDateString,
 } from './common';
 
 export type TFunction = (key: string) => string;
@@ -68,8 +68,8 @@ const createExperienceItemSchema = (t: TFunction) =>
         min: t('validation.positionMin'),
         max: t('validation.positionMax'),
       }),
-      startDate: monthString(t('validation.startDateRequired'), t('validation.dateInvalid')),
-      endDate: optionalMonthString(t('validation.dateInvalid')),
+      startDate: resumeDateString(t('validation.startDateRequired'), t('validation.dateInvalid')),
+      endDate: optionalResumeDateString(t('validation.dateInvalid')),
       isCurrent: z.boolean(),
       description: z
         .array(
@@ -99,7 +99,7 @@ const createExperienceItemSchema = (t: TFunction) =>
       }
 
       if (value.endDate && !value.isCurrent) {
-        const validOrder = compareMonth(value.startDate, value.endDate);
+        const validOrder = compareResumeDates(value.startDate, value.endDate);
         if (validOrder === false) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
@@ -128,8 +128,8 @@ const createEducationItemSchema = (t: TFunction) =>
         max: t('validation.courseMax'),
       }),
       degree: optionalTrimmedStringAllowEmpty(60, t('validation.degreeMax')),
-      startDate: monthString(t('validation.startDateRequired'), t('validation.dateInvalid')),
-      endDate: optionalMonthString(t('validation.dateInvalid')),
+      startDate: resumeDateString(t('validation.startDateRequired'), t('validation.dateInvalid')),
+      endDate: optionalResumeDateString(t('validation.dateInvalid')),
       status: z.enum(['completed', 'in_progress']),
     })
     .superRefine((value, ctx) => {
@@ -142,7 +142,7 @@ const createEducationItemSchema = (t: TFunction) =>
       }
 
       if (value.endDate) {
-        const validOrder = compareMonth(value.startDate, value.endDate);
+        const validOrder = compareResumeDates(value.startDate, value.endDate);
         if (validOrder === false) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

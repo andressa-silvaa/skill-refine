@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useModalEffects } from '@/shared/lib/hooks/useModalEffects';
@@ -27,7 +27,10 @@ export function Modal(props: Props) {
   return createPortal(
     <div className="sr-modal" role="dialog" aria-modal="true" aria-labelledby={labelId}>
       <button type="button" className="sr-modal__backdrop" aria-label="Fechar" onClick={onClose} />
-      <div className="sr-modal__panel" style={{ width: `min(${width}px, 100%)` }}>
+      <div
+        className="sr-modal__panel"
+        style={{ '--sr-modal-max-width': `${width}px` } as CSSProperties}
+      >
         <div className="sr-modal__header">
           <div className="sr-modal__header-content">
             <h3 id={labelId} className="sr-modal__title" tabIndex={-1}>

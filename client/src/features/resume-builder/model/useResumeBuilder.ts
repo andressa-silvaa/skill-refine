@@ -7,6 +7,7 @@ import { getResumeThemeById } from '@/entities/resume';
 import type { BuilderStep } from './types';
 import { BUILDER_STEPS } from './types';
 import { getFirstErrorForStep, getFirstErrorStep, validateResume, validateStep } from './validation/validate';
+import { normalizeResumeDateInput } from '@/shared/lib/date/resumeDate';
 
 const normalizeText = (value: string | undefined) => (value ?? '').trim();
 
@@ -45,8 +46,8 @@ const normalizeResumeData = (input: ResumeData) => {
       institution: normalizeText(edu.institution),
       course: normalizeText(edu.course),
       degree: normalizeText(edu.degree),
-      startDate: normalizeText(edu.startDate),
-      endDate: normalizeText(edu.endDate),
+      startDate: normalizeResumeDateInput(normalizeText(edu.startDate)),
+      endDate: normalizeResumeDateInput(normalizeText(edu.endDate)),
       status: edu.status,
     })),
     skills: input.skills.map((skill) => ({

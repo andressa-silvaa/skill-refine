@@ -108,11 +108,13 @@ export function ResumeExperienceItem({ experience, variant = 'default' }: { expe
 }
 
 export function ResumeEducationItem({ education, variant = 'default' }: { education: ResumeData['educations'][0]; variant?: SectionVariant }) {
+  const { i18n } = useTranslation();
+  const locale = i18n.language;
   const dateRange = education.status === 'completed' && education.endDate
-    ? `${formatMonthYear(education.startDate)} - ${formatMonthYear(education.endDate)}`
+    ? `${formatMonthYear(education.startDate, locale)} - ${formatMonthYear(education.endDate, locale)}`
     : education.status === 'in_progress'
-    ? `${formatMonthYear(education.startDate)} - Em andamento`
-    : formatMonthYear(education.startDate);
+    ? `${formatMonthYear(education.startDate, locale)} - Em andamento`
+    : formatMonthYear(education.startDate, locale);
 
   return (
     <div className={`sr-resume-block__item sr-resume-block__item--${variant}`}>

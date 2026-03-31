@@ -18,8 +18,8 @@ class ResumeContactSerializer(serializers.Serializer):
 class ResumeExperienceSerializer(serializers.Serializer):
     company = serializers.CharField(required=False, allow_blank=True, max_length=180)
     position = serializers.CharField(required=False, allow_blank=True, max_length=160)
-    startDate = serializers.CharField(required=False, allow_blank=True, max_length=7)
-    endDate = serializers.CharField(required=False, allow_blank=True, max_length=7)
+    startDate = serializers.CharField(required=False, allow_blank=True, max_length=10)
+    endDate = serializers.CharField(required=False, allow_blank=True, max_length=10)
     isCurrent = serializers.BooleanField(required=False)
     description = serializers.ListField(child=serializers.CharField(allow_blank=True), required=False)
 
@@ -28,8 +28,8 @@ class ResumeEducationSerializer(serializers.Serializer):
     institution = serializers.CharField(required=False, allow_blank=True, max_length=180)
     course = serializers.CharField(required=False, allow_blank=True, max_length=180)
     degree = serializers.CharField(required=False, allow_blank=True, max_length=120)
-    startDate = serializers.CharField(required=False, allow_blank=True, max_length=7)
-    endDate = serializers.CharField(required=False, allow_blank=True, max_length=7)
+    startDate = serializers.CharField(required=False, allow_blank=True, max_length=10)
+    endDate = serializers.CharField(required=False, allow_blank=True, max_length=10)
     status = serializers.ChoiceField(required=False, choices=["completed", "in_progress"])
 
 
