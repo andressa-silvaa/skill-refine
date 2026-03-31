@@ -4,7 +4,7 @@ Run: python manage.py test apps.analysis.tests.test_analysis_api -v 2
 """
 from __future__ import annotations
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -119,11 +119,11 @@ class TestRunCreatesPendingAnalysis(AnalysisAPITestCase):
         self.assertEqual(resp.status_code, status.HTTP_202_ACCEPTED)
         data = resp.json()
         self.assertIn("id", data)
-        self.assertEqual(data["status"], "pending")
+        self.assertIn(data["status"], ("pending", "running", "done"))
         self.assertEqual(data["resumeId"], str(self.resume_a.id))
         self.assertEqual(ResumeAnalysis.objects.filter(resume_id=self.resume_a.id).count(), 1)
         analysis = ResumeAnalysis.objects.get(id=data["id"])
-        self.assertEqual(analysis.status, AnalysisStatus.PENDING)
+        self.assertIn(analysis.status, (AnalysisStatus.PENDING, AnalysisStatus.RUNNING, AnalysisStatus.DONE))
 
 
 class TestPayloadShapeStable(AnalysisAPITestCase):
@@ -141,9 +141,24 @@ class TestPayloadShapeStable(AnalysisAPITestCase):
                         {"title": "Adicionar métricas", "priority": "high", "description": None},
                     ],
                 },
+                "model_metadata_by_task": {
+                    "seniority": {
+                        "modelName": "neuralmind/bert-base-portuguese-cased",
+                        "modelVersion": "analysis_v1_pt",
+                        "datasetVersion": "abc123",
+                        "provider": "local",
+                    },
+                    "quality": {
+                        "modelName": "neuralmind/bert-base-portuguese-cased",
+                        "modelVersion": "analysis_quality_v9_pt",
+                        "datasetVersion": "def456",
+                        "provider": "local",
+                    },
+                },
             },
             model_name="bertimbau-base",
             model_version="analysis_v1",
+            dataset_version="root123",
             provider="local",
         )
         payload = analysis_payload(analysis)
@@ -161,7 +176,11 @@ class TestPayloadShapeStable(AnalysisAPITestCase):
         self.assertIn("metadata", payload)
         self.assertIn("modelName", payload["metadata"])
         self.assertIn("modelVersion", payload["metadata"])
+        self.assertIn("datasetVersion", payload["metadata"])
         self.assertIn("provider", payload["metadata"])
+        self.assertIn("taskModels", payload["metadata"])
+        self.assertIn("seniority", payload["metadata"]["taskModels"])
+        self.assertEqual(payload["metadata"]["taskModels"]["quality"]["modelVersion"], "analysis_quality_v9_pt")
         self.assertIn("createdAt", payload)
         self.assertIn("updatedAt", payload)
         self.assertEqual(len(payload["insights"]["strengths"]), 1)
@@ -196,3 +215,23 @@ class TestHistoryRequiresAuth(AnalysisAPITestCase):
     def test_history_without_auth_returns_401(self):
         resp = self.client.get(self.history_url, {"resume_id": str(self.resume_a.id)})
         self.assertIn(resp.status_code, (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN))
+
+
+class TestRunReturns503WhenUnavailable(AnalysisAPITestCase):
+    """When Celery unavailable and fallback disabled (prod), return 503."""
+
+    @override_settings(
+        CELERY_BROKER_URL="",
+        CELERY_TASKS_ENABLED=True,
+        ALLOW_INPROCESS_JOB_FALLBACK=False,
+    )
+    def test_run_returns_503_when_analysis_unavailable(self):
+        self.client.force_authenticate(user=self.user_a)
+        resp = self.client.post(
+            self.run_url,
+            {"resume_id": str(self.resume_a.id)},
+            format="json",
+        )
+        self.assertEqual(resp.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
+        data = resp.json() or {}
+        self.assertIn("error", data)

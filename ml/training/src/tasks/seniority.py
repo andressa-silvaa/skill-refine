@@ -10,6 +10,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from ..data import SeniorityDataset, collate_seniority, load_splits
 from ..eval.metrics import accuracy, f1_macro, classification_report_per_lang, confusion_matrix_and_report
+from ..utils import ensure_padding_token
 
 SENIORITY_LABELS = ("intern", "junior", "mid", "senior")
 
@@ -25,6 +26,7 @@ def get_id2label() -> dict[int, str]:
 def build_model_and_tokenizer(base_model: str, num_labels: int = 4):
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     model = AutoModelForSequenceClassification.from_pretrained(base_model, num_labels=num_labels)
+    tokenizer, model = ensure_padding_token(tokenizer, model)
     return model, tokenizer
 
 

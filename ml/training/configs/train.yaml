@@ -29,7 +29,7 @@ train_file: train.jsonl
 val_file: val.jsonl
 test_file: test.jsonl
 output_dir: ../models
-reports_dir: ../reports
+reports_dir: training/reports
 
 # Training
 epochs: 3

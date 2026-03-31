@@ -1,5 +1,5 @@
 """
-Seniority predictor: TF-IDF + LogReg or heuristic fallback.
+Seniority predictor: HF (SequenceClassification), TF-IDF+LogReg, or heuristic fallback.
 """
 from __future__ import annotations
 
@@ -42,7 +42,6 @@ def _heuristic_seniority(text: str, lang: str) -> str:
         return "junior"
     if any(s in text_lower for s in signals["intern"]):
         return "intern"
-    # Fallback: years of experience
     match = YEARS_PATTERN.search(text_lower)
     if match:
         yrs = int(match.group(1))
@@ -56,26 +55,70 @@ def _heuristic_seniority(text: str, lang: str) -> str:
     return "mid"
 
 
+def _predict_hf(model, tokenizer, text: str, max_length: int = 512) -> str | None:
+    """Run HF inference. Returns predicted label or None on error."""
+    try:
+        import torch
+        inputs = tokenizer(
+            text[:12000],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        )
+        ctx = getattr(torch, "inference_mode", None)
+        if callable(ctx):
+            infer_ctx = ctx()
+        else:
+            infer_ctx = torch.no_grad()
+        with infer_ctx:
+            out = model(**inputs)
+        pred_id = out.logits.argmax(dim=-1).item()
+        if 0 <= pred_id < len(SENIORITY_LABELS):
+            return SENIORITY_LABELS[pred_id]
+    except Exception:
+        pass
+    return None
+
+
 def predict_seniority(
     resume_text: str,
     language: str,
-    model_bundle: tuple[Any, list[str]] | None,
+    model_bundle: tuple[Any, Any] | None,
 ) -> tuple[str, str]:
     """
     Predict seniority class. Returns (class, model_provider).
-    model_provider: "tfidf" | "heuristics-only"
+    model_provider: "hf" | "tfidf" | "heuristics-only"
     """
     if model_bundle is None:
         pred = _heuristic_seniority(resume_text, language)
         return (pred, "heuristics-only")
 
-    pipeline, labels = model_bundle
-    if pipeline is None:
+    model_or_pipeline, extra = model_bundle
+    if model_or_pipeline is None:
+        pred = _heuristic_seniority(resume_text, language)
+        provider = "heuristics-only"
+        if isinstance(extra, dict) and extra.get("provider"):
+            provider = extra["provider"]
+        return (pred, provider)
+
+    # HF model + tokenizer
+    if isinstance(extra, dict) and extra.get("tokenizer") is not None:
+        tokenizer = extra["tokenizer"]
+        max_length = 512
+        if isinstance(extra.get("metadata"), dict):
+            limits = extra["metadata"].get("input_limits") or {}
+            max_length = limits.get("max_tokens", 512)
+        pred = _predict_hf(model_or_pipeline, tokenizer, resume_text, max_length)
+        if pred:
+            return (pred, "hf")
         pred = _heuristic_seniority(resume_text, language)
         return (pred, "heuristics-only")
 
+    # TF-IDF pipeline (sklearn)
+    labels = extra if isinstance(extra, (list, tuple)) else extra.get("labels", list(SENIORITY_LABELS))
     try:
-        pred = pipeline.predict([resume_text])[0]
+        pred = model_or_pipeline.predict([resume_text])[0]
         if pred in SENIORITY_LABELS:
             return (pred, "tfidf")
     except Exception:

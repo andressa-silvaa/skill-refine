@@ -1,7 +1,9 @@
 """Matching task: Bi-encoder (cosine similarity) or Cross-encoder. D1) Bi-encoder recommended."""
 from __future__ import annotations
 
+import json
 from pathlib import Path
+import numpy as np
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
@@ -37,9 +39,11 @@ def build_dataloaders(
 class BiEncoderWithProjection(torch.nn.Module):
     """Shared encoder + cosine similarity; optional projection for score regression."""
 
-    def __init__(self, encoder, hidden_size: int, dropout: float = 0.1):
+    def __init__(self, encoder, hidden_size: int, dropout: float = 0.1, blend_alpha: float = 0.65):
         super().__init__()
         self.encoder = encoder
+        self.hidden_size = hidden_size
+        self.blend_alpha = float(blend_alpha)
         self.proj = torch.nn.Sequential(
             torch.nn.Linear(hidden_size * 2, hidden_size),
             torch.nn.ReLU(),
@@ -63,10 +67,12 @@ class BiEncoderWithProjection(torch.nn.Module):
         # Option B: concat + MLP for score
         concat = torch.cat([job_pooled, resume_pooled], dim=-1)
         score = self.proj(concat).squeeze(-1)
-        return score
+        score = torch.sigmoid(score)
+        # Blend learned score with cosine to stabilize regression without collapsing to hard buckets.
+        return (self.blend_alpha * score) + ((1.0 - self.blend_alpha) * ((cos + 1.0) / 2.0))
 
 
-def train_step(model, batch, device) -> tuple[torch.Tensor, torch.Tensor]:
+def train_step(model, batch, device, huber_beta: float = 0.08) -> tuple[torch.Tensor, torch.Tensor]:
     model.train()
     job_ids = batch.job_input_ids.to(device)
     job_mask = batch.job_attention_mask.to(device)
@@ -74,7 +80,7 @@ def train_step(model, batch, device) -> tuple[torch.Tensor, torch.Tensor]:
     res_mask = batch.resume_attention_mask.to(device)
     labels = batch.labels.to(device)
     score = model(job_ids, job_mask, res_ids, res_mask)
-    loss = F.mse_loss(score, labels)
+    loss = F.smooth_l1_loss(score, labels, beta=huber_beta)
     return loss, score
 
 
@@ -91,8 +97,68 @@ def eval_step(model, batch, device) -> tuple[torch.Tensor, torch.Tensor]:
 
 
 def compute_metrics(logits: torch.Tensor, labels: torch.Tensor) -> dict[str, float]:
-    preds = logits.cpu().numpy()
-    labels_np = labels.cpu().numpy()
+    preds = logits.cpu().numpy().astype(float)
+    labels_np = labels.cpu().numpy().astype(float)
     mse, mae = mse_mae(labels_np, preds)
     pearson, spearman = correlation(labels_np, preds)
-    return {"mse": mse, "mae": mae, "pearson": pearson, "spearman": spearman}
+    mse_score = mse * 10000.0
+    mae_score = mae * 100.0
+    bucket_accuracy = float(((preds * 100).astype(int) // 20 == (labels_np * 100).astype(int) // 20).mean())
+    return {
+        "mse": mse,
+        "mae": mae,
+        "mse_score": mse_score,
+        "mae_score": mae_score,
+        "pearson": pearson,
+        "spearman": spearman,
+        "bucket_accuracy": bucket_accuracy,
+    }
+
+
+def compute_metrics_per_language(logits: torch.Tensor, labels: torch.Tensor, languages: list[str]) -> dict[str, float]:
+    if not languages or len(languages) != int(labels.shape[0]):
+        return {}
+    preds = logits.cpu().numpy().astype(float)
+    labels_np = labels.cpu().numpy().astype(float)
+    lang_arr = np.array(languages)
+    metrics: dict[str, float] = {}
+    for lang in sorted(set(languages)):
+        mask = lang_arr == lang
+        if int(mask.sum()) == 0:
+            continue
+        mse, mae = mse_mae(labels_np[mask], preds[mask])
+        pearson, spearman = correlation(labels_np[mask], preds[mask])
+        metrics[f"mae_score_{lang}"] = mae * 100.0
+        metrics[f"pearson_{lang}"] = pearson
+        metrics[f"spearman_{lang}"] = spearman
+        metrics[f"bucket_accuracy_{lang}"] = float(
+            (((preds[mask] * 100).astype(int) // 20) == ((labels_np[mask] * 100).astype(int) // 20)).mean()
+        )
+    return metrics
+
+
+def save_matching_artifact(model: BiEncoderWithProjection, tokenizer, output_dir: Path, config: dict | None = None) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    encoder_dir = output_dir / "encoder"
+    encoder_dir.mkdir(parents=True, exist_ok=True)
+    model.encoder.save_pretrained(encoder_dir)
+    tokenizer.save_pretrained(encoder_dir)
+    torch.save(model.state_dict(), output_dir / "model.pt")
+    bundle_config = {
+        "hidden_size": model.hidden_size,
+        "dropout": 0.1,
+        "blend_alpha": model.blend_alpha,
+        "model_type": "matching-biencoder-projection",
+    }
+    if config:
+        bundle_config.update(
+            {
+                "model_version": config.get("model_version"),
+                "dataset_version": config.get("dataset_version"),
+                "languages": config.get("languages", []),
+                "max_length": config.get("max_length", 512),
+                "task": "matching",
+                "trained_at": config.get("trained_at"),
+            }
+        )
+    (output_dir / "matching_config.json").write_text(json.dumps(bundle_config, indent=2, ensure_ascii=False), encoding="utf-8")

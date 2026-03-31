@@ -81,16 +81,22 @@ class RunAnalysisView(APIView):
         resume_id = data["resume_id"]
         job_description_text = data.get("job_description_text") or ""
 
-        analysis = run_analysis(
+        analysis, err = run_analysis(
             user_id,
             resume_id,
             job_description_text.strip() or None,
         )
-        if analysis is None:
+        if err == "not_found":
             return _error(
                 "not_found",
                 "Currículo não encontrado ou você não tem permissão para analisá-lo.",
                 status.HTTP_404_NOT_FOUND,
+            )
+        if err == "unavailable":
+            return _error(
+                "service_unavailable",
+                "Análise indisponível no momento. Tente novamente em instantes.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
         return Response(

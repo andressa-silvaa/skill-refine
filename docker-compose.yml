@@ -43,6 +43,15 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - DJANGO_DEBUG=1
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+      - ANALYSIS_MODEL_ROOT=/ml/models
+      - ANALYSIS_MODEL_VERSION=analysis_v1_pt
+      - ANALYSIS_MODEL_VERSION_BY_LANG=pt-BR=analysis_v1_pt;en-US=analysis_seniority_multi_v2_light;es-ES=analysis_seniority_multi_v2_light
+      - ANALYSIS_MODEL_VERSION_BY_TASK=quality=analysis_quality_v9_pt;matching=analysis_matching_v3_reg_pt
+      - ANALYSIS_MODEL_VERSION_BY_TASK_LANG=quality:pt-BR=analysis_quality_v9_pt;quality:en-US=analysis_quality_multi_v1_light;quality:es-ES=analysis_quality_multi_v1_light;matching:pt-BR=analysis_matching_v3_reg_pt;matching:en-US=analysis_matching_multi_v1_light;matching:es-ES=analysis_matching_multi_v1_light
+      - ANALYSIS_MODEL_MODE=hf
+      - ANALYSIS_PREWARM_ENABLED=true
+      - ANALYSIS_PREWARM_LANGUAGES=pt-BR
+      - ANALYSIS_PARALLEL_INFERENCE=true
     depends_on:
       postgres:
         condition: service_healthy
@@ -52,6 +61,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - ./ml:/ml
     command: >
       sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     healthcheck:
@@ -76,6 +86,18 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/2
       - PYTHONPATH=/app/src
+      - ANALYSIS_MODEL_ROOT=/ml/models
+      - ANALYSIS_MODEL_VERSION=analysis_v1_pt
+      - ANALYSIS_MODEL_VERSION_BY_LANG=pt-BR=analysis_v1_pt;en-US=analysis_seniority_multi_v2_light;es-ES=analysis_seniority_multi_v2_light
+      - ANALYSIS_MODEL_VERSION_BY_TASK=quality=analysis_quality_v9_pt;matching=analysis_matching_v3_reg_pt
+      - ANALYSIS_MODEL_VERSION_BY_TASK_LANG=quality:pt-BR=analysis_quality_v9_pt;quality:en-US=analysis_quality_multi_v1_light;quality:es-ES=analysis_quality_multi_v1_light;matching:pt-BR=analysis_matching_v3_reg_pt;matching:en-US=analysis_matching_multi_v1_light;matching:es-ES=analysis_matching_multi_v1_light
+      - ANALYSIS_MODEL_MODE=hf
+      - ANALYSIS_PREWARM_ENABLED=true
+      - ANALYSIS_PREWARM_LANGUAGES=pt-BR
+      - ANALYSIS_PARALLEL_INFERENCE=true
+      - OMP_NUM_THREADS=4
+      - MKL_NUM_THREADS=4
+      - TOKENIZERS_PARALLELISM=false
     depends_on:
       backend:
         condition: service_started
@@ -83,7 +105,8 @@ services:
         condition: service_healthy
     volumes:
       - ./backend:/app
-    command: sh -c "PYTHONPATH=/app/src celery -A config.celery worker -l info"
+      - ./ml:/ml
+    command: sh -c "PYTHONPATH=/app/src celery -A config.celery worker -l info --pool=solo --concurrency=1"
 
 volumes:
   skill_refine_postgres_data:

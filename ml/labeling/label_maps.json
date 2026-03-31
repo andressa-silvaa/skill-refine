@@ -10,8 +10,7 @@
   "quality_level": {
     "poor": "analysis.quality.poor",
     "ok": "analysis.quality.ok",
-    "good": "analysis.quality.good",
-    "excellent": "analysis.quality.excellent"
+    "strong": "analysis.quality.strong"
   },
   "insight_keys": {
     "strengths": [

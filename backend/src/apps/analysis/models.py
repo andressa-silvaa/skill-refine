@@ -40,6 +40,7 @@ class ResumeAnalysis(UUIDPrimaryKeyModel, TimestampedModel):
     payload_json = models.JSONField(null=True, blank=True)  # structured insights
     model_name = models.CharField(max_length=80, default="", blank=True)
     model_version = models.CharField(max_length=40, default="", blank=True)
+    dataset_version = models.CharField(max_length=64, default="", blank=True)
     provider = models.CharField(max_length=16, default="local", blank=True)
     job_description_text = models.TextField(null=True, blank=True)
     error_message = models.TextField(null=True, blank=True)

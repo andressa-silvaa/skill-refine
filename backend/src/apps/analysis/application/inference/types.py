@@ -20,14 +20,16 @@ class AnalysisResult:
 
     def to_persist_dict(self) -> dict[str, Any]:
         """Format for ResumeAnalysis persistence (score, task_scores, payload_json)."""
+        meta = dict(self.metadata)
+        meta.setdefault("datasetVersion", "")
+        payload = dict(self.payload_json or {})
+        payload["insights"] = self.insights
+        payload["recommendations"] = self.recommendations
         return {
             "score": self.score,
             "task_scores": self.task_scores,
-            "payload_json": {
-                "insights": self.insights,
-                "recommendations": self.recommendations,
-            },
-            "metadata": self.metadata,
+            "payload_json": payload,
+            "metadata": meta,
         }
 
 

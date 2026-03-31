@@ -30,7 +30,21 @@ def _use_celery() -> bool:
 
 
 def _allow_inprocess_fallback() -> bool:
-    return bool(getattr(settings, "ALLOW_INPROCESS_JOB_FALLBACK", False))
+    """In prod (DEBUG=False), default False. In dev, default True."""
+    default = getattr(settings, "DEBUG", False)
+    return bool(getattr(settings, "ALLOW_INPROCESS_JOB_FALLBACK", default))
+
+
+def is_analysis_available() -> tuple[bool, str | None]:
+    """
+    Return (True, None) if analysis can be run, else (False, error_message).
+    In prod: Celery must be available or 503.
+    """
+    if _use_celery():
+        return (True, None)
+    if _allow_inprocess_fallback():
+        return (True, None)
+    return (False, "Análise indisponível no momento. Tente novamente em instantes.")
 
 
 def _start_inprocess_analysis(analysis_id: str) -> None:
@@ -58,13 +72,18 @@ def run_analysis(
     user_id: str,
     resume_id: UUID | str,
     job_description_text: str | None = None,
-) -> ResumeAnalysis | None:
+) -> tuple[ResumeAnalysis | None, str | None]:
     """
     Create a pending ResumeAnalysis and enqueue execution (Celery or thread).
-    Returns the created analysis or None if resume not found/not owned.
+    Returns (analysis, None) on success, (None, "not_found") if resume invalid,
+    (None, "unavailable") if analysis service unavailable (prod, no Celery).
     """
     if not validate_resume_ownership(user_id, str(resume_id)):
-        return None
+        return (None, "not_found")
+
+    available, _ = is_analysis_available()
+    if not available:
+        return (None, "unavailable")
 
     analysis = ResumeAnalysis.objects.create(
         user_id=user_id,
@@ -89,7 +108,7 @@ def run_analysis(
         else:
             _mark_analysis_failed(analysis)
 
-    return analysis
+    return (analysis, None)
 
 
 def get_latest_analysis(user_id: str, resume_id: str) -> ResumeAnalysis | None:

@@ -7,7 +7,8 @@ from datetime import datetime, timezone
 
 
 def save_config(config: dict, output_dir: Path) -> Path:
-    path = output_dir / "config.json"
+    """Persist training config without overwriting HF config.json."""
+    path = output_dir / "training_config.json"
     output_dir.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2, ensure_ascii=False)

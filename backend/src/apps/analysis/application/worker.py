@@ -65,12 +65,13 @@ def run_analysis_worker(analysis_id: str) -> None:
     analysis.payload_json = result["payload_json"]
     analysis.model_name = result.get("model_name", "")
     analysis.model_version = result.get("model_version", "")
+    analysis.dataset_version = result.get("dataset_version", "")
     analysis.provider = result.get("provider", "local")
     analysis.status = AnalysisStatus.DONE
     analysis.save(
         update_fields=[
             "status", "score", "task_scores", "payload_json",
-            "model_name", "model_version", "provider", "updated_at",
+            "model_name", "model_version", "dataset_version", "provider", "updated_at",
         ]
     )
 
@@ -80,8 +81,8 @@ def run_analysis_worker(analysis_id: str) -> None:
         extra={
             "analysis_id": str(analysis.id),
             "resume_id": str(analysis.resume_id),
-            "user_id": str(analysis.user_id),
             "model_version": analysis.model_version,
+            "provider": analysis.provider,
             "duration_ms": duration_ms,
             "queue_wait_ms": queue_wait_ms,
         },

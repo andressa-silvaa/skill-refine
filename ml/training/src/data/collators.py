@@ -1,4 +1,4 @@
-"""Collators for DataLoader: seniority (sequence classification), quality (regression), matching (pairs)."""
+"""Collators for DataLoader: seniority, quality (ordinal classification), matching (pairs)."""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -6,6 +6,8 @@ from typing import Any
 
 import torch
 from torch.utils.data import Dataset
+
+from .load_dataset import normalize_quality_level
 
 
 @dataclass
@@ -20,7 +22,7 @@ class SeniorityBatch:
 class QualityBatch:
     input_ids: torch.Tensor
     attention_mask: torch.Tensor
-    labels: torch.FloatTensor
+    labels: torch.LongTensor
 
 
 @dataclass
@@ -30,6 +32,7 @@ class MatchingBiEncoderBatch:
     resume_input_ids: torch.Tensor
     resume_attention_mask: torch.Tensor
     labels: torch.FloatTensor
+    languages: list[str]
 
 
 class SeniorityDataset(Dataset):
@@ -65,10 +68,11 @@ class SeniorityDataset(Dataset):
 
 
 class QualityDataset(Dataset):
-    def __init__(self, records: list[dict], tokenizer, max_length: int):
+    def __init__(self, records: list[dict], tokenizer, max_length: int, label2id: dict[str, int]):
         self.records = records
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.label2id = label2id
 
     def __len__(self) -> int:
         return len(self.records)
@@ -76,9 +80,8 @@ class QualityDataset(Dataset):
     def __getitem__(self, i: int) -> dict[str, Any]:
         rec = self.records[i]
         text = (rec.get("inputs") or {}).get("resume_text") or ""
-        lab = (rec.get("labels") or {}).get("quality_score", 0)
-        if not isinstance(lab, (int, float)):
-            lab = float(lab) if lab else 0.0
+        labels = rec.get("labels") or {}
+        level = normalize_quality_level(labels.get("quality_level"), labels.get("quality_score", 0))
         enc = self.tokenizer(
             text,
             max_length=self.max_length,
@@ -89,7 +92,7 @@ class QualityDataset(Dataset):
         return {
             "input_ids": enc["input_ids"].squeeze(0),
             "attention_mask": enc["attention_mask"].squeeze(0),
-            "labels": torch.tensor(float(lab), dtype=torch.float32),
+            "labels": torch.tensor(self.label2id[level], dtype=torch.long),
         }
 
 
@@ -118,6 +121,7 @@ class MatchingBiEncoderDataset(Dataset):
             "resume_input_ids": resume_enc["input_ids"].squeeze(0),
             "resume_attention_mask": resume_enc["attention_mask"].squeeze(0),
             "labels": torch.tensor(float(lab) / 100.0, dtype=torch.float32),
+            "language": (rec.get("language") or "pt-BR").strip(),
         }
 
 
@@ -145,4 +149,5 @@ def collate_matching_bi(batch: list[dict]) -> MatchingBiEncoderBatch:
         resume_input_ids=torch.stack([b["resume_input_ids"] for b in batch]),
         resume_attention_mask=torch.stack([b["resume_attention_mask"] for b in batch]),
         labels=torch.stack([b["labels"] for b in batch]),
+        languages=[b.get("language", "pt-BR") for b in batch],
     )

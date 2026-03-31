@@ -1,0 +1,7 @@
+Confusion matrix (rows=true, cols=pred)
+
+            intern junior    mid senior
+intern         34      0      0      0
+junior          0     35      2      2
+mid             0      0     36      3
+senior          0      0      0     41

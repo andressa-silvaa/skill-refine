@@ -1,0 +1,7 @@
+Confusion matrix (rows=true, cols=pred)
+
+              poor     ok   good excell
+poor            0      4      0      1
+ok              0      8      1      1
+good            0      0      7      2
+excellent       0      0      2     10

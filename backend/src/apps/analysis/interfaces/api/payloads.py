@@ -10,6 +10,20 @@ from typing import Any
 from apps.analysis.models import ResumeAnalysis
 
 
+def _normalize_task_models(task_models: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
+    for task, meta in (task_models or {}).items():
+        if not isinstance(meta, dict):
+            continue
+        out[str(task)] = {
+            "modelName": meta.get("modelName") or "",
+            "modelVersion": meta.get("modelVersion") or "",
+            "datasetVersion": meta.get("datasetVersion") or "",
+            "provider": meta.get("provider") or "local",
+        }
+    return out
+
+
 def _normalize_strength(s: dict | str) -> dict[str, Any]:
     """Normalize to { key, params? }. Accepts legacy { title, description } for backward compat."""
     if isinstance(s, str):
@@ -70,7 +84,9 @@ def analysis_payload(analysis: ResumeAnalysis) -> dict[str, Any]:
         "metadata": {
             "modelName": analysis.model_name or "",
             "modelVersion": analysis.model_version or "",
+            "datasetVersion": analysis.dataset_version or "",
             "provider": analysis.provider or "local",
+            "taskModels": _normalize_task_models(payload_json.get("model_metadata_by_task")),
         },
         "createdAt": analysis.created_at.isoformat(),
         "updatedAt": analysis.updated_at.isoformat(),

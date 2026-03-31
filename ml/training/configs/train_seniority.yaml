@@ -1,0 +1,27 @@
+# Seniority classification (intern|junior|mid|senior)
+# Usage: python ml/training/src/train.py --task seniority --language pt-BR --base_model neuralmind/bert-base-portuguese-cased
+
+task: seniority
+language_mode: mono
+languages:
+  - pt-BR
+base_model: neuralmind/bert-base-portuguese-cased
+
+data_dir: ../data
+splits_dir: ../data/splits
+train_file: train.jsonl
+val_file: val.jsonl
+test_file: test.jsonl
+output_dir: ../models
+reports_dir: training/reports
+
+epochs: 3
+batch_size: 8
+max_length: 512
+learning_rate: 2.0e-5
+warmup_ratio: 0.1
+weight_decay: 0.01
+seed: 42
+
+save_config: true
+save_dataset_version: true

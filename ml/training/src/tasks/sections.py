@@ -8,6 +8,7 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from ..data import load_splits
 from ..data.collators import SeniorityDataset, collate_seniority
+from ..utils import ensure_padding_token
 
 # Reuse sequence classification: sections as labels (EXPERIENCE, EDUCATION, SKILLS, ...)
 SECTION_LABELS = ["EXPERIENCE", "EDUCATION", "SKILLS", "PROJECTS", "SUMMARY", "CONTACT", "OTHER"]
@@ -25,6 +26,7 @@ def build_model_and_tokenizer(base_model: str, num_labels: int | None = None):
     num_labels = num_labels or len(SECTION_LABELS)
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     model = AutoModelForSequenceClassification.from_pretrained(base_model, num_labels=num_labels)
+    tokenizer, model = ensure_padding_token(tokenizer, model)
     return model, tokenizer
 
 

@@ -117,7 +117,7 @@ Por exemplo (por linha):
 
 **Objetivo:** score geral (0–100) e critérios objetivos e explicáveis.
 
-**Decisão: Regressão 0–100** para o score geral, com features heurísticas mantidas para explicabilidade (enriquece o TCC e a UI).
+**Decisão: classificação ordinal** com 3 níveis (`poor`, `ok`, `strong`) e mapeamento estável para score 0–100 no serving.
 
 ### Critérios mínimos (features heurísticas)
 
@@ -129,7 +129,8 @@ Por exemplo (por linha):
 ### Formato do dataset (Tarefa C)
 
 - `input_text`: texto do currículo (ou seções).
-- `label_score`: inteiro 0–100 (regressão).
+- `labels.quality_level`: `poor` | `ok` | `strong` (rótulo principal para treino).
+- `labels.quality_score`: inteiro 0–100 (auditoria, calibração e compatibilidade com heurísticas).
 - `language`: `pt` | `en` | `es`.
 - `feature_flags`: ex. `{ "has_metrics": true, "has_links": true, "has_action_verbs": true }` para auditoria e baseline.
 
@@ -141,8 +142,9 @@ Por exemplo (por linha):
 
 ### Métricas
 
-- MSE, MAE, R² por idioma e global.
-- Correlação entre score e feature_flags (baseline heurístico).
+- Accuracy e F1 macro por idioma e global.
+- MAE/MSE no score derivado do nível ordinal.
+- Correlação entre score derivado e feature_flags (baseline heurístico).
 
 ---
 

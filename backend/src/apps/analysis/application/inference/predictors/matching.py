@@ -1,19 +1,14 @@
 """
-Matching predictor (optional): vaga vs currículo.
-Placeholder: returns heuristic-based score when job_text provided.
+Matching predictor: bi-encoder embeddings + cosine, or heuristic keyword overlap.
 """
 from __future__ import annotations
 
+from contextlib import nullcontext
+from typing import Any
 
-def predict_matching(
-    resume_text: str,
-    job_text: str,
-    language: str,
-) -> tuple[int, list[str]]:
-    """
-    Placeholder: simple keyword overlap score 0-100 and top matches.
-    No LLM; heuristics only.
-    """
+
+def _heuristic_matching(resume_text: str, job_text: str) -> tuple[int, list[str]]:
+    """Simple keyword overlap score 0-100 and top matches."""
     if not job_text or not resume_text:
         return (0, [])
     job_words = set((job_text or "").lower().split())
@@ -25,3 +20,104 @@ def predict_matching(
     score = min(100, int(100 * n_overlap / min(n_job, 50)))
     top = list(overlap)[:10]
     return (score, top)
+
+
+def _predict_hf_matching(model, tokenizer, resume_text: str, job_text: str, max_length: int = 512) -> int | None:
+    """Bi-encoder: embed resume and job, cosine similarity. Returns score 0-100 or None."""
+    try:
+        import torch
+        import torch.nn.functional as F
+        r_inputs = tokenizer(
+            resume_text[:12000],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        )
+        j_inputs = tokenizer(
+            job_text[:8000],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        )
+        with torch.no_grad():
+            r_out = model(**r_inputs)
+            j_out = model(**j_inputs)
+        r_emb = r_out.last_hidden_state[:, 0, :]
+        j_emb = j_out.last_hidden_state[:, 0, :]
+        sim = F.cosine_similarity(r_emb, j_emb).item()
+        score = int(min(100, max(0, (sim + 1) * 50)))
+        return score
+    except Exception:
+        pass
+    return None
+
+
+def _predict_custom_matching(model, tokenizer, resume_text: str, job_text: str, max_length: int = 512) -> int | None:
+    """Custom trained bi-encoder projection model. Returns 0-100 or None."""
+    try:
+        try:
+            import torch
+        except Exception:
+            torch = None
+
+        r_inputs = tokenizer(
+            resume_text[:12000],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        )
+        j_inputs = tokenizer(
+            job_text[:8000],
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=max_length,
+        )
+        context = torch.no_grad() if torch is not None else nullcontext()
+        with context:
+            score = model(
+                job_input_ids=j_inputs["input_ids"],
+                job_attention_mask=j_inputs["attention_mask"],
+                resume_input_ids=r_inputs["input_ids"],
+                resume_attention_mask=r_inputs["attention_mask"],
+            )
+        value = float(score.squeeze(-1).item())
+        return int(min(100, max(0, round(value * 100))))
+    except Exception:
+        pass
+    return None
+
+
+def predict_matching(
+    resume_text: str,
+    job_text: str,
+    language: str,
+    matching_bundle: tuple[Any, dict] | None = None,
+) -> tuple[int, list[str]]:
+    """
+    Predict matching score 0-100 and top matches.
+    Uses bi-encoder when available, else heuristic keyword overlap.
+    """
+    if not job_text or not resume_text:
+        return (0, [])
+
+    if matching_bundle:
+        model_or_none, extra = matching_bundle
+        if model_or_none is not None and isinstance(extra, dict) and extra.get("tokenizer"):
+            tokenizer = extra["tokenizer"]
+            max_length = 512
+            if isinstance(extra.get("metadata"), dict):
+                limits = extra["metadata"].get("input_limits") or {}
+                max_length = limits.get("max_tokens", 512)
+            if extra.get("kind") == "matching-biencoder":
+                score = _predict_custom_matching(model_or_none, tokenizer, resume_text, job_text, max_length)
+            else:
+                score = _predict_hf_matching(model_or_none, tokenizer, resume_text, job_text, max_length)
+            if score is not None:
+                _, top = _heuristic_matching(resume_text, job_text)
+                return (score, top)
+
+    return _heuristic_matching(resume_text, job_text)

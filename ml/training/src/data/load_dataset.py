@@ -9,6 +9,14 @@ from pathlib import Path
 from typing import Any
 
 SENIORITY_LABELS = ("intern", "junior", "mid", "senior")
+QUALITY_LEVELS = ("poor", "ok", "strong")
+LEGACY_QUALITY_LEVEL_MAP = {
+    "poor": "poor",
+    "ok": "ok",
+    "good": "strong",
+    "excellent": "strong",
+    "strong": "strong",
+}
 LANGUAGE_NORMALIZE = {"pt": "pt-BR", "pt-BR": "pt-BR", "en": "en-US", "en-US": "en-US", "es": "es-ES", "es-ES": "es-ES"}
 
 
@@ -16,8 +24,25 @@ def _normalize_lang(lang: str) -> str:
     return LANGUAGE_NORMALIZE.get((lang or "pt").strip(), "pt-BR")
 
 
+def normalize_quality_level(level: Any = None, score: Any = None) -> str:
+    level_norm = str(level or "").strip().lower()
+    if level_norm:
+        mapped = LEGACY_QUALITY_LEVEL_MAP.get(level_norm)
+        if mapped:
+            return mapped
+    if isinstance(score, str):
+        score = float(score) if score else None
+    if isinstance(score, (int, float)):
+        if score < 40:
+            return "poor"
+        if score < 60:
+            return "ok"
+        return "strong"
+    return "ok"
+
+
 def _normalize_record(raw: dict) -> dict:
-    """Canonical: inputs.resume_text, inputs.job_text, labels.seniority, labels.quality_score, labels.sections, labels.matching_score."""
+    """Canonical: inputs.resume_text, inputs.job_text, labels.*, sections."""
     inputs = raw.get("inputs") or {}
     labels = raw.get("labels") or {}
     resume_text = inputs.get("resume_text") or raw.get("resume_text") or raw.get("input_text") or ""
@@ -31,6 +56,7 @@ def _normalize_record(raw: dict) -> dict:
         "labels": {
             "seniority": labels.get("seniority"),
             "quality_score": labels.get("quality_score"),
+            "quality_level": labels.get("quality_level"),
             "sections": labels.get("sections"),
             "matching_score": labels.get("matching_score"),
         },
@@ -56,11 +82,15 @@ def _validate_quality(record: dict) -> list[str]:
     text = (record.get("inputs") or {}).get("resume_text") or ""
     if not text.strip():
         errs.append("inputs.resume_text (or resume_text) required")
-    lab = (record.get("labels") or {}).get("quality_score")
-    if lab is None:
-        errs.append("labels.quality_score required")
-    elif not isinstance(lab, (int, float)) or lab < 0 or lab > 100:
+    labels = record.get("labels") or {}
+    lab = labels.get("quality_score")
+    level = labels.get("quality_level")
+    if lab is None and not level:
+        errs.append("labels.quality_score or labels.quality_level required")
+    if lab is not None and (not isinstance(lab, (int, float)) or lab < 0 or lab > 100):
         errs.append("labels.quality_score must be 0-100")
+    if level is not None and str(level).strip().lower() not in LEGACY_QUALITY_LEVEL_MAP:
+        errs.append(f"labels.quality_level must be one of {tuple(LEGACY_QUALITY_LEVEL_MAP)}")
     return errs
 
 
