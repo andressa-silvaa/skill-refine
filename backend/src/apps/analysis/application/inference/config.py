@@ -96,4 +96,19 @@ def get_config(settings) -> dict:
         "multilang": bool(getattr(settings, "ANALYSIS_MULTILANG", False)),
         "parallel_inference": bool(getattr(settings, "ANALYSIS_PARALLEL_INFERENCE", True)),
         "heuristics_only_model": "heuristics-only",
+        "signals_ml_enabled": bool(getattr(settings, "ANALYSIS_SIGNALS_ML_ENABLED", False)),
+        "signals_ml_model_subdir": str(getattr(settings, "ANALYSIS_SIGNALS_ML_SUBDIR", "seniority_signals_v1") or "seniority_signals_v1"),
+        "signals_ml_cache_key": "signals_ml_v1",
+    }
+
+
+def get_signals_ml_thresholds(settings) -> dict:
+    """Thresholds for ``signals_ml_predict`` / policy (env-driven)."""
+    return {
+        "SENIOR_PROB_THRESHOLD": float(getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_PROB_THRESHOLD", 0.70)),
+        "SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS": int(getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS", 60)),
+        "SIGNALS_ML_SENIOR_MIN_EXPERIENCES": int(getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_MIN_EXPERIENCES", 2)),
+        "SIGNALS_ML_SENIOR_MIN_BULLETS": int(getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS", 6)),
+        "MIN_COMPLETENESS_FOR_SIGNALS_ML": int(getattr(settings, "ANALYSIS_SIGNALS_ML_MIN_COMPLETENESS", 52)),
+        "MIN_WORDS_FOR_SIGNALS_ML": int(getattr(settings, "ANALYSIS_SIGNALS_ML_MIN_WORDS", 48)),
     }

@@ -25,6 +25,18 @@ ANALYSIS_PARALLEL_INFERENCE = env.bool("ANALYSIS_PARALLEL_INFERENCE", default=Tr
 ANALYSIS_MAX_CHARS_RESUME = env.int("ANALYSIS_MAX_CHARS_RESUME", default=12_000)
 ANALYSIS_MAX_CHARS_JOB = env.int("ANALYSIS_MAX_CHARS_JOB", default=8_000)
 
+# Signals-only sklearn seniority (LogReg + calibration). Artifact: ml/models/<subdir>/model.joblib
+ANALYSIS_SIGNALS_ML_ENABLED = env.bool("ANALYSIS_SIGNALS_ML_ENABLED", default=False)
+ANALYSIS_SIGNALS_ML_SUBDIR = env.str("ANALYSIS_SIGNALS_ML_SUBDIR", default="seniority_signals_v1")
+# Conservative gates for predicted "senior" (reduce false seniors on thin evidence)
+ANALYSIS_SIGNALS_ML_SENIOR_PROB_THRESHOLD = env.float("ANALYSIS_SIGNALS_ML_SENIOR_PROB_THRESHOLD", default=0.70)
+ANALYSIS_SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS = env.int("ANALYSIS_SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS", default=60)
+ANALYSIS_SIGNALS_ML_SENIOR_MIN_EXPERIENCES = env.int("ANALYSIS_SIGNALS_ML_SENIOR_MIN_EXPERIENCES", default=2)
+ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS = env.int("ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS", default=6)
+# Minimum text/completeness to trust signals_ml (aligned with neural gating by default)
+ANALYSIS_SIGNALS_ML_MIN_COMPLETENESS = env.int("ANALYSIS_SIGNALS_ML_MIN_COMPLETENESS", default=52)
+ANALYSIS_SIGNALS_ML_MIN_WORDS = env.int("ANALYSIS_SIGNALS_ML_MIN_WORDS", default=48)
+
 AI_REWRITE_CACHE_TTL_SECONDS = env.int("AI_REWRITE_CACHE_TTL_SECONDS", default=600)
 
 AI_CLOUD_BASE_URL = env.str("AI_CLOUD_BASE_URL", default="")
@@ -33,3 +45,10 @@ AI_CLOUD_MODEL = env.str("AI_CLOUD_MODEL", default="")
 AI_CLOUD_TIMEOUT_SECONDS = env.int("AI_CLOUD_TIMEOUT_SECONDS", default=15)
 
 DASHBOARD_SUMMARY_CACHE_TTL_SECONDS = env.int("DASHBOARD_SUMMARY_CACHE_TTL_SECONDS", default=45)
+
+# Internal review API (GET /analysis/internal/...). Empty = 403 for all.
+ANALYSIS_INTERNAL_REVIEW_SECRET = env.str("ANALYSIS_INTERNAL_REVIEW_SECRET", default="")
+# When DEBUG is False, secret must be at least this long (production hardening).
+ANALYSIS_INTERNAL_SECRET_MIN_LENGTH = env.int("ANALYSIS_INTERNAL_SECRET_MIN_LENGTH", default=20)
+# Salt for pseudo-keys (analysisKey, resumeKey, userKey) and dataset keys; falls back to SECRET_KEY prefix.
+ANALYSIS_INTERNAL_REVIEW_KEY_SALT = env.str("ANALYSIS_INTERNAL_REVIEW_KEY_SALT", default="")
