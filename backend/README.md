@@ -119,10 +119,10 @@ The backend must be able to reach the frontend URL for PDF generation. Configure
 
 ## 📧 Email (Optional)
 
-Configure SMTP in `.env`:
+Configure in `.env` (see `env.example`):
 
+- **Resend (recommended):** `RESEND_API_KEY=re_...` and `DEFAULT_FROM_EMAIL` (verified domain or `onboarding@resend.dev` for tests). Optionally set explicit `EMAIL_HOST=smtp.resend.com` and SMTP fields instead.
 - **Gmail:** `EMAIL_HOST=smtp.gmail.com`, `EMAIL_PORT=587`, `EMAIL_USE_TLS=1`
-- **SendGrid:** `EMAIL_HOST=smtp.sendgrid.net`, `EMAIL_HOST_USER=apikey`, `EMAIL_HOST_PASSWORD=<API_KEY>`
 - **Brevo:** `EMAIL_HOST=smtp-relay.brevo.com`
 
 ---
@@ -132,6 +132,24 @@ Configure SMTP in `.env`:
 1. Create OAuth credentials in Google Cloud Console
 2. Set `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` in `.env`
 3. Use the same Client ID in the frontend `REACT_APP_GOOGLE_CLIENT_ID`
+
+---
+
+## 🤖 Senioridade `signals_ml` (sklearn, feature flag)
+
+Não altera o contrato de `/analysis/run`, `/analysis/latest` nem `/analysis/history`. Ativação por variáveis de ambiente (ver `env.example`):
+
+| Variável | Descrição |
+|----------|-----------|
+| `ANALYSIS_SIGNALS_ML_ENABLED` | `true` para carregar o artefato signals-only |
+| `ANALYSIS_SIGNALS_MODEL_DIR` | Caminho **absoluto** para `.../ml/models/seniority_signals_v1` (recomendado) |
+| `ANALYSIS_MODEL_ROOT` | Alternativa: raiz `ml/models` + `ANALYSIS_SIGNALS_ML_SUBDIR` |
+| `ANALYSIS_SIGNALS_THRESHOLDS_FROM_SETTINGS` | `true` (padrão): limites vêm do `.env`; `false`: usar `inference_thresholds` do `metadata.json` |
+| `SENIOR_PROB_THRESHOLD`, `SENIOR_MIN_MONTHS`, `SENIOR_MIN_EXPERIENCES`, `SENIOR_MIN_BULLETS` | Gates conservadores para classe `senior` |
+
+Após uma análise concluída, conferir no modelo `ResumeAnalysis` os campos `provider` (`signals_ml`), `model_version` e `dataset_version` (persistidos pelo worker; sem PII).
+
+Pipeline de treino/export: `python ml/scripts/run_seniority_pipeline.py` na raiz do monorepo.
 
 ---
 

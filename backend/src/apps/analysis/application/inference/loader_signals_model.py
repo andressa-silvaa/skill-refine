@@ -59,9 +59,13 @@ def get_signals_ml_bundle(config: dict[str, Any]) -> dict[str, Any] | None:
         if key in _cache:
             return _cache[key]
 
-        root = Path(config.get("model_root") or config.get("model_dir") or "")
-        sub = str(config.get("signals_ml_model_subdir") or "seniority_signals_v1").strip()
-        model_dir = (root / sub) if sub else root
+        explicit = str(config.get("signals_ml_model_dir") or "").strip()
+        if explicit:
+            model_dir = Path(explicit)
+        else:
+            root = Path(config.get("model_root") or config.get("model_dir") or "")
+            sub = str(config.get("signals_ml_model_subdir") or "seniority_signals_v1").strip()
+            model_dir = (root / sub) if sub else root
         try:
             bundle = load_signals_ml_bundle(model_dir)
             bundle["_model_dir"] = str(model_dir)

@@ -1,25 +1,79 @@
 .sr-dash-score-chart {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
 }
 
-.sr-dash-score-chart__svg {
+.sr-dash-score-chart__plot-row {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
   width: 100%;
+  min-width: 0;
+}
+
+.sr-dash-score-chart__y-axis {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 1.75rem;
+  padding: 10px 0 8px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--sr-ink-muted);
+  line-height: 1;
+}
+
+.sr-dash-score-chart__svg {
+  flex: 1 1 auto;
+  min-width: 0;
   height: 140px;
   display: block;
   overflow: visible;
 }
 
 .sr-dash-score-chart__labels {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 2px;
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 0 0 0 calc(1.75rem + 6px);
+  box-sizing: border-box;
 }
 
 .sr-dash-score-chart__month {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  min-width: 0;
+}
+
+.sr-dash-score-chart__month-label {
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--sr-ink-muted);
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.sr-dash-score-chart__month-score {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--sr-accent);
+  line-height: 1;
+}
+
+@media (max-width: 480px) {
+  .sr-dash-score-chart__y-axis {
+    width: 1.5rem;
+    font-size: 0.6rem;
+  }
+
+  .sr-dash-score-chart__labels {
+    padding-left: calc(1.5rem + 6px);
+  }
 }

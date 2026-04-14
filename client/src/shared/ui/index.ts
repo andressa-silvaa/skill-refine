@@ -22,4 +22,5 @@ export { Checkbox } from './checkbox/Checkbox';
 export { ColorPicker } from './color-picker/ColorPicker';
 export { PaletteChip } from './palette-chip/PaletteChip';
 export { PageLoader } from './page-loader';
+export { RouteContentLoader } from './route-content-loader';
 export { DocumentPage } from './document-page/DocumentPage';

@@ -76,6 +76,7 @@
   }
 }
 
+/* Apenas superfície: largura/altura seguem as mesmas regras do tema claro (--sr-modal-max-width no painel). */
 [data-sr-theme-scope][data-theme='dark'] .sr-modal__panel {
   background: var(--sr-surface-soft);
 }

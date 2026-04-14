@@ -1,7 +1,8 @@
 """
 Export training / calibration rows from completed analyses (no PII in default mode).
 
-Schema ``1.0`` (JSONL): stable keys for ML pipeline — see ``ml/data/schema/seniority_dataset_schema.json``.
+Schema ``1.1`` (JSONL): gold label = persisted ``seniority_final_label`` (review > rule).
+See ``ml/data/schema/seniority_dataset_schema_v1_1.json``.
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ from .inference.safety import truncate_text
 from .inference.signals.resume_signals import extract_resume_signals
 from .internal_review import pseudo_key
 
-DATASET_SCHEMA_VERSION = "1.0"
+DATASET_SCHEMA_VERSION = "1.1"
 DATASET_KIND = "seniority"
 
 _EMAIL_RE = re.compile(r"\S+@\S+\.\S+")
@@ -52,12 +53,13 @@ def _signals_dict(rs: Any) -> dict[str, Any]:
     return d
 
 
-def _ml_label_from_payload(pj: dict[str, Any]) -> str | None:
+def _ml_suggestion_from_payload(pj: dict[str, Any]) -> str | None:
+    """HF / legacy text-model hint only — not used as training gold."""
     for e in pj.get("seniorityEvidence") or []:
         if not isinstance(e, dict):
             continue
-        if e.get("type") == "ml" and e.get("status") == "adjusted" and e.get("to"):
-            return str(e["to"])
+        if e.get("type") == "ml_suggestion" and e.get("label"):
+            return str(e["label"])
     return None
 
 
@@ -66,10 +68,11 @@ def build_seniority_dataset_record(
     *,
     hash_salt: str,
     include_text: bool = False,
+    schema_version: str | None = None,
 ) -> dict[str, Any]:
     """
-    One v1.0 dataset row: pseudonymised keys, structured signals, labels and targets.
-    Requires ``analysis.resume`` and related rows prefetched (same as worker).
+    One dataset row: pseudonymised keys, structured signals, labels and targets.
+    v1.1 uses persisted gold columns; never ``payload_json.seniorityClass`` as training label.
     """
     resume = analysis.resume
     resume_data = resume_detail_payload(resume)
@@ -79,15 +82,47 @@ def build_seniority_dataset_record(
 
     pj = analysis.payload_json or {}
     completeness = pj.get("completeness") if isinstance(pj.get("completeness"), dict) else {}
-    conf = pj.get("seniorityConfidence") or ""
+    conf_db = (analysis.seniority_confidence or "").strip()
+    conf = conf_db if conf_db in ("low", "medium", "high") else str(pj.get("seniorityConfidence") or "")
     if conf not in ("low", "medium", "high"):
         conf = str(conf) if conf else ""
 
-    seniority_label = str(pj.get("seniorityClass") or "")
-    rule_label = str(pj.get("seniorityRuleBase") or "")
+    rule_label = (analysis.seniority_rule_label or "").strip() or str(pj.get("seniorityRuleBase") or "")
+    final_label = (analysis.seniority_final_label or "").strip()
+    if not final_label:
+        final_label = rule_label
+    if not final_label:
+        final_label = str(pj.get("seniorityRuleBase") or "").strip()
+
+    src = (analysis.seniority_label_source or "").strip() or "rule"
+    if src not in ("rule", "review"):
+        src = "rule"
+    policy_v = (analysis.seniority_policy_version or "").strip()
+    reviewed = src == "review"
+
+    ver = (schema_version or DATASET_SCHEMA_VERSION).strip() or DATASET_SCHEMA_VERSION
+
+    labels_block: dict[str, Any]
+    if ver == "1.0":
+        labels_block = {
+            "seniority_label": final_label or str(pj.get("seniorityClass") or ""),
+            "rule_label": rule_label,
+            "ml_label": _ml_suggestion_from_payload(pj),
+            "confidence": conf,
+        }
+    else:
+        labels_block = {
+            "seniority_label": final_label,
+            "rule_label": rule_label,
+            "ml_label": _ml_suggestion_from_payload(pj),
+            "confidence": conf,
+            "source": src,
+            "policy_version": policy_v,
+            "reviewed": reviewed,
+        }
 
     record: dict[str, Any] = {
-        "schema_version": DATASET_SCHEMA_VERSION,
+        "schema_version": ver,
         "dataset_kind": DATASET_KIND,
         "analysis_key": pseudo_key(raw_id=str(analysis.id), salt=hash_salt),
         "resume_key": pseudo_key(raw_id=str(analysis.resume_id), salt=hash_salt),
@@ -95,12 +130,7 @@ def build_seniority_dataset_record(
         "created_at": analysis.created_at.isoformat(),
         "language": language,
         "signals": _signals_dict(rs),
-        "labels": {
-            "seniority_label": seniority_label,
-            "rule_label": rule_label,
-            "ml_label": _ml_label_from_payload(pj),
-            "confidence": conf,
-        },
+        "labels": labels_block,
         "targets": {
             "overall_score": analysis.score,
             "task_scores": dict(analysis.task_scores or {}),
@@ -113,6 +143,9 @@ def build_seniority_dataset_record(
             "seniority_ml_status": str(pj.get("seniorityMlStatus") or ""),
             "provider": analysis.provider or "",
             "model_version": analysis.model_version or "",
+            "dataset_version": analysis.dataset_version or "",
+            "label_source": src,
+            "policy_version": policy_v,
         },
     }
     if include_text:
@@ -126,9 +159,10 @@ def iter_seniority_export_rows(
     since: datetime | None = None,
     mode: str = "signals",
     id_hash_salt: str = "",
+    schema_version: str | None = None,
 ) -> Iterator[dict[str, Any]]:
     """
-    Yield one v1.0 record per completed analysis.
+    Yield one record per completed analysis.
 
     mode:
       - signals: no CV text.
@@ -162,6 +196,7 @@ def iter_seniority_export_rows(
             analysis,
             hash_salt=salt,
             include_text=include_text,
+            schema_version=schema_version,
         )
 
 
@@ -172,6 +207,7 @@ def write_seniority_export_jsonl(
     since: datetime | None = None,
     mode: str = "signals",
     id_hash_salt: str = "",
+    schema_version: str | None = None,
 ) -> int:
     """Write JSONL; returns number of rows written."""
     count = 0
@@ -181,6 +217,7 @@ def write_seniority_export_jsonl(
             since=since,
             mode=mode,
             id_hash_salt=id_hash_salt,
+            schema_version=schema_version,
         ):
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
             count += 1
@@ -192,7 +229,13 @@ def iter_dataset_rows_for_analyses(
     *,
     hash_salt: str,
     include_text: bool = False,
+    schema_version: str | None = None,
 ) -> Iterator[dict[str, Any]]:
     """Export a fixed list of analyses (e.g. filtered low-confidence) to dataset records."""
     for analysis in analyses:
-        yield build_seniority_dataset_record(analysis, hash_salt=hash_salt, include_text=include_text)
+        yield build_seniority_dataset_record(
+            analysis,
+            hash_salt=hash_salt,
+            include_text=include_text,
+            schema_version=schema_version,
+        )

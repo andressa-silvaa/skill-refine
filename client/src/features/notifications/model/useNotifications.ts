@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+
+import { useSession } from '@/entities/session';
+
 import type { NotificationItem } from '../api/notificationsApi';
 import { notificationsApi } from '../api/notificationsApi';
 
 const UNREAD_CACHE_MS = 15_000;
 
 export function useNotifications() {
+  const { status: sessionStatus } = useSession();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -39,6 +43,10 @@ export function useNotifications() {
   }, []);
 
   useEffect(() => {
+    if (sessionStatus !== 'authenticated') {
+      setUnreadCount(0);
+      return;
+    }
     fetchUnreadCount(true);
     const interval = setInterval(() => fetchUnreadCount(false), UNREAD_CACHE_MS);
     const onInvalidate = () => fetchUnreadCount(true);
@@ -47,7 +55,7 @@ export function useNotifications() {
       clearInterval(interval);
       window.removeEventListener('skill-refine:notifications-invalidate', onInvalidate);
     };
-  }, [fetchUnreadCount]);
+  }, [fetchUnreadCount, sessionStatus]);
 
   const markRead = useCallback(async (id: string) => {
     try {
@@ -113,10 +121,15 @@ export function useNotifications() {
 }
 
 export function useNotificationsUnreadBadge() {
+  const { status: sessionStatus } = useSession();
   const [unreadCount, setUnreadCount] = useState(0);
   const fetchedAt = useRef<number>(0);
 
   useEffect(() => {
+    if (sessionStatus !== 'authenticated') {
+      setUnreadCount(0);
+      return;
+    }
     const refresh = async () => {
       const now = Date.now();
       if (now - fetchedAt.current < UNREAD_CACHE_MS) return;
@@ -128,10 +141,10 @@ export function useNotificationsUnreadBadge() {
         // Silently fail
       }
     };
-    refresh();
-    const interval = setInterval(refresh, UNREAD_CACHE_MS);
+    void refresh();
+    const interval = setInterval(() => void refresh(), UNREAD_CACHE_MS);
     return () => clearInterval(interval);
-  }, []);
+  }, [sessionStatus]);
 
   return { unreadCount, invalidate: () => { fetchedAt.current = 0; } };
 }

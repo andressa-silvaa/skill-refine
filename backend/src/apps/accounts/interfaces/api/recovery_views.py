@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import logging
+
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.domain.errors import (
     AccountsError,
+    EmailAlreadyConfirmed,
     EmailConfirmationExpired,
     EmailConfirmationInvalid,
+    EmailConfirmationTokenConsumed,
     EmailNotRegistered,
     EmailSendFailed,
     EmailServiceNotConfigured,
@@ -41,6 +45,8 @@ from .services import (
     password_reset_request_service,
     password_reset_verify_service,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class PasswordResetRequestView(APIView):
@@ -137,20 +143,35 @@ class EmailConfirmationRequestView(APIView):
         meta = request_meta(request)
 
         try:
-            email_confirmation_request_service(ser.validated_data["email"], meta)
+            result = email_confirmation_request_service(ser.validated_data["email"], meta)
         except EmailNotRegistered:
             return _error(
                 "email_not_registered",
                 "Não existe nenhum usuário cadastrado com este e-mail.",
                 status.HTTP_404_NOT_FOUND,
             )
-        except TooManyRequests:
+        except TooManyRequests as exc:
+            ra = getattr(exc, "retry_after_seconds", None)
+            hdr = {"Retry-After": str(ra)} if isinstance(ra, int) and ra > 0 else None
             return _error(
                 "too_many_requests",
                 "Aguarde um pouco antes de reenviar a confirmação.",
                 status.HTTP_429_TOO_MANY_REQUESTS,
+                headers=hdr,
             )
-        except (EmailServiceNotConfigured, EmailSendFailed):
+        except EmailServiceNotConfigured:
+            logger.warning(
+                "email_confirmation_request: 503 SMTP not configured (see email_smtp_not_configured in logs)"
+            )
+            return _error(
+                "email_service_unavailable",
+                "Não foi possível enviar o e-mail agora. Tente novamente mais tarde.",
+                status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except EmailSendFailed:
+            logger.warning(
+                "email_confirmation_request: 503 send failed (see email_smtp_send_failed in logs for SMTP error)"
+            )
             return _error(
                 "email_service_unavailable",
                 "Não foi possível enviar o e-mail agora. Tente novamente mais tarde.",
@@ -163,13 +184,15 @@ class EmailConfirmationRequestView(APIView):
                 status.HTTP_400_BAD_REQUEST,
             )
         except Exception:
+            logger.exception("email_confirmation_request: 503 unexpected error")
             return _error(
                 "email_confirmation_request_failed",
                 "Serviço temporariamente indisponível. Tente novamente mais tarde.",
                 status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        return Response(status_ok_payload(), status=status.HTTP_200_OK)
+        payload = {**status_ok_payload(), **result}
+        return Response(payload, status=status.HTTP_200_OK)
 
 
 class EmailConfirmationConfirmView(APIView):
@@ -184,8 +207,17 @@ class EmailConfirmationConfirmView(APIView):
 
         try:
             email_confirmation_confirm_service(ser.validated_data["token"], meta)
+        except EmailAlreadyConfirmed:
+            payload = {**status_ok_payload(), "already_confirmed": True}
+            return Response(payload, status=status.HTTP_200_OK)
         except EmailConfirmationExpired:
             return _error("token_expired", "Token expirado. Solicite um novo e-mail.", status.HTTP_400_BAD_REQUEST)
+        except EmailConfirmationTokenConsumed:
+            return _error(
+                "token_consumed",
+                "Este link não é mais válido. Solicite um novo e-mail.",
+                status.HTTP_400_BAD_REQUEST,
+            )
         except EmailConfirmationInvalid:
             return _error("token_invalid", "Token inválido. Solicite um novo e-mail.", status.HTTP_400_BAD_REQUEST)
         except AccountsError:

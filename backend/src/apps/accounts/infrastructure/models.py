@@ -205,7 +205,6 @@ class UserPreferences(TimestampedModel, models.Model):
     theme = models.CharField(max_length=16, choices=UserTheme.choices, default=UserTheme.LIGHT)
     accent_color = models.CharField(max_length=16, default="pink")
     email_notifications_enabled = models.BooleanField(default=True)
-    region = models.CharField(max_length=16, null=True, blank=True)
 
     class Meta:
         db_table = "user_preferences"

@@ -5,7 +5,7 @@ Evaluate a signals-based seniority bundle (model.joblib) on a JSONL dataset.
   python ml/training/src/eval_seniority.py \\
     --model_dir ml/models/seniority_signals_v1 \\
     --test_jsonl ml/data/splits/seniority_latest/test.jsonl \\
-    --out_md ml/training/reports/seniority_signals_v1_eval.md \\
+    --out_md ml/training/reports/eval_seniority.md \\
     --metrics_json ml/models/seniority_signals_v1/test_metrics.json
 """
 from __future__ import annotations
@@ -41,17 +41,39 @@ def _confusion_pairs(cm: np.ndarray, labels: list[str]) -> dict[str, int]:
     if "junior" in idx and "mid" in idx:
         add_pair("junior", "mid")
         add_pair("mid", "junior")
+    if "intern" in idx and "junior" in idx:
+        add_pair("intern", "junior")
+        add_pair("junior", "intern")
     return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model_dir", required=True)
-    ap.add_argument("--test_jsonl", required=True)
-    ap.add_argument("--out", default="", help="Optional plain-text report (legacy).")
-    ap.add_argument("--out_md", default="", help="Markdown report path.")
+    ap.add_argument("--split_dir", default="", help="Uses split_dir/test.jsonl if set.")
+    ap.add_argument("--test_jsonl", default="", help="Test JSONL (required if no --split_dir).")
+    ap.add_argument(
+        "--out",
+        default="",
+        help="Report path: .md → Markdown; otherwise plain text (legacy).",
+    )
+    ap.add_argument("--out_md", default="", help="Markdown report (alias; overrides --out if both set).")
     ap.add_argument("--metrics_json", default="", help="Optional JSON with accuracy, f1_macro, confusion.")
     args = ap.parse_args()
+
+    if args.split_dir:
+        test_path = Path(args.split_dir) / "test.jsonl"
+    elif args.test_jsonl:
+        test_path = Path(args.test_jsonl)
+    else:
+        print("Provide --split_dir or --test_jsonl.", file=sys.stderr)
+        return 2
+
+    md_out = (args.out_md or "").strip()
+    out_raw = (args.out or "").strip()
+    if not md_out and out_raw.lower().endswith(".md"):
+        md_out = out_raw
+    txt_out = out_raw if out_raw and not out_raw.lower().endswith(".md") else ""
 
     bundle = joblib.load(Path(args.model_dir) / "model.joblib")
     clf = bundle["pipeline"]
@@ -62,7 +84,7 @@ def main() -> int:
     X_list: list[list[float]] = []
     y_true: list[str] = []
     skipped_unknown = 0
-    with Path(args.test_jsonl).open(encoding="utf-8") as f:
+    with test_path.open(encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -90,8 +112,18 @@ def main() -> int:
     pred = clf.predict(X)
     acc = accuracy_score(y_enc, pred)
     f1m = f1_score(y_enc, pred, average="macro", zero_division=0)
-    report = classification_report(y_enc, pred, target_names=le.classes_, zero_division=0)
-    cm = confusion_matrix(y_enc, pred)
+    n_classes = len(le.classes_)
+    labels_full = np.arange(n_classes, dtype=int)
+    cm = confusion_matrix(y_enc, pred, labels=labels_full)
+    present = sorted(set(np.unique(y_enc).tolist()) | set(np.unique(pred).tolist()))
+    report_names = [str(le.classes_[i]) for i in present]
+    report = classification_report(
+        y_enc,
+        pred,
+        labels=present,
+        target_names=report_names,
+        zero_division=0,
+    )
     labels = list(le.classes_)
     pairs = _confusion_pairs(cm, labels)
 
@@ -111,7 +143,7 @@ def main() -> int:
         "# Seniority signals model — evaluation",
         "",
         f"- **model_dir**: `{Path(args.model_dir).as_posix()}`",
-        f"- **test_jsonl**: `{Path(args.test_jsonl).as_posix()}`",
+        f"- **test_jsonl**: `{test_path.as_posix()}`",
         f"- **rows (evaluated)**: {len(y_true)}",
         f"- **rows skipped (label not in model classes)**: {skipped_unknown}",
         "",
@@ -140,14 +172,14 @@ def main() -> int:
         md_lines.append(f"- `{k}`: **{v}**")
     md_lines.extend(["", "## Classification report", "", "```", report.rstrip(), "```", ""])
 
-    if args.out_md:
-        out_md = Path(args.out_md)
+    if md_out:
+        out_md = Path(md_out)
         out_md.parent.mkdir(parents=True, exist_ok=True)
         out_md.write_text("\n".join(md_lines), encoding="utf-8")
         print(f"Wrote {out_md}")
 
-    if args.out:
-        out_path = Path(args.out)
+    if txt_out:
+        out_path = Path(txt_out)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         lines = [
             f"accuracy: {acc:.4f}",
@@ -165,7 +197,7 @@ def main() -> int:
         out_path.write_text("\n".join(lines), encoding="utf-8")
         print(f"Wrote {out_path}")
 
-    if not args.out_md and not args.out:
+    if not md_out and not txt_out:
         print("\n".join(md_lines))
     return 0
 

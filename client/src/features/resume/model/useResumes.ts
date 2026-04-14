@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { markResumeContentSaved } from '@/shared/lib/resumeSaveMarker';
+
 import { resumeApi, type ResumeDraftPayload } from '../api/resumeApi';
 import { toResumeViewModel, type Resume, type ResumeViewModel } from '@/entities/resume';
 
@@ -74,6 +76,8 @@ export function useResumes(init?: UseResumesInit) {
     loading: true,
     error: null,
   });
+  /** Bumped after forced list refresh so dependent hooks (e.g. IA badges) refetch. */
+  const [listVersion, setListVersion] = useState(0);
 
   const viewModels = useMemo<ResumeViewModel[]>(() => {
     return state.items.map((r) => toResumeViewModel(r, { t }));
@@ -118,13 +122,17 @@ export function useResumes(init?: UseResumesInit) {
     };
   }, [state.filters.score, state.filters.status, state.filters.updated, state.query, state.sort]);
 
-  const reload = useCallback(async () => {
+  const reload = useCallback(async (options?: { force?: boolean }) => {
     const cacheKey = JSON.stringify(listParams);
     const now = Date.now();
-    const cached = listCacheRef.current.get(cacheKey);
-    if (cached && now - cached.at <= LIST_CACHE_TTL_MS) {
-      setState((s) => ({ ...s, items: cached.items, loading: false, error: null }));
-      return;
+    if (!options?.force) {
+      const cached = listCacheRef.current.get(cacheKey);
+      if (cached && now - cached.at <= LIST_CACHE_TTL_MS) {
+        setState((s) => ({ ...s, items: cached.items, loading: false, error: null }));
+        return;
+      }
+    } else {
+      listCacheRef.current.clear();
     }
 
     abortRef.current?.abort();
@@ -140,6 +148,9 @@ export function useResumes(init?: UseResumesInit) {
       const items = res.items ?? [];
       listCacheRef.current.set(cacheKey, { at: now, items });
       setState((s) => ({ ...s, items, loading: false }));
+      if (options?.force) {
+        setListVersion((v) => v + 1);
+      }
     } catch (err) {
       if ((err as { name?: string })?.name === 'AbortError') return;
       if (requestSeqRef.current !== reqSeq) return;
@@ -154,13 +165,15 @@ export function useResumes(init?: UseResumesInit) {
 
   const createDraft = useCallback(async (payload: ResumeDraftPayload) => {
     const resume = await resumeApi.create(payload);
-    await reload();
+    markResumeContentSaved(resume.id);
+    await reload({ force: true });
     return resume;
   }, [reload]);
 
   const updateDraft = useCallback(async (resumeId: string, payload: ResumeDraftPayload) => {
     const resume = await resumeApi.update(resumeId, payload);
-    await reload();
+    markResumeContentSaved(resumeId);
+    await reload({ force: true });
     return resume;
   }, [reload]);
 
@@ -171,7 +184,8 @@ export function useResumes(init?: UseResumesInit) {
 
   const duplicateResume = useCallback(async (resumeId: string) => {
     const resume = await resumeApi.duplicate(resumeId);
-    await reload();
+    markResumeContentSaved(resume.id);
+    await reload({ force: true });
     return resume;
   }, [reload]);
 
@@ -216,6 +230,7 @@ export function useResumes(init?: UseResumesInit) {
     loading: state.loading,
     error: state.error,
     hasActiveFilters,
+    listVersion,
     viewModels,
     setQuery,
     setView,

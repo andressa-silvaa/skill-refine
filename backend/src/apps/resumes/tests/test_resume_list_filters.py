@@ -73,11 +73,13 @@ class ResumeListFiltersTest(TestCase):
         self.assertNotIn("Backend Draft", names)
 
     def test_filter_by_score_range(self):
+        self.resume_draft.refresh_from_db()
         ResumeAnalysis.objects.create(
             user_id=self.user_a.id,
             resume_id=self.resume_draft.id,
             status=AnalysisStatus.DONE,
             score=88,
+            resume_content_synced_at=self.resume_draft.updated_at,
         )
         response = self.client.get(self.url, {"score_min": "86", "score_max": "100"})
         names = self._names(response)

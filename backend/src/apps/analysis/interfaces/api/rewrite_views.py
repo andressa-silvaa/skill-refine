@@ -22,6 +22,25 @@ from .serializers import RewriteRequestSerializer
 logger = logging.getLogger(__name__)
 
 
+def _language_from_accept_language(header: str | None) -> str | None:
+    if not header or not str(header).strip():
+        return None
+    first = str(header).split(",")[0].strip().split(";")[0].strip().replace("_", "-")
+    return first or None
+
+
+def _merge_rewrite_options(request, options: dict[str, Any] | None) -> dict[str, Any]:
+    """Ensure language is set: body wins, else Accept-Language (browser / client sends both)."""
+    merged: dict[str, Any] = dict(options or {})
+    lang = merged.get("language")
+    if isinstance(lang, str) and lang.strip():
+        return merged
+    from_header = _language_from_accept_language(request.headers.get("Accept-Language"))
+    if from_header:
+        merged["language"] = from_header
+    return merged
+
+
 def _rate_limit(request, limit: int = 10, window_seconds: int = 60) -> None:
     meta = request_meta(request)
     ip = meta.get("ip") or "unknown"
@@ -62,7 +81,7 @@ class AiRewriteView(APIView):
         data = ser.validated_data
         text: str = data["text"]
         context: str = data["context"]
-        options: dict[str, Any] | None = data.get("options")
+        options = _merge_rewrite_options(request, data.get("options"))
 
         try:
             result = rewrite_text_orchestrated(text, context, options)

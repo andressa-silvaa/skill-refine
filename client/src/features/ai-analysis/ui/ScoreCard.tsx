@@ -9,6 +9,8 @@ type Props = {
   score: number;
   scoreLabel: string;
   howWeCalculateLabel: string;
+  /** Ex.: score reflete qualidade do currículo, não senioridade. */
+  qualityHint?: string;
 };
 
 const CIRCLE_SIZE = 88;
@@ -17,7 +19,7 @@ const RADIUS = (CIRCLE_SIZE - STROKE_WIDTH) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function ScoreCard(props: Props) {
-  const { score, scoreLabel, howWeCalculateLabel } = props;
+  const { score, scoreLabel, howWeCalculateLabel, qualityHint } = props;
   const { t } = useTranslation();
 
   const normalizedScore = Math.min(100, Math.max(0, score));
@@ -58,6 +60,7 @@ export function ScoreCard(props: Props) {
       </div>
       <h3 className="sr-score-card__label">{t('analysis.scoreGeneral')}</h3>
       <span className="sr-score-card__subtext">{scoreLabel}</span>
+      {qualityHint ? <p className="sr-score-card__meaning">{qualityHint}</p> : null}
       <ScoreExplanationPopover triggerLabel={howWeCalculateLabel} />
     </Card>
   );

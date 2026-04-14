@@ -10,5 +10,6 @@ export type {
 } from './api/profileApi';
 export { privacyApi } from './api/privacyApi';
 export { accountApi } from './api/accountApi';
+export type { EmailConfirmationRequestResult } from './api/accountApi';
 
 

@@ -10,10 +10,10 @@ import threading
 from uuid import UUID
 
 from django.conf import settings
-from django.db.models import OuterRef, Subquery
-
+from apps.analysis.application.analysis_resume_validity import is_analysis_valid_for_resume
 from apps.analysis.models import AnalysisStatus, ResumeAnalysis
 from apps.resumes.infrastructure.models import Resume
+from apps.analysis.application.worker import run_analysis_worker_safe
 from apps.analysis.tasks import run_resume_analysis_task
 from apps.resumes.interfaces.api.services import get_resume_by_id_and_user
 
@@ -72,13 +72,18 @@ def run_analysis(
     user_id: str,
     resume_id: UUID | str,
     job_description_text: str | None = None,
+    *,
+    sync: bool = False,
 ) -> tuple[ResumeAnalysis | None, str | None]:
     """
     Create a pending ResumeAnalysis and enqueue execution (Celery or thread).
+    When ``sync=True``, runs ``run_analysis_worker_safe`` inline (tests / controlled batch).
+
     Returns (analysis, None) on success, (None, "not_found") if resume invalid,
     (None, "unavailable") if analysis service unavailable (prod, no Celery).
     """
-    if not validate_resume_ownership(user_id, str(resume_id)):
+    resume = get_resume_by_id_and_user(user_id, str(resume_id))
+    if resume is None:
         return (None, "not_found")
 
     available, _ = is_analysis_available()
@@ -90,7 +95,12 @@ def run_analysis(
         resume_id=str(resume_id),
         status=AnalysisStatus.PENDING,
         job_description_text=(job_description_text or "")[:JOB_DESCRIPTION_MAX_LENGTH] or None,
+        resume_content_synced_at=resume.updated_at,
     )
+
+    if sync:
+        run_analysis_worker_safe(str(analysis.id))
+        return (analysis, None)
 
     if _use_celery():
         try:
@@ -100,7 +110,7 @@ def run_analysis(
                 logger.warning("Celery unavailable, falling back to thread: %s", exc)
                 _start_inprocess_analysis(str(analysis.id))
             else:
-                logger.error("Celery unavailable and in-process fallback disabled: %s", exc)
+                logger.error("Celery unavailable and in-process fallback: %s", exc)
                 _mark_analysis_failed(analysis)
     else:
         if _allow_inprocess_fallback():
@@ -112,17 +122,21 @@ def run_analysis(
 
 
 def get_latest_analysis(user_id: str, resume_id: str) -> ResumeAnalysis | None:
-    """Return the most recent analysis for this resume owned by user, or None."""
-    if not validate_resume_ownership(user_id, resume_id):
+    """Return the most recent analysis still valid for current resume content, or None."""
+    resume = get_resume_by_id_and_user(user_id, str(resume_id))
+    if resume is None:
         return None
-    return (
+    qs = (
         ResumeAnalysis.objects.filter(
             user_id=user_id,
             resume_id=resume_id,
         )
-        .order_by("-created_at")
-        .first()
+        .order_by("-created_at")[:25]
     )
+    for analysis in qs:
+        if is_analysis_valid_for_resume(resume, analysis):
+            return analysis
+    return None
 
 
 def get_latest_analyses_map(user_id: str, resume_ids: list[str]) -> dict[str, ResumeAnalysis]:
@@ -144,24 +158,11 @@ def get_latest_analyses_map(user_id: str, resume_ids: list[str]) -> dict[str, Re
     if not owned_ids:
         return {}
 
-    latest_analysis_subquery = (
-        ResumeAnalysis.objects.filter(
-            user_id=user_id,
-            resume_id=OuterRef("resume_id"),
-        )
-        .order_by("-created_at")
-        .values("id")[:1]
-    )
-    latest = list(
-        ResumeAnalysis.objects.filter(
-            user_id=user_id,
-            resume_id__in=owned_ids,
-        )
-        .filter(id=Subquery(latest_analysis_subquery))
-    )
     by_resume: dict[str, ResumeAnalysis] = {}
-    for analysis in latest:
-        by_resume[str(analysis.resume_id)] = analysis
+    for rid in owned_ids:
+        latest = get_latest_analysis(user_id, str(rid))
+        if latest is not None:
+            by_resume[str(rid)] = latest
     return by_resume
 
 

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useSession } from '@/entities/session';
 import { Button, Textarea } from '@/shared/ui';
 import { resumeApi } from '@/features/resume';
 import { notify } from '@/shared/lib/notify';
 import { getApiErrorMessage } from '@/shared/api';
+import { resolveUiLanguageForAi } from '@/shared/lib/i18n/languageForAiRewrite';
 
 import './SummaryStep.css';
 
@@ -18,7 +20,8 @@ type Props = {
 
 export function SummaryStep(props: Props) {
   const { summary, onChange, getError, shouldShowError, onFieldTouched } = props;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { preferences } = useSession();
   const summaryError = shouldShowError('summary') ? getError('summary') : undefined;
   const [isImproving, setIsImproving] = useState(false);
 
@@ -53,7 +56,12 @@ export function SummaryStep(props: Props) {
             }
             setIsImproving(true);
             try {
-              const result = await resumeApi.rewriteSummaryWithAI(summary);
+              const uiLang = resolveUiLanguageForAi({
+                preferencesLanguage: preferences?.language,
+                i18nLanguage: i18n.language,
+                resolvedLanguage: i18n.resolvedLanguage,
+              });
+              const result = await resumeApi.rewriteSummaryWithAI(summary, uiLang);
               onChange(result.suggestedText);
             } catch (err) {
               notify.error(getApiErrorMessage(err, t('resume.summaryStepApiError')));

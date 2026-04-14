@@ -74,7 +74,11 @@ export function LoginPage() {
               }
 
               try {
-                await resend.resend(trimmed);
+                const out = await resend.resend(trimmed);
+                if (out?.already_verified) {
+                  notify.success('Este e-mail já está confirmado. Entre com sua senha.');
+                  return;
+                }
                 navigate('/verify-email', { state: { email: trimmed, emailConfirmationSent: true } });
               } catch (err) {
                 setConfirmEmailError(getApiErrorMessage(err, 'Não foi possível enviar a confirmação agora.'));

@@ -42,7 +42,7 @@ export const sessionApi = {
       const res = await authApi.me();
       return res.user;
     } catch (e) {
-      if (e instanceof ApiError && e.status === 401) {
+      if (e instanceof ApiError && (e.status === 401 || e.status === 403)) {
         await sessionApi.refresh();
         const res = await authApi.me();
         return res.user;

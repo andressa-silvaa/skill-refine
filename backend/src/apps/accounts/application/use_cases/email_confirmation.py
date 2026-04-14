@@ -1,14 +1,18 @@
 """Email confirmation use cases: request, confirm."""
 from __future__ import annotations
 
+import logging
+import math
 import secrets
 from datetime import timedelta
 
 from apps.accounts.application.use_cases import config
 from apps.accounts.application.use_cases._helpers import _hash_secret, _normalize_frontend_url, _utc
 from apps.accounts.domain.errors import (
+    EmailAlreadyConfirmed,
     EmailConfirmationExpired,
     EmailConfirmationInvalid,
+    EmailConfirmationTokenConsumed,
     EmailNotRegistered,
     EmailSendFailed,
     EmailServiceNotConfigured,
@@ -24,6 +28,8 @@ from apps.audit.domain.ports import AuditLogger
 from shared.auth.jwt import now_utc
 from shared.utils.normalization import normalize_email
 
+logger = logging.getLogger(__name__)
+
 
 def request_email_confirmation(
     *,
@@ -35,7 +41,7 @@ def request_email_confirmation(
     email: str,
     ip: str | None,
     user_agent: str | None,
-) -> None:
+) -> dict[str, bool]:
     email_n = normalize_email(email)
     if not email_n:
         raise ValidationError("Invalid email")
@@ -61,14 +67,19 @@ def request_email_confirmation(
             user_agent=user_agent,
             metadata={"email": email_n, "result": "already_verified"},
         )
-        return
+        logger.info(
+            "email_confirmation_request: already_verified (no e-mail sent) email=%s",
+            email_n,
+        )
+        return {"email_sent": False, "already_verified": True}
 
     now = now_utc()
 
     last_req = confirmations.latest_active_for_email(email=email_n)
     if last_req is not None:
         last_created = _utc(last_req.created_at)
-        if (now - last_created).total_seconds() < 60:
+        elapsed = (now - last_created).total_seconds()
+        if elapsed < 60:
             audit.log(
                 action="accounts.email_confirmation_requested",
                 actor_user_id=str(user.id),
@@ -77,13 +88,14 @@ def request_email_confirmation(
                 user_agent=user_agent,
                 metadata={"email": email_n, "result": "throttled"},
             )
-            raise TooManyRequests()
+            retry_after = max(1, int(math.ceil(60 - elapsed)))
+            raise TooManyRequests(retry_after_seconds=retry_after)
 
     since = now - timedelta(hours=1)
     if confirmations.count_recent_for_email(email=email_n, since=since) >= 8:
-        raise TooManyRequests()
+        raise TooManyRequests(retry_after_seconds=3600)
     if ip and confirmations.count_recent_for_ip(ip=ip, since=since) >= 25:
-        raise TooManyRequests()
+        raise TooManyRequests(retry_after_seconds=3600)
 
     token_plain = secrets.token_urlsafe(48)
     token_hash = _hash_secret(token_plain, cfg.email_confirmation_token_pepper)
@@ -115,6 +127,7 @@ def request_email_confirmation(
         user_agent=user_agent,
         metadata={"email": email_n, "result": "sent"},
     )
+    return {"email_sent": True, "already_verified": False}
 
 
 def confirm_email(
@@ -135,6 +148,16 @@ def confirm_email(
     token_hash = _hash_secret(token, cfg.email_confirmation_token_pepper)
     rec = confirmations.get_active_by_token_hash(token_hash=token_hash)
     if rec is None:
+        latest = confirmations.get_latest_by_token_hash(token_hash=token_hash)
+        if latest is not None and latest.consumed_at is not None:
+            user_prev = users.get_by_id(str(latest.user_id))
+            if (
+                user_prev is not None
+                and getattr(user_prev, "deleted_at", None) is None
+                and getattr(user_prev, "email_verified_at", None)
+            ):
+                raise EmailAlreadyConfirmed()
+            raise EmailConfirmationTokenConsumed()
         raise EmailConfirmationInvalid()
 
     if _utc(rec.expires_at) <= now:
@@ -142,11 +165,18 @@ def confirm_email(
         raise EmailConfirmationExpired()
 
     user = users.get_by_id(str(rec.user_id))
-    if user is None:
+    if user is None or getattr(user, "deleted_at", None) is not None:
         confirmations.consume_if_active(token_id=str(rec.id), when=now)
         raise EmailConfirmationInvalid()
 
     if not confirmations.consume_if_active(token_id=str(rec.id), when=now):
+        user_after = users.get_by_id(str(rec.user_id))
+        if (
+            user_after is not None
+            and getattr(user_after, "deleted_at", None) is None
+            and getattr(user_after, "email_verified_at", None)
+        ):
+            return
         raise EmailConfirmationInvalid()
 
     if not getattr(user, "email_verified_at", None):

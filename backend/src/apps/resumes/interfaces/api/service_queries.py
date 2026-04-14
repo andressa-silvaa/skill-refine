@@ -5,6 +5,7 @@ from typing import Any
 from django.db.models import F, OuterRef, Prefetch, Q, QuerySet, Subquery
 from django.db.models.functions import Coalesce
 
+from apps.analysis.application.analysis_resume_validity import valid_resume_analysis_q
 from apps.analysis.models import AnalysisStatus, ResumeAnalysis
 from apps.resumes.infrastructure.models import Resume, ResumeSkill, ResumeTag
 
@@ -60,6 +61,7 @@ def _apply_list_filters(qs: QuerySet[Resume], filters: ResumeListFilters | None)
                 status=AnalysisStatus.DONE,
                 score__isnull=False,
             )
+            .filter(valid_resume_analysis_q())
             .order_by("-created_at")
             .values("score")[:1]
         )

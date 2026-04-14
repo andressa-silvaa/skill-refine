@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Badge, Card, Chip, IconButton, Tooltip } from '@/shared/ui';
 import { useMediaQuery } from '@/shared/lib/hooks/useMediaQuery';
 
+import { translateVersionChangeLabel } from '../lib/translateVersionChangeLabel';
 import type { VersionHistoryItem } from '../model/types';
 
 import './VersionHistoryCard.css';
@@ -96,7 +97,7 @@ export function VersionHistoryCard({ item, showAsCurrent = false, onView, onRest
         <div className="sr-version-card__changes">
           {visibleChanges.map((change, idx) => (
             <Chip key={idx} className="sr-version-card__change-chip">
-              {change}
+              {translateVersionChangeLabel(t, change)}
             </Chip>
           ))}
           {hiddenChangesCount > 0 ? (

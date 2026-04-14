@@ -151,10 +151,17 @@ class OrmPasswordResetRepository(PasswordResetRepository):
         if not email_n:
             return None
         return (
-            PasswordResetRequest.objects.filter(email=email_n, consumed_at__isnull=True)
+            PasswordResetRequest.objects.filter(
+                email=email_n,
+                consumed_at__isnull=True,
+                user__deleted_at__isnull=True,
+            )
             .order_by("-created_at")
             .first()
         )
+
+    def consume_all_active_for_user(self, *, user_id: str, when: datetime) -> None:
+        PasswordResetRequest.objects.filter(user_id=user_id, consumed_at__isnull=True).update(consumed_at=when)
 
     def increment_attempts(self, *, request_id: str, when: datetime) -> None:
         with transaction.atomic():
@@ -187,7 +194,11 @@ class OrmEmailConfirmationRepository(EmailConfirmationRepository):
         if not email_n:
             return None
         return (
-            EmailConfirmationToken.objects.filter(email=email_n, consumed_at__isnull=True)
+            EmailConfirmationToken.objects.filter(
+                email=email_n,
+                consumed_at__isnull=True,
+                user__deleted_at__isnull=True,
+            )
             .order_by("-created_at")
             .first()
         )
@@ -196,12 +207,20 @@ class OrmEmailConfirmationRepository(EmailConfirmationRepository):
         email_n = normalize_email(email) or ""
         if not email_n:
             return 0
-        return EmailConfirmationToken.objects.filter(email=email_n, created_at__gte=since).count()
+        return EmailConfirmationToken.objects.filter(
+            email=email_n,
+            created_at__gte=since,
+            user__deleted_at__isnull=True,
+        ).count()
 
     def count_recent_for_ip(self, *, ip: str, since: datetime) -> int:
         if not ip:
             return 0
-        return EmailConfirmationToken.objects.filter(ip=ip, created_at__gte=since).count()
+        return EmailConfirmationToken.objects.filter(
+            ip=ip,
+            created_at__gte=since,
+            user__deleted_at__isnull=True,
+        ).count()
 
     def create_token(
         self,
@@ -226,10 +245,26 @@ class OrmEmailConfirmationRepository(EmailConfirmationRepository):
         if not token_hash:
             return None
         return (
-            EmailConfirmationToken.objects.filter(token_hash=token_hash, consumed_at__isnull=True)
+            EmailConfirmationToken.objects.filter(
+                token_hash=token_hash,
+                consumed_at__isnull=True,
+                user__deleted_at__isnull=True,
+            )
             .order_by("-created_at")
             .first()
         )
+
+    def get_latest_by_token_hash(self, *, token_hash: str):
+        if not token_hash:
+            return None
+        return (
+            EmailConfirmationToken.objects.filter(token_hash=token_hash, user__deleted_at__isnull=True)
+            .order_by("-created_at")
+            .first()
+        )
+
+    def consume_all_active_for_user(self, *, user_id: str, when: datetime) -> None:
+        EmailConfirmationToken.objects.filter(user_id=user_id, consumed_at__isnull=True).update(consumed_at=when)
 
     def consume(self, *, token_id: str, when: datetime) -> None:
         EmailConfirmationToken.objects.filter(id=token_id).update(consumed_at=when)

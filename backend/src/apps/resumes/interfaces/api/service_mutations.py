@@ -74,6 +74,8 @@ def create_resume_draft(user_id: str, data: dict[str, Any]) -> Resume:
         if "languages" in data:
             replace_languages(resume, data.get("languages") or [])
 
+        resume.save()
+
     return resume
 
 
@@ -113,8 +115,6 @@ def update_resume_draft(user_id: str, resume_id: str, data: dict[str, Any]) -> R
         elif status_value == "draft":
             resume.status = ResumeStatus.DRAFT
 
-        resume.save()
-
         if "contact" in data:
             contact = data.get("contact") or {}
             ResumeContact.objects.update_or_create(
@@ -140,6 +140,9 @@ def update_resume_draft(user_id: str, resume_id: str, data: dict[str, Any]) -> R
             replace_skills(resume, data.get("skills") or [])
         if "languages" in data:
             replace_languages(resume, data.get("languages") or [])
+
+        # After nested rows change, persist resume so updated_at reflects full edit (invalidates AI analysis).
+        resume.save()
 
     return resume
 

@@ -44,6 +44,22 @@ class ResumeAnalysis(UUIDPrimaryKeyModel, TimestampedModel):
     provider = models.CharField(max_length=16, default="local", blank=True)
     job_description_text = models.TextField(null=True, blank=True)
     error_message = models.TextField(null=True, blank=True)
+    # Resume.updated_at when this run was enqueued; analysis is valid only while it still matches.
+    resume_content_synced_at = models.DateTimeField(null=True, blank=True)
+
+    # Gold-standard seniority (policy + optional human review). Export / training use these, not legacy ML class.
+    seniority_rule_label = models.CharField(max_length=16, blank=True, default="")
+    seniority_review_label = models.CharField(max_length=16, blank=True, null=True)
+    seniority_final_label = models.CharField(max_length=16, blank=True, default="")
+    seniority_label_source = models.CharField(max_length=16, blank=True, default="")
+    seniority_policy_version = models.CharField(max_length=24, blank=True, default="")
+    seniority_confidence = models.CharField(max_length=16, blank=True, default="")
+    seniority_evidence = models.JSONField(null=True, blank=True)
+    seniority_text_label = models.CharField(max_length=16, blank=True, default="")
+    seniority_text_confidence = models.CharField(max_length=16, blank=True, default="")
+    target_fit_embedding_score = models.PositiveSmallIntegerField(null=True, blank=True)
+    target_fit_signals_score = models.PositiveSmallIntegerField(null=True, blank=True)
+    target_fit_final_score = models.PositiveSmallIntegerField(null=True, blank=True)
 
     class Meta:
         db_table = "resume_analyses"

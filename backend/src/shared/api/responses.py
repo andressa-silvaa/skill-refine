@@ -14,7 +14,12 @@ def canonical_error_code(code: str) -> str:
     return (code or "").strip().upper()
 
 
-def error_response(code: str, message: str, http_status: int) -> Response:
+def error_response(
+    code: str,
+    message: str,
+    http_status: int,
+    headers: dict[str, str] | None = None,
+) -> Response:
     """Generic error response. Payload: error, error_code, message (contract-preserving)."""
     canonical = canonical_error_code(code)
     payload = {
@@ -22,7 +27,7 @@ def error_response(code: str, message: str, http_status: int) -> Response:
         "error_code": canonical,
         "message": message,
     }
-    return Response(payload, status=http_status)
+    return Response(payload, status=http_status, headers=headers or {})
 
 
 def field_error_response(

@@ -10,6 +10,10 @@ from django.db.models import Avg, OuterRef, Q, Subquery
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 
+from apps.analysis.application.analysis_resume_validity import (
+    is_analysis_valid_for_resume,
+    valid_resume_analysis_q,
+)
 from apps.analysis.models import AnalysisStatus, ResumeAnalysis
 from apps.resumes.infrastructure.models import Resume, ResumeStatus
 
@@ -41,16 +45,21 @@ def _latest_done_analyses_by_resume(user_id: str) -> list[ResumeAnalysis]:
         ResumeAnalysis.objects.filter(
             user_id=user_id,
             status=AnalysisStatus.DONE,
-            resume_id=OuterRef("resume_id"),
+            resume_id=OuterRef("pk"),
         )
+        .filter(valid_resume_analysis_q())
         .order_by("-created_at")
         .values("id")[:1]
     )
-    return list(
-        ResumeAnalysis.objects.filter(user_id=user_id, status=AnalysisStatus.DONE)
-        .filter(id=Subquery(latest_analysis_subquery))
-        .select_related("resume")
+    annotated = Resume.objects.filter(user_id=user_id, deleted_at__isnull=True).annotate(
+        _lid=Subquery(latest_analysis_subquery),
     )
+    ids = [i for i in annotated.values_list("_lid", flat=True) if i]
+    out: list[ResumeAnalysis] = []
+    for a in ResumeAnalysis.objects.filter(id__in=ids).select_related("resume"):
+        if a.resume_id and is_analysis_valid_for_resume(a.resume, a):
+            out.append(a)
+    return out
 
 
 def _build_competencies(
@@ -178,7 +187,11 @@ def get_dashboard_summary(user_id: str) -> dict[str, Any]:
     draft_resumes = resumes_qs.filter(status=ResumeStatus.DRAFT).count()
 
     done_analyses_qs = ResumeAnalysis.objects.filter(user_id=user_id, status=AnalysisStatus.DONE)
-    latest_done_analysis = done_analyses_qs.select_related("resume").order_by("-created_at").first()
+    latest_done_analysis = None
+    for a in done_analyses_qs.select_related("resume").order_by("-created_at")[:80]:
+        if is_analysis_valid_for_resume(a.resume, a):
+            latest_done_analysis = a
+            break
     latest_done_analyses = _latest_done_analyses_by_resume(user_id)
 
     analysis_scores = list(done_analyses_qs.exclude(score__isnull=True).values_list("score", flat=True))
@@ -224,6 +237,7 @@ def get_dashboard_summary(user_id: str) -> dict[str, Any]:
             status=AnalysisStatus.DONE,
             resume_id=OuterRef("id"),
         )
+        .filter(valid_resume_analysis_q())
         .order_by("-created_at")
         .values("score")[:1]
     )

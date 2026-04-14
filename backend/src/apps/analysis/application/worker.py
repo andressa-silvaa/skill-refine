@@ -67,15 +67,46 @@ def run_analysis_worker(analysis_id: str) -> None:
     analysis.model_version = result.get("model_version", "")
     analysis.dataset_version = result.get("dataset_version", "")
     analysis.provider = result.get("provider", "local")
+    analysis.seniority_rule_label = result.get("seniority_rule_label", "") or ""
+    analysis.seniority_final_label = result.get("seniority_final_label", "") or ""
+    analysis.seniority_label_source = result.get("seniority_label_source", "") or "rule_policy"
+    analysis.seniority_policy_version = result.get("seniority_policy_version", "") or ""
+    analysis.seniority_confidence = result.get("seniority_confidence_persist", "") or ""
+    analysis.seniority_evidence = result.get("seniority_evidence_json")
+    analysis.seniority_text_label = result.get("seniority_text_label", "") or ""
+    analysis.seniority_text_confidence = result.get("seniority_text_confidence", "") or ""
+    analysis.target_fit_embedding_score = result.get("target_fit_embedding_score")
+    analysis.target_fit_signals_score = result.get("target_fit_signals_score")
+    analysis.target_fit_final_score = result.get("target_fit_final_score")
     analysis.status = AnalysisStatus.DONE
     analysis.save(
         update_fields=[
-            "status", "score", "task_scores", "payload_json",
-            "model_name", "model_version", "dataset_version", "provider", "updated_at",
+            "status",
+            "score",
+            "task_scores",
+            "payload_json",
+            "model_name",
+            "model_version",
+            "dataset_version",
+            "provider",
+            "seniority_rule_label",
+            "seniority_final_label",
+            "seniority_label_source",
+            "seniority_policy_version",
+            "seniority_confidence",
+            "seniority_evidence",
+            "seniority_text_label",
+            "seniority_text_confidence",
+            "target_fit_embedding_score",
+            "target_fit_signals_score",
+            "target_fit_final_score",
+            "updated_at",
         ]
     )
 
     duration_ms = int((time.monotonic() - start) * 1000)
+    pj = analysis.payload_json or {}
+    ts = analysis.task_scores or {}
     logger.info(
         "Analysis task completed",
         extra={
@@ -85,6 +116,27 @@ def run_analysis_worker(analysis_id: str) -> None:
             "provider": analysis.provider,
             "duration_ms": duration_ms,
             "queue_wait_ms": queue_wait_ms,
+            "completeness_score": (pj.get("completeness") or {}).get("score"),
+            "completeness_level": (pj.get("completeness") or {}).get("level"),
+            "seniority_confidence": pj.get("seniorityConfidence"),
+            "seniority_rule_base": pj.get("seniorityRuleBase"),
+            "seniority_final": pj.get("seniorityClass"),
+            "seniority_ml_status": pj.get("seniorityMlStatus"),
+            "quality_score": analysis.score,
+        },
+    )
+    logger.info(
+        "analysis_score_components",
+        extra={
+            "analysis_id": str(analysis.id),
+            "resume_id": str(analysis.resume_id),
+            "score_overall": analysis.score,
+            "quality_task": ts.get("ats"),
+            "seniority_task": ts.get("seniority"),
+            "matching_task": ts.get("matching"),
+            "target_fit_task": ts.get("target_fit"),
+            "target_seniority_task": ts.get("target_seniority"),
+            "seniority_label_source": analysis.seniority_label_source,
         },
     )
     invalidate_dashboard_summary_cache(str(analysis.user_id))

@@ -62,14 +62,19 @@ services:
     volumes:
       - ./backend:/app
       - ./ml:/ml
+    # --noreload: evita StatReloader em volume montado (Windows/Docker) e POSTs sem resposta.
+    # exec: runserver vira PID 1 (sinais/restart corretos). -u: log em tempo real no `docker logs`.
     command: >
-      sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+      sh -c "set -e && cd /app &&
+      python manage.py migrate &&
+      echo 'Starting Django runserver on 0.0.0.0:8000...' &&
+      exec python -u manage.py runserver 0.0.0.0:8000 --noreload"
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 8s
+      retries: 8
+      start_period: 120s
 
   celery:
     build:

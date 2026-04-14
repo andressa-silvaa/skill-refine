@@ -21,6 +21,40 @@ from apps.resumes.infrastructure.models import (
 )
 from apps.resumes.infrastructure.models import ResumeVersion
 
+# Sync with client: shared/constants/versionChangeSummaryKeys.ts
+_VERSION_CHANGE_SUMMARY_KEYS = frozenset(
+    {
+        "initial",
+        "professional_summary_updated",
+        "name_contact_updated",
+        "email_updated",
+        "target_position_updated",
+        "experience_updated",
+        "education_updated",
+        "skills_updated",
+        "languages_updated",
+        "theme_updated",
+        "general_changes",
+        "version_restored",
+    }
+)
+
+
+def _is_displayable_resume_list_label(value: str | None) -> bool:
+    """Omit empty, version-summary keys, and punctuation junk (e.g. corrupted skill chips)."""
+    s = (value or "").strip()
+    if not s:
+        return False
+    if s in _VERSION_CHANGE_SUMMARY_KEYS:
+        return False
+    letters = sum(1 for c in s if c.isalpha())
+    heavy_punct = sum(1 for c in s if c in ",/.;:")
+    if len(s) <= 10 and heavy_punct >= 2 and letters <= 3:
+        return False
+    if len(s) <= 2 and letters == 0:
+        return False
+    return True
+
 
 def format_resume_date(value: date | None) -> str:
     if not value:
@@ -58,9 +92,9 @@ def resume_detail_prefetch():
 def resume_payload(resume: Resume) -> dict[str, Any]:
     # Use prefetched relations when available (list view); otherwise triggers queries.
     tag_objs = list(resume.resumetag_set.all())
-    tags = [t.label for t in tag_objs]
+    tags = [t.label for t in tag_objs if _is_displayable_resume_list_label(t.label)]
     skill_objs = list(resume.resumeskill_set.all())[:5]
-    skills = [s.name for s in skill_objs if (s.name or "").strip()]
+    skills = [s.name for s in skill_objs if _is_displayable_resume_list_label(s.name)]
     status_value = resume.status
     if status_value not in (ResumeStatus.DRAFT, ResumeStatus.COMPLETE, ResumeStatus.ANALYZING):
         status_value = ResumeStatus.DRAFT

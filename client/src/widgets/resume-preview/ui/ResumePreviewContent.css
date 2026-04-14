@@ -21,9 +21,20 @@
   color: var(--sr-ink);
 }
 
-[data-sr-theme-scope][data-theme='dark'] .sr-resume-preview__paper {
-  background: #1a1a1a;
-  color: #e0e0e0;
+/*
+ * Documento do currículo: sempre como impressão/PDF (mesmas cores do tema claro da app),
+ * mesmo com a interface em dark — evita texto claro herdado de --sr-ink no escuro.
+ * Temas como tech-stack continuam com seus tokens próprios (regras mais abaixo).
+ */
+.sr-resume-preview__paper.sr-resume-theme {
+  color-scheme: light;
+  --sr-ink: rgba(20, 20, 20, 0.84);
+  --sr-ink-muted: rgba(20, 20, 20, 0.56);
+  --sr-ink-subtle: rgba(20, 20, 20, 0.62);
+  --sr-border: rgba(20, 20, 20, 0.08);
+  --sr-surface: rgba(255, 255, 255, 0.92);
+  --sr-surface-2: rgba(255, 255, 255, 0.82);
+  --sr-surface-soft: rgba(255, 255, 255, 0.7);
 }
 
 .sr-resume-theme__layout {

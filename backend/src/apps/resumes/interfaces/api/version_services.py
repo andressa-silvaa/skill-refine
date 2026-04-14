@@ -25,54 +25,54 @@ def _resume_snapshot_data(resume: Resume) -> dict[str, Any]:
 
 
 def _build_change_summary(prev: dict[str, Any] | None, new: dict[str, Any]) -> list[str]:
-    """Heuristic: list of human-readable change descriptions."""
+    """Heuristic: list of i18n keys (client translates via versionHistory.changeLabels.*)."""
     if not prev:
-        return ["Versão inicial"]
+        return ["initial"]
     summary = []
     # Summary
     if (new.get("summary") or "").strip() != (prev.get("summary") or "").strip():
-        summary.append("Resumo profissional atualizado")
+        summary.append("professional_summary_updated")
     # Contact
     c_old = prev.get("contact") or {}
     c_new = new.get("contact") or {}
     if (c_new.get("fullName") or "").strip() != (c_old.get("fullName") or "").strip():
-        summary.append("Nome/contato atualizado")
+        summary.append("name_contact_updated")
     if (c_new.get("email") or "").strip() != (c_old.get("email") or "").strip():
-        summary.append("E-mail atualizado")
+        summary.append("email_updated")
     # Target position
     if (new.get("targetPosition") or "").strip() != (prev.get("targetPosition") or "").strip():
-        summary.append("Cargo alvo atualizado")
+        summary.append("target_position_updated")
     # Experiences
     exp_old = prev.get("experiences") or []
     exp_new = new.get("experiences") or []
     if len(exp_new) != len(exp_old):
-        summary.append("Experiência profissional alterada")
+        summary.append("experience_updated")
     else:
         for i, ne in enumerate(exp_new):
             oe = exp_old[i] if i < len(exp_old) else {}
             if (ne.get("company") or "") != (oe.get("company") or "") or (ne.get("position") or "") != (oe.get("position") or ""):
-                summary.append("Experiência profissional alterada")
+                summary.append("experience_updated")
                 break
     # Educations
     edu_old = prev.get("educations") or []
     edu_new = new.get("educations") or []
     if len(edu_new) != len(edu_old):
-        summary.append("Formação acadêmica alterada")
+        summary.append("education_updated")
     # Skills
     skill_old = prev.get("skills") or []
     skill_new = new.get("skills") or []
     if len(skill_new) != len(skill_old):
-        summary.append("Habilidades alteradas")
+        summary.append("skills_updated")
     # Languages
     lang_old = prev.get("languages") or []
     lang_new = new.get("languages") or []
     if len(lang_new) != len(lang_old):
-        summary.append("Idiomas alterados")
+        summary.append("languages_updated")
     # Theme
     if (new.get("themeId") or "") != (prev.get("themeId") or ""):
-        summary.append("Tema do currículo alterado")
+        summary.append("theme_updated")
     if not summary:
-        summary.append("Alterações gerais")
+        summary.append("general_changes")
     return summary
 
 
@@ -180,10 +180,6 @@ def restore_version(user_id: str, resume_id: str, version_id: str) -> Resume | N
         resume.theme_palette_id = normalize_optional(snapshot.get("themePaletteId"))
         resume.theme_accent_override = normalize_optional(snapshot.get("themeAccentOverride"))
         resume.theme_secondary_override = normalize_optional(snapshot.get("themeSecondaryOverride"))
-        resume.save(update_fields=[
-            "target_position", "summary", "theme_id", "theme_palette_id",
-            "theme_accent_override", "theme_secondary_override", "updated_at",
-        ])
         # Contact
         contact = snapshot.get("contact") or {}
         ResumeContact.objects.update_or_create(
@@ -205,6 +201,7 @@ def restore_version(user_id: str, resume_id: str, version_id: str) -> Resume | N
         replace_educations(resume, snapshot.get("educations") or [])
         replace_skills(resume, snapshot.get("skills") or [])
         replace_languages(resume, snapshot.get("languages") or [])
+        resume.save()
         # Unset current, create new version from this snapshot
         ResumeVersion.objects.filter(resume_id=resume_id, is_current=True).update(is_current=False)
         next_num = (
@@ -217,7 +214,7 @@ def restore_version(user_id: str, resume_id: str, version_id: str) -> Resume | N
             version_number=next_num,
             is_current=True,
             snapshot_json=snapshot,
-            change_summary_json=["Versão restaurada"],
+            change_summary_json=["version_restored"],
             score=version.score,
         )
         from apps.notifications.services import create_notification

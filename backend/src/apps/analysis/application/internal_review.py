@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Any, Mapping
 
 from django.conf import settings
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import HttpRequest
 
 from apps.analysis.models import AnalysisStatus, ResumeAnalysis
@@ -77,7 +77,10 @@ def apply_internal_review_filters(
 ) -> QuerySet[ResumeAnalysis]:
     qp = _query_params(params)
 
-    qs = qs.filter(payload_json__seniorityConfidence=confidence)
+    qs = qs.filter(
+        Q(seniority_confidence=confidence)
+        | (Q(seniority_confidence="") & Q(payload_json__seniorityConfidence=confidence))
+    )
 
     since = _parse_since(_get_param(qp, "since"))
     if since is not None:
@@ -99,9 +102,27 @@ def apply_internal_review_filters(
 
     label = (_get_param(qp, "seniority_label") or "").strip()
     if label:
-        qs = qs.filter(payload_json__seniorityClass=label)
+        qs = qs.filter(
+            Q(seniority_final_label=label)
+            | (Q(seniority_final_label="") & Q(payload_json__seniorityClass=label))
+        )
 
     return qs
+
+
+def resolve_analysis_by_pseudo_key(analysis_key: str, *, salt: str) -> ResumeAnalysis | None:
+    """
+    Map opaque analysisKey (from low-confidence list) back to ResumeAnalysis.
+    O(n) over DONE rows — acceptable for internal review volumes.
+    """
+    key = (analysis_key or "").strip().lower()
+    if len(key) != 32:
+        return None
+    qs = ResumeAnalysis.objects.filter(status=AnalysisStatus.DONE).values_list("id", flat=True)
+    for pk in qs.iterator(chunk_size=500):
+        if pseudo_key(raw_id=str(pk), salt=salt) == key:
+            return ResumeAnalysis.objects.filter(pk=pk).first()
+    return None
 
 
 def filter_queryset_by_gating_reason(
@@ -132,15 +153,21 @@ def filter_queryset_by_gating_reason(
 def serialize_review_item(analysis: ResumeAnalysis, *, salt: str) -> dict[str, Any]:
     pj = analysis.payload_json or {}
     completeness = pj.get("completeness") if isinstance(pj.get("completeness"), dict) else {}
+    conf = (analysis.seniority_confidence or "").strip() or (pj.get("seniorityConfidence") or "")
+    rule = (analysis.seniority_rule_label or "").strip() or (pj.get("seniorityRuleBase") or "")
+    display = (pj.get("seniorityClass") or "").strip() or (analysis.seniority_final_label or "").strip()
     return {
         "analysisKey": pseudo_key(raw_id=str(analysis.id), salt=salt),
         "resumeKey": pseudo_key(raw_id=str(analysis.resume_id), salt=salt),
         "userKey": pseudo_key(raw_id=str(analysis.user_id), salt=salt),
         "createdAt": analysis.created_at.isoformat(),
         "score": analysis.score,
-        "seniorityLabel": pj.get("seniorityClass") or "",
-        "seniorityConfidence": pj.get("seniorityConfidence") or "",
-        "seniorityRuleBase": pj.get("seniorityRuleBase") or "",
+        "seniorityLabel": display,
+        "seniorityFinalLabel": (analysis.seniority_final_label or "").strip(),
+        "seniorityLabelSource": (analysis.seniority_label_source or "").strip(),
+        "seniorityReviewLabel": (analysis.seniority_review_label or "").strip(),
+        "seniorityConfidence": conf,
+        "seniorityRuleBase": rule,
         "seniorityMlStatus": pj.get("seniorityMlStatus") or "",
         "insufficientData": bool(pj.get("insufficientData")),
         "gatingReasons": list(pj.get("gatingReasons") or [])
@@ -150,6 +177,7 @@ def serialize_review_item(analysis: ResumeAnalysis, *, salt: str) -> dict[str, A
         "completenessLevel": completeness.get("level"),
         "modelVersion": analysis.model_version or "",
         "provider": analysis.provider or "",
+        "policyVersion": (analysis.seniority_policy_version or "").strip(),
     }
 
 

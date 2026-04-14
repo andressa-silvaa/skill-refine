@@ -78,7 +78,12 @@ def _metadata_supports_task(metadata: dict, task: str) -> bool:
         return True
     if meta_task in {requested, "multitask"}:
         return True
-    return meta_task.startswith(f"{requested}-")
+    if meta_task.startswith(f"{requested}-"):
+        return True
+    # Same 4-class HF head as core seniority; metadata may say text_seniority for TCC/docs.
+    if requested == "seniority" and meta_task == "text_seniority":
+        return True
+    return False
 
 
 def _load_hf_seniority(hf_dir: Path) -> tuple[Any, Any, dict]:

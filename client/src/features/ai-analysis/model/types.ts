@@ -26,14 +26,42 @@ export type ImprovementItem = {
   priority?: ImprovementPriority;
 };
 
+/** Target role fit / migration (optional — present when backend computed target fit). */
+export type TargetFitView = {
+  score: number;
+  seniorityLabel: string;
+  roleDomainLabel: string;
+  resumeDomainLabel: string;
+  evidence: {
+    matchedTerms: string[];
+    missingTerms: string[];
+    matchedSkills: string[];
+    experienceKeywordHits: number;
+    educationAlignment: string;
+    portfolioEvidence: boolean;
+    requiredTermsHit: number;
+    requiredTermsTotal: number;
+    skillsHit: number;
+    semanticKeywords?: string[];
+  };
+  clampReasonLabels: string[];
+  careerSwitch: { detected: boolean; reason?: string };
+};
+
 export type AnalysisResult = {
   score: number;
   scoreLabel: string;
+  /** Curta explicação do que o score principal mede (qualidade do currículo). */
+  scoreQualityHint?: string;
   ats: number;
   atsBadge: MetricBadgeTone;
   clarity: number;
   clarityBadge: MetricBadgeTone;
   seniorityLabel: string;
+  seniorityConfidence?: 'low' | 'medium' | 'high';
+  insufficientDataHint?: string;
+  /** Aderência ao cargo alvo + senioridade na área alvo (quando disponível). */
+  targetFit?: TargetFitView;
   /** Canonical: list of { key, params? }. API and mock use this. */
   strengths: InsightItem[];
   /** Canonical: list of { key, priority?, params? }. API and mock use this. */

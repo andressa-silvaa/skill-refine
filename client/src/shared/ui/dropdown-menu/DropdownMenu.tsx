@@ -15,15 +15,20 @@ type Props = {
   trigger: ReactNode;
   items: DropdownItem[];
   align?: 'left' | 'right';
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function DropdownMenu(props: Props) {
-  const { trigger, items, align = 'right' } = props;
+  const { trigger, items, align = 'right', onOpenChange } = props;
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<DOMRect | null>(null);
+
+  useEffect(() => {
+    onOpenChange?.(open);
+  }, [open, onOpenChange]);
 
   useEffect(() => {
     if (!open) return;

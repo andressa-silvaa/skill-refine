@@ -9,9 +9,16 @@ from typing import Any
 
 from django.conf import settings
 
+from apps.analysis.application.seniority_persist import build_seniority_evidence_json
+
 from .completeness import assess_completeness, matching_score_cap, quality_score_cap
 from .config import get_config, get_signals_ml_thresholds
 from .loader import get_model_bundle, get_quality_bundle, get_matching_bundle
+from .loaders.loader_target_fit_model import (
+    get_target_fit_ml_bundle,
+    predict_target_fit_ml_score,
+    target_fit_ml_metadata_for_task,
+)
 from .loader_signals_model import get_signals_ml_bundle, signals_ml_metadata_for_extra
 from .postprocess.insights import derive_insights
 from .postprocess.recommendations import build_recommendations
@@ -20,16 +27,48 @@ from .predictors.quality import predict_quality
 from .resume_mapper import resume_to_text
 from .resume_signals import is_thin_student_or_intern_profile
 from .safety import truncate_text
-from .predictors.seniority import SENIORITY_LABELS
-from .seniority.ml_adjust import ml_adjust_seniority
+from .embeddings.loader_embeddings_model import get_embeddings_model
+from .embeddings.target_fit_embedding import (
+    build_cv_embedding_text,
+    build_target_embedding_text,
+    embedding_fit_scores,
+)
+from .overall_score import compute_overall_score
+from .predictors.seniority import SENIORITY_LABELS, predict_hf_seniority_probs
+from .seniority.constants import SENIORITY_POLICY_VERSION
 from .seniority.rule_based import clamp_seniority_vetoes, rule_based_seniority
 from .seniority.signals_ml_predict import signals_ml_predict
 from .signals import extract_resume_signals
+from .text_sanitizer import job_text_sanitized, resume_to_text_sanitized
+from .text_seniority.fuse_seniority import fuse_seniority, structural_signals_strength
+from .text_seniority.loader_text_seniority_model import get_text_seniority_bundle
+from .text_seniority.predict import predict_text_seniority
+from .target_fit import (
+    TARGET_FIT_POLICY_VERSION,
+    compute_career_switch,
+    compute_target_fit_policy,
+    compute_target_seniority,
+    extract_target_fit_signals,
+    infer_domain_category,
+)
 from .types import AnalysisResult
 
 logger = logging.getLogger(__name__)
 
 SENIORITY_TO_SCORE = {"intern": 25, "junior": 50, "mid": 75, "senior": 100}
+
+
+def _target_fit_improvement(missing_terms: list[str], lang: str) -> dict[str, Any] | None:
+    if not missing_terms:
+        return None
+    shown = ", ".join(missing_terms[:6])
+    if not shown:
+        return None
+    return {
+        "key": "analysis.insights.improvements.target_role_terms",
+        "priority": "high",
+        "params": {"terms": shown, "lang": lang},
+    }
 
 
 def _normalize_provider(provider: str | None) -> str:
@@ -99,10 +138,9 @@ def analyze_resume(
     seniority_confidence = base_confidence
     seniority_evidence = list(base_evidence)
     ml_status = "skipped_no_model"
-    seniority_from_signals_path = False
 
     if signals_bundle:
-        sm_cfg = get_signals_ml_thresholds(settings)
+        sm_cfg = get_signals_ml_thresholds(settings, bundle_metadata=signals_bundle.get("_metadata"))
         ml_lab, ml_conf, _probs, ml_ev, st = signals_ml_predict(signals_bundle, rs, sm_cfg)
         if st == "applied":
             merged_evidence = list(base_evidence) + list(ml_ev)
@@ -112,15 +150,27 @@ def analyze_resume(
             seniority_confidence = ml_conf
             seniority_evidence = merged_evidence
             ml_status = "applied_signals_ml"
-            seniority_from_signals_path = True
         elif st == "error":
             signals_bundle = None
+            ml_status = "signals_ml_error"
         else:
-            seniority_evidence = list(base_evidence) + list(ml_ev)
+            merged_evidence = list(base_evidence) + list(ml_ev)
+            fl, ve = clamp_seniority_vetoes(base_label, rs)
+            merged_evidence.extend(ve)
+            final_label = fl
+            seniority_confidence = base_confidence
+            seniority_evidence = merged_evidence
             ml_status = f"skipped_signals_ml:{st}"
-            seniority_from_signals_path = True
 
-    if seniority_from_signals_path and signals_bundle is not None:
+    if signals_bundle is None:
+        fl, ve = clamp_seniority_vetoes(base_label, rs)
+        final_label = fl
+        seniority_confidence = base_confidence
+        seniority_evidence = list(base_evidence) + ve
+        if ml_status == "skipped_no_model":
+            ml_status = "skipped_no_signals_ml_bundle"
+
+    if ml_status == "applied_signals_ml" and signals_bundle is not None:
         meta_d = signals_ml_metadata_for_extra(signals_bundle)
         model_bundle = (
             None,
@@ -131,22 +181,239 @@ def analyze_resume(
             },
         )
     else:
-        model_bundle = get_model_bundle(task="seniority", language_mode=language_mode, language=lang, config=config)
-        final_label, seniority_confidence, seniority_evidence, ml_status = ml_adjust_seniority(
-            resume_text,
-            lang,
-            base_label,
-            base_confidence,
-            base_evidence,
-            rs,
-            model_bundle,
-            allow_ml=allow_ml_seniority,
+        model_bundle = (
+            None,
+            {
+                "labels": list(SENIORITY_LABELS),
+                "metadata": {
+                    "model_name_base": "rule_policy",
+                    "model_version": SENIORITY_POLICY_VERSION,
+                    "dataset_version": "",
+                },
+                "provider": "rule_policy",
+            },
         )
+
+    hf_bundle = get_model_bundle(task="seniority", language_mode=language_mode, language=lang, config=config)
+    hf_lab, hf_gap, hf_prov = predict_hf_seniority_probs(resume_text, lang, hf_bundle, allow=allow_ml_seniority)
+    if hf_lab:
+        seniority_evidence.append(
+            {
+                "type": "ml_suggestion",
+                "label": hf_lab,
+                "gap": round(float(hf_gap), 4),
+                "provider": hf_prov,
+            }
+        )
+
+    sanitized_cv = resume_to_text_sanitized(resume_data)
+    text_pred: dict[str, Any] = {"label": None, "confidence": "low", "probs": {}, "source": "none"}
+    fuse_meta: dict[str, Any] = {}
+    seniority_label_source = "rule_policy"
+    if ml_status == "applied_signals_ml":
+        seniority_label_source = "signals_ml"
+
+    if config["text_seniority_fusion_enabled"]:
+        tbundle = get_text_seniority_bundle(settings) if config["text_seniority_enabled"] else None
+        text_pred = predict_text_seniority(
+            sanitized_cv,
+            lang,
+            tbundle,
+            allow_lexical_fallback=True,
+        )
+        strength = structural_signals_strength(
+            total_months_experience=rs.total_months_experience,
+            experiences_count=rs.experiences_count,
+        )
+        text_suggests_senior = text_pred.get("label") == "senior"
+        fused_label, fused_conf, fuse_meta = fuse_seniority(
+            final_label,
+            seniority_confidence,
+            text_pred.get("label"),
+            str(text_pred.get("confidence") or "low"),
+            strength,
+            has_leadership_terms=bool(rs.has_leadership_terms),
+            total_months_experience=int(rs.total_months_experience or 0),
+            text_suggests_senior=text_suggests_senior,
+        )
+        final_label = fused_label
+        seniority_confidence = fused_conf
+        if fuse_meta.get("fusion") == "signals_ml_text":
+            seniority_label_source = "fused"
+        if text_pred.get("label") or text_pred.get("source") not in ("none",):
+            seniority_evidence.append(
+                {
+                    "type": "text_seniority",
+                    "label": text_pred.get("label"),
+                    "confidence": text_pred.get("confidence"),
+                    "source": text_pred.get("source"),
+                    "fusionWeights": fuse_meta.get("weights"),
+                }
+            )
+
     seniority_score = SENIORITY_TO_SCORE.get(final_label, 50)
 
+    job_text_raw = (job_description_text or "").strip()
     job_text = ""
-    if job_description_text:
-        job_text, _ = truncate_text((job_description_text or "").strip(), max_job)
+    if job_text_raw:
+        job_text, _ = truncate_text(job_text_raw, max_job)
+
+    data_block = resume_data.get("data") if isinstance(resume_data.get("data"), dict) else {}
+    target_pos = str(data_block.get("targetPosition") or "").strip()
+
+    fit_score = 0
+    fit_signals_score = 0
+    fit_embedding_score: int | None = None
+    target_seniority_label = final_label
+    ts_pack: dict = {"targetSeniorityLabel": final_label, "clampReasonKeys": []}
+    career_sw: dict = {"detected": False, "reasonKey": ""}
+    tf_imp = None
+    tf_signals = None
+    domain_target: dict = {"domainCategory": "general", "confidence": "low", "evidenceTokens": []}
+    domain_resume: dict = {"domainCategory": "general", "confidence": "low", "evidenceTokens": []}
+    target_fit_extra: dict[str, Any] = {}
+    target_fit_task: dict[str, float | None] = {"target_fit": None, "target_seniority": None}
+    target_fit_bundle_extra: dict[str, Any] | None = None
+
+    if target_pos:
+        domain_target = infer_domain_category(f"{target_pos} {job_text}".strip(), lang=lang)
+        resume_domain_text = (resume_text[:12000] if resume_text else "") or sections.full_text[:12000]
+        domain_resume = infer_domain_category(resume_domain_text, lang=lang)
+        tf_signals = extract_target_fit_signals(
+            resume_data,
+            target_pos,
+            job_text if job_text else None,
+            lang,
+            completeness_score=int(rs.completeness_score or 0),
+        )
+        rd_cat = str(domain_resume.get("domainCategory") or "general")
+        td_cat = str(domain_target.get("domainCategory") or "general")
+        policy_score = compute_target_fit_policy(
+            tf_signals,
+            has_job_text=bool(job_text),
+            resume_domain=rd_cat,
+            target_domain=td_cat,
+        )
+        fit_score = int(policy_score)
+        target_fit_bundle_extra = {
+            "provider": "target_fit_policy",
+            "metadata": {
+                "model_name_base": "target_fit_policy",
+                "model_version": TARGET_FIT_POLICY_VERSION,
+                "dataset_version": "",
+            },
+        }
+        tf_ml_bundle = get_target_fit_ml_bundle(config)
+        if tf_ml_bundle:
+            try:
+                fit_score = predict_target_fit_ml_score(
+                    tf_ml_bundle,
+                    signals=tf_signals,
+                    resume_domain=rd_cat,
+                    target_domain=td_cat,
+                    has_job_text=bool(job_text),
+                )
+                md_flat = target_fit_ml_metadata_for_task(tf_ml_bundle)
+                target_fit_bundle_extra = {
+                    "provider": "target_fit_ml",
+                    "metadata": {
+                        "model_name_base": md_flat.get("model_name_base") or "target_fit_signals",
+                        "model_version": md_flat.get("model_version") or "",
+                        "dataset_version": md_flat.get("dataset_version") or "",
+                    },
+                }
+            except Exception as exc:
+                logger.warning("target_fit_ml inference failed, using policy: %s", exc)
+                fit_score = int(policy_score)
+                target_fit_bundle_extra = {
+                    "provider": "target_fit_policy",
+                    "metadata": {
+                        "model_name_base": "target_fit_policy",
+                        "model_version": TARGET_FIT_POLICY_VERSION,
+                        "dataset_version": "",
+                    },
+                }
+        fit_signals_score = int(fit_score)
+        fit_embedding_score = None
+        semantic_kw: list[str] = []
+        emb_model = get_embeddings_model(settings) if config.get("embeddings_enabled") else None
+        if emb_model is not None:
+            try:
+                cv_emb_text = build_cv_embedding_text(sanitized_cv)
+                jt_san = job_text_sanitized(job_text) if job_text else ""
+                tgt_txt = build_target_embedding_text(target_pos, jt_san, td_cat, lang)
+                fit_embedding_score, _cos, semantic_kw = embedding_fit_scores(emb_model, cv_emb_text, tgt_txt)
+                w_e = float(config.get("target_fit_embed_weight") or 0.65)
+                w_e = max(0.0, min(1.0, w_e))
+                fit_final = w_e * float(fit_embedding_score or 0) + (1.0 - w_e) * float(fit_signals_score)
+                fit_score = int(round(max(0, min(100, fit_final))))
+                emb_name = str(getattr(settings, "ANALYSIS_EMBEDDINGS_MODEL_NAME", "") or "MiniLM").split("/")[-1][:48]
+                target_fit_bundle_extra = {
+                    "provider": "target_fit_embedding_v1",
+                    "metadata": {
+                        "model_name_base": emb_name,
+                        "model_version": "target_fit_embedding_v1",
+                        "dataset_version": "",
+                    },
+                }
+            except Exception as exc:
+                logger.warning("target_fit embedding failed, using signals only: %s", exc)
+                fit_embedding_score = None
+                semantic_kw = []
+        ts_pack = compute_target_seniority(final_label, fit_score, tf_signals, lang)
+        target_seniority_label = str(ts_pack.get("targetSeniorityLabel") or "junior")
+        career_sw = compute_career_switch(
+            final_label,
+            fit_score,
+            str(domain_resume.get("domainCategory") or "general"),
+            str(domain_target.get("domainCategory") or "general"),
+        )
+        tf_imp = _target_fit_improvement(tf_signals.required_terms_missing, lang)
+        target_fit_task = {
+            "target_fit": float(fit_score),
+            "target_seniority": float(SENIORITY_TO_SCORE.get(target_seniority_label, 50)),
+        }
+        tfe: dict[str, Any] = {
+            "matchedTerms": tf_signals.required_terms_matched,
+            "missingTerms": tf_signals.required_terms_missing,
+            "matchedSkills": tf_signals.skills_matched,
+            "experienceKeywordHits": tf_signals.experience_keyword_hits,
+            "educationAlignment": tf_signals.education_alignment,
+            "portfolioEvidence": tf_signals.portfolio_evidence,
+            "requiredTermsHit": tf_signals.required_terms_hit,
+            "requiredTermsTotal": tf_signals.required_terms_total,
+            "skillsHit": tf_signals.skills_hit,
+        }
+        if semantic_kw:
+            tfe["semanticEvidence"] = {"keywords": semantic_kw}
+        target_fit_extra = {
+            "targetFitScore": int(fit_score),
+            "targetFitSignalsScore": int(fit_signals_score),
+            "targetFitEmbeddingScore": fit_embedding_score,
+            "targetFitFinalScore": int(fit_score),
+            "targetSeniorityLabel": target_seniority_label,
+            "targetSeniorityClampReasons": list(ts_pack.get("clampReasonKeys") or []),
+            "targetRoleDomain": {
+                "category": domain_target.get("domainCategory"),
+                "confidence": domain_target.get("confidence"),
+                "evidenceTokens": list(domain_target.get("evidenceTokens") or [])[:8],
+            },
+            "resumeDomain": {
+                "category": domain_resume.get("domainCategory"),
+                "confidence": domain_resume.get("confidence"),
+                "evidenceTokens": list(domain_resume.get("evidenceTokens") or [])[:8],
+            },
+            "targetFitEvidence": tfe,
+            "careerSwitch": {
+                "detected": bool(career_sw.get("detected")),
+                "reasonKey": str(career_sw.get("reasonKey") or ""),
+            },
+        }
+        if target_fit_bundle_extra:
+            meta_blk = target_fit_bundle_extra.get("metadata") or {}
+            target_fit_extra["targetFitProvider"] = str(target_fit_bundle_extra.get("provider") or "target_fit_policy")
+            target_fit_extra["targetFitModelVersion"] = str(meta_blk.get("model_version") or "")
+            target_fit_extra["targetFitDatasetVersion"] = str(meta_blk.get("dataset_version") or "")
 
     quality_bundle = get_quality_bundle(language=lang, config=config)
     matching_bundle = get_matching_bundle(language=lang, config=config) if job_text else None
@@ -189,6 +456,8 @@ def analyze_resume(
     }
     if job_text:
         model_metadata_by_task["matching"] = _task_metadata("matching", metadata_matching, config)
+    if target_pos and target_fit_bundle_extra is not None:
+        model_metadata_by_task["target_fit"] = _task_metadata("target_fit", target_fit_bundle_extra, config)
 
     model_meta = metadata_seniority.get("metadata") or {}
     provider = metadata_seniority.get("provider") or "local"
@@ -221,9 +490,90 @@ def analyze_resume(
         resume_data=resume_data,
         signals=rs,
     )
+    if tf_imp:
+        improvements = list(insights.get("improvements") or [])
+        improvements.insert(0, tf_imp)
+        insights = {**insights, "improvements": improvements}
+    if career_sw.get("detected"):
+        strengths = list(insights.get("strengths") or [])
+        strengths.insert(
+            0,
+            {
+                "key": "analysis.insights.strengths.career_switch_context",
+                "params": {"reasonKey": str(career_sw.get("reasonKey") or "")},
+            },
+        )
+        insights = {**insights, "strengths": strengths}
     recommendations = build_recommendations(insights, lang)
 
-    overall_quality = min(100, max(0, int(quality_score)))
+    target_fit_for_overall: float | None = float(fit_score) if target_pos else None
+    overall_quality, overall_formula_meta = compute_overall_score(
+        float(quality_score),
+        float(seniority_score),
+        target_fit_for_overall,
+        blend_enabled=bool(config.get("overall_blend_enabled")),
+        w_quality=float(config.get("overall_w_quality") or 0.78),
+        w_seniority=float(config.get("overall_w_seniority") or 0.12),
+        w_target=float(config.get("overall_w_target_fit") or 0.10),
+    )
+
+    debug_block: dict[str, Any] | None = None
+    if getattr(settings, "DEBUG", False):
+        tf_dbg = None
+        tf_sig_dbg = None
+        tf_emb_dbg = None
+        if target_pos:
+            tf_dbg = float(target_fit_task.get("target_fit") or 0)
+            tf_sig_dbg = int(fit_signals_score)
+            tf_emb_dbg = fit_embedding_score
+        debug_block = {
+            "scoreBreakdown": {
+                "quality_score": int(quality_score),
+                "seniority_general_score": int(seniority_score),
+                "target_fit_score": tf_dbg,
+                "target_fit_signals_score": tf_sig_dbg,
+                "target_fit_embedding_score": tf_emb_dbg,
+                "matching_score": int(matching_score) if job_text else None,
+                "overall_weights": overall_formula_meta.get("weights"),
+                "overall_formula": overall_formula_meta.get("formula"),
+                "overall_mode": overall_formula_meta.get("mode"),
+            },
+            "featureSnapshot": {
+                "completenessLevel": level,
+                "completenessScore": int(rs.completeness_score or 0),
+                "wordCount": int(rs.word_count or 0),
+                "experiencesCount": int(rs.experiences_count or 0),
+                "totalMonthsExperience": int(rs.total_months_experience or 0),
+                "skillsCount": int(rs.skills_count or 0),
+                "bulletsCount": int(rs.bullets_count or 0),
+                "seniorityMlStatus": ml_status,
+                "textSenioritySource": text_pred.get("source"),
+                "embeddingsEnabled": bool(config.get("embeddings_enabled")),
+            },
+        }
+
+    payload_body: dict[str, Any] = {
+        "insights": insights,
+        "recommendations": recommendations,
+        "was_truncated": was_truncated,
+        "model_metadata_by_task": model_metadata_by_task,
+        "completeness": {
+            "score": completeness["score"],
+            "level": completeness["level"],
+            "confidence": "low" if level != "adequate" else "high",
+        },
+        "scoreMeaning": "analysis.scoreMeaning.resume_quality",
+        "seniorityClass": final_label,
+        "seniorityConfidence": seniority_confidence,
+        "seniorityEvidence": seniority_evidence[:12],
+        "seniorityMlStatus": ml_status,
+        "seniorityRuleBase": base_label,
+        "insufficientData": rs.insufficient_data,
+        "gatingReasons": list(rs.reasons),
+        **target_fit_extra,
+    }
+    if debug_block is not None:
+        payload_body["debug"] = debug_block
 
     result = AnalysisResult(
         score=overall_quality,
@@ -232,6 +582,7 @@ def analyze_resume(
             "clarity": quality_score,
             "seniority": seniority_score,
             "matching": matching_score if job_text else None,
+            **target_fit_task,
         },
         insights=insights,
         recommendations=recommendations,
@@ -241,25 +592,7 @@ def analyze_resume(
             "datasetVersion": dataset_version,
             "provider": provider if provider != "heuristics-only" else "heuristics",
         },
-        payload_json={
-            "insights": insights,
-            "recommendations": recommendations,
-            "was_truncated": was_truncated,
-            "model_metadata_by_task": model_metadata_by_task,
-            "completeness": {
-                "score": completeness["score"],
-                "level": completeness["level"],
-                "confidence": "low" if level != "adequate" else "high",
-            },
-            "scoreMeaning": "analysis.scoreMeaning.resume_quality",
-            "seniorityClass": final_label,
-            "seniorityConfidence": seniority_confidence,
-            "seniorityEvidence": seniority_evidence[:12],
-            "seniorityMlStatus": ml_status,
-            "seniorityRuleBase": base_label,
-            "insufficientData": rs.insufficient_data,
-            "gatingReasons": list(rs.reasons),
-        },
+        payload_json=payload_body,
     )
 
     d = result.to_persist_dict()
@@ -271,4 +604,17 @@ def analyze_resume(
         "model_version": d["metadata"]["modelVersion"],
         "dataset_version": d["metadata"].get("datasetVersion", ""),
         "provider": d["metadata"]["provider"],
+        "seniority_rule_label": base_label,
+        "seniority_final_label": final_label,
+        "seniority_label_source": seniority_label_source,
+        "seniority_policy_version": SENIORITY_POLICY_VERSION,
+        "seniority_confidence_persist": seniority_confidence
+        if seniority_confidence in ("low", "medium", "high")
+        else "low",
+        "seniority_evidence_json": build_seniority_evidence_json(rs, seniority_evidence),
+        "seniority_text_label": str(text_pred.get("label") or "")[:16],
+        "seniority_text_confidence": str(text_pred.get("confidence") or "")[:16],
+        "target_fit_embedding_score": (fit_embedding_score if target_pos else None),
+        "target_fit_signals_score": (int(fit_signals_score) if target_pos else None),
+        "target_fit_final_score": (int(fit_score) if target_pos else None),
     }

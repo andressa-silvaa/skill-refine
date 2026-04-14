@@ -16,6 +16,7 @@ type Props = {
   onExport: (id: string) => void;
   onDelete: (id: string) => void;
   onAnalyzeWithAI?: (id: string) => void;
+  onActionsMenuOpen?: (open: boolean) => void;
   duplicateLoadingId?: string | null;
   downloadLoadingId?: string | null;
   analysisByResumeId?: Map<string, LatestAnalysisInfo>;
@@ -77,13 +78,25 @@ type ListItemProps = {
   onExport: (id: string) => void;
   onDelete: (id: string) => void;
   onAnalyzeWithAI?: (id: string) => void;
+  onActionsMenuOpen?: (open: boolean) => void;
   duplicateLoadingId?: string | null;
   downloadLoadingId?: string | null;
   analysisInfo?: LatestAnalysisInfo | null;
 };
 
 const ResumesListItem = memo(function ResumesListItem(props: ListItemProps) {
-  const { vm, onEdit, onDuplicate, onExport, onDelete, onAnalyzeWithAI, duplicateLoadingId, downloadLoadingId, analysisInfo } = props;
+  const {
+    vm,
+    onEdit,
+    onDuplicate,
+    onExport,
+    onDelete,
+    onAnalyzeWithAI,
+    onActionsMenuOpen,
+    duplicateLoadingId,
+    downloadLoadingId,
+    analysisInfo,
+  } = props;
   const { t } = useTranslation();
 
   const handleNameClick = useCallback(() => onEdit(vm.id), [vm.id, onEdit]);
@@ -147,6 +160,7 @@ const ResumesListItem = memo(function ResumesListItem(props: ListItemProps) {
             </IconButton>
           }
           items={menuItems}
+          onOpenChange={onActionsMenuOpen}
         />
       </div>
     </div>
@@ -161,6 +175,7 @@ export function ResumesList(props: Props) {
     onExport,
     onDelete,
     onAnalyzeWithAI,
+    onActionsMenuOpen,
     duplicateLoadingId,
     downloadLoadingId,
     analysisByResumeId,
@@ -188,6 +203,7 @@ export function ResumesList(props: Props) {
           onExport={onExport}
           onDelete={onDelete}
           onAnalyzeWithAI={onAnalyzeWithAI}
+          onActionsMenuOpen={onActionsMenuOpen}
           duplicateLoadingId={duplicateLoadingId}
           downloadLoadingId={downloadLoadingId}
           analysisInfo={analysisByResumeId?.get(vm.id)}

@@ -63,6 +63,20 @@ export function getTopSkills(skills: string[], max: number): { visible: string[]
   return { visible, overflow };
 }
 
+/**
+ * Rejects corrupted or accidental fragments (IME/JSON glitches) that are not real skill names,
+ * e.g. "l,o/" stored as a ResumeSkill.name.
+ */
+export function isJunkResumeChipLabel(raw: string): boolean {
+  const s = raw.trim();
+  if (!s) return true;
+  const letters = (s.match(/\p{L}/gu) ?? []).length;
+  const heavyPunct = (s.match(/[,/\\.;:]/g) ?? []).length;
+  if (s.length <= 10 && heavyPunct >= 2 && letters <= 3) return true;
+  if (s.length <= 2 && letters === 0) return true;
+  return false;
+}
+
 export function calculateCompletenessScore(data: ResumeData): number {
   let score = 0;
   if (data.targetPosition) score += 10;

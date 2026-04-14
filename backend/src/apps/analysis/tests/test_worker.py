@@ -30,14 +30,19 @@ class WorkerPersistsMetadataTest(TestCase):
 
     @override_settings(ANALYSIS_ALLOW_HEURISTICS_FALLBACK=True)
     def test_worker_saves_model_version_and_dataset_version(self):
+        self.resume.refresh_from_db()
         analysis = ResumeAnalysis.objects.create(
             user_id=self.user.id,
             resume_id=self.resume.id,
             status=AnalysisStatus.PENDING,
+            resume_content_synced_at=self.resume.updated_at,
         )
         run_analysis_worker_safe(str(analysis.id))
         analysis.refresh_from_db()
         self.assertEqual(analysis.status, AnalysisStatus.DONE)
         self.assertIsNotNone(analysis.model_name)
         self.assertIsNotNone(analysis.model_version)
-        self.assertIn(analysis.provider, ("local", "heuristics-only"))
+        self.assertIn(
+            analysis.provider,
+            ("local", "heuristics-only", "heuristics", "rule_policy"),
+        )

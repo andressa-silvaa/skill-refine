@@ -15,7 +15,16 @@ export const analysisDomain = {
     ats: 'Compatibilidad ATS',
     clarity: 'Claridad',
     seniority: 'Senioridad',
+    seniorityGeneral: 'Senioridad (general)',
     estimate: 'Estimación',
+    seniorityConfidenceLow: 'Baja confianza',
+    seniorityConservativeDetail:
+      'Estimación conservadora según los datos de tu CV. La puntuación general mide la calidad del documento — no tu nivel profesional.',
+    insufficientDataHint:
+      'Completa fechas, cargos y viñetas en experiencias para afinar la estimación de senioridad.',
+    scoreMeaning: {
+      resume_quality: 'Esta puntuación refleja la calidad del CV (claridad, ATS, estructura), no tu nivel profesional.',
+    },
     badgeExcellent: 'Excelente',
     badgeGood: 'Bueno',
     badgeAttention: 'Atención',
@@ -87,16 +96,81 @@ export const analysisDomain = {
         other: 'Otro punto fuerte identificado.',
       },
       improvements: {
+        add_experiences: 'Añade experiencia profesional o proyectos relevantes (con fechas si es posible).',
+        add_skills: 'Incluye habilidades técnicas y herramientas alineadas al puesto.',
+        add_education: 'Incluye formación o cursos relevantes para el perfil deseado.',
         add_metrics: 'Incluir métricas y resultados cuantificables en la sección {{section}}.',
         use_action_verbs: 'Usar más verbos de acción para describir logros.',
         improve_summary: 'Mejorar el resumen profesional para que sea más claro e impactante.',
         ats_keywords: 'Destacar palabras clave para mejor compatibilidad ATS.',
         executive_summary: 'Añadir resumen ejecutivo al inicio del currículo.',
+        fill_core_sections:
+          'Completa experiencia, formación y habilidades con detalle — el análisis es fiable cuando hay más contenido.',
+        education_target_gap:
+          'El puesto objetivo parece exigir otra área de formación que la descrita. Añade cursos, certificaciones o proyectos alineados al rol deseado, o contextualiza una transición profesional.',
+        target_role_terms:
+          'Incluye en el CV términos y competencias del puesto objetivo (p. ej. {{terms}}) en experiencias, resumen o habilidades.',
+        career_switch_context: 'Contexto de cambio de área: {{context}}',
         relevant_links: 'Incluir enlaces relevantes (LinkedIn, GitHub, portafolio).',
         action_verbs: 'Usar más verbos de acción para describir logros.',
         clarity_conciseness: 'Revisar claridad y concisión del texto.',
         other: 'Otra sugerencia de mejora.',
       },
+    },
+    domainCategory: {
+      health: 'Salud',
+      education: 'Educación',
+      legal: 'Legal',
+      finance: 'Finanzas',
+      engineering: 'Ingeniería',
+      marketing: 'Marketing',
+      sales: 'Ventas',
+      technology: 'Tecnología',
+      administrative: 'Administrativo',
+      science: 'Ciencia / investigación',
+      hr: 'Recursos humanos',
+      operations: 'Operaciones / logística',
+      creative: 'Creativo / diseño',
+      general: 'General / transversal',
+    },
+    careerSwitch: {
+      reasonLowFitMidPlus:
+        'Experiencia general sólida, pero poca superposición explícita con el puesto objetivo — refuerza términos y logros alineados.',
+      reasonDomainMismatch:
+        'El historial sugiere otro dominio profesional que el puesto deseado; añade proyectos, cursos o reformula experiencias hacia la nueva dirección.',
+    },
+    targetFit: {
+      sectionTitle: 'Puesto objetivo y ajuste',
+      sectionAria: 'Ajuste al puesto objetivo y senioridad en esa área',
+      fitCard: 'Ajuste al puesto objetivo',
+      targetSeniorityCard: 'Senioridad (área objetivo)',
+      resumeDomain: 'Área inferida del currículo',
+      targetDomain: 'Área inferida del puesto objetivo',
+      careerSwitchTitle: 'Posible cambio de área',
+      evidenceTitle: 'Cómo estimamos el ajuste',
+      hitRatio: 'Términos del puesto encontrados en el CV: {{hit}} / {{total}}',
+      experienceHits: 'Coincidencias en experiencia: {{n}}',
+      skillsHits: 'Habilidades alineadas con términos objetivo: {{n}}',
+      educationLabel: 'Alineación de la formación',
+      eduWeak: 'Débil',
+      eduMedium: 'Media',
+      eduStrong: 'Fuerte',
+      portfolioYes: 'Portafolio o enlace técnico presente',
+      portfolioNo: 'Sin portafolio o enlace técnico destacado',
+      matchedTerms: 'Términos encontrados',
+      missingTerms: 'Términos a reforzar',
+      matchedSkills: 'Habilidades relacionadas',
+      clampTitle: 'Por qué la senioridad en el área objetivo es conservadora',
+      disclaimer:
+        'Estimación a partir de datos estructurados del CV y del puesto objetivo (sin LLM como decisión final). Añade texto de la oferta para mayor precisión.',
+      clampMaxJuniorScore: 'Bajo ajuste al puesto: senioridad en el área objetivo limitada a Junior.',
+      clampMaxMidScore: 'Ajuste moderado: senioridad en el área objetivo limitada a nivel medio.',
+      clampNoExperiencePortfolio:
+        'Sin evidencia clara en experiencias y sin portafolio: senioridad en el área objetivo limitada a Junior.',
+      clampSparseTargetHits: 'Pocos términos del puesto aparecen en el currículo.',
+      clampSkillsGap: 'Poca superposición entre habilidades y el puesto objetivo.',
+      clampHighGeneralLowFit:
+        'Senioridad general alta pero ajuste al puesto muy bajo — perfil conservador para el área nueva.',
     },
     improvementExamples: {
       addMetrics: {

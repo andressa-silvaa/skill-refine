@@ -21,7 +21,7 @@ from apps.accounts.application.use_cases.password_reset import (
     request_password_reset,
     verify_password_reset_code,
 )
-from apps.accounts.application.use_cases.profile import delete_account, request_data_export
+from apps.accounts.application.use_cases.profile import delete_account
 from apps.accounts.application.use_cases.session import logout, refresh_session
 from apps.accounts.application.use_cases.types import (
     AuthResult,
@@ -42,7 +42,6 @@ __all__ = [
     "logout",
     "refresh_session",
     "register_user",
-    "request_data_export",
     "request_email_confirmation",
     "request_password_reset",
     "verify_password_reset_code",

@@ -36,11 +36,7 @@ export const commonDomain = {
     deleteAccountConfirm: 'Excluir conta',
     deleting: 'Excluindo...',
   },
-  toast: {
-    exportRequested: 'Solicitação de exportação enviada.',
-  },
   errors: {
-    exportFailed: 'Não foi possível exportar seus dados agora.',
     deleteFailed: 'Não foi possível excluir sua conta agora.',
   },
   palette: {

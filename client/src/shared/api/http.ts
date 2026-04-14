@@ -7,6 +7,7 @@ export type ApiErrorBody = {
   error_code?: string;
   message?: string;
   fields?: Record<string, string | string[]>;
+  detail?: string;
 };
 
 export class ApiError extends Error {
@@ -26,50 +27,92 @@ export class ApiError extends Error {
 
 const API_BASE = (process.env.REACT_APP_API_URL ?? 'http://localhost:8000').trim().replace(/\/+$/, '');
 
-export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = getAccessToken();
+function isAuthFlowPath(path: string): boolean {
+  const p = path.startsWith('/') ? path : `/${path}`;
+  return (
+    p.includes('/accounts/auth/refresh') ||
+    p.includes('/accounts/auth/login') ||
+    p.includes('/accounts/auth/register') ||
+    p.includes('/accounts/auth/google')
+  );
+}
 
+async function refreshSessionOnce(): Promise<void> {
+  const { sessionApi } = await import('@/entities/session/api/sessionApi');
+  await sessionApi.refresh();
+}
+
+function buildHeaders(init: RequestInit): Headers {
   const headers = new Headers(init.headers);
   if (!headers.has('Content-Type') && typeof init.body === 'string') headers.set('Content-Type', 'application/json');
+  const token = getAccessToken();
   if (token) headers.set('Authorization', `Bearer ${token}`);
+  return headers;
+}
 
-  const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
-  trackApiRequest(path);
-  const res = await fetch(url, {
-    ...init,
-    headers,
-    credentials: 'include',
-  });
-
-  const contentType = res.headers.get('content-type') ?? '';
-  const isJson = contentType.includes('application/json');
-  const data = isJson ? ((await res.json()) as unknown) : undefined;
-
-  if (!res.ok) {
-    const body = (data ?? {}) as ApiErrorBody;
-    const rawCode = body.error?.error_code ?? body.error_code ?? body.error?.code;
-    const code = normalizeApiErrorCode(rawCode);
-    const message = body.error?.message ?? body.message ?? 'Erro inesperado';
-    let retryAfterSeconds: number | undefined;
-    if (res.status === 429) {
-      const raw = (res.headers.get('retry-after') ?? '').trim();
-      if (raw) {
-        const asInt = Number(raw);
-        if (Number.isFinite(asInt) && asInt > 0) {
-          retryAfterSeconds = Math.floor(asInt);
-        } else {
-          const asDate = Date.parse(raw);
-          if (!Number.isNaN(asDate)) {
-            const diffSeconds = Math.ceil((asDate - Date.now()) / 1000);
-            if (diffSeconds > 0) retryAfterSeconds = diffSeconds;
-          }
+function parseApiError(res: Response, data: unknown): ApiError {
+  const body = (data ?? {}) as ApiErrorBody;
+  const rawCode = body.error?.error_code ?? body.error_code ?? body.error?.code;
+  const code = normalizeApiErrorCode(rawCode);
+  const message =
+    body.error?.message ??
+    body.message ??
+    (typeof body.detail === 'string' ? body.detail : undefined) ??
+    'Erro inesperado';
+  let retryAfterSeconds: number | undefined;
+  if (res.status === 429) {
+    const raw = (res.headers.get('retry-after') ?? '').trim();
+    if (raw) {
+      const asInt = Number(raw);
+      if (Number.isFinite(asInt) && asInt > 0) {
+        retryAfterSeconds = Math.floor(asInt);
+      } else {
+        const asDate = Date.parse(raw);
+        if (!Number.isNaN(asDate)) {
+          const diffSeconds = Math.ceil((asDate - Date.now()) / 1000);
+          if (diffSeconds > 0) retryAfterSeconds = diffSeconds;
         }
       }
     }
-    throw new ApiError(res.status, code, message, retryAfterSeconds, body);
+  }
+  return new ApiError(res.status, code, message, retryAfterSeconds, body);
+}
+
+export async function apiRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
+  trackApiRequest(path);
+
+  const allowRetry = !isAuthFlowPath(path);
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const headers = buildHeaders(init);
+    const res = await fetch(url, {
+      ...init,
+      headers,
+      credentials: 'include',
+    });
+
+    const contentType = res.headers.get('content-type') ?? '';
+    const isJson = contentType.includes('application/json');
+    const data = isJson ? ((await res.json()) as unknown) : undefined;
+
+    if (res.ok) {
+      return (data ?? ({} as unknown)) as T;
+    }
+
+    if ((res.status === 401 || res.status === 403) && allowRetry && attempt === 0) {
+      try {
+        await refreshSessionOnce();
+        continue;
+      } catch {
+        throw parseApiError(res, data);
+      }
+    }
+
+    throw parseApiError(res, data);
   }
 
-  return (data ?? ({} as unknown)) as T;
+  throw new ApiError(401, undefined, 'Sessão expirada');
 }
 
 export type ApiBlobResponse = {
@@ -86,33 +129,39 @@ function parseFilename(disposition: string | null): string | undefined {
 }
 
 export async function apiRequestBlob(path: string, init: RequestInit = {}): Promise<ApiBlobResponse> {
-  const token = getAccessToken();
-
-  const headers = new Headers(init.headers);
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-
   const url = `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
   trackApiRequest(path);
-  const res = await fetch(url, {
-    ...init,
-    headers,
-    credentials: 'include',
-  });
+  const allowRetry = !isAuthFlowPath(path);
 
-  if (!res.ok) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const headers = buildHeaders(init);
+    const res = await fetch(url, {
+      ...init,
+      headers,
+      credentials: 'include',
+    });
+
+    if (res.ok) {
+      const blob = await res.blob();
+      const filename = parseFilename(res.headers.get('content-disposition'));
+      return { blob, filename };
+    }
+
     const contentType = res.headers.get('content-type') ?? '';
     const isJson = contentType.includes('application/json');
     const data = isJson ? ((await res.json()) as unknown) : undefined;
-    const body = (data ?? {}) as ApiErrorBody;
-    const rawCode = body.error?.error_code ?? body.error_code ?? body.error?.code;
-    const code = normalizeApiErrorCode(rawCode);
-    const message = body.error?.message ?? body.message ?? 'Erro inesperado';
-    throw new ApiError(res.status, code, message, undefined, body);
+
+    if ((res.status === 401 || res.status === 403) && allowRetry && attempt === 0) {
+      try {
+        await refreshSessionOnce();
+        continue;
+      } catch {
+        throw parseApiError(res, data);
+      }
+    }
+
+    throw parseApiError(res, data);
   }
 
-  const blob = await res.blob();
-  const filename = parseFilename(res.headers.get('content-disposition'));
-  return { blob, filename };
+  throw new ApiError(401, undefined, 'Sessão expirada');
 }
-
-

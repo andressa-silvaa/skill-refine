@@ -1,3 +1,5 @@
+import { VERSION_CHANGE_SUMMARY_KEYS } from '@/shared/constants/versionChangeSummaryKeys';
+
 import type { Resume } from '../model/types';
 import type { TFunction } from './format';
 import {
@@ -6,7 +8,21 @@ import {
   getResumeStatusLabel,
   getResumeStatusTone,
   getTopSkills,
+  isJunkResumeChipLabel,
 } from './format';
+
+function normalizeResumeSkillTags(skills: unknown, tags: unknown): string[] {
+  const primary = Array.isArray(skills) && skills.length > 0 ? skills : tags;
+  if (!Array.isArray(primary)) return [];
+  const out: string[] = [];
+  for (const item of primary) {
+    if (typeof item !== 'string') continue;
+    const s = item.trim();
+    if (!s || VERSION_CHANGE_SUMMARY_KEYS.has(s) || isJunkResumeChipLabel(s)) continue;
+    out.push(s);
+  }
+  return out;
+}
 
 const DEFAULT_MAX_SKILLS = 3;
 
@@ -28,7 +44,7 @@ export function toResumeViewModel(
 ): ResumeViewModel {
   const maxSkills = options?.maxSkills ?? DEFAULT_MAX_SKILLS;
   const t = options?.t ?? ((key: string) => key);
-  const skillsSource = (resume.skills?.length ? resume.skills : resume.tags ?? []).filter(Boolean);
+  const skillsSource = normalizeResumeSkillTags(resume.skills, resume.tags);
   const { visible: tagsVisible, overflow: tagsOverflow } = getTopSkills(skillsSource, maxSkills);
   const dateStr = formatDatePt(resume.updatedAt);
 

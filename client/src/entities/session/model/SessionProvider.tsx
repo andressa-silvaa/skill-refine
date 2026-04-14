@@ -1,8 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+import { getAccessToken, clearAccessToken } from '@/shared/api';
+
 import { sessionApi } from '../api/sessionApi';
-import { getHasRefreshCookieHint } from '../lib/refreshFlag';
+import { clearHasRefreshCookieHint, getHasRefreshCookieHint } from '../lib/refreshFlag';
 import type { SessionPreferences, SessionStatus, SessionUser } from './types';
 import { profileApi } from '../api/profileApi';
 import { applyAppearancePreferences } from '@/shared/lib/theme/appearance';
@@ -48,16 +50,24 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const bootstrap = useCallback(async (options?: { force?: boolean }) => {
-    if (!options?.force && !getHasRefreshCookieHint()) {
+    const hasRefreshHint = getHasRefreshCookieHint();
+    const hasAccessToken = Boolean(getAccessToken());
+
+    // Só dá para restaurar sessão com cookie de refresh OU com access token ainda válido no storage.
+    if (!options?.force && !hasRefreshHint && !hasAccessToken) {
       setState({ status: 'anonymous', user: null, preferences: null });
       return;
     }
     try {
-      await sessionApi.refresh();
+      if (hasRefreshHint) {
+        await sessionApi.refresh();
+      }
       const user = await sessionApi.me();
       setState((prev) => ({ ...prev, status: 'authenticated', user }));
       void loadPreferences();
-    } catch (e) {
+    } catch {
+      clearAccessToken();
+      clearHasRefreshCookieHint();
       setState({ status: 'anonymous', user: null, preferences: null });
     }
   }, [loadPreferences]);

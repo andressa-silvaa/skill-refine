@@ -18,6 +18,7 @@ type GridCardProps = {
   onExport: (id: string) => void;
   onDelete: (id: string) => void;
   onAnalyzeWithAI?: (id: string) => void;
+  onActionsMenuOpen?: (open: boolean) => void;
   duplicateLoadingId?: string | null;
   downloadLoadingId?: string | null;
   analysisInfo?: LatestAnalysisInfo | null;
@@ -31,6 +32,7 @@ const ResumeGridCard = memo(function ResumeGridCard(props: GridCardProps) {
     onExport,
     onDelete,
     onAnalyzeWithAI,
+    onActionsMenuOpen,
     duplicateLoadingId,
     downloadLoadingId,
     analysisInfo,
@@ -49,7 +51,18 @@ const ResumeGridCard = memo(function ResumeGridCard(props: GridCardProps) {
       onAnalyzeWithAI,
       t,
     });
-  }, [vm.id, duplicateLoadingId, downloadLoadingId, onEdit, onDuplicate, onExport, onDelete, onAnalyzeWithAI, t]);
+  }, [
+    vm.id,
+    duplicateLoadingId,
+    downloadLoadingId,
+    onEdit,
+    onDuplicate,
+    onExport,
+    onDelete,
+    onAnalyzeWithAI,
+    onActionsMenuOpen,
+    t,
+  ]);
 
   return (
     <Card className="sr-resumes-grid__card" role="listitem">
@@ -69,6 +82,7 @@ const ResumeGridCard = memo(function ResumeGridCard(props: GridCardProps) {
             </IconButton>
           }
           items={menuItems}
+          onOpenChange={onActionsMenuOpen}
         />
       </div>
 
@@ -84,6 +98,7 @@ type Props = {
   onExport: (id: string) => void;
   onDelete: (id: string) => void;
   onAnalyzeWithAI?: (id: string) => void;
+  onActionsMenuOpen?: (open: boolean) => void;
   duplicateLoadingId?: string | null;
   downloadLoadingId?: string | null;
   analysisByResumeId?: Map<string, import('@/features/ai-analysis').LatestAnalysisInfo>;
@@ -97,6 +112,7 @@ export function ResumesGrid(props: Props) {
     onExport,
     onDelete,
     onAnalyzeWithAI,
+    onActionsMenuOpen,
     duplicateLoadingId,
     downloadLoadingId,
     analysisByResumeId,
@@ -113,6 +129,7 @@ export function ResumesGrid(props: Props) {
           onExport={onExport}
           onDelete={onDelete}
           onAnalyzeWithAI={onAnalyzeWithAI}
+          onActionsMenuOpen={onActionsMenuOpen}
           duplicateLoadingId={duplicateLoadingId}
           downloadLoadingId={downloadLoadingId}
           analysisInfo={analysisByResumeId?.get(vm.id)}

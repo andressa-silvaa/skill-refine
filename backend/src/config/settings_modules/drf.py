@@ -10,6 +10,7 @@ REST_FRAMEWORK = {
         "analysis": "40/min",
         "pdf_export_start": "20/min",
         "pdf_export_status": "120/min",
+        "analysis_internal": "120/hour",
     },
     "UNAUTHENTICATED_USER": None,
     "UNAUTHENTICATED_TOKEN": None,

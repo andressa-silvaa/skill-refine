@@ -75,8 +75,12 @@ export function VerifyEmailPage() {
         onClick={async () => {
           if (!canResend) return;
           try {
-            await resend(email.trim());
-            notify.success('E-mail de confirmação reenviado.');
+            const out = await resend(email.trim());
+            if (out?.already_verified) {
+              notify.success('Este e-mail já está confirmado. Você pode entrar.');
+            } else {
+              notify.success('E-mail de confirmação reenviado.');
+            }
           } catch (e) {
             const apiErr = asApiError(e);
             if (apiErr?.status === 429) return;

@@ -1,4 +1,5 @@
 import { resumeApi } from '@/features/resume';
+import { markResumeContentSaved } from '@/shared/lib/resumeSaveMarker';
 
 import type { ImprovementInsightItem } from './types';
 
@@ -93,6 +94,18 @@ const IMPROVEMENT_ACTIONS: Record<string, ImprovementActionConfig> = {
     exampleMode: 'before_after',
     beforeExampleKey: 'analysis.improvementExamples.executiveSummary.before',
     afterExampleKey: 'analysis.improvementExamples.executiveSummary.after',
+  },
+  'analysis.insights.improvements.fill_core_sections': {
+    targetStep: 'basic',
+    applyMode: 'guided',
+    exampleMode: 'single',
+    singleExampleKey: 'analysis.improvementExamples.fallback.single',
+  },
+  'analysis.insights.improvements.education_target_gap': {
+    targetStep: 'education',
+    applyMode: 'guided',
+    exampleMode: 'single',
+    singleExampleKey: 'analysis.improvementExamples.fallback.single',
   },
   'analysis.insights.improvements.relevant_links': {
     targetStep: 'contact',
@@ -239,5 +252,6 @@ export async function tryAutoApplyImprovement(
     lastStep: 'contact',
   });
 
+  markResumeContentSaved(resumeId);
   return true;
 }

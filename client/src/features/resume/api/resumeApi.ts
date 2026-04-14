@@ -1,5 +1,6 @@
 import type { Resume, ResumeData, ResumeStatus } from '@/entities/resume';
 import { apiRequest, apiRequestBlob } from '@/shared/api/http';
+import { languageForAiRewrite } from '@/shared/lib/i18n/languageForAiRewrite';
 
 export type ResumeDraftPayload = ResumeData & {
   name?: string;
@@ -68,14 +69,19 @@ export const resumeApi = {
   get(resumeId: string) {
     return apiRequest<ResumeDetailResponse>(`/resumes/api/resumes/${resumeId}`);
   },
-  rewriteSummaryWithAI(text: string) {
+  /** @param uiLanguage best-effort UI locale (session preference + i18n); normalized before send */
+  rewriteSummaryWithAI(text: string, uiLanguage?: string) {
+    const language = languageForAiRewrite(uiLanguage);
     return apiRequest<AiRewriteResponse>('/ai/rewrite', {
       method: 'POST',
+      headers: {
+        'Accept-Language': `${language},${language.split('-')[0]};q=0.9`,
+      },
       body: JSON.stringify({
         text,
         context: 'resume_summary',
         options: {
-          language: 'pt-BR',
+          language,
           tone: 'professional',
           maxLength: 600,
         },

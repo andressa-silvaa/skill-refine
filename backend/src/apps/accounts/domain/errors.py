@@ -84,7 +84,23 @@ class EmailConfirmationExpired(AccountsError):
     code = "email_confirmation_expired"
 
 
+class EmailAlreadyConfirmed(AccountsError):
+    """Token row consumed and account email already verified (e.g. second click on same link)."""
+
+    code = "email_already_confirmed"
+
+
+class EmailConfirmationTokenConsumed(AccountsError):
+    """Token was invalidated/consumed without completing verification (e.g. failed send path)."""
+
+    code = "token_consumed"
+
+
 class TooManyRequests(AccountsError):
     code = "too_many_requests"
+
+    def __init__(self, message: str | None = None, *, retry_after_seconds: int | None = None):
+        super().__init__(message)
+        self.retry_after_seconds = retry_after_seconds
 
 

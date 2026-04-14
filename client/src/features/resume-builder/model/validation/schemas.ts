@@ -158,6 +158,8 @@ const createEducationSchema = (t: TFunction) =>
     educations: z.array(createEducationItemSchema(t)),
   });
 
+const SKILL_LEVEL_VALUES = ['beginner', 'intermediate', 'advanced', 'expert'] as const;
+
 const createSkillSchema = (showSkillLevels: boolean, t: TFunction) =>
   z.object({
     id: z.string().min(1),
@@ -165,11 +167,16 @@ const createSkillSchema = (showSkillLevels: boolean, t: TFunction) =>
       min: t('validation.skillMin'),
       max: t('validation.skillMax'),
     }),
+    // API returns level: null when no level; Zod .optional() allows undefined but rejects null.
+    // New skills from the UI omit level → undefined (valid). Editing loaded resumes kept null → blocked "Next".
     level: showSkillLevels
-      ? z.enum(['beginner', 'intermediate', 'advanced', 'expert'], {
+      ? z.enum(SKILL_LEVEL_VALUES, {
           required_error: t('validation.skillLevelRequired'),
         })
-      : z.enum(['beginner', 'intermediate', 'advanced', 'expert']).optional(),
+      : z.preprocess(
+          (val) => (val === null || val === undefined || val === '' ? undefined : val),
+          z.enum(SKILL_LEVEL_VALUES).optional(),
+        ),
   });
 
 const createSkillsSchema = (showSkillLevels: boolean, t: TFunction) =>

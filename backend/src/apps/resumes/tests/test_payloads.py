@@ -54,6 +54,15 @@ class ResumePayloadKeysTest(TestCase):
         payload = resume_payload(self.resume)
         assert payload["name"] == "Backend"
 
+    def test_resume_payload_omits_junk_skill_and_tag_labels(self):
+        ResumeSkill.objects.create(resume=self.resume, name="l,o/", position_index=1)
+        ResumeTag.objects.create(resume=self.resume, label="x,/", position_index=1)
+        payload = resume_payload(self.resume)
+        assert "l,o/" not in payload["skills"]
+        assert "x,/" not in payload["tags"]
+        assert "Python" in payload["skills"]
+        assert "tag1" in payload["tags"]
+
 
 class ResumeDetailPayloadKeysTest(TestCase):
     """Ensure detail/draft payload has expected keys and data shape (no regression)."""

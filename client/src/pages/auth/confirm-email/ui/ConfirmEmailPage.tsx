@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { accountApi } from '@/entities/session';
@@ -7,9 +7,15 @@ import { getApiErrorMessage } from '@/shared/api';
 import { isValidEmail } from '@/shared/lib/forms';
 import { useAsyncRequest } from '@/shared/lib/hooks/useAsyncRequest';
 import { AlertMessage, AuthForm, Field, PrimaryButton, Spinner } from '@/features/auth';
+import { LinkButton } from '@/shared/ui';
 import { AuthLayout } from '@/widgets/auth';
 
 type LocationState = { email?: string; emailConfirmationSent?: boolean } | null;
+
+/** Evita concorrência enquanto um POST /confirm está em andamento. */
+const emailConfirmTokenInFlight = new Set<string>();
+/** Tokens já confirmados com sucesso nesta sessão (evita 2º POST após remount do Strict Mode). */
+const emailConfirmTokenSucceeded = new Set<string>();
 
 export function ConfirmEmailPage() {
   const navigate = useNavigate();
@@ -33,6 +39,8 @@ export function ConfirmEmailPage() {
     isSuccess: isConfirmed,
     isError: isConfirmError,
   } = useAsyncRequest(accountApi.confirmEmail);
+  const confirmEmailRef = useRef(confirmEmail);
+  confirmEmailRef.current = confirmEmail;
   const resend = useEmailConfirmationResend({ cooldownSeconds: 60 });
 
   const canResend = isValidEmail(emailForResend) && !resend.isLoading && !resend.isCoolingDown;
@@ -45,26 +53,57 @@ export function ConfirmEmailPage() {
 
   useEffect(() => {
     if (!token) return;
+
+    if (emailConfirmTokenSucceeded.has(token)) {
+      setServerError(null);
+      setServerSuccess('E-mail confirmado com sucesso.');
+      return;
+    }
+
+    if (emailConfirmTokenInFlight.has(token)) return;
+    emailConfirmTokenInFlight.add(token);
+
     void (async () => {
       try {
         setServerError(null);
         setServerSuccess(null);
-        await confirmEmail({ token });
+        await confirmEmailRef.current({ token });
+        emailConfirmTokenSucceeded.add(token);
         setServerSuccess('E-mail confirmado com sucesso.');
       } catch (e) {
+        setServerSuccess(null);
         setServerError(getApiErrorMessage(e, 'Não foi possível confirmar seu e-mail.'));
+      } finally {
+        emailConfirmTokenInFlight.delete(token);
       }
     })();
-  }, [token, confirmEmail]);
+  }, [token]);
+
+  const confirmedByApiOrSession =
+    isConfirmed || (Boolean(token) && emailConfirmTokenSucceeded.has(token));
 
   return (
     <AuthLayout
       title="Confirmação de e-mail"
+      footer={
+        confirmedByApiOrSession ? undefined : (
+          <span>
+            Já confirmou?{' '}
+            <LinkButton
+              type="button"
+              className="recovery-small-action"
+              onClick={() => navigate('/login')}
+            >
+              Entrar
+            </LinkButton>
+          </span>
+        )
+      }
       subtitle={
         token
           ? isConfirming
             ? 'Estamos confirmando seu e-mail. Aguarde um instante.'
-            : isConfirmed
+            : confirmedByApiOrSession
               ? 'Tudo certo! Sua conta está pronta para uso.'
               : 'Não foi possível confirmar automaticamente. Você pode reenviar a confirmação abaixo.'
           : emailForResend
@@ -78,7 +117,7 @@ export function ConfirmEmailPage() {
         </div>
       ) : null}
 
-      {isConfirmed ? (
+      {confirmedByApiOrSession ? (
         <>
           <div className="auth-success">
             <div className="auth-success-icon">✔</div>
@@ -90,11 +129,14 @@ export function ConfirmEmailPage() {
         </>
       ) : null}
 
-      {isConfirmError || !token ? (
+      {(isConfirmError && !emailConfirmTokenSucceeded.has(token)) || !token ? (
         <>
-          {serverError ? <AlertMessage message={serverError} variant="error" /> : null}
-          {serverSuccess ? <AlertMessage message={serverSuccess} variant="success" /> : null}
-          {resendSentFromState ? (
+          {serverError ? (
+            <AlertMessage message={serverError} variant="error" />
+          ) : serverSuccess ? (
+            <AlertMessage message={serverSuccess} variant="success" />
+          ) : null}
+          {resendSentFromState && !serverError ? (
             <AlertMessage message="E-mail de confirmação enviado. Verifique sua caixa de entrada." variant="success" />
           ) : null}
 
@@ -106,9 +148,14 @@ export function ConfirmEmailPage() {
                 try {
                   setServerError(null);
                   setServerSuccess(null);
-                  await resend.resend(emailForResend.trim());
-                  setServerSuccess('E-mail de confirmação reenviado.');
+                  const out = await resend.resend(emailForResend.trim());
+                  if (out?.already_verified) {
+                    setServerSuccess('Este e-mail já está confirmado. Você pode entrar na conta.');
+                  } else {
+                    setServerSuccess('E-mail de confirmação reenviado.');
+                  }
                 } catch (err) {
+                  setServerSuccess(null);
                   setServerError(getApiErrorMessage(err, 'Não foi possível reenviar agora. Tente novamente.'));
                 }
               })();

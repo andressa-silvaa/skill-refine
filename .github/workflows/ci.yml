@@ -63,7 +63,6 @@ jobs:
           apps.resumes.tests.test_resume_list_pagination
           apps.resumes.tests.test_pdf_exports
           apps.resumes.tests.test_version_list_pagination_api
-          apps.accounts.tests.test_privacy_export_api
           apps.dashboard.tests.test_dashboard_api
           -v 1
 

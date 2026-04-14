@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppShell } from '@/widgets/app-shell';
 import {
   useVersionHistory,
   VersionHistoryFilters,
@@ -49,7 +48,7 @@ export function VersionHistoryPage() {
       notify.success(t('versionHistory.restoreSuccess'));
       setRestoreModalItem(null);
       refetch();
-      void resumes.reload();
+      void resumes.reload({ force: true });
     } catch {
       notify.error(t('versionHistory.restoreFailed'));
     } finally {
@@ -61,7 +60,7 @@ export function VersionHistoryPage() {
   const showError = Boolean(error);
 
   return (
-    <AppShell>
+    <>
       <main className="sr-version-history" aria-label={t('versionHistory.mainAria')}>
         <div className="sr-version-history__container">
           <header className="sr-version-history__header">
@@ -140,6 +139,6 @@ export function VersionHistoryPage() {
           </div>
         )}
       </Modal>
-    </AppShell>
+    </>
   );
 }

@@ -30,7 +30,7 @@ class VersionListPaginationApiTest(TestCase):
                 version_number=idx + 1,
                 is_current=idx == 2,
                 snapshot_json={"v": idx + 1},
-                change_summary_json=["x"],
+                change_summary_json=["general_changes"],
             )
 
     def test_versions_without_limit_offset_keeps_legacy_shape(self):

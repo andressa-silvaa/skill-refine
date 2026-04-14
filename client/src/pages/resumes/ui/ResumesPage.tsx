@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { prefetchAiAnalysisRoute } from '@/pages/ai-analysis/prefetch';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -16,7 +18,6 @@ import {
   ResumesToolbar,
 } from '@/widgets/resumes';
 import { ResumeBuilderWizard } from '@/widgets/resume-builder';
-import { AppShell } from '@/widgets/app-shell';
 import { Modal, ProgressBar } from '@/shared/ui';
 
 import { useResumesPageState } from '../model/useResumesPageState';
@@ -46,14 +47,23 @@ export function ResumesPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const resumeIds = useMemo(() => resumes.viewModels.map((vm) => vm.id), [resumes.viewModels]);
-  const analysisByResumeId = useLatestAnalyses(resumeIds);
+  const analysisByResumeId = useLatestAnalyses(resumeIds, resumes.listVersion);
+
+  useEffect(() => {
+    prefetchAiAnalysisRoute();
+  }, []);
 
   const onAnalyzeWithAI = useCallback(
     (id: string) => {
+      prefetchAiAnalysisRoute();
       navigate(`/protected/ai-analysis?resumeId=${encodeURIComponent(id)}`);
     },
     [navigate]
   );
+
+  const onResumeActionsMenuOpen = useCallback((open: boolean) => {
+    if (open) prefetchAiAnalysisRoute();
+  }, []);
 
   const pdfVm = useMemo(
     () =>
@@ -114,8 +124,7 @@ export function ResumesPage() {
   });
 
   return (
-    <AppShell>
-      <main className="sr-resumes" aria-label={t('resume.mainAria')}>
+    <main className="sr-resumes" aria-label={t('resume.mainAria')}>
         <ResumesHeader onCreate={pageActions.openCreate} />
 
         <ResumesToolbar
@@ -161,6 +170,7 @@ export function ResumesPage() {
               onExport={onExport}
               onDelete={onDelete}
               onAnalyzeWithAI={onAnalyzeWithAI}
+              onActionsMenuOpen={onResumeActionsMenuOpen}
               duplicateLoadingId={pageState.duplicateLoadingId}
               downloadLoadingId={pageState.downloadLoadingId}
               analysisByResumeId={analysisByResumeId}
@@ -173,6 +183,7 @@ export function ResumesPage() {
               onExport={onExport}
               onDelete={onDelete}
               onAnalyzeWithAI={onAnalyzeWithAI}
+              onActionsMenuOpen={onResumeActionsMenuOpen}
               duplicateLoadingId={pageState.duplicateLoadingId}
               downloadLoadingId={pageState.downloadLoadingId}
               analysisByResumeId={analysisByResumeId}
@@ -240,7 +251,6 @@ export function ResumesPage() {
             </div>
           </div>
         </Modal>
-      </main>
-    </AppShell>
+    </main>
   );
 }

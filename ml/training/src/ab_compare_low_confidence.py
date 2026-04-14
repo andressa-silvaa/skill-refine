@@ -5,7 +5,7 @@ Offline A/B: structural rule baseline vs signals_ml on low-confidence JSONL rows
   python ml/training/src/ab_compare_low_confidence.py \\
     --in_jsonl ml/data/processed/low_confidence.jsonl \\
     --model_dir ml/models/seniority_signals_v1 \\
-    --out_md ml/training/reports/ab_low_confidence_seniority_signals_v1.md
+    --out_md ml/training/reports/ab_low_confidence_report.md
 
 Requires ``backend/src`` on PYTHONPATH (script adds it).
 """
@@ -45,6 +45,25 @@ def _default_sm_cfg() -> dict[str, Any]:
     }
 
 
+def _cfg_from_thresholds_json(path: Path) -> dict[str, Any]:
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    raw = doc.get("inference_thresholds") if isinstance(doc.get("inference_thresholds"), dict) else doc
+    cfg = _default_sm_cfg()
+    key_map = {
+        "senior_prob_threshold": "SENIOR_PROB_THRESHOLD",
+        "senior_min_total_months": "SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS",
+        "senior_min_experiences": "SIGNALS_ML_SENIOR_MIN_EXPERIENCES",
+        "senior_min_bullets": "SIGNALS_ML_SENIOR_MIN_BULLETS",
+        "min_completeness": "MIN_COMPLETENESS_FOR_SIGNALS_ML",
+        "min_words": "MIN_WORDS_FOR_SIGNALS_ML",
+    }
+    for a, b in key_map.items():
+        if a in raw:
+            v = raw[a]
+            cfg[b] = float(v) if b == "SENIOR_PROB_THRESHOLD" else int(v)
+    return cfg
+
+
 def _row_to_resume_signals(sig: dict[str, Any], language: str) -> Any:
     from apps.analysis.application.inference.signals.types import ResumeSignals
 
@@ -82,8 +101,19 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--in_jsonl", required=True)
     ap.add_argument("--model_dir", required=True)
-    ap.add_argument("--out_md", required=True)
+    ap.add_argument(
+        "--out_md",
+        default="ml/training/reports/ab_low_confidence_report.md",
+        help="Markdown report path.",
+    )
+    ap.add_argument("--out", default="", help="Alias for --out_md (.md report).")
+    ap.add_argument("--thresholds_json", default="", help="threshold_recommended.json from tune_thresholds.py")
     args = ap.parse_args()
+
+    out_md = (args.out_md or args.out or "").strip()
+    if not out_md:
+        print("Provide --out_md or --out.", file=sys.stderr)
+        return 2
 
     rows: list[dict[str, Any]] = []
     with Path(args.in_jsonl).open(encoding="utf-8") as f:
@@ -94,7 +124,11 @@ def main() -> int:
             rows.append(json.loads(line))
 
     bundle = load_signals_ml_bundle(Path(args.model_dir))
-    cfg = _default_sm_cfg()
+    cfg = (
+        _cfg_from_thresholds_json(Path(args.thresholds_json))
+        if (args.thresholds_json or "").strip()
+        else _default_sm_cfg()
+    )
 
     before_dist: Counter[str] = Counter()
     after_dist: Counter[str] = Counter()
@@ -106,9 +140,9 @@ def main() -> int:
 
     def has_senior_evidence(s: Any) -> bool:
         return (
-            s.total_months_experience >= 60
-            and s.experiences_count >= 2
-            and s.bullets_count >= 6
+            s.total_months_experience >= int(cfg["SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS"])
+            and s.experiences_count >= int(cfg["SIGNALS_ML_SENIOR_MIN_EXPERIENCES"])
+            and s.bullets_count >= int(cfg["SIGNALS_ML_SENIOR_MIN_BULLETS"])
         )
 
     for row in rows:
@@ -157,6 +191,10 @@ def main() -> int:
                 }
             )
 
+    n = len(rows) or 1
+    pct_sen_before = 100.0 * before_dist.get("senior", 0) / n
+    pct_sen_after = 100.0 * after_dist.get("senior", 0) / n
+
     lines = [
         "# A/B — low confidence seniority (offline)",
         "",
@@ -164,12 +202,18 @@ def main() -> int:
         f"- **model_dir**: `{Path(args.model_dir).as_posix()}`",
         f"- **rows**: {len(rows)}",
         "",
-        "## Senior without structural evidence",
+        "## Senior share (rule-only vs signals_ml)",
         "",
-        "Rule: `total_months_experience >= 60` and `experiences_count >= 2` and `bullets_count >= 6`.",
+        f"- **`senior` % before (structural rules only)**: {pct_sen_before:.2f}%",
+        f"- **`senior` % after (signals_ml + gates + vetoes)**: {pct_sen_after:.2f}%",
+        "",
+        "## Senior without structural evidence (phantom risk)",
+        "",
+        f"Evidence rule (aligned with current cfg): months ≥ {cfg['SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS']}, "
+        f"experiences ≥ {cfg['SIGNALS_ML_SENIOR_MIN_EXPERIENCES']}, bullets ≥ {cfg['SIGNALS_ML_SENIOR_MIN_BULLETS']}.",
         "",
         f"- **rule-only `senior` violating evidence**: {senior_without_evidence_before}",
-        f"- **after signals_ml (+vetoes) `senior` violating evidence**: {senior_without_evidence_after}",
+        f"- **after signals_ml `senior` still violating evidence**: {senior_without_evidence_after}",
         "",
         "## Label distribution — rule-only (before)",
         "",
@@ -190,7 +234,7 @@ def main() -> int:
     lines.append("```")
     lines.append("")
 
-    out = Path(args.out_md)
+    out = Path(out_md)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"Wrote {out}")

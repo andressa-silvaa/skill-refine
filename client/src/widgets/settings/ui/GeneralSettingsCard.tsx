@@ -19,8 +19,6 @@ export function GeneralSettingsCard() {
     []
   );
 
-  const [region, setRegion] = useState('BR');
-
   const lang = useGeneralSettingsLanguage(languageOptions);
 
   return (
@@ -61,14 +59,6 @@ export function GeneralSettingsCard() {
             }}
           />
           <span className="sr-settings-general__hint">{t('settings.languageHint')}</span>
-        </label>
-
-        <label className="sr-field">
-          <span className="sr-label">{t('settings.regionVisual')}</span>
-          <select className="sr-input" value={region} onChange={(e) => setRegion(e.target.value)} disabled>
-            <option value="BR">Brasil</option>
-          </select>
-          <span className="sr-settings-general__hint">{t('settings.regionHint')}</span>
         </label>
       </div>
 

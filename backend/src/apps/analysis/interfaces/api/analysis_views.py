@@ -23,6 +23,9 @@ from .services import (
 HISTORY_LIMIT_MAX = 100
 HISTORY_LIMIT_DEFAULT = 20
 
+# Latest/history must not be cached by proxies or browsers (resume edits change validity immediately).
+_ANALYSIS_READ_HEADERS = {"Cache-Control": "no-store, max-age=0", "Pragma": "no-cache"}
+
 
 def _require_user_id(request):
     user_id = getattr(request.user, "id", None)
@@ -120,7 +123,11 @@ class LatestAnalysisView(APIView):
             resume_ids = resume_ids[:100]
             latest_map = get_latest_analyses_map(user_id, resume_ids)
             payload = {resume_id: analysis_payload(latest_map[resume_id]) for resume_id in latest_map}
-            return Response({"items": payload}, status=status.HTTP_200_OK)
+            return Response(
+                {"items": payload},
+                status=status.HTTP_200_OK,
+                headers=_ANALYSIS_READ_HEADERS,
+            )
 
         resume_id = (request.query_params.get("resume_id") or "").strip()
         if not resume_id:
@@ -139,9 +146,17 @@ class LatestAnalysisView(APIView):
 
         analysis = get_latest_analysis(user_id, resume_id)
         if analysis is None:
-            return Response({"item": None}, status=status.HTTP_200_OK)
+            return Response(
+                {"item": None},
+                status=status.HTTP_200_OK,
+                headers=_ANALYSIS_READ_HEADERS,
+            )
 
-        return Response({"item": analysis_payload(analysis)}, status=status.HTTP_200_OK)
+        return Response(
+            {"item": analysis_payload(analysis)},
+            status=status.HTTP_200_OK,
+            headers=_ANALYSIS_READ_HEADERS,
+        )
 
 
 class HistoryAnalysisView(APIView):
@@ -187,4 +202,5 @@ class HistoryAnalysisView(APIView):
                 "nextOffset": next_offset if has_next else None,
             },
             status=status.HTTP_200_OK,
+            headers=_ANALYSIS_READ_HEADERS,
         )

@@ -1,217 +1,72 @@
-# Políticas de rotulagem e definição de tarefas — Análise de currículo (multilíngue)
+# Rotulagem e dataset (senioridade)
 
-Este documento define as tarefas do pipeline de ML para análise de currículo, as políticas de labels, formatos de dataset e critérios de avaliação. Idiomas suportados: **pt** (PT-BR), **en** (EN-US), **es** (ES-ES).
+A política canônica de classes e regras está em:
 
----
+- `docs/analysis/seniority_policy.md`
 
-## Decisão de i18n (contrato de saída)
+## Schema do JSONL (v1.0)
 
-**Opção adotada: Opção 1 — Backend retorna chaves canônicas + params, frontend traduz.**
+Cada linha segue o contrato descrito em `ml/data/schema/seniority_dataset_schema.json`:
 
-- O backend **nunca** retorna texto pronto em um idioma; retorna `key` (ex.: `analysis.insights.improvements.add_metrics`) e `params` opcionais (ex.: `{ "section": "experience" }`).
-- O frontend usa o i18n existente (PT/EN/ES) para renderizar `t(key, params)`.
-- **Vantagens**: uma única fonte de verdade para textos, consistência entre idiomas, evolução de copy sem retreinar modelo, sem duplicar dicionários no backend.
+- `analysis_key`, `resume_key`, `user_key`: pseudonimização SHA-256 (truncada) com sal configurável (`ANALYSIS_INTERNAL_REVIEW_KEY_SALT` ou `--hash-salt` / fallback do `SECRET_KEY`).
+- `signals`: features estruturadas (espelho de `ResumeSignals`).
+- `labels`: `seniority_label`, `rule_label`, `ml_label` (quando há evidência de ajuste ML no payload), `confidence`.
+- `targets`: `overall_score`, `task_scores`, `completeness_score`, `completeness_level`.
+- `text_sanitized`: apenas no modo `full` do export.
 
-**Formato de insight na API:**
+## Export a partir do banco
 
-```json
-{
-  "key": "analysis.insights.improvements.add_metrics",
-  "priority": "high",
-  "params": { "section": "experience" }
-}
+Diretório sugerido: `ml/data/processed/`.
+
+### Export completo (todas as análises DONE)
+
+1. **Somente sinais (recomendado para LGPD)** — sem texto do CV:
+
+   ```bash
+   cd backend
+   python manage.py export_seniority_dataset --out ../ml/data/processed/seniority_from_db.jsonl --limit 5000
+   ```
+
+   Ou, a partir da raiz do repositório:
+
+   ```bash
+   python ml/scripts/export_seniority_from_db.py --out ml/data/processed/seniority_from_db.jsonl --limit 5000
+   ```
+
+2. **Modo `full`** — adiciona `text_sanitized` (PII comum mascarada + limite de tamanho). Tratar como dado sensível.
+
+   ```bash
+   python manage.py export_seniority_dataset --mode full --out ../ml/data/processed/seniority_from_db_full.jsonl --limit 1000
+   ```
+
+3. **`--hash-salt`** — pepper dedicado para chaves pseudonimizadas (recomendado em produção).
+
+### Casos de baixa confiança (loop revisão → dataset)
+
+```bash
+cd backend
+python manage.py export_low_confidence_cases --out ../ml/data/processed/low_confidence.jsonl --confidence low --limit 500
 ```
 
-Todos os textos exibidos ao usuário vêm do frontend via chaves; o backend só persiste e devolve `key` + `params`.
+Ou via API interna: `GET /analysis/internal/low-confidence/export` (mesmo schema, signals-only).
 
----
+## Validação e split (reprodutível)
 
-## Tarefa A — Classificação de senioridade
+A partir da raiz do repositório:
 
-**Objetivo:** prever o nível de senioridade do candidato a partir do texto do currículo.
+```bash
+python ml/training/src/validate_dataset.py --in ml/data/processed/seniority_from_db.jsonl
+python ml/training/src/split_dataset.py --in ml/data/processed/seniority_from_db.jsonl --out_dir ml/data/splits/seniority_latest --seed 42
+```
 
-### Labels (internos, estáveis)
+O split é **por `resume_key`** (todas as linhas de um mesmo currículo ficam no mesmo split). `split_meta.json` no diretório de saída contém `dataset_version` (impressão digital estável).
 
-| Valor interno | Descrição breve | Uso na UI (i18n) |
-|---------------|-----------------|------------------|
-| `intern`      | Estágio         | analysis.seniority.intern |
-| `junior`      | Júnior          | analysis.seniority.junior |
-| `mid`         | Pleno           | analysis.seniority.mid |
-| `senior`      | Sênior          | analysis.seniority.senior |
+## Treino leve (sinais)
 
-Casos ambíguos (ex.: “Pleno/Sênior”): rotular como o **nível mais alto** indicado (ex.: `senior`). Se não houver sinal claro, usar `mid` como default conservador.
+```bash
+python ml/training/src/train_seniority.py --train_jsonl ml/data/splits/seniority_latest/train.jsonl --model_version seniority_sklearn_signals_v1 --out_dir ml/models/seniority_sklearn_signals_v1
+python ml/training/src/eval_seniority.py --model_dir ml/models/seniority_sklearn_signals_v1 --test_jsonl ml/data/splits/seniority_latest/test.jsonl --out ml/training/reports/seniority_sklearn_eval.txt
+python ml/training/src/export_seniority_sklearn_model.py --model_dir ml/models/seniority_sklearn_signals_v1 --split_meta ml/data/splits/seniority_latest/split_meta.json
+```
 
-### Política objetiva (sinais no texto)
-
-1. **Anos de experiência** (inferidos de datas ou menções explícitas):
-   - 0–1 ano, “estágio”, “trainee” → `intern`
-   - 1–3 anos, “júnior” → `junior`
-   - 3–6 anos, “pleno”, “mid” → `mid`
-   - 6+ anos, “sênior”, “lead”, “principal” → `senior`
-2. **Liderança**: “liderar”, “coordenação”, “mentoria” → tendência a `mid`/`senior`.
-3. **Escopo**: “global”, “multi-equipe” → tendência a `senior`.
-4. **Títulos**: cargo contendo “Senior”, “Lead”, “Principal” → `senior`; “Junior”, “Intern” → conforme o termo.
-
-### Formato do dataset (Tarefa A)
-
-Cada exemplo:
-
-- `input_text`: texto do currículo (ou concatenação de seções relevantes: experiência + resumo).
-- `label`: uma de `intern` | `junior` | `mid` | `senior`.
-- `language`: `pt` | `en` | `es`.
-- `source`: `manual` | `heuristic` | `revisado`.
-- `confidence`: 0.0–1.0 (opcional).
-
-### Saída do modelo (API)
-
-- `seniority_class`: um dos valores acima.
-- `seniority_confidence`: float em [0, 1] (opcional).
-
----
-
-## Tarefa B — Detecção/segmentação de seções
-
-**Decisão: Opção B1 — Classificação por sentença/linha.**
-
-- Cada **linha ou bloco** de texto recebe um único label de seção.
-- Justificativa: mais simples para MVP, suficiente para extrair estrutura (experiência, educação, habilidades, etc.), menor esforço de rotulagem e de avaliação do que NER/BIO.
-
-### Lista de seções suportadas
-
-| Label        | Descrição (PT)        | Uso i18n (se necessário) |
-|-------------|------------------------|---------------------------|
-| `EXPERIENCE`| Experiência profissional | analysis.sections.experience |
-| `EDUCATION` | Formação acadêmica    | analysis.sections.education |
-| `SKILLS`    | Habilidades           | analysis.sections.skills |
-| `PROJECTS`  | Projetos              | analysis.sections.projects |
-| `SUMMARY`   | Resumo / Objetivo     | analysis.sections.summary |
-| `CONTACT`   | Contato               | analysis.sections.contact |
-| `OTHER`     | Outros                | analysis.sections.other |
-
-### Guidelines de rotulagem
-
-- Uma linha = uma sentença ou um título de seção (ex.: “Experiência profissional” → `EXPERIENCE`).
-- Conteúdo sob um título pertence à mesma seção até o próximo título reconhecível.
-- Datas, cargos e empresas na área de experiência → `EXPERIENCE`; instituição e curso → `EDUCATION`; lista de tecnologias/competências → `SKILLS`.
-- Tudo que não se encaixar → `OTHER`.
-
-### Formato do dataset (Tarefa B)
-
-Por exemplo (por linha):
-
-- `line_text`: string.
-- `label`: um de `EXPERIENCE` | `EDUCATION` | `SKILLS` | `PROJECTS` | `SUMMARY` | `CONTACT` | `OTHER`.
-- `language`: `pt` | `en` | `es`.
-- `resume_id`: identificador do currículo (para split sem vazamento).
-- `source`, `confidence`: opcionais.
-
-### Métricas
-
-- F1 por classe (macro e micro).
-- Acurácia.
-- Matriz de confusão (por idioma e global).
-
----
-
-## Tarefa C — Pontuação de qualidade por critérios (explicável)
-
-**Objetivo:** score geral (0–100) e critérios objetivos e explicáveis.
-
-**Decisão: classificação ordinal** com 3 níveis (`poor`, `ok`, `strong`) e mapeamento estável para score 0–100 no serving.
-
-### Critérios mínimos (features heurísticas)
-
-1. **Métricas numéricas**: presença de %, R$, números, KPIs (ex.: “aumentou vendas em 20%”) → `has_metrics`.
-2. **Verbos de ação**: listas por idioma (pt: liderou, implementou, desenvolveu…; en: led, implemented, developed…; es: lideró, implementó…) → `has_action_verbs`.
-3. **Clareza/concisão**: tamanho de sentenças, repetição de palavras (proxy) → heurística + eventual proxy de modelo.
-4. **Links relevantes**: LinkedIn, GitHub, portfolio → `has_relevant_links`.
-
-### Formato do dataset (Tarefa C)
-
-- `input_text`: texto do currículo (ou seções).
-- `labels.quality_level`: `poor` | `ok` | `strong` (rótulo principal para treino).
-- `labels.quality_score`: inteiro 0–100 (auditoria, calibração e compatibilidade com heurísticas).
-- `language`: `pt` | `en` | `es`.
-- `feature_flags`: ex. `{ "has_metrics": true, "has_links": true, "has_action_verbs": true }` para auditoria e baseline.
-
-### Saída do modelo (API)
-
-- `score`: 0–100.
-- `taskScores`: ex. `{ "ats": 92, "clarity": 78, "seniority": 0 }` (podem vir de submodelos ou heurísticas).
-- Insights de qualidade usam **chaves canônicas** (ex.: `analysis.insights.improvements.add_metrics` com `params.section`).
-
-### Métricas
-
-- Accuracy e F1 macro por idioma e global.
-- MAE/MSE no score derivado do nível ordinal.
-- Correlação entre score derivado e feature_flags (baseline heurístico).
-
----
-
-## Tarefa D — Matching vaga ↔ currículo
-
-**Objetivo:** dado `job_text` + `resume_text`, retornar `match_score` (0–100) e `top_skill_matches`.
-
-**Decisão: D1 — Bi-encoder.**
-
-- Embeddings separados para vaga e currículo; score por similaridade de cosseno.
-- Top skills/tópicos por overlap (TF-IDF ou embeddings por skill).
-- Justificativa: bom custo/benefício, mensurável, evita cross-encoder pesado.
-
-### Formato do dataset (Tarefa D)
-
-- `job_text`: texto da vaga.
-- `resume_text`: texto do currículo.
-- `language`: `pt` | `en` | `es` (par vaga–currículo no mesmo idioma, ou definir política para misto).
-- `label_match`: binário (match / no-match) ou score 0–100.
-- `resume_id`: para split **por currículo** (evitar vazamento: mesmo currículo não aparece em train e test).
-
-### Split
-
-- Split por `resume_id`: todos os pares que contêm um dado `resume_id` vão para o mesmo conjunto (train/val/test).
-
-### Saída do modelo (API)
-
-- `match_score`: 0–100.
-- `top_skill_matches`: lista de strings (skills/tópicos em comum ou mais relevantes).
-
----
-
-## Estratégia de dataset e splits
-
-- **language** obrigatório em todo exemplo (`pt` | `en` | `es`).
-- **Normalização**: remoção/anonimização de PII (nomes, e-mails, telefones) em scripts; texto normalizado (unicode, espaços).
-- **Split**:
-  - Por `resume_id` (e, na Tarefa D, por par vaga–currículo sem repetir mesmo currículo em conjuntos diferentes).
-  - Proporção sugerida: 70% train, 15% val, 15% test (estratificado por idioma quando possível).
-- **Validação**: schema JSON com campos obrigatórios, enums de labels, distribuição por idioma; relatório de estatísticas (counts por label/idioma/split).
-
----
-
-## Checklist de avaliação
-
-- [ ] Métricas por tarefa (A: F1/acc; B: F1 macro/micro; C: MSE/MAE/R²; D: accuracy/AUC ou MSE no score).
-- [ ] Métricas por idioma (pt, en, es) quando aplicável.
-- [ ] Matriz de confusão para tarefas de classificação (A, B).
-- [ ] Baseline heurístico para comparação (Tarefa C e, se aplicável, D).
-
----
-
-## Chaves canônicas de insights (exemplos para i18n)
-
-O frontend deve ter chaves para todas as `key` retornadas pelo backend. Exemplos:
-
-**Pontos fortes (strengths):**
-
-- `analysis.insights.strengths.clear_structure`
-- `analysis.insights.strengths.education_aligned`
-- `analysis.insights.strengths.professional_summary`
-
-**Pontos de melhoria (improvements):**
-
-- `analysis.insights.improvements.add_metrics` (params: `section` opcional)
-- `analysis.insights.improvements.ats_keywords`
-- `analysis.insights.improvements.executive_summary`
-- `analysis.insights.improvements.relevant_links`
-
-Prioridade sempre: `high` | `medium` | `low` (já traduzidas no front: `analysis.priorityHigh`, etc.).
+Fine-tune HF completo continua em `ml/training/src/train.py --task seniority`.

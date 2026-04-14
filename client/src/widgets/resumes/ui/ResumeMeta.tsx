@@ -48,8 +48,10 @@ export const ResumeMeta = memo(function ResumeMeta(props: Props) {
 
       {!compact ? (
         <div className="sr-resume-meta__tags" aria-label={t('resume.skillsAria')}>
-          {vm.tagsVisible.map((t, i) => (
-            <Chip key={`skill-${i}-${t}`} className="sr-resume-meta__chip">{t}</Chip>
+          {vm.tagsVisible.map((tagLabel, i) => (
+            <Chip key={`skill-${i}-${tagLabel}`} className="sr-resume-meta__chip">
+              {tagLabel}
+            </Chip>
           ))}
           {vm.tagsOverflow > 0 ? <span className="sr-resume-meta__ellipsis" aria-hidden>...</span> : null}
         </div>

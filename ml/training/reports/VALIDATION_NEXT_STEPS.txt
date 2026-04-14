@@ -1,0 +1,6 @@
+1) Preencha review_target_fit_score e/ou review_seniority_label em:
+   /mnt/c/Skill-Refine-TCC/ml/data/processed/gold_review_candidates_ptbr.csv
+2) cd backend
+   python manage.py apply_target_fit_reviews_from_csv --csv ..\ml\data\processed\gold_review_candidates_ptbr.csv
+3) python ml/training/src/eval_against_gold.py --user-email dev@local.seed.invalid
+4) python ml/training/src/build_tcc_validation_doc.py

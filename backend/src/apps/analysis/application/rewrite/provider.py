@@ -24,20 +24,32 @@ def rewrite_with_cloud(text: str, context: str, options: dict[str, Any] | None) 
     tone = (options or {}).get("tone") or "professional"
     max_length = int((options or {}).get("maxLength") or 600)
 
+    lang_key = str(language).strip().replace("_", "-").lower()
+    if lang_key.startswith("en"):
+        output_language = "English (US)"
+    elif lang_key.startswith("es"):
+        output_language = "Spanish"
+    else:
+        output_language = "Brazilian Portuguese"
+
     system_prompt = (
-        "Você é um assistente especializado em aprimorar resumos de currículo em português do Brasil. "
-        "Sempre responda somente com o texto reescrito, sem explicações adicionais."
+        "You are an expert resume coach. The user will ask you to rewrite text for their resume. "
+        f"You must reply with ONLY the rewritten text in {output_language}, with no title, no quotes, "
+        "and no explanation before or after."
     )
     user_prompt = (
-        f"Contexto: {context}\n"
-        f"Idioma: {language}\n"
-        f"Tom desejado: {tone}\n"
-        f"Tamanho máximo aproximado: {max_length} caracteres.\n\n"
-        "Reescreva o texto abaixo deixando-o mais claro, profissional e conciso, "
-        "adequado para a seção de resumo de currículo. Não altere o idioma e não adicione informações fictícias.\n\n"
-        "Texto original:\n\"\"\"\n"
+        f"Context: {context}\n"
+        f"Output language (BCP-47): {language} — write the entire answer in {output_language}.\n"
+        f"Tone: {tone}\n"
+        f"Approximate maximum length: {max_length} characters.\n\n"
+        "Rewrite the following for a professional resume summary section: make it clearer, concise, and polished. "
+        "Keep all factual content; do not invent employers, dates, degrees, or skills.\n\n"
+        "Original text:\n\"\"\"\n"
         f"{text}\n"
-        "\"\"\""
+        "\"\"\"\n\n"
+        f"CRITICAL: Respond with ONLY the rewritten summary. The full text must be in {output_language}. "
+        "If the original is in a different language, translate it into that output language while rewriting—"
+        "do not leave the answer in the source language."
     )
 
     try:

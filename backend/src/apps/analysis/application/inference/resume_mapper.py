@@ -11,6 +11,7 @@ from .types import ResumeSections
 
 SECTION_TITLES: dict[str, dict[str, str]] = {
     "pt-BR": {
+        "career_headline": "Objetivo e identificação",
         "summary": "Resumo",
         "experience": "Experiência Profissional",
         "education": "Formação",
@@ -20,6 +21,7 @@ SECTION_TITLES: dict[str, dict[str, str]] = {
         "projects": "Projetos",
     },
     "pt": {
+        "career_headline": "Objetivo e identificação",
         "summary": "Resumo",
         "experience": "Experiência Profissional",
         "education": "Formação",
@@ -29,6 +31,7 @@ SECTION_TITLES: dict[str, dict[str, str]] = {
         "projects": "Projetos",
     },
     "en-US": {
+        "career_headline": "Headline and target role",
         "summary": "Summary",
         "experience": "Work Experience",
         "education": "Education",
@@ -38,6 +41,7 @@ SECTION_TITLES: dict[str, dict[str, str]] = {
         "projects": "Projects",
     },
     "en": {
+        "career_headline": "Headline and target role",
         "summary": "Summary",
         "experience": "Work Experience",
         "education": "Education",
@@ -47,6 +51,7 @@ SECTION_TITLES: dict[str, dict[str, str]] = {
         "projects": "Projects",
     },
     "es-ES": {
+        "career_headline": "Objetivo y titular",
         "summary": "Resumen",
         "experience": "Experiencia Profesional",
         "education": "Formación",
@@ -56,6 +61,7 @@ SECTION_TITLES: dict[str, dict[str, str]] = {
         "projects": "Proyectos",
     },
     "es": {
+        "career_headline": "Objetivo y titular",
         "summary": "Resumen",
         "experience": "Experiencia Profesional",
         "education": "Formación",
@@ -93,6 +99,11 @@ def resume_to_text(resume_data: dict[str, Any], language: str = "pt-BR") -> Resu
     """
     titles = _titles(language)
     data = resume_data.get("data", resume_data)
+
+    cv_name = _normalize(str(resume_data.get("name") or ""))
+    target_position = _normalize(str(data.get("targetPosition") or ""))
+    career_lines = [ln for ln in (cv_name, target_position) if ln]
+    career_block = "\n".join(career_lines)
 
     summary = _normalize(data.get("summary") or "")
     contact_data = data.get("contact") or {}
@@ -156,8 +167,10 @@ def resume_to_text(resume_data: dict[str, Any], language: str = "pt-BR") -> Resu
             contact_parts.append(f"[{k.upper()}]")
     contact = " ".join(contact_parts) if contact_parts else ""
 
-    # Full text with headings
+    # Full text with headings (nome do CV + cargo alvo entram no texto do modelo/heurística)
     sections_list = []
+    if career_block:
+        sections_list.append(f"{titles['career_headline']}\n{career_block}")
     if summary:
         sections_list.append(f"{titles['summary']}\n{summary}")
     if experience:

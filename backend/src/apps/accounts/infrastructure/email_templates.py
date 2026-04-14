@@ -197,33 +197,6 @@ def render_email_confirmation(*, confirm_url: str, frontend_url: str | None = No
     return subject, html, text
 
 
-def render_data_export_requested(*, frontend_url: str | None = None) -> tuple[str, str, str]:
-    subject = "Recebemos sua solicitação de exportação"
-    html = render_base_email(
-        preheader="Estamos preparando seus dados para exportação.",
-        title="Exportação de dados",
-        paragraphs=[
-            "Recebemos sua solicitação de exportação dos seus dados.",
-            "Estamos preparando os arquivos e você receberá um novo e-mail quando estiver pronto.",
-        ],
-        cta_label="Abrir Skill Refine" if _normalize_frontend_url(frontend_url) else None,
-        cta_url=f"{_normalize_frontend_url(frontend_url)}/protected/settings" if _normalize_frontend_url(frontend_url) else None,
-    )
-    fe = _normalize_frontend_url(frontend_url)
-    text_lines = [
-        "Exportação de dados",
-        "",
-        "Recebemos sua solicitação de exportação dos seus dados.",
-        "Estamos preparando os arquivos e você receberá um novo e-mail quando estiver pronto.",
-        "",
-        BRAND_NAME,
-    ]
-    if fe:
-        text_lines.insert(4, f"Acompanhar: {fe}/protected/settings")
-    text = "\n".join(text_lines)
-    return subject, html, text
-
-
 def render_password_reset_code(*, code: str, frontend_url: str | None = None) -> tuple[str, str, str]:
     subject = "Seu código de redefinição de senha"
 

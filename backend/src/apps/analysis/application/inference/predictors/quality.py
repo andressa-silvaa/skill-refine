@@ -30,8 +30,8 @@ TECH_KEYWORDS = re.compile(
 DEFAULT_QUALITY_LEVEL_TO_SCORE = {
     "poor": 30,
     "ok": 55,
-    "strong": 84,
-    "good": 75,
+    "strong": 78,
+    "good": 72,
     "excellent": 92,
 }
 
@@ -158,13 +158,37 @@ def _predict_hf_quality(model, tokenizer, text: str, max_length: int = 512) -> i
             out = model(**inputs)
         logits = out.logits
         if getattr(logits, "ndim", 0) == 2 and getattr(logits, "shape", [0, 0])[-1] > 1:
-            pred_idx = int(logits.argmax(dim=-1).item())
+            n_cls = int(logits.shape[-1])
             id2label = getattr(getattr(model, "config", None), "id2label", {}) or {}
-            label = id2label.get(pred_idx)
-            mapped_score = _resolve_quality_score_from_label(label)
+            # Probability-weighted score avoids saturation on argmax (e.g. always "strong" -> 84).
+            try:
+                probs = torch.softmax(logits, dim=-1).squeeze(0).tolist()
+            except Exception:
+                probs = []
+            if n_cls == 3:
+                fallback_scores = [30, 55, 78]
+            elif n_cls == 4:
+                fallback_scores = [28, 48, 68, 88]
+            else:
+                fallback_scores = [int(round(20 + 70 * i / max(1, n_cls - 1))) for i in range(n_cls)]
+            total = 0.0
+            for i in range(min(len(probs), n_cls)):
+                label = id2label.get(i) if isinstance(id2label, dict) else None
+                if label is None and isinstance(id2label, dict):
+                    label = id2label.get(str(i))
+                mapped = _resolve_quality_score_from_label(str(label)) if label is not None else None
+                if mapped is None and i < len(fallback_scores):
+                    mapped = fallback_scores[i]
+                if mapped is None:
+                    mapped = 55
+                total += float(probs[i]) * float(mapped)
+            if probs:
+                return int(round(min(100, max(0, total))))
+            pred_idx = int(logits.argmax(dim=-1).item())
+            label = id2label.get(pred_idx) if isinstance(id2label, dict) else None
+            mapped_score = _resolve_quality_score_from_label(str(label)) if label is not None else None
             if mapped_score is not None:
                 return mapped_score
-            fallback_scores = [30, 55, 84] if int(logits.shape[-1]) == 3 else [30, 55, 75, 92]
             if 0 <= pred_idx < len(fallback_scores):
                 return fallback_scores[pred_idx]
             return None
@@ -219,14 +243,17 @@ def predict_quality(
     sections: Any,
     seniority_hint: str | None = None,
     quality_bundle: tuple[Any, dict] | None = None,
+    *,
+    neural_allowed: bool = True,
 ) -> tuple[int, dict[str, bool | int]]:
     """
     Predict quality score 0-100 and feature flags.
     Uses HF model when available, else heuristics.
+    When neural_allowed is False, skips HF/hybrid (sparse or empty resumes).
     """
     flags = _heuristic_flags(resume_text, language)
 
-    if quality_bundle:
+    if neural_allowed and quality_bundle:
         model_or_none, extra = quality_bundle
         if model_or_none is not None and isinstance(extra, dict) and extra.get("kind") == "hybrid":
             score = _predict_hybrid_quality(model_or_none, resume_text, language, seniority_hint=seniority_hint)

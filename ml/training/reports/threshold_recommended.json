@@ -1,0 +1,9 @@
+{
+  "inference_thresholds": {
+    "senior_prob_threshold": 0.65,
+    "senior_min_total_months": 48,
+    "senior_min_experiences": 2,
+    "senior_min_bullets": 8
+  },
+  "notes": "Merge into metadata.json or mirror in .env (see threshold_tuning.md)."
+}

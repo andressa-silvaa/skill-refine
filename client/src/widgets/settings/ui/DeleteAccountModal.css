@@ -1,4 +1,5 @@
-.sr-modal {
+/* Escopado: evita sobrescrever .sr-modal__panel dos outros modais (ex.: novo currículo, builder). */
+.sr-delete-account-modal.sr-modal {
   position: fixed;
   inset: 0;
   z-index: 200;
@@ -7,7 +8,7 @@
   padding: 18px;
 }
 
-.sr-modal__backdrop {
+.sr-delete-account-modal .sr-modal__backdrop {
   position: absolute;
   inset: 0;
   border: 0;
@@ -16,7 +17,7 @@
   backdrop-filter: blur(2px);
 }
 
-.sr-modal__panel {
+.sr-delete-account-modal .sr-modal__panel {
   position: relative;
   width: min(360px, 100%);
   border-radius: 16px;
@@ -27,7 +28,7 @@
   padding: 14px;
 }
 
-.sr-modal__icon {
+.sr-delete-account-modal .sr-modal__icon {
   width: 40px;
   height: 40px;
   border-radius: 12px;
@@ -40,14 +41,14 @@
   font-size: 16px;
 }
 
-.sr-modal__title {
+.sr-delete-account-modal .sr-modal__title {
   margin: 0;
   font-size: 14px;
   font-weight: 800;
   color: var(--sr-ink);
 }
 
-.sr-modal__text {
+.sr-delete-account-modal .sr-modal__text {
   margin: 8px 0 0;
   font-size: 12px;
   font-weight: 600;
@@ -55,11 +56,11 @@
   line-height: 1.6;
 }
 
-[data-sr-theme-scope][data-theme='dark'] .sr-modal__panel {
+[data-sr-theme-scope][data-theme='dark'] .sr-delete-account-modal .sr-modal__panel {
   background: var(--sr-surface-soft);
 }
 
-.sr-modal__actions {
+.sr-delete-account-modal .sr-modal__actions {
   margin-top: 14px;
   display: flex;
   justify-content: flex-end;
@@ -67,6 +68,6 @@
   flex-wrap: wrap;
 }
 
-.sr-modal__actions .sr-btn {
+.sr-delete-account-modal .sr-modal__actions .sr-btn {
   min-width: 120px;
 }

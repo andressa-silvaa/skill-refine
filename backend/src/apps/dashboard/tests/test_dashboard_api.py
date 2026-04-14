@@ -59,6 +59,7 @@ class DashboardAPITestCase(TestCase):
             status=AnalysisStatus.DONE,
             score=60,
             task_scores={"ats": 60, "clarity": 65, "seniority": 55, "matching": 58},
+            resume_content_synced_at=resume_a1.updated_at,
             payload_json={
                 "insights": {
                     "improvements": [
@@ -77,6 +78,7 @@ class DashboardAPITestCase(TestCase):
             status=AnalysisStatus.DONE,
             score=80,
             task_scores={"ats": 82, "clarity": 78, "seniority": 74, "matching": 76},
+            resume_content_synced_at=resume_a2.updated_at,
             payload_json={
                 "insights": {
                     "improvements": [
@@ -89,12 +91,14 @@ class DashboardAPITestCase(TestCase):
         second_analysis.created_at = timezone.now() - timedelta(days=3)
         second_analysis.save(update_fields=["created_at"])
 
+        resume_other = Resume.objects.filter(user_id=self.user_b.id).first()
         ResumeAnalysis.objects.create(
             user_id=self.user_b.id,
-            resume_id=Resume.objects.filter(user_id=self.user_b.id).first().id,
+            resume_id=resume_other.id,
             status=AnalysisStatus.DONE,
             score=95,
             task_scores={"ats": 95, "clarity": 95, "seniority": 95},
+            resume_content_synced_at=resume_other.updated_at,
             payload_json={"insights": {"improvements": [{"key": "analysis.insights.improvements.other"}]}},
         )
 

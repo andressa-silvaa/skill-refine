@@ -1,0 +1,127 @@
+.sr-target-role {
+  margin-top: 28px;
+  padding-top: 8px;
+  border-top: 1px solid var(--sr-border-subtle, rgba(0, 0, 0, 0.08));
+}
+
+.sr-target-role__title {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sr-ink, #1a1a1a);
+}
+
+.sr-target-role__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .sr-target-role__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.sr-target-role__domains {
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--sr-ink-muted, #5c5c5c);
+  line-height: 1.45;
+}
+
+.sr-target-role__domain-label {
+  font-weight: 700;
+}
+
+.sr-target-role__callout {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--sr-callout-bg, rgba(234, 179, 8, 0.12));
+  border: 1px solid var(--sr-callout-border, rgba(234, 179, 8, 0.35));
+}
+
+.sr-target-role__callout-icon {
+  margin-top: 2px;
+  color: var(--sr-warning, #b45309);
+}
+
+.sr-target-role__callout-title {
+  margin: 0 0 4px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.sr-target-role__callout-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sr-target-role__evidence {
+  margin-top: 16px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--sr-ink, #333);
+}
+
+.sr-target-role__evidence-title {
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.sr-target-role__evidence-list {
+  margin: 0 0 10px;
+  padding-left: 1.1rem;
+}
+
+.sr-target-role__terms {
+  margin: 6px 0 0;
+  word-break: break-word;
+}
+
+.sr-target-role__terms--missing {
+  color: var(--sr-ink-muted, #5c5c5c);
+}
+
+.sr-target-role__terms-label {
+  font-weight: 700;
+}
+
+.sr-target-role__clamps {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--sr-surface-muted, rgba(0, 0, 0, 0.04));
+  font-size: 12px;
+}
+
+.sr-target-role__clamps-title {
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+
+.sr-target-role__clamps ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.sr-target-role__hint {
+  margin: 14px 0 0;
+  font-size: 11px;
+  color: var(--sr-ink-muted, #666);
+  line-height: 1.35;
+}
+
+.sr-target-role__dev-meta {
+  margin: 10px 0 0;
+  font-size: 10px;
+  font-family: ui-monospace, monospace;
+  color: var(--sr-ink-muted, #777);
+  word-break: break-all;
+}

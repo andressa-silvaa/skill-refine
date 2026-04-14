@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { useTranslation } from 'react-i18next';
 
@@ -25,28 +25,36 @@ export function AppShell(props: Props) {
   const isMobile = useMediaQuery('(max-width: 900px)');
   const isSm = useMediaQuery('(max-width: 480px)');
   const desktopCollapsedRef = useRef<boolean | null>(null);
+  const prevIsMobileRef = useRef(isMobile);
+  const collapsedRef = useRef(collapsed);
+  collapsedRef.current = collapsed;
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!preferences) return;
     applyAppearancePreferences({ theme: preferences.theme, accent_color: preferences.accent_color });
   }, [preferences]);
 
+  /**
+   * Só ao entrar/sair do breakpoint mobile (≤900px): guardar estado de desktop e forçar menu fechado uma vez.
+   * Não reagir a cada mudança de `collapsed` em mobile — senão o botão de expandir nunca funciona (efeito repunha collapsed=true).
+   */
   useEffect(() => {
-    if (isMobile) {
-      if (desktopCollapsedRef.current == null) {
-        desktopCollapsedRef.current = collapsed;
-      }
-      setCollapsed((prev) => (prev ? prev : true));
+    const wasMobile = prevIsMobileRef.current;
+    prevIsMobileRef.current = isMobile;
+
+    if (isMobile && !wasMobile) {
+      desktopCollapsedRef.current = collapsedRef.current;
+      setCollapsed(true);
       return;
     }
 
-    if (desktopCollapsedRef.current != null) {
+    if (!isMobile && wasMobile && desktopCollapsedRef.current != null) {
       const previousDesktopValue = desktopCollapsedRef.current;
       desktopCollapsedRef.current = null;
       setCollapsed(previousDesktopValue);
     }
-  }, [collapsed, isMobile]);
+  }, [isMobile]);
 
   useEffect(() => {
     if (!isSm) return;

@@ -19,6 +19,7 @@ import { VerifyEmailPage } from '@/pages/auth/verify-email';
 
 import { RequireAuth } from './RequireAuth';
 import { RouteLoadErrorBoundary } from './RouteLoadErrorBoundary';
+import { ProtectedAppLayout } from './ProtectedAppLayout';
 
 const DashboardPage = lazy(() =>
   import('@/pages/dashboard').then((m) => ({ default: m.DashboardPage }))
@@ -45,88 +46,40 @@ const VersionHistoryPage = lazy(() =>
 export function AppRouter() {
   return (
     <RouteLoadErrorBoundary>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/terms" element={<TermsPage />} />
-          <Route path="/privacy" element={<PrivacyPage />} />
-          <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-          <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+        <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-          <Route path="/reset/email" element={<ResetEmailPage />} />
-          <Route path="/reset/code" element={<ResetCodePage />} />
-          <Route path="/reset/new" element={<ResetNewPasswordPage />} />
-          <Route path="/reset/success" element={<ResetSuccessPage />} />
-          <Route path="/resume/print/:resumeId" element={<ResumePrintPage />} />
+        <Route path="/reset/email" element={<ResetEmailPage />} />
+        <Route path="/reset/code" element={<ResetCodePage />} />
+        <Route path="/reset/new" element={<ResetNewPasswordPage />} />
+        <Route path="/reset/success" element={<ResetSuccessPage />} />
+        <Route
+          path="/resume/print/:resumeId"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ResumePrintPage />
+            </Suspense>
+          }
+        />
 
-          <Route
-            path="/protected"
-            element={
-              <RequireAuth>
-                <Navigate to="/protected/dashboard" replace />
-              </RequireAuth>
-            }
-          />
+        <Route path="/protected" element={<RequireAuth><ProtectedAppLayout /></RequireAuth>}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="resumes" element={<ResumesPage />} />
+          <Route path="ai-analysis" element={<AiAnalysisPage />} />
+          <Route path="version-history" element={<VersionHistoryPage />} />
+        </Route>
 
-          <Route
-            path="/protected/dashboard"
-            element={
-              <RequireAuth>
-                <DashboardPage />
-              </RequireAuth>
-            }
-          />
-
-          <Route
-            path="/protected/profile"
-            element={
-              <RequireAuth>
-                <ProfilePage />
-              </RequireAuth>
-            }
-          />
-
-          <Route
-            path="/protected/settings"
-            element={
-              <RequireAuth>
-                <SettingsPage />
-              </RequireAuth>
-            }
-          />
-
-          <Route
-            path="/protected/resumes"
-            element={
-              <RequireAuth>
-                <ResumesPage />
-              </RequireAuth>
-            }
-          />
-
-          <Route
-            path="/protected/ai-analysis"
-            element={
-              <RequireAuth>
-                <AiAnalysisPage />
-              </RequireAuth>
-            }
-          />
-
-          <Route
-            path="/protected/version-history"
-            element={
-              <RequireAuth>
-                <VersionHistoryPage />
-              </RequireAuth>
-            }
-          />
-
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </Suspense>
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     </RouteLoadErrorBoundary>
   );
 }

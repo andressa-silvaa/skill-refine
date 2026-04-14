@@ -54,10 +54,6 @@
   cursor: not-allowed;
 }
 
-.sr-privacy__dot {
-  color: var(--sr-ink-muted);
-}
-
 [data-sr-theme-scope][data-theme='dark'] .sr-privacy__panel {
   background: rgba(var(--sr-accent-rgb), 0.14);
 }
@@ -81,8 +77,4 @@
 
 [data-sr-theme-scope][data-theme='dark'] .sr-privacy__link--danger {
   color: var(--danger);
-}
-
-[data-sr-theme-scope][data-theme='dark'] .sr-privacy__dot {
-  color: var(--sr-ink-muted);
 }

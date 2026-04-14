@@ -15,6 +15,11 @@ from apps.resumes.infrastructure.models import Resume, ResumeStatus
 
 
 class AnalysisAPITestCase(TestCase):
+    def _resume_content_synced_at(self, resume: Resume):
+        """Snapshot timestamp to tie an analysis to the resume row (matches production run_analysis)."""
+        resume.refresh_from_db()
+        return resume.updated_at
+
     def setUp(self):
         self.client = APIClient()
         self.user_a, _ = User.objects.get_or_create(
@@ -83,6 +88,7 @@ class TestLatestBatch(AnalysisAPITestCase):
             model_name="m",
             model_version="v",
             provider="local",
+            resume_content_synced_at=self._resume_content_synced_at(self.resume_a),
         )
         ResumeAnalysis.objects.create(
             user_id=self.user_b.id,
@@ -94,6 +100,7 @@ class TestLatestBatch(AnalysisAPITestCase):
             model_name="m",
             model_version="v",
             provider="local",
+            resume_content_synced_at=self._resume_content_synced_at(self.resume_b),
         )
 
         self.client.force_authenticate(user=self.user_a)
@@ -106,6 +113,60 @@ class TestLatestBatch(AnalysisAPITestCase):
         self.assertIn("items", data)
         self.assertIn(str(self.resume_a.id), data["items"])
         self.assertNotIn(str(self.resume_b.id), data["items"])
+
+
+class TestLatestInvalidatedAfterResumeEdit(AnalysisAPITestCase):
+    """Análise concluída deixa de ser "latest" quando o currículo é salvo de novo."""
+
+    def test_latest_returns_null_after_resume_change(self):
+        ResumeAnalysis.objects.create(
+            user_id=self.user_a.id,
+            resume_id=self.resume_a.id,
+            status=AnalysisStatus.DONE,
+            score=90,
+            task_scores={},
+            payload_json={"insights": {"strengths": [], "improvements": []}},
+            model_name="m",
+            model_version="v",
+            provider="local",
+            resume_content_synced_at=self._resume_content_synced_at(self.resume_a),
+        )
+        self.client.force_authenticate(user=self.user_a)
+        r1 = self.client.get(self.latest_url, {"resume_id": str(self.resume_a.id)})
+        self.assertEqual(r1.status_code, status.HTTP_200_OK)
+        self.assertIsNotNone(r1.json().get("item"))
+
+        self.resume_a.summary = "Conteúdo alterado após a análise."
+        self.resume_a.save()
+
+        r2 = self.client.get(self.latest_url, {"resume_id": str(self.resume_a.id)})
+        self.assertEqual(r2.status_code, status.HTTP_200_OK)
+        self.assertIsNone(r2.json().get("item"))
+
+    def test_latest_batch_omits_stale_analysis(self):
+        ResumeAnalysis.objects.create(
+            user_id=self.user_a.id,
+            resume_id=self.resume_a.id,
+            status=AnalysisStatus.DONE,
+            score=77,
+            task_scores={},
+            payload_json={},
+            model_name="m",
+            model_version="v",
+            provider="local",
+            resume_content_synced_at=self._resume_content_synced_at(self.resume_a),
+        )
+        self.resume_a.target_position = "Novo cargo"
+        self.resume_a.save()
+
+        self.client.force_authenticate(user=self.user_a)
+        resp = self.client.get(
+            self.latest_url,
+            {"resume_ids": str(self.resume_a.id)},
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        items = resp.json().get("items") or {}
+        self.assertEqual(items, {})
 
 
 class TestRunCreatesPendingAnalysis(AnalysisAPITestCase):
@@ -134,9 +195,10 @@ class TestPayloadShapeStable(AnalysisAPITestCase):
             status=AnalysisStatus.DONE,
             score=85,
             task_scores={"ats": 92, "clarity": 78, "seniority": 0},
+            resume_content_synced_at=self._resume_content_synced_at(self.resume_a),
             payload_json={
                 "insights": {
-                    "strengths": [{"title": "Estrutura clara", "description": None}],
+                    "strengths": [{"key": "analysis.insights.strengths.clear_structure", "params": {}}],
                     "improvements": [
                         {"title": "Adicionar métricas", "priority": "high", "description": None},
                     ],
@@ -166,6 +228,8 @@ class TestPayloadShapeStable(AnalysisAPITestCase):
         self.assertIn("resumeId", payload)
         self.assertIn("status", payload)
         self.assertIn("score", payload)
+        self.assertIn("completeness", payload)
+        self.assertIsNone(payload["completeness"])
         self.assertIn("taskScores", payload)
         self.assertIn("ats", payload["taskScores"])
         self.assertIn("clarity", payload["taskScores"])
@@ -186,11 +250,29 @@ class TestPayloadShapeStable(AnalysisAPITestCase):
         self.assertEqual(len(payload["insights"]["strengths"]), 1)
         self.assertIn("key", payload["insights"]["strengths"][0])
         self.assertEqual(
-            payload["insights"]["strengths"][0].get("params", {}).get("title"),
-            "Estrutura clara",
+            payload["insights"]["strengths"][0]["key"],
+            "analysis.insights.strengths.clear_structure",
         )
         self.assertEqual(len(payload["insights"]["improvements"]), 1)
         self.assertEqual(payload["insights"]["improvements"][0]["priority"], "high")
+
+    def test_payload_drops_generic_strength_other(self):
+        analysis = ResumeAnalysis.objects.create(
+            user_id=self.user_a.id,
+            resume_id=self.resume_a.id,
+            status=AnalysisStatus.DONE,
+            score=50,
+            task_scores={},
+            resume_content_synced_at=self._resume_content_synced_at(self.resume_a),
+            payload_json={
+                "insights": {
+                    "strengths": [{"key": "analysis.insights.strengths.other", "params": {}}],
+                    "improvements": [],
+                },
+            },
+        )
+        payload = analysis_payload(analysis)
+        self.assertEqual(payload["insights"]["strengths"], [])
 
     def test_failed_analysis_includes_error_message(self):
         analysis = ResumeAnalysis.objects.create(
@@ -198,6 +280,7 @@ class TestPayloadShapeStable(AnalysisAPITestCase):
             resume_id=self.resume_a.id,
             status=AnalysisStatus.FAILED,
             error_message="Mock error",
+            resume_content_synced_at=self._resume_content_synced_at(self.resume_a),
         )
         payload = analysis_payload(analysis)
         self.assertEqual(payload["status"], "failed")

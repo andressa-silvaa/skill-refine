@@ -3,6 +3,7 @@ Unit tests for analysis inference module.
 """
 from __future__ import annotations
 
+from typing import Any
 from unittest.mock import patch
 
 from django.conf import settings
@@ -12,8 +13,18 @@ from apps.analysis.application.inference.config import get_config
 from apps.analysis.application.inference.loader import clear_cache, get_quality_bundle
 from apps.analysis.application.inference.resume_mapper import resume_to_text
 from apps.analysis.application.inference.safety import truncate_text
+from apps.analysis.application.inference.completeness import assess_completeness
 from apps.analysis.application.inference.postprocess.insights import derive_insights
+from apps.analysis.application.inference.resume_signals import (
+    education_aligned_with_target,
+    has_internship_position,
+    is_thin_student_or_intern_profile,
+    max_years_mentioned_in_work_context,
+    structured_seniority_floor_lift,
+)
+from apps.analysis.application.inference import orchestrator as orchestrator_mod
 from apps.analysis.application.inference.orchestrator import analyze_resume
+from apps.analysis.application.inference.seniority.constants import SENIORITY_POLICY_VERSION
 from apps.analysis.application.inference.predictors.quality import predict_quality
 from apps.analysis.application.inference.predictors.matching import predict_matching
 
@@ -106,6 +117,264 @@ class InsightsKeysCanonicalTest(TestCase):
             self.assertIn("params", i)
             self.assertIn(i.get("priority", "medium"), ("high", "medium", "low"))
 
+    def test_insights_sparse_no_placeholder_strength(self) -> None:
+        insights = derive_insights(
+            seniority="intern",
+            quality_flags={"has_metrics": False, "has_links": False, "has_action_verbs": False},
+            sections=None,
+            resume_text="",
+            completeness_level="insufficient",
+        )
+        self.assertEqual(insights["strengths"], [])
+        keys = [i["key"] for i in insights["improvements"]]
+        self.assertIn("analysis.insights.improvements.fill_core_sections", keys)
+
+
+class CompletenessAssessmentTest(TestCase):
+    """Completeness gates neural models and caps."""
+
+    def test_empty_resume_is_insufficient(self) -> None:
+        data = {
+            "data": {
+                "summary": "",
+                "contact": {},
+                "experiences": [],
+                "educations": [],
+                "skills": [],
+                "languages": [],
+            }
+        }
+        sections = resume_to_text(data, "pt-BR")
+        c = assess_completeness(data, sections)
+        self.assertEqual(c["level"], "insufficient")
+
+    def test_analyze_sparse_resume_caps_scores(self) -> None:
+        resume_data = {
+            "data": {
+                "summary": "Estudante",
+                "contact": {},
+                "experiences": [],
+                "educations": [],
+                "skills": [],
+                "languages": [],
+            }
+        }
+        result = analyze_resume(resume_data, job_description_text=None, language="pt-BR")
+        self.assertLessEqual(result["score"], 45)
+        self.assertEqual(result["task_scores"]["seniority"], 50)
+        self.assertLessEqual(result["task_scores"]["ats"], 40)
+        payload = result["payload_json"]
+        self.assertEqual(payload["completeness"]["level"], "insufficient")
+        self.assertEqual(payload["completeness"]["confidence"], "low")
+        imp_keys = [i["key"] for i in payload["insights"]["improvements"]]
+        self.assertIn("analysis.insights.improvements.fill_core_sections", imp_keys)
+        self.assertNotIn(
+            "analysis.insights.strengths.education_aligned",
+            [s["key"] for s in payload["insights"]["strengths"]],
+        )
+
+    def test_intern_student_biology_vs_programador_is_realistic(self) -> None:
+        resume_data = {
+            "data": {
+                "targetPosition": "Programador",
+                "summary": "Estudante de biologia buscando oportunidades em desenvolvimento.",
+                "contact": {},
+                "experiences": [
+                    {
+                        "company": "Empresa X",
+                        "position": "Estagiário de TI",
+                        "description": ["Apoio em projeto por duas semanas."],
+                    }
+                ],
+                "educations": [
+                    {
+                        "institution": "Universidade",
+                        "course": "Biologia",
+                        "degree": "Graduação em andamento",
+                    }
+                ],
+                "skills": [],
+                "languages": [],
+            }
+        }
+        self.assertTrue(is_thin_student_or_intern_profile(resume_data))
+        self.assertFalse(education_aligned_with_target(resume_data))
+        result = analyze_resume(resume_data, job_description_text=None, language="pt-BR")
+        self.assertEqual(result["task_scores"]["seniority"], 25)
+        self.assertLessEqual(result["score"], 58)
+        strengths = [s["key"] for s in result["payload_json"]["insights"]["strengths"]]
+        self.assertNotIn("analysis.insights.strengths.education_aligned", strengths)
+        imp = [i["key"] for i in result["payload_json"]["insights"]["improvements"]]
+        self.assertIn("analysis.insights.improvements.education_target_gap", imp)
+
+    def test_shallow_experience_without_intern_keyword_still_thin(self) -> None:
+        """Cargo sem 'estágio' no título mas com pouquíssimo texto — mesmo perfil frágil."""
+        resume_data = {
+            "data": {
+                "targetPosition": "Programador",
+                "summary": "Buscando primeira oportunidade.",
+                "contact": {},
+                "experiences": [
+                    {
+                        "company": "Empresa",
+                        "position": "Programador",
+                        "description": ["Duas semanas de atividades."],
+                    }
+                ],
+                "educations": [{"institution": "UF", "course": "Biologia", "degree": "Graduação"}],
+                "skills": [],
+                "languages": [],
+            }
+        }
+        self.assertTrue(is_thin_student_or_intern_profile(resume_data))
+        result = analyze_resume(resume_data, None, "pt-BR")
+        self.assertEqual(result["task_scores"]["seniority"], 25)
+        self.assertLessEqual(result["score"], 58)
+
+    def test_junior_with_dates_not_treated_as_intern(self) -> None:
+        """Uma experiência curta em texto mas ~2 anos em datas + cargo júnior → não é perfil de estágio."""
+        resume_data = {
+            "data": {
+                "targetPosition": "Desenvolvedor Júnior",
+                "summary": "Foco em APIs e qualidade de código.",
+                "contact": {},
+                "experiences": [
+                    {
+                        "company": "Tech Co",
+                        "position": "Desenvolvedor Júnior",
+                        "startDate": "2023-01-01",
+                        "endDate": "2024-12-31",
+                        "isCurrent": False,
+                        "description": [
+                            "Desenvolvimento de APIs REST.",
+                            "Participação em code review.",
+                        ],
+                    }
+                ],
+                "educations": [
+                    {"institution": "UF", "course": "Ciência da Computação", "degree": "Bacharelado"}
+                ],
+                "skills": [{"name": "Python"}, {"name": "Django"}, {"name": "PostgreSQL"}],
+                "languages": [],
+            }
+        }
+        self.assertFalse(is_thin_student_or_intern_profile(resume_data))
+        self.assertEqual(structured_seniority_floor_lift(resume_data), "junior")
+        result = analyze_resume(resume_data, None, "pt-BR")
+        self.assertGreaterEqual(result["task_scores"]["seniority"], 50)
+
+    def test_explicit_two_years_in_experience_lifts_thin_guard(self) -> None:
+        """'2 anos' nas bullets (sem datas) ainda indica júnior, não estágio forçado."""
+        resume_data = {
+            "data": {
+                "targetPosition": "Desenvolvedor",
+                "summary": "Backend e integrações.",
+                "contact": {},
+                "experiences": [
+                    {
+                        "company": "Empresa",
+                        "position": "Desenvolvedor",
+                        "description": [
+                            "2 anos construindo microsserviços e filas.",
+                        ],
+                    }
+                ],
+                "educations": [],
+                "skills": [{"name": "Node.js"}, {"name": "PostgreSQL"}],
+                "languages": [],
+            }
+        }
+        self.assertFalse(is_thin_student_or_intern_profile(resume_data))
+        result = analyze_resume(resume_data, None, "pt-BR")
+        self.assertGreaterEqual(result["task_scores"]["seniority"], 50)
+
+    def test_junior_two_years_in_summary_only_not_intern(self) -> None:
+        """Texto típico de resumo (júnior + 2 anos) sem cargo de estágio."""
+        resume_data = {
+            "data": {
+                "targetPosition": "Desenvolvedor Front-end",
+                "summary": (
+                    "Desenvolvedor júnior com 2 anos de experiência em desenvolvimento front-end."
+                ),
+                "contact": {},
+                "experiences": [
+                    {
+                        "company": "Empresa",
+                        "position": "Desenvolvedor Front-end",
+                        "description": ["Componentes React e integração com APIs."],
+                    }
+                ],
+                "educations": [],
+                "skills": [{"name": "React"}, {"name": "TypeScript"}],
+                "languages": [],
+            }
+        }
+        self.assertGreaterEqual(max_years_mentioned_in_work_context(resume_data), 2)
+        self.assertFalse(has_internship_position(resume_data))
+        self.assertFalse(is_thin_student_or_intern_profile(resume_data))
+        result = analyze_resume(resume_data, None, "pt-BR")
+        self.assertGreaterEqual(result["task_scores"]["seniority"], 50)
+
+    def test_two_plus_years_in_summary_detected(self) -> None:
+        self.assertGreaterEqual(
+            max_years_mentioned_in_work_context(
+                {
+                    "data": {
+                        "targetPosition": "",
+                        "summary": "Frontend com 2+ anos em produto.",
+                        "experiences": [],
+                    }
+                }
+            ),
+            2,
+        )
+
+    def test_interno_in_position_is_not_internship(self) -> None:
+        """'Interno' não deve acionar falso positivo de 'intern'."""
+        resume_data = {
+            "data": {
+                "targetPosition": "Dev",
+                "summary": "",
+                "experiences": [
+                    {
+                        "company": "Banco",
+                        "position": "Desenvolvedor Interno",
+                        "description": ["Sistemas internos."],
+                    }
+                ],
+            }
+        }
+        self.assertFalse(has_internship_position(resume_data))
+
+    def test_years_in_resume_name_field(self) -> None:
+        """Nome do CV (fora de data.*) também entra na leitura de 'N anos'."""
+        self.assertGreaterEqual(
+            max_years_mentioned_in_work_context(
+                {
+                    "name": "João — 2 anos em front-end",
+                    "data": {"targetPosition": "", "summary": "", "experiences": []},
+                }
+            ),
+            2,
+        )
+
+    @patch.object(orchestrator_mod, "is_thin_student_or_intern_profile", return_value=True)
+    def test_structured_floor_lift_overrides_thin_intern_forcing(self, _mock: Any) -> None:
+        """Mesmo com thin=True, '2 anos' + júnior no resumo deve subir para júnior (50)."""
+        resume_data = {
+            "data": {
+                "targetPosition": "",
+                "summary": "Desenvolvedor júnior com 2 anos de experiência em front-end.",
+                "contact": {},
+                "experiences": [],
+                "educations": [],
+                "skills": [],
+                "languages": [],
+            }
+        }
+        result = analyze_resume(resume_data, None, "pt-BR")
+        self.assertGreaterEqual(result["task_scores"]["seniority"], 50)
+
 
 class AnalyzeResumeStableShapeTest(TestCase):
     """Test analyze_resume returns stable shape."""
@@ -129,6 +398,11 @@ class AnalyzeResumeStableShapeTest(TestCase):
         self.assertIn("model_version", result)
         self.assertIn("provider", result)
         self.assertIn("dataset_version", result)
+        self.assertIn("seniority_rule_label", result)
+        self.assertIn("seniority_final_label", result)
+        self.assertIn("seniority_label_source", result)
+        self.assertIn("seniority_policy_version", result)
+        self.assertIn("seniority_evidence_json", result)
         self.assertIsInstance(result["score"], int)
         self.assertGreaterEqual(result["score"], 0)
         self.assertLessEqual(result["score"], 100)
@@ -141,9 +415,36 @@ class AnalyzeResumeStableShapeTest(TestCase):
         self.assertIn("strengths", payload["insights"])
         self.assertIn("improvements", payload["insights"])
         self.assertIn("was_truncated", payload)
+        self.assertIn("completeness", payload)
+        self.assertIn("score", payload["completeness"])
+        self.assertIn("level", payload["completeness"])
         self.assertIn("model_metadata_by_task", payload)
         self.assertIn("seniority", payload["model_metadata_by_task"])
         self.assertIn("quality", payload["model_metadata_by_task"])
+
+    def test_target_position_exposes_target_fit_policy_metadata(self) -> None:
+        resume_data = {
+            "data": {
+                "targetPosition": "Analista",
+                "summary": "Profissional com experiência.",
+                "contact": {},
+                "experiences": [
+                    {"company": "Co", "position": "Analista", "description": ["Relatórios e conciliação."]}
+                ],
+                "educations": [],
+                "skills": [{"name": "Excel"}],
+                "languages": [],
+            }
+        }
+        result = analyze_resume(resume_data, None, "pt-BR")
+        payload = result["payload_json"]
+        self.assertIn("targetFitScore", payload)
+        self.assertEqual(payload.get("targetFitProvider"), "target_fit_policy")
+        self.assertIn("targetFitModelVersion", payload)
+        meta = payload.get("model_metadata_by_task") or {}
+        self.assertIn("target_fit", meta)
+        self.assertEqual((meta.get("target_fit") or {}).get("provider"), "target_fit_policy")
+        self.assertIsNotNone(result["task_scores"].get("target_fit"))
 
     @override_settings(
         ANALYSIS_MODEL_VERSION_BY_TASK=(
@@ -181,7 +482,11 @@ class AnalyzeResumeStableShapeTest(TestCase):
             language="pt-BR",
         )
         metadata_by_task = result["payload_json"]["model_metadata_by_task"]
-        self.assertEqual(metadata_by_task["seniority"]["modelVersion"], "analysis_v1_pt")
+        self.assertIn(
+            metadata_by_task["seniority"]["modelVersion"],
+            ("analysis_v1_pt", SENIORITY_POLICY_VERSION),
+        )
+        self.assertIn(metadata_by_task["seniority"]["provider"], ("rule_policy", "signals_ml"))
         self.assertEqual(metadata_by_task["quality"]["modelVersion"], "analysis_quality_v9_pt")
         self.assertEqual(metadata_by_task["matching"]["modelVersion"], "analysis_matching_v3_reg_pt")
         self.assertIn(metadata_by_task["quality"]["provider"], ("local", "heuristics"))

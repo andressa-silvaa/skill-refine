@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
 
-import { accountApi } from '@/entities/session';
+import { accountApi, type EmailConfirmationRequestResult } from '@/entities/session';
 import { asApiError } from '@/shared/api';
 import { useAsyncRequest } from '@/shared/lib/hooks/useAsyncRequest';
 import { useCooldown } from '@/shared/lib/hooks/useCooldown';
@@ -17,19 +17,22 @@ export function useEmailConfirmationResend(options: Options = {}) {
   const inFlightRef = useRef(false);
 
   const resend = useCallback(
-    async (email: string) => {
+    async (email: string): Promise<EmailConfirmationRequestResult | undefined> => {
       if (!email) return;
       if (inFlightRef.current || req.isLoading || cooldown.isCoolingDown) return;
 
       inFlightRef.current = true;
-      cooldown.start(cooldownSeconds);
       try {
-        await req.run({ email });
+        const data = await req.run({ email });
+        if (!data?.already_verified) {
+          cooldown.start(cooldownSeconds);
+        }
+        return data;
       } catch (e) {
         const apiErr = asApiError(e);
         if (apiErr?.status === 429) {
           cooldown.start(apiErr.retryAfterSeconds ?? cooldownSeconds);
-          return;
+          return undefined;
         }
         cooldown.stop();
         throw e;

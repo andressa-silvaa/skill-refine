@@ -42,7 +42,7 @@ class VersionCreationTest(TestCase):
         self.assertEqual(len(versions), 1)
         self.assertTrue(versions[0].is_current)
         self.assertEqual(versions[0].version_number, 1)
-        self.assertIn("Versão inicial", versions[0].change_summary_json)
+        self.assertIn("initial", versions[0].change_summary_json)
 
     def test_update_with_changes_creates_new_version(self):
         data = {
@@ -81,7 +81,7 @@ class VersionListTest(TestCase):
             version_number=1,
             is_current=True,
             snapshot_json={"targetPosition": "Dev"},
-            change_summary_json=["Initial"],
+            change_summary_json=["initial"],
         )
 
     def test_list_all_versions_for_user(self):
@@ -130,7 +130,7 @@ class VersionRestoreTest(TestCase):
                 "skills": [],
                 "languages": [],
             },
-            change_summary_json=["Initial"],
+            change_summary_json=["initial"],
         )
 
     def test_restore_updates_resume_and_creates_version(self):
@@ -144,7 +144,7 @@ class VersionRestoreTest(TestCase):
         versions = list(ResumeVersion.objects.filter(resume_id=self.resume.id).order_by("-version_number"))
         self.assertEqual(versions[0].version_number, 2)
         self.assertTrue(versions[0].is_current)
-        self.assertIn("Versão restaurada", versions[0].change_summary_json)
+        self.assertIn("version_restored", versions[0].change_summary_json)
 
     def test_restore_wrong_user_returns_none(self):
         other_user, _ = User.objects.get_or_create(

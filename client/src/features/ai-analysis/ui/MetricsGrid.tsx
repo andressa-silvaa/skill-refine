@@ -24,12 +24,19 @@ export function MetricsGrid(props: Props) {
   const atsBadgeLabel = result.atsBadge === 'excellent' ? t('analysis.badgeExcellent') : result.atsBadge === 'good' ? t('analysis.badgeGood') : t('analysis.badgeAttention');
   const clarityBadgeLabel = result.clarityBadge === 'excellent' ? t('analysis.badgeExcellent') : result.clarityBadge === 'good' ? t('analysis.badgeGood') : t('analysis.badgeAttention');
 
+  const seniorityBadgeParts = [t('analysis.estimate')];
+  if (result.seniorityConfidence === 'low') {
+    seniorityBadgeParts.push(t('analysis.seniorityConfidenceLow'));
+  }
+  const seniorityBadge = seniorityBadgeParts.join(' · ');
+
   return (
     <div className="sr-ai-metrics-grid" role="group" aria-label={t('analysis.metricsAria')}>
       <ScoreCard
         score={result.score}
         scoreLabel={result.scoreLabel}
         howWeCalculateLabel={t('analysis.howWeCalculate')}
+        qualityHint={result.scoreQualityHint}
       />
       <MetricCard
         icon={<i className="fa-solid fa-file-code" aria-hidden />}
@@ -47,11 +54,29 @@ export function MetricsGrid(props: Props) {
       />
       <MetricCard
         icon={<i className="fa-solid fa-chart-line" aria-hidden />}
-        label={t('analysis.seniority')}
-        value={result.seniorityLabel}
+        label={t('analysis.seniorityGeneral')}
+        value={
+          <>
+            {result.seniorityLabel}
+            {result.seniorityConfidence === 'low' || result.insufficientDataHint ? (
+              <div className="sr-ai-metrics-grid__seniority-notes">
+                {result.seniorityConfidence === 'low' ? (
+                  <p className="sr-ai-metrics-grid__seniority-hint sr-ai-metrics-grid__seniority-hint--primary">
+                    {t('analysis.seniorityConservativeDetail')}
+                  </p>
+                ) : null}
+                {result.insufficientDataHint ? (
+                  <p className="sr-ai-metrics-grid__seniority-hint sr-ai-metrics-grid__seniority-hint--tip">
+                    {result.insufficientDataHint}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
+          </>
+        }
         valueVariant="text"
-        badge={t('analysis.estimate')}
-        badgeTone="neutral"
+        badge={seniorityBadge}
+        badgeTone={result.seniorityConfidence === 'low' ? 'warning' : 'neutral'}
       />
     </div>
   );

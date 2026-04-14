@@ -89,7 +89,7 @@ def register_service(validated_data: dict, meta: dict) -> tuple[object, bool]:
     confirmations = OrmEmailConfirmationRepository()
     email_sender = DjangoEmailSender()
     try:
-        request_email_confirmation(
+        send_result = request_email_confirmation(
             cfg=get_cfg(),
             users=users,
             confirmations=confirmations,
@@ -99,6 +99,7 @@ def register_service(validated_data: dict, meta: dict) -> tuple[object, bool]:
             ip=meta["ip"],
             user_agent=meta["user_agent"],
         )
+        email_confirmation_sent = bool(send_result.get("email_sent"))
     except (EmailServiceNotConfigured, EmailSendFailed):
         email_confirmation_sent = False
     except TooManyRequests:
@@ -255,14 +256,14 @@ def password_reset_confirm_service(
     )
 
 
-def email_confirmation_request_service(email: str, meta: dict) -> None:
-    """Request email confirmation (resend link)."""
+def email_confirmation_request_service(email: str, meta: dict) -> dict[str, bool]:
+    """Request email confirmation (resend link). Returns email_sent / already_verified flags."""
     users = OrmUserRepository()
     confirmations = OrmEmailConfirmationRepository()
     email_sender = DjangoEmailSender()
     audit = OrmAuditLogger()
 
-    request_email_confirmation(
+    return request_email_confirmation(
         cfg=get_cfg(),
         users=users,
         confirmations=confirmations,

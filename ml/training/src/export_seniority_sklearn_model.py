@@ -29,6 +29,11 @@ def main() -> int:
         default="",
         help="Optional test metrics from eval_seniority.py --metrics_json",
     )
+    ap.add_argument(
+        "--inference_thresholds_json",
+        default="",
+        help="Optional tune_thresholds.py --out_json; sets metadata inference_thresholds for artifact-driven deploy.",
+    )
     ap.add_argument("--out_dir", default="", help="Optional copy destination (full directory copy).")
     args = ap.parse_args()
 
@@ -53,6 +58,13 @@ def main() -> int:
                 "f1_macro": test_m.get("f1_macro"),
                 "confusion_pairs": test_m.get("confusion_pairs"),
             }
+
+    if args.inference_thresholds_json:
+        th_path = Path(args.inference_thresholds_json)
+        if th_path.exists():
+            th_doc = json.loads(th_path.read_text(encoding="utf-8"))
+            if isinstance(th_doc.get("inference_thresholds"), dict):
+                meta["inference_thresholds"] = th_doc["inference_thresholds"]
 
     joblib_meta_path = model_dir / "model.joblib"
     if joblib_meta_path.exists():

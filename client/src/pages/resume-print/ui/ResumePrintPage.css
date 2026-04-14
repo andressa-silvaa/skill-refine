@@ -37,6 +37,8 @@ body[data-sr-print='true'] .sr-resume-pages > *:last-child {
   flex-direction: column;
   align-items: center;
   gap: 0;
+  /* Mesma base visual do PDF/claro; evita prefers-color-scheme: dark no navegador degradar a captura */
+  color-scheme: light;
 }
 
 .sr-resume-print__loading,

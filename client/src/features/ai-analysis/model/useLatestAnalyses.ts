@@ -16,7 +16,11 @@ export type LatestAnalysisInfo = {
  * Returns a map of resumeId -> { status, score, updatedAt }.
  * Used to show "Analisando…" or "Score IA: X" on resume cards.
  */
-export function useLatestAnalyses(resumeIds: string[]): Map<string, LatestAnalysisInfo> {
+export function useLatestAnalyses(
+  resumeIds: string[],
+  /** When this changes (e.g. after a forced list reload), analysis badges refetch instead of using stale cache. */
+  listVersion = 0
+): Map<string, LatestAnalysisInfo> {
   const { status: sessionStatus } = useSession();
   const [map, setMap] = useState<Map<string, LatestAnalysisInfo>>(new Map());
   const cacheRef = useRef<Map<string, { at: number; map: Map<string, LatestAnalysisInfo> }>>(new Map());
@@ -29,7 +33,9 @@ export function useLatestAnalyses(resumeIds: string[]): Map<string, LatestAnalys
       return;
     }
 
-    const key = ids.join(',');
+    // listVersion must be part of the key: after save, useResumes bumps it so we do not
+    // reuse a batch response from before the resume (and validity of latest analysis) changed.
+    const key = `${listVersion}\n${ids.join(',')}`;
     const now = Date.now();
     const cached = cacheRef.current.get(key);
     if (cached && now - cached.at <= 15_000) {
@@ -57,7 +63,7 @@ export function useLatestAnalyses(resumeIds: string[]): Map<string, LatestAnalys
     };
 
     void fetchAll();
-  }, [sessionStatus, ids]);
+  }, [sessionStatus, ids, listVersion]);
 
   return map;
 }

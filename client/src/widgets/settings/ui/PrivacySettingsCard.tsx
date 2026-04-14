@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 
 import { privacyApi, useSessionActions } from '@/entities/session';
 import { getApiErrorMessage } from '@/shared/api';
-import { downloadBlob } from '@/shared/lib/download/download';
 import { notify } from '@/shared/lib/notify';
 
 import './PrivacySettingsCard.css';
@@ -15,7 +14,6 @@ export function PrivacySettingsCard() {
   const nav = useNavigate();
   const { logout } = useSessionActions();
 
-  const [isExporting, setIsExporting] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -40,35 +38,10 @@ export function PrivacySettingsCard() {
         <div className="sr-privacy__links">
           <button
             type="button"
-            className="sr-privacy__link"
-            disabled={isExporting || isDeleting}
-            onClick={async () => {
-              if (isExporting || isDeleting) return;
-              setIsExporting(true);
-              try {
-                const dateLabel = new Date().toISOString().slice(0, 10);
-                const fallbackName = `skill-refine-data-export-${dateLabel}.json`;
-                const { blob, filename } = await privacyApi.downloadDataExport();
-                downloadBlob(blob, filename || fallbackName);
-                notify.success(t('settings.exportSuccess'));
-              } catch (e) {
-                notify.error(getApiErrorMessage(e, t('settings.exportError')));
-              } finally {
-                setIsExporting(false);
-              }
-            }}
-          >
-            {isExporting ? t('settings.exportingData') : t('settings.exportData')}
-          </button>
-          <span className="sr-privacy__dot" aria-hidden>
-            •
-          </span>
-          <button
-            type="button"
             className="sr-privacy__link sr-privacy__link--danger"
-            disabled={isExporting || isDeleting}
+            disabled={isDeleting}
             onClick={() => {
-              if (isExporting || isDeleting) return;
+              if (isDeleting) return;
               setDeleteOpen(true);
             }}
           >

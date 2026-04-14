@@ -15,7 +15,16 @@ export const analysisDomain = {
     ats: 'ATS Compatibility',
     clarity: 'Clarity',
     seniority: 'Seniority',
+    seniorityGeneral: 'Seniority (general)',
     estimate: 'Estimate',
+    seniorityConfidenceLow: 'Low confidence',
+    seniorityConservativeDetail:
+      'Conservative estimate from the fields in your resume. The overall score measures document quality — not a rating of your career level.',
+    insufficientDataHint:
+      'Add timelines, job titles, and bullet points under experience to sharpen the seniority estimate.',
+    scoreMeaning: {
+      resume_quality: 'This score reflects resume quality (clarity, ATS, structure), not your career level.',
+    },
     badgeExcellent: 'Excellent',
     badgeGood: 'Good',
     badgeAttention: 'Attention',
@@ -87,16 +96,81 @@ export const analysisDomain = {
         other: 'Other strength identified.',
       },
       improvements: {
+        add_experiences: 'Add professional experience or relevant projects (with dates when possible).',
+        add_skills: 'Add technical skills and tools that match the target role.',
+        add_education: 'Add education or courses relevant to your target profile.',
         add_metrics: 'Add metrics and quantifiable results to the {{section}} section.',
         use_action_verbs: 'Use more action verbs to describe achievements.',
         improve_summary: 'Improve the professional summary to make it clearer and more impactful.',
         ats_keywords: 'Highlight keywords for better ATS compatibility.',
         executive_summary: 'Add an executive summary at the top of the resume.',
+        fill_core_sections:
+          'Add experience, education, and skills with detail — analysis is reliable when the resume has enough content.',
+        education_target_gap:
+          'The target role seems to expect a different field of study than what is listed. Add courses, certifications, or projects aligned with the desired role, or explain a career transition.',
+        target_role_terms:
+          'Add target-role keywords and competencies (e.g. {{terms}}) to experience, summary, or skills.',
+        career_switch_context: 'Career shift context: {{context}}',
         relevant_links: 'Include relevant links (LinkedIn, GitHub, portfolio).',
         action_verbs: 'Use more action verbs to describe achievements.',
         clarity_conciseness: 'Review clarity and conciseness of the text.',
         other: 'Other improvement suggestion.',
       },
+    },
+    domainCategory: {
+      health: 'Health',
+      education: 'Education',
+      legal: 'Legal',
+      finance: 'Finance',
+      engineering: 'Engineering',
+      marketing: 'Marketing',
+      sales: 'Sales',
+      technology: 'Technology',
+      administrative: 'Administrative',
+      science: 'Science / research',
+      hr: 'Human resources',
+      operations: 'Operations / logistics',
+      creative: 'Creative / design',
+      general: 'General / cross-functional',
+    },
+    careerSwitch: {
+      reasonLowFitMidPlus:
+        'Strong overall experience, but little explicit overlap with the target role — add aligned keywords and outcomes.',
+      reasonDomainMismatch:
+        'Your background suggests a different professional domain than the target role; add projects, courses, or reframe experience for the new direction.',
+    },
+    targetFit: {
+      sectionTitle: 'Target role fit',
+      sectionAria: 'Fit to target role and seniority in that area',
+      fitCard: 'Target role fit',
+      targetSeniorityCard: 'Seniority (target area)',
+      resumeDomain: 'Inferred domain from resume',
+      targetDomain: 'Inferred domain from target role',
+      careerSwitchTitle: 'Possible career change',
+      evidenceTitle: 'How we estimate fit',
+      hitRatio: 'Target terms found in resume: {{hit}} / {{total}}',
+      experienceHits: 'Matches in experience: {{n}}',
+      skillsHits: 'Skills aligned with target terms: {{n}}',
+      educationLabel: 'Education alignment',
+      eduWeak: 'Weak',
+      eduMedium: 'Medium',
+      eduStrong: 'Strong',
+      portfolioYes: 'Portfolio or technical link present',
+      portfolioNo: 'No portfolio or technical link highlighted',
+      matchedTerms: 'Terms matched',
+      missingTerms: 'Terms to reinforce',
+      matchedSkills: 'Related skills',
+      clampTitle: 'Why target-area seniority is conservative',
+      disclaimer:
+        'Estimate from structured resume data and target role (no LLM as the final decision). Add job description text for better accuracy.',
+      clampMaxJuniorScore: 'Low fit to target role: target-area seniority capped at Junior.',
+      clampMaxMidScore: 'Moderate fit: target-area seniority capped at Mid-level.',
+      clampNoExperiencePortfolio:
+        'No clear evidence in experience and no portfolio: target-area seniority capped at Junior.',
+      clampSparseTargetHits: 'Few target-role terms appear in the resume.',
+      clampSkillsGap: 'Little overlap between skills and the target role.',
+      clampHighGeneralLowFit:
+        'High general seniority but very low fit to the target role — conservative profile for the new area.',
     },
     improvementExamples: {
       addMetrics: {

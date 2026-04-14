@@ -31,7 +31,12 @@ export function DeleteAccountModal(props: Props) {
   const portalRoot = document.querySelector('[data-sr-theme-scope]') ?? document.body;
 
   return createPortal(
-    <div className="sr-modal" role="dialog" aria-modal="true" aria-label={t('modal.deleteAccountTitle')}>
+    <div
+      className="sr-modal sr-delete-account-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('modal.deleteAccountTitle')}
+    >
       <button type="button" className="sr-modal__backdrop" aria-label={t('common.close')} onClick={onClose} />
       <div className="sr-modal__panel">
         <div className="sr-modal__icon" aria-hidden>

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Badge, Button, Chip, Modal } from '@/shared/ui';
 
+import { translateVersionChangeLabel } from '../lib/translateVersionChangeLabel';
 import type { VersionHistoryItem } from '../model/types';
 
 import './VersionViewModal.css';
@@ -85,7 +86,7 @@ export function VersionViewModal({ open, item, onClose }: Props) {
           {item.changes.length > 0 ? (
             <div className="sr-version-view__chips">
               {item.changes.map((change, idx) => (
-                <Chip key={idx}>{change}</Chip>
+                <Chip key={idx}>{translateVersionChangeLabel(t, change)}</Chip>
               ))}
             </div>
           ) : (

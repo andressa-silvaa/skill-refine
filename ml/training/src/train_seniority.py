@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -37,6 +38,63 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from signals_features import feature_dict_from_signals
 
 _LABELS = ("intern", "junior", "mid", "senior")
+
+
+def _calibration_cv_folds(y_enc: np.ndarray) -> int:
+    """Folds for CalibratedClassifierCV; stratified CV needs each class count >= n_folds."""
+    if y_enc.size == 0:
+        return 0
+    min_c = min(Counter(int(x) for x in y_enc).values())
+    if min_c < 2:
+        return 0
+    return min(5, min_c)
+
+
+def _fit_calibrated_classifier(
+    base: Pipeline,
+    X_va: np.ndarray,
+    y_va_enc: np.ndarray,
+    *,
+    method: str,
+) -> tuple[Any, bool, str]:
+    """
+    sklearn ≥1.8: use FrozenEstimator + CV on the validation set (prefit removed).
+    sklearn antigo: tenta cv='prefit'.
+    """
+    cv_eff = _calibration_cv_folds(y_va_enc)
+    if cv_eff < 2:
+        return base, False, "none"
+
+    try:
+        from sklearn.frozen import FrozenEstimator
+
+        cal = CalibratedClassifierCV(FrozenEstimator(base), method=method, cv=cv_eff)
+        cal.fit(X_va, y_va_enc)
+        return cal, True, method
+    except Exception as exc:
+        print(f"Calibration failed ({method}), retrying sigmoid: {exc}", file=sys.stderr)
+    try:
+        from sklearn.frozen import FrozenEstimator
+
+        cal = CalibratedClassifierCV(FrozenEstimator(base), method="sigmoid", cv=cv_eff)
+        cal.fit(X_va, y_va_enc)
+        return cal, True, "sigmoid"
+    except Exception as exc:
+        print(f"FrozenEstimator calibration disabled: {exc}", file=sys.stderr)
+
+    try:
+        cal = CalibratedClassifierCV(base, cv="prefit", method=method)
+        cal.fit(X_va, y_va_enc)
+        return cal, True, method
+    except Exception:
+        pass
+    try:
+        cal = CalibratedClassifierCV(base, cv="prefit", method="sigmoid")
+        cal.fit(X_va, y_va_enc)
+        return cal, True, "sigmoid"
+    except Exception as exc2:
+        print(f"Calibration disabled: {exc2}", file=sys.stderr)
+    return base, False, "none"
 
 
 def _load_rows(path: Path) -> list[dict[str, Any]]:
@@ -87,9 +145,10 @@ def _infer_feature_names(rows: list[dict[str, Any]]) -> list[str]:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--train_jsonl", required=True, help="Training JSONL (schema v1.0).")
+    ap.add_argument("--split_dir", default="", help="Directory with train.jsonl + val.jsonl (alternative to --train_jsonl).")
+    ap.add_argument("--train_jsonl", default="", help="Training JSONL (schema v1.0).")
     ap.add_argument("--val_jsonl", default="", help="Validation JSONL for calibration (recommended).")
-    ap.add_argument("--model_version", required=True)
+    ap.add_argument("--model_version", default="", help="Default: last segment of --out_dir.")
     ap.add_argument("--out_dir", required=True)
     ap.add_argument(
         "--mode",
@@ -112,6 +171,20 @@ def main() -> int:
     )
     args = ap.parse_args()
 
+    out_dir = Path(args.out_dir)
+    model_version = (args.model_version or "").strip() or out_dir.name
+
+    if args.split_dir:
+        sd = Path(args.split_dir)
+        train_path = sd / "train.jsonl"
+        val_path = sd / "val.jsonl"
+    elif args.train_jsonl:
+        train_path = Path(args.train_jsonl)
+        val_path = Path(args.val_jsonl) if args.val_jsonl else None
+    else:
+        print("Provide --split_dir or --train_jsonl.", file=sys.stderr)
+        return 2
+
     if args.mode == "hf":
         print(
             "Mode 'hf' is not implemented in this script; use ml/training/src/train.py --task seniority.",
@@ -119,14 +192,30 @@ def main() -> int:
         )
         return 2
 
-    train_rows = _load_rows(Path(args.train_jsonl))
+    train_rows = _load_rows(train_path)
     if len(train_rows) < 8:
         print("Need at least 8 training rows for a stable run.", file=sys.stderr)
         return 1
 
+    labeled = sum(
+        1
+        for row in train_rows
+        if str((row.get("labels") or {}).get("seniority_label") or "").strip() in _LABELS
+    )
+    if labeled == 0:
+        print(
+            f"No training rows have labels.seniority_label in {_LABELS}. "
+            "Backfill or export labeled analyses before training.",
+            file=sys.stderr,
+        )
+        return 1
+
     feature_names = _infer_feature_names(train_rows)
     if len(feature_names) < 2:
-        print("Could not infer feature names from training data.", file=sys.stderr)
+        print(
+            "Could not infer feature names: labeled rows have empty or non-numeric signals.",
+            file=sys.stderr,
+        )
         return 1
 
     X_tr, y_tr, le = _build_xy(train_rows, feature_names)
@@ -149,12 +238,11 @@ def main() -> int:
     )
     base.fit(X_tr, y_tr)
 
-    val_path = Path(args.val_jsonl) if args.val_jsonl else None
     calibrated = False
     calibration_method = "none"
     final_estimator: Any = base
 
-    if val_path and val_path.exists():
+    if isinstance(val_path, Path) and val_path.exists():
         val_rows = _load_rows(val_path)
         try:
             X_va, y_va_enc, _ = _build_xy(val_rows, feature_names, le=le)
@@ -164,33 +252,19 @@ def main() -> int:
             y_va_enc = np.array([], dtype=int)
         if len(X_va) >= args.calibration_min_val:
             cal_method = "isotonic" if len(X_va) >= args.isotonic_min_val else "sigmoid"
-            try:
-                cal = CalibratedClassifierCV(base, cv="prefit", method=cal_method)
-                cal.fit(X_va, y_va_enc)
-                final_estimator = cal
-                calibrated = True
-                calibration_method = cal_method
-            except Exception as exc:
-                print(f"Calibration failed ({cal_method}), retrying sigmoid: {exc}", file=sys.stderr)
-                try:
-                    cal = CalibratedClassifierCV(base, cv="prefit", method="sigmoid")
-                    cal.fit(X_va, y_va_enc)
-                    final_estimator = cal
-                    calibrated = True
-                    calibration_method = "sigmoid"
-                except Exception as exc2:
-                    print(f"Calibration disabled: {exc2}", file=sys.stderr)
+            final_estimator, calibrated, calibration_method = _fit_calibrated_classifier(
+                base, X_va, y_va_enc, method=cal_method
+            )
 
     pred_va = final_estimator.predict(X_tr)
     report = classification_report(y_tr, pred_va, target_names=le.classes_, zero_division=0)
 
-    out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     bundle = {
         "pipeline": final_estimator,
         "label_encoder": le,
         "feature_names": feature_names,
-        "model_version": args.model_version,
+        "model_version": model_version,
         "mode": "signals_logreg_calibrated" if calibrated else "signals_logreg",
         "calibrated": calibrated,
         "calibration_method": calibration_method,
@@ -205,7 +279,7 @@ def main() -> int:
 
     meta = {
         "model_name": "seniority_signals",
-        "model_version": args.model_version,
+        "model_version": model_version,
         "dataset_version": "unknown",
         "task": "seniority_signals",
         "mode": bundle["mode"],
