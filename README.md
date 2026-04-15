@@ -14,6 +14,7 @@ Monorepo for **Skill Refine**: a resume builder and AI-assisted analysis platfor
 
 - **Frontend setup:** [client/README.md](client/README.md)
 - **Backend setup:** [backend/README.md](backend/README.md)
+- **Study guide (Portuguese, architecture & flows):** [temp-md/README.md](temp-md/README.md)
 
 ## Author
 
