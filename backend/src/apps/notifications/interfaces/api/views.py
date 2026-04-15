@@ -5,6 +5,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from shared.api.pagination import parse_notifications_list_pagination
+from shared.api.request_user import require_authenticated_user_id
 from shared.api.responses import error_response as _error
 
 from apps.notifications.models import Notification
@@ -12,28 +14,26 @@ from apps.notifications.models import Notification
 from .payloads import notification_payload
 
 
-def _user_id(request):
-    uid = getattr(request.user, "id", None)
-    if not uid:
-        return None, _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
-    return str(uid), None
-
-
 class NotificationListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        user_id, err = _user_id(request)
+        user_id, err = require_authenticated_user_id(request)
         if err:
             return err
-        limit = min(max(int(request.query_params.get("limit", 20)), 1), 100)
-        offset = max(int(request.query_params.get("offset", 0)), 0)
+        page_params, page_err = parse_notifications_list_pagination(
+            limit_param=request.query_params.get("limit"),
+            offset_param=request.query_params.get("offset"),
+        )
+        if page_err:
+            return page_err
+        limit, offset = page_params
         qs = Notification.objects.filter(user_id=user_id).order_by("-created_at")
         total = qs.count()
-        page = list(qs[offset : offset + limit])
+        rows = list(qs[offset : offset + limit])
         return Response(
             {
-                "items": [notification_payload(n) for n in page],
+                "items": [notification_payload(n) for n in rows],
                 "limit": limit,
                 "offset": offset,
                 "total": total,
@@ -48,7 +48,7 @@ class NotificationUnreadCountView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        user_id, err = _user_id(request)
+        user_id, err = require_authenticated_user_id(request)
         if err:
             return err
         count = Notification.objects.filter(user_id=user_id, is_read=False).count()
@@ -59,7 +59,7 @@ class NotificationMarkReadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, notification_id):
-        user_id, err = _user_id(request)
+        user_id, err = require_authenticated_user_id(request)
         if err:
             return err
         updated = Notification.objects.filter(
@@ -75,7 +75,7 @@ class NotificationMarkAllReadView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        user_id, err = _user_id(request)
+        user_id, err = require_authenticated_user_id(request)
         if err:
             return err
         Notification.objects.filter(user_id=user_id, is_read=False).update(is_read=True)
@@ -86,7 +86,7 @@ class NotificationDeleteView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, notification_id):
-        user_id, err = _user_id(request)
+        user_id, err = require_authenticated_user_id(request)
         if err:
             return err
         deleted, _ = Notification.objects.filter(
@@ -102,7 +102,7 @@ class NotificationClearAllView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request):
-        user_id, err = _user_id(request)
+        user_id, err = require_authenticated_user_id(request)
         if err:
             return err
         count, _ = Notification.objects.filter(user_id=user_id).delete()

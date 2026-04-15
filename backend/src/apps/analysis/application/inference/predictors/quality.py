@@ -160,7 +160,6 @@ def _predict_hf_quality(model, tokenizer, text: str, max_length: int = 512) -> i
         if getattr(logits, "ndim", 0) == 2 and getattr(logits, "shape", [0, 0])[-1] > 1:
             n_cls = int(logits.shape[-1])
             id2label = getattr(getattr(model, "config", None), "id2label", {}) or {}
-            # Probability-weighted score avoids saturation on argmax (e.g. always "strong" -> 84).
             try:
                 probs = torch.softmax(logits, dim=-1).squeeze(0).tolist()
             except Exception:

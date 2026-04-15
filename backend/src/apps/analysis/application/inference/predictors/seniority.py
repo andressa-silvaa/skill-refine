@@ -187,7 +187,6 @@ def predict_seniority(
             provider = extra["provider"]
         return (pred, provider)
 
-    # HF model + tokenizer
     if isinstance(extra, dict) and extra.get("tokenizer") is not None:
         tokenizer = extra["tokenizer"]
         max_length = 512
@@ -200,7 +199,6 @@ def predict_seniority(
         pred = _heuristic_seniority(resume_text, language, default_without_signals=default_without_signals)
         return (pred, "heuristics-only")
 
-    # TF-IDF pipeline (sklearn)
     labels = extra if isinstance(extra, (list, tuple)) else extra.get("labels", list(SENIORITY_LABELS))
     try:
         pred = model_or_pipeline.predict([resume_text])[0]

@@ -112,7 +112,6 @@ def resume_to_text(resume_data: dict[str, Any], language: str = "pt-BR") -> Resu
     skills = data.get("skills") or []
     languages_list = data.get("languages") or []
 
-    # Experience
     exp_parts = []
     for exp in experiences:
         company = _normalize(exp.get("company") or "")
@@ -131,7 +130,6 @@ def resume_to_text(resume_data: dict[str, Any], language: str = "pt-BR") -> Resu
                 exp_parts.append(f"- {bullet_text}")
     experience = "\n".join(exp_parts)
 
-    # Education
     edu_parts = []
     for edu in educations:
         institution = _normalize(edu.get("institution") or "")
@@ -142,7 +140,6 @@ def resume_to_text(resume_data: dict[str, Any], language: str = "pt-BR") -> Resu
             edu_parts.append(", ".join(parts))
     education = "\n".join(edu_parts)
 
-    # Skills: comma-separated
     skill_names = []
     for s in skills:
         name = _normalize(s.get("name") if isinstance(s, dict) else str(s))
@@ -150,7 +147,6 @@ def resume_to_text(resume_data: dict[str, Any], language: str = "pt-BR") -> Resu
             skill_names.append(name)
     skills_text = ", ".join(skill_names)
 
-    # Languages
     lang_parts = []
     for l in languages_list:
         name = _normalize(l.get("name") if isinstance(l, dict) else str(l))

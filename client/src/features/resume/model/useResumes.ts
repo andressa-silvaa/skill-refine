@@ -13,6 +13,7 @@ import type {
   ResumesSortKey,
   ResumesViewMode,
 } from './types';
+import { scoreFilterToRange, updatedFilterToRange } from './resumeListQueryParams';
 
 const QUERY_DEBOUNCE_MS = 260;
 const LIST_CACHE_TTL_MS = 15_000;
@@ -40,24 +41,6 @@ type UseResumesInit = {
   filters?: Partial<ResumeFiltersState>;
 };
 
-function scoreFilterToRange(score: ResumeScoreFilter) {
-  if (score === 'none') return { include_no_score: true };
-  if (score === '0-50') return { score_min: 0, score_max: 50 };
-  if (score === '51-70') return { score_min: 51, score_max: 70 };
-  if (score === '71-85') return { score_min: 71, score_max: 85 };
-  if (score === '86-100') return { score_min: 86, score_max: 100 };
-  return {};
-}
-
-function updatedFilterToRange(updated: ResumeUpdatedFilter) {
-  if (updated === 'all') return {};
-  const now = new Date();
-  const days = updated === '7d' ? 7 : 30;
-  const from = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-  const iso = from.toISOString().slice(0, 10);
-  return { updated_from: iso };
-}
-
 export function useResumes(init?: UseResumesInit) {
   const listCacheRef = useRef<Map<string, { at: number; items: Resume[] }>>(new Map());
   const requestSeqRef = useRef(0);
@@ -76,7 +59,6 @@ export function useResumes(init?: UseResumesInit) {
     loading: true,
     error: null,
   });
-  /** Bumped after forced list refresh so dependent hooks (e.g. IA badges) refetch. */
   const [listVersion, setListVersion] = useState(0);
 
   const viewModels = useMemo<ResumeViewModel[]>(() => {

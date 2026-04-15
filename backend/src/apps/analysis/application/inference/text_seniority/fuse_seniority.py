@@ -27,7 +27,6 @@ def _label_from_rank(r: float) -> str:
         return "intern"
     if r < 1.5:
         return "junior"
-    # Below 2.35: mid; otherwise senior — blends like 0.4*mid+0.6*senior land in senior.
     if r < 2.35:
         return "mid"
     return "senior"

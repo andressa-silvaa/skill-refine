@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useSession } from '@/entities/session';
 
 import { dashboardApi } from '../api/dashboardApi';
+import { firstNameFromUserFullName } from './dashboardFormatters';
 import { mapDashboardResponseToViewModel } from './mappers';
 import type { DashboardData } from './viewTypes';
 
@@ -12,12 +13,6 @@ type UseDashboardState = {
   loading: boolean;
   error: unknown | null;
 };
-
-function firstNameFromUserFullName(fullName: string | null | undefined, fallback: string): string {
-  const raw = (fullName || '').trim();
-  if (!raw) return fallback;
-  return raw.split(/\s+/)[0] || fallback;
-}
 
 export function useDashboard() {
   const { t, i18n } = useTranslation();

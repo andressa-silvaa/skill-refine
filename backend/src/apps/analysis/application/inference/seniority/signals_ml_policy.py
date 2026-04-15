@@ -72,7 +72,6 @@ def apply_signals_ml_gates(
                     "p_senior": round(p_senior, 4),
                 }
             )
-            # pick best non-senior class by probability
             non_senior = [(lab, p) for lab, p in sorted_probs if lab != "senior"]
             final = non_senior[0][0] if non_senior else "mid"
 

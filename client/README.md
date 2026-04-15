@@ -1,17 +1,13 @@
-# 🎨 Skill Refine — Frontend (Client)
+# Skill Refine — Frontend
 
-React + TypeScript frontend for the Skill Refine resume builder and analysis platform.
+React 19 + TypeScript client (CRA/Craco). Architecture: **Feature-Sliced Design** (`app`, `pages`, `widgets`, `features`, `entities`, `shared`).
 
----
+## Prerequisites
 
-## 📋 Prerequisites
+- **Node.js** 18+ (LTS)
+- **npm** 9+
 
-- **Node.js** 18+ (LTS recommended)
-- **npm** 9+ (comes with Node.js)
-
----
-
-## 🚀 Quick Start
+## Configure the frontend
 
 ### 1. Install dependencies
 
@@ -20,93 +16,46 @@ cd client
 npm install
 ```
 
-### 2. Configure environment
+### 2. Environment variables
 
-Copy the example env file and adjust if needed:
+Copy the example file:
 
 ```bash
 cp env.example .env
 ```
 
-Edit `.env`:
+Edit **`.env`** in the `client` folder:
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `REACT_APP_API_URL` | Backend API base URL | `http://localhost:8000` |
-| `REACT_APP_GOOGLE_CLIENT_ID` | Google OAuth Client ID (must match backend) | `xxx.apps.googleusercontent.com` |
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `REACT_APP_API_URL` | Base URL of the Django API (no trailing slash) | `http://localhost:8000` |
+| `REACT_APP_GOOGLE_CLIENT_ID` | Google OAuth Web Client ID (must match backend `GOOGLE_OAUTH_CLIENT_ID`) | `xxx.apps.googleusercontent.com` |
 
-### 3. Run development server
+The app reads these at **build time** (`REACT_APP_*`). After changing `.env`, restart the dev server or rebuild for production.
+
+### 3. Run the development server
 
 ```bash
 npm start
 ```
 
-The app will open at [http://localhost:3000](http://localhost:3000).
+Opens at [http://localhost:3000](http://localhost:3000).
 
----
-
-## 📜 Available Scripts
+### 4. Useful scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm start` | Start dev server (port 3000) |
-| `npm run build` | Build for production |
-| `npm test` | Run Jest tests |
-| `npm run lint` | Run ESLint |
-| `npm run i18n:check` | Validate i18n translation keys |
-| `npm run deps:cycles` | Check for circular dependencies |
-| `npm run ci:check` | Full CI check (lint + cycles + i18n) |
+| `npm run build` | Production build → `build/` |
+| `npm test` | Jest tests |
+| `npm run lint` | ESLint |
+| `npm run i18n:check` | Validate i18n keys |
+| `npm run deps:cycles` | Detect circular imports |
+| `npm run ci:check` | Lint + cycles + i18n |
 
----
+## i18n
 
-## 🏗️ Project Structure (FSD)
+Default **pt-BR**; also **en-US** and **es-ES**. Config under `src/shared/lib/i18n/`.
 
-```
-src/
-├── app/           # App root, router, auth guards
-├── pages/         # Page components (auth, protected, public)
-├── widgets/       # AppShell, dashboard, resumes, settings
-├── features/      # auth, ai-analysis, resume, version-history, etc.
-├── entities/      # resume, session
-└── shared/        # api, lib (i18n, theme, performance), ui (design system)
-```
+## Author
 
----
-
-## 🌍 Internationalization (i18n)
-
-- **Languages:** pt-BR (default), en-US, es-ES
-- **Library:** i18next + react-i18next
-- **Config:** `src/shared/lib/i18n/`
-
----
-
-## 🎨 Theming
-
-- **Appearance:** Light / Dark mode + accent colors (pink, purple, blue, green, orange)
-- **Resume themes:** `src/entities/resume/config/themes/`
-- **Config:** `src/shared/lib/theme/`
-
----
-
-## 🧪 Testing
-
-```bash
-npm test
-```
-
----
-
-## 📦 Build for Production
-
-```bash
-npm run build
-```
-
-Output goes to `build/`.
-
----
-
-## 📄 Author
-
-**Andressa Silva**
+👧 **Andressa Costa**

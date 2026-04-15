@@ -131,7 +131,6 @@ def predict_text_seniority(
                     probs_list = []
             id2label = getattr(getattr(model, "config", None), "id2label", None) or {}
             if not probs_list and len(logits.shape) == 2:
-                # numpy fallback
                 import math
 
                 row = logits.squeeze(0).tolist()

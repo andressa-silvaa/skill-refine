@@ -85,7 +85,6 @@ def run_measurements():
     user, items, detail_resume = ensure_fixtures()
     factory = RequestFactory()
 
-    # List
     request = factory.get("/resumes/api/resumes/")
     request.user = user
     list_view = ResumeListCreateView.as_view()
@@ -95,7 +94,6 @@ def run_measurements():
         list_time_ms = (time.perf_counter() - t0) * 1000
     list_queries = len(ctx.captured_queries)
 
-    # Detail
     detail_queries = 0
     detail_time_ms = 0.0
     if detail_resume:

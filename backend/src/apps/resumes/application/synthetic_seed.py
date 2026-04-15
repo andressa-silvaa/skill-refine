@@ -298,7 +298,6 @@ def pick_profile(index: int, profiles_mode: str, rng: random.Random) -> str:
             weights=[6, 3, 2, 1],
             k=1,
         )[0]
-    # custom "intern=10,junior=20,..." not implemented; fall back
     return PROFILE_ORDER[index % 4]
 
 
@@ -325,7 +324,6 @@ def build_synthetic_resume(
             out.append(bullets_pool[i % len(bullets_pool)])
         return out
 
-    # Generic contact (no real PII)
     idx = f"{base_seed}-{index:05d}"
     include_links = rng.random() < 0.35
     contact: dict[str, Any] = {
@@ -436,7 +434,6 @@ def build_synthetic_resume(
         target_position = "Desenvolvedor de Software"
 
     elif profile == "mid":
-        # Two non-overlapping blocks ~15–22 months each => 30–44 effective months
         e1_end = add_months(anchor_end, -rng.randint(14, 20))
         e1_start = add_months(e1_end, -rng.randint(14, 22))
         experiences.append(

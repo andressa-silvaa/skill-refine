@@ -31,7 +31,6 @@ def build_target_embedding_text(
         return job[:4000]
     tp = (target_position or "").strip()
     dom = (domain_category or "general").strip().lower() or "general"
-    # Minimal domain hints for embedding space (keywords, not rules).
     dom_hint = {
         "tech": "software engineering technology development",
         "health": "healthcare clinical patient care",
@@ -56,11 +55,9 @@ def compute_semantic_keyword_evidence(cv_text: str, target_text: str, *, limit: 
 
 def cosine_to_fit_score(cosine: float) -> int:
     """Map cosine [-1,1] to 0..100 with gentle spread (avoids everything ~50)."""
-    # Typical sentence similarity clusters ~0.35–0.85 for related texts.
     lo, hi = 0.28, 0.82
     x = (float(cosine) - lo) / (hi - lo + 1e-9)
     x = max(0.0, min(1.0, x))
-    # Slight gamma to spread mid range
     x = math.pow(x, 0.92)
     return int(round(100 * x))
 

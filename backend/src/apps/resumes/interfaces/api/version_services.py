@@ -29,20 +29,16 @@ def _build_change_summary(prev: dict[str, Any] | None, new: dict[str, Any]) -> l
     if not prev:
         return ["initial"]
     summary = []
-    # Summary
     if (new.get("summary") or "").strip() != (prev.get("summary") or "").strip():
         summary.append("professional_summary_updated")
-    # Contact
     c_old = prev.get("contact") or {}
     c_new = new.get("contact") or {}
     if (c_new.get("fullName") or "").strip() != (c_old.get("fullName") or "").strip():
         summary.append("name_contact_updated")
     if (c_new.get("email") or "").strip() != (c_old.get("email") or "").strip():
         summary.append("email_updated")
-    # Target position
     if (new.get("targetPosition") or "").strip() != (prev.get("targetPosition") or "").strip():
         summary.append("target_position_updated")
-    # Experiences
     exp_old = prev.get("experiences") or []
     exp_new = new.get("experiences") or []
     if len(exp_new) != len(exp_old):
@@ -53,22 +49,18 @@ def _build_change_summary(prev: dict[str, Any] | None, new: dict[str, Any]) -> l
             if (ne.get("company") or "") != (oe.get("company") or "") or (ne.get("position") or "") != (oe.get("position") or ""):
                 summary.append("experience_updated")
                 break
-    # Educations
     edu_old = prev.get("educations") or []
     edu_new = new.get("educations") or []
     if len(edu_new) != len(edu_old):
         summary.append("education_updated")
-    # Skills
     skill_old = prev.get("skills") or []
     skill_new = new.get("skills") or []
     if len(skill_new) != len(skill_old):
         summary.append("skills_updated")
-    # Languages
     lang_old = prev.get("languages") or []
     lang_new = new.get("languages") or []
     if len(lang_new) != len(lang_old):
         summary.append("languages_updated")
-    # Theme
     if (new.get("themeId") or "") != (prev.get("themeId") or ""):
         summary.append("theme_updated")
     if not summary:
@@ -173,14 +165,12 @@ def restore_version(user_id: str, resume_id: str, version_id: str) -> Resume | N
         return None
     snapshot = version.snapshot_json
     with transaction.atomic():
-        # Apply snapshot to resume (main model)
         resume.target_position = (snapshot.get("targetPosition") or "").strip()
         resume.summary = (snapshot.get("summary") or "").strip()
         resume.theme_id = (snapshot.get("themeId") or "").strip() or resume.theme_id
         resume.theme_palette_id = normalize_optional(snapshot.get("themePaletteId"))
         resume.theme_accent_override = normalize_optional(snapshot.get("themeAccentOverride"))
         resume.theme_secondary_override = normalize_optional(snapshot.get("themeSecondaryOverride"))
-        # Contact
         contact = snapshot.get("contact") or {}
         ResumeContact.objects.update_or_create(
             resume=resume,
@@ -196,13 +186,11 @@ def restore_version(user_id: str, resume_id: str, version_id: str) -> Resume | N
                 "website": normalize_optional(contact.get("website")),
             },
         )
-        # Replace nested
         replace_experiences(resume, snapshot.get("experiences") or [])
         replace_educations(resume, snapshot.get("educations") or [])
         replace_skills(resume, snapshot.get("skills") or [])
         replace_languages(resume, snapshot.get("languages") or [])
         resume.save()
-        # Unset current, create new version from this snapshot
         ResumeVersion.objects.filter(resume_id=resume_id, is_current=True).update(is_current=False)
         next_num = (
             ResumeVersion.objects.filter(resume_id=resume_id).order_by("-version_number").values_list("version_number", flat=True).first()

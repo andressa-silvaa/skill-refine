@@ -265,7 +265,6 @@ def _token_windows(text: str) -> list[str]:
     windows: list[str] = []
     windows.append(folded.strip())
     windows.extend(parts)
-    # bigrams
     for i in range(len(parts) - 1):
         windows.append(f"{parts[i]} {parts[i + 1]}")
     return windows
@@ -278,7 +277,7 @@ def infer_domain_category(text: str, lang: str | None = None) -> dict[str, Any]:
       confidence: "low" | "medium" | "high"
       evidenceTokens: list[str] (matched snippets, max 8, no PII — generic keywords only)
     """
-    _ = lang  # reserved for future locale-specific boosting
+    _ = lang
     if not (text or "").strip():
         return {"domainCategory": "general", "confidence": "low", "evidenceTokens": []}
 
@@ -299,7 +298,6 @@ def infer_domain_category(text: str, lang: str | None = None) -> dict[str, Any]:
     if best_score == 0:
         return {"domainCategory": "general", "confidence": "low", "evidenceTokens": []}
 
-    # Second-best to detect ambiguity
     sorted_cats = sorted(scores.items(), key=lambda x: -x[1])
     second = sorted_cats[1][1] if len(sorted_cats) > 1 else 0
 

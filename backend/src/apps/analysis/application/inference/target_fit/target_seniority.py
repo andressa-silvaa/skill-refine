@@ -101,7 +101,6 @@ def compute_target_seniority(
 
     clamp_keys: list[str] = []
 
-    # Tier caps from fit score
     if fit_score < 40:
         max_ord = _ORDER["junior"]
         clamp_keys.append("analysis.targetFit.clampMaxJuniorScore")
@@ -111,7 +110,6 @@ def compute_target_seniority(
     else:
         max_ord = _ORDER["senior"]
 
-    # Evidence vetoes (conservative)
     if signals.experience_keyword_hits == 0 and not signals.portfolio_evidence:
         max_ord = min(max_ord, _ORDER["junior"])
         clamp_keys.append("analysis.targetFit.clampNoExperiencePortfolio")
@@ -129,14 +127,12 @@ def compute_target_seniority(
         max_ord = min(max_ord, _ORDER["junior"])
         clamp_keys.append("analysis.targetFit.clampSkillsGap")
 
-    # High general seniority with very low structural match → extra conservative
     if _ORDER[general_label] >= _ORDER["mid"] and fit_score < 35:
         max_ord = min(max_ord, _ORDER["junior"])
         clamp_keys.append("analysis.targetFit.clampHighGeneralLowFit")
 
     label = _clamp_order(general_label, max_ord)
 
-    # de-dup keys preserving order
     seen: set[str] = set()
     uniq_keys = []
     for k in clamp_keys:
@@ -165,7 +161,6 @@ def compute_career_switch(
         return {"detected": False, "reasonKey": ""}
 
     if rd == "general" or td == "general":
-        # weak domain signal — use fit only for mid+ with low score
         if g >= _ORDER["mid"] and fit_score < 45:
             return {"detected": True, "reasonKey": "analysis.careerSwitch.reasonLowFitMidPlus"}
         return {"detected": False, "reasonKey": ""}

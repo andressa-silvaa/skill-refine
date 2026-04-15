@@ -90,7 +90,6 @@ def resume_detail_prefetch():
 
 
 def resume_payload(resume: Resume) -> dict[str, Any]:
-    # Use prefetched relations when available (list view); otherwise triggers queries.
     tag_objs = list(resume.resumetag_set.all())
     tags = [t.label for t in tag_objs if _is_displayable_resume_list_label(t.label)]
     skill_objs = list(resume.resumeskill_set.all())[:5]
@@ -110,7 +109,6 @@ def resume_payload(resume: Resume) -> dict[str, Any]:
 
 
 def resume_detail_payload(resume: Resume) -> dict[str, Any]:
-    # Use prefetched/related data when available (detail view); avoids N+1.
     try:
         contact = resume.resumecontact
     except ResumeContact.DoesNotExist:

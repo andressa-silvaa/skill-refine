@@ -25,7 +25,6 @@ from apps.resumes.interfaces.api.service_utils import (
 
 
 def _repo_root() -> Path:
-    # .../backend/src/apps/resumes/management/commands/this.py → repo root
     return Path(__file__).resolve().parents[6]
 
 
@@ -76,7 +75,6 @@ class Command(BaseCommand):
 
         scenarios: list[tuple[str, dict]] = []
 
-        # 1 empty
         scenarios.append(
             (
                 "empty",
@@ -93,7 +91,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 2 junior
         scenarios.append(
             (
                 "junior",
@@ -119,7 +116,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 3 mid
         scenarios.append(
             (
                 "mid",
@@ -153,7 +149,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 4 senior explicit
         scenarios.append(
             (
                 "senior_explicit",
@@ -182,7 +177,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 5 migration no evidence (nurse -> dev)
         scenarios.append(
             (
                 "migration_no_evidence",
@@ -211,7 +205,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 6 migration with B evidence
         scenarios.append(
             (
                 "migration_with_evidence",
@@ -245,7 +238,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 7 aligned high tech
         scenarios.append(
             (
                 "aligned_high_tech",
@@ -278,7 +270,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 8 no target
         scenarios.append(
             (
                 "no_target_position",
@@ -304,7 +295,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 9 many skills little exp
         scenarios.append(
             (
                 "many_skills_little_exp",
@@ -335,7 +325,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 10 much exp few skills
         scenarios.append(
             (
                 "much_exp_few_skills",
@@ -369,7 +358,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 11 target + short job text
         scenarios.append(
             (
                 "target_with_short_job",
@@ -395,7 +383,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 12 EN summary
         scenarios.append(
             (
                 "summary_en",
@@ -423,7 +410,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 13 intern-like
         scenarios.append(
             (
                 "intern_like",
@@ -440,7 +426,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 14 marketing -> dev switch (weak)
         scenarios.append(
             (
                 "career_switch_marketing_dev",
@@ -466,7 +451,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 15 data aligned
         scenarios.append(
             (
                 "data_aligned",
@@ -492,7 +476,6 @@ class Command(BaseCommand):
                 },
             )
         )
-        # 16 sparse bullets senior dates
         scenarios.append(
             (
                 "senior_sparse_structured",

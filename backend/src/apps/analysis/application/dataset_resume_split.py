@@ -46,7 +46,6 @@ def assign_split_labels(resume_keys: list[str], *, seed: int, train_ratio: float
     n_val = int(round(n * val_ratio))
     n_train = max(0, min(n_train, n))
     n_val = max(0, min(n_val, n - n_train))
-    # remainder test
     splits: dict[str, str] = {}
     for i, k in enumerate(ordered):
         if i < n_train:

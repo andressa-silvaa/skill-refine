@@ -43,7 +43,6 @@ def derive_insights(
     summary_stripped = summary.strip()
     summary_words = len(summary_stripped.split())
 
-    # --- Improvements first (gaps), ordered by severity ---
     if rs and rs.experiences_count == 0:
         improvements.append(
             _item(
@@ -128,7 +127,6 @@ def derive_insights(
             _item("analysis.insights.improvements.ats_keywords", priority="medium", evidence={"section": "experience"})
         )
 
-    # --- Strengths (evidence required) ---
     if quality_flags.get("has_metrics"):
         strengths.append(_item("analysis.insights.strengths.has_metrics", evidence={"has_metrics": True}))
     if quality_flags.get("has_links"):
@@ -156,7 +154,6 @@ def derive_insights(
     if sections and (sections.education or "").strip() and rd and edu_present and education_aligned_with_target(rd):
         strengths.append(_item("analysis.insights.strengths.education_aligned", evidence={"education_present": True}))
 
-    # Dedupe improvement keys (keep first priority)
     seen: set[str] = set()
     deduped: list[dict[str, Any]] = []
     for imp in improvements:

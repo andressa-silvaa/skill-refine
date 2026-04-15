@@ -4,6 +4,8 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from shared.api.pagination import parse_history_limit_offset
+from shared.api.request_user import require_authenticated_user_id
 from shared.api.responses import (
     error_response as _error,
     field_error_response as _field_error,
@@ -23,42 +25,18 @@ from .services import (
 HISTORY_LIMIT_MAX = 100
 HISTORY_LIMIT_DEFAULT = 20
 
-# Latest/history must not be cached by proxies or browsers (resume edits change validity immediately).
+# no-store: resume edits change validity; proxies must not cache latest/history.
 _ANALYSIS_READ_HEADERS = {"Cache-Control": "no-store, max-age=0", "Pragma": "no-cache"}
 
 
-def _require_user_id(request):
-    user_id = getattr(request.user, "id", None)
-    if not user_id:
-        return None, _error("unauthorized", "Não autenticado.", status.HTTP_401_UNAUTHORIZED)
-    return str(user_id), None
-
-
 def _parse_history_pagination(request):
-    limit_param = request.query_params.get("limit", HISTORY_LIMIT_DEFAULT)
-    offset_param = request.query_params.get("offset", 0)
-    try:
-        limit = int(limit_param) if limit_param not in (None, "") else HISTORY_LIMIT_DEFAULT
-    except (TypeError, ValueError):
-        limit = HISTORY_LIMIT_DEFAULT
-    try:
-        offset = int(offset_param) if offset_param not in (None, "") else 0
-    except (TypeError, ValueError):
-        offset = 0
-
-    if limit < 1 or limit > HISTORY_LIMIT_MAX:
-        return None, _error(
-            "validation_error",
-            f"Parâmetro limit deve ser entre 1 e {HISTORY_LIMIT_MAX}.",
-            status.HTTP_400_BAD_REQUEST,
-        )
-    if offset < 0:
-        return None, _error(
-            "validation_error",
-            "Parâmetro offset deve ser maior ou igual a 0.",
-            status.HTTP_400_BAD_REQUEST,
-        )
-    return (limit, offset), None
+    return parse_history_limit_offset(
+        limit_param=request.query_params.get("limit", HISTORY_LIMIT_DEFAULT),
+        offset_param=request.query_params.get("offset", 0),
+        limit_default=HISTORY_LIMIT_DEFAULT,
+        offset_default=0,
+        limit_max=HISTORY_LIMIT_MAX,
+    )
 
 
 class RunAnalysisView(APIView):
@@ -66,7 +44,7 @@ class RunAnalysisView(APIView):
     throttle_scope = "analysis"
 
     def post(self, request):
-        user_id, auth_error = _require_user_id(request)
+        user_id, auth_error = require_authenticated_user_id(request)
         if auth_error:
             return auth_error
 
@@ -113,7 +91,7 @@ class LatestAnalysisView(APIView):
     throttle_scope = "analysis"
 
     def get(self, request):
-        user_id, auth_error = _require_user_id(request)
+        user_id, auth_error = require_authenticated_user_id(request)
         if auth_error:
             return auth_error
 
@@ -164,7 +142,7 @@ class HistoryAnalysisView(APIView):
     throttle_scope = "analysis"
 
     def get(self, request):
-        user_id, auth_error = _require_user_id(request)
+        user_id, auth_error = require_authenticated_user_id(request)
         if auth_error:
             return auth_error
 

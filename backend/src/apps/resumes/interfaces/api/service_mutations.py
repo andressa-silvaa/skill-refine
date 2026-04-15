@@ -141,7 +141,6 @@ def update_resume_draft(user_id: str, resume_id: str, data: dict[str, Any]) -> R
         if "languages" in data:
             replace_languages(resume, data.get("languages") or [])
 
-        # After nested rows change, persist resume so updated_at reflects full edit (invalidates AI analysis).
         resume.save()
 
     return resume

@@ -24,7 +24,6 @@ class ResumeListPaginationTest(TestCase):
         self.client.force_authenticate(user=self.user)
         self.url = "/resumes/api/resumes"
 
-        # Ensure at least 3 resumes for pagination tests
         existing = list(
             Resume.objects.filter(user_id=self.user.id, deleted_at__isnull=True).order_by("-updated_at")
         )
@@ -43,7 +42,6 @@ class ResumeListPaginationTest(TestCase):
         data = resp.json()
         self.assertIn("items", data)
         self.assertIsInstance(data["items"], list)
-        # Must NOT include pagination metadata when no params (compat)
         self.assertNotIn("limit", data)
         self.assertNotIn("offset", data)
         self.assertNotIn("total", data)

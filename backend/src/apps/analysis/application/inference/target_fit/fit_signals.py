@@ -69,7 +69,6 @@ def _extract_terms(raw: str, lang: str, *, max_terms: int = 28) -> list[str]:
     folded = _fold(raw)
     folded = re.sub(r"[^\w\s\-/+]", " ", folded, flags=re.UNICODE)
     tokens = [t for t in re.split(r"\s+", folded) if len(t) >= 3 and t not in sw]
-    # de-dup preserving order
     seen: set[str] = set()
     out: list[str] = []
     for t in tokens:
@@ -206,7 +205,6 @@ def extract_target_fit_signals(
         terms = terms[:28]
 
     if not terms and target_position:
-        # at least title words
         terms = _extract_terms(target_position, lang, max_terms=12)
 
     corpus = _fold(_resume_corpus(resume_data))
@@ -225,7 +223,6 @@ def extract_target_fit_signals(
         else:
             missing.append(term[:64])
 
-    # skills: how many required terms appear inside any skill string
     sk_hit = 0
     sk_matched: list[str] = []
     for term in terms:
@@ -236,7 +233,6 @@ def extract_target_fit_signals(
                     sk_matched.append(term[:64])
                 break
 
-    # education alignment
     edu_align = "weak"
     for term in terms[:15]:
         if term and term_matches_folded_corpus(term, edu_corpus):

@@ -80,7 +80,6 @@ def _metadata_supports_task(metadata: dict, task: str) -> bool:
         return True
     if meta_task.startswith(f"{requested}-"):
         return True
-    # Same 4-class HF head as core seniority; metadata may say text_seniority for TCC/docs.
     if requested == "seniority" and meta_task == "text_seniority":
         return True
     return False
@@ -206,7 +205,6 @@ def get_model_bundle(
                         if not allow_fallback:
                             raise
 
-            # TF-IDF fallback (legacy)
             tfidf_path = config.get("tfidf_model_path") or Path(config.get("model_dir", "")) / "tfidf_logreg_seniority.pkl"
             tfidf_path = Path(tfidf_path) if tfidf_path else Path()
             if tfidf_path.exists():
@@ -219,7 +217,6 @@ def get_model_bundle(
                 except Exception as e:
                     logger.warning("Failed to load TF-IDF model: %s", e)
 
-            # Heuristics fallback
             if not allow_fallback:
                 raise RuntimeError(
                     "Analysis model not available and heuristics fallback disabled. "

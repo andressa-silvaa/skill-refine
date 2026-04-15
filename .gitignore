@@ -17,13 +17,21 @@ coverage.xml
 .venv_ml/
 venv/
 ENV/
+env/
 
 # Environment files (12-factor)
 .env
 .env.*
+env_backup
+env_temp
+backend/env_backup
+backend/env_temp
+*.env.backup
+*.env.temp
 
 # Django
 *.sqlite3
+db.sqlite3
 staticfiles/
 media/
 
@@ -45,13 +53,15 @@ client/coverage/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 .eslintcache
-.turbo
+.turbo/
 dist/
+build/
+.next/
 
 # ----------------------------
-# ML — caches, runs e pesos (evita estourar limite do GitHub gratuito)
-# Pesos já versionados permanecem até remoção explícita com git rm --cached
+# ML — caches, runs e pesos
 # ----------------------------
 wandb/
 **/wandb/
@@ -60,12 +70,17 @@ ml/**/outputs/
 ml/**/checkpoints/
 ml/**/runs/
 **/.cache/
-.pytest_cache/
+.cache/
+
+# Modelos e artefatos pesados
+ml/models/
 *.pt
 *.pth
 *.safetensors
 *.onnx
 *.h5
+
+# Dados e artefatos tabulares
 *.parquet
 *.arrow
 *.npz
@@ -76,6 +91,3 @@ ml/**/runs/
 *.log
 tmp/
 temp/
-.cache/
-
-

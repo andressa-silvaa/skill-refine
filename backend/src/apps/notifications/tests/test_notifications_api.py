@@ -84,3 +84,27 @@ class NotificationsApiTestCase(TestCase):
         res = client.post("/notifications/read-all/")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(Notification.objects.filter(user_id=user.id, is_read=False).count(), 0)
+
+    def test_list_invalid_limit_returns_400(self):
+        user, _ = User.objects.get_or_create(
+            email="notif-test-bad-limit@x.com",
+            defaults={"full_name": "U", "status": "active"},
+        )
+        client = APIClient()
+        client.force_authenticate(user=user)
+        res = client.get("/notifications/", {"limit": "not-a-number"})
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_list_negative_offset_clamps_to_zero(self):
+        user, _ = User.objects.get_or_create(
+            email="notif-test-neg-offset@x.com",
+            defaults={"full_name": "U", "status": "active"},
+        )
+        create_notification(str(user.id), NotificationType.SYSTEM, "notifications.system", {})
+        client = APIClient()
+        client.force_authenticate(user=user)
+        res = client.get("/notifications/", {"limit": "10", "offset": "-5"})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        body = res.json()
+        self.assertEqual(body["offset"], 0)
+        self.assertEqual(body["limit"], 10)
