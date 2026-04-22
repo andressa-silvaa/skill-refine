@@ -129,6 +129,16 @@ def login_with_password(
         )
         raise InvalidCredentials()
 
+    if password_hasher.needs_rehash(stored_hash):
+        try:
+            passwords.set_password(
+                user_id=str(user.id),
+                password_hash=password_hasher.hash(password),
+                when=now_utc(),
+            )
+        except Exception:
+            pass
+
     if not getattr(user, "email_verified_at", None):
         audit.log(
             action="accounts.login_failed",

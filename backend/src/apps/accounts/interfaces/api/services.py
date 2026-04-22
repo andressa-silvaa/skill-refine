@@ -28,7 +28,6 @@ from apps.accounts.domain.errors import (
 )
 from apps.accounts.infrastructure.email_sender import DjangoEmailSender
 from apps.accounts.infrastructure.google_verifier import GoogleIdTokenVerifier
-from apps.accounts.infrastructure.password_hasher import Argon2PasswordHasher
 from apps.accounts.infrastructure.repositories import (
     OrmAuthIdentityRepository,
     OrmEmailConfirmationRepository,
@@ -39,6 +38,7 @@ from apps.accounts.infrastructure.repositories import (
 )
 from apps.audit.infrastructure.logger import OrmAuditLogger
 from shared.auth.jwt import now_utc
+from shared.auth.pepper_password_hasher import build_default_password_hasher
 
 
 class WrongCurrentPassword(Exception):
@@ -67,7 +67,7 @@ def register_service(validated_data: dict, meta: dict) -> tuple[object, bool]:
     users = OrmUserRepository()
     passwords = OrmPasswordRepository()
     identities = OrmAuthIdentityRepository()
-    hasher = Argon2PasswordHasher()
+    hasher = build_default_password_hasher()
     audit = OrmAuditLogger()
 
     user = register_user(
@@ -116,7 +116,7 @@ def login_service(validated_data: dict, meta: dict) -> tuple[object, str]:
     passwords = OrmPasswordRepository()
     identities = OrmAuthIdentityRepository()
     sessions = OrmSessionRepository()
-    hasher = Argon2PasswordHasher()
+    hasher = build_default_password_hasher()
     audit = OrmAuditLogger()
 
     result, refresh_cookie = login_with_password(
@@ -239,7 +239,7 @@ def password_reset_confirm_service(
     """Confirm new password after reset."""
     resets = OrmPasswordResetRepository()
     passwords = OrmPasswordRepository()
-    hasher = Argon2PasswordHasher()
+    hasher = build_default_password_hasher()
     audit = OrmAuditLogger()
 
     confirm_new_password(
@@ -297,7 +297,7 @@ def password_change_service(
 ) -> None:
     """Change password for authenticated user. Raises WrongCurrentPassword if current password wrong."""
     passwords = OrmPasswordRepository()
-    hasher = Argon2PasswordHasher()
+    hasher = build_default_password_hasher()
     audit = OrmAuditLogger()
 
     stored_hash = passwords.get_password_hash(user_id=user_id)

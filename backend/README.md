@@ -41,6 +41,7 @@ Edit **`backend/.env`** (or a `.env` at repo root if your setup loads it — see
 | `DJANGO_SECRET_KEY` | Django secret | strong random string |
 | `JWT_SECRET` | Access JWT signing | strong random string |
 | `REFRESH_TOKEN_PEPPER` | Refresh token hashing | strong random string |
+| `PASSWORD_HASH_PEPPER` | Server-side pepper for password hashing (**required in production**) | strong random string |
 | `FRONTEND_URL` | CORS + PDF generation (must reach the SPA) | `http://localhost:3000` |
 
 Optional: `CELERY_BROKER_URL`, `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET`, email (`RESEND_API_KEY`, SMTP), `CLOUDINARY_URL`, etc. Full list in `env.example`.
@@ -77,6 +78,27 @@ If the broker is unavailable, some analysis paths may fall back to in-process be
 ### 7. PDF export
 
 Set `FRONTEND_URL` so the backend can open the resume preview (e.g. `http://host.docker.internal:3000` when Django runs in Docker on Windows).
+
+## Password hashing: salt vs pepper
+
+Passwords are hashed with **Argon2id** and a per-record **salt** (stored with
+the hash), plus a process-wide **pepper** mixed in via HMAC-SHA256 **before**
+the KDF runs (see `shared/auth/pepper_password_hasher.py`).
+
+- **Salt** (in the DB) prevents rainbow tables and makes identical passwords
+  produce different hashes.
+- **Pepper** (in the env only, `PASSWORD_HASH_PEPPER`) mitigates the
+  "DB-leaked + offline cracking" threat: an attacker with the database dump
+  still needs the application environment secret to brute-force hashes.
+
+Because the pepper never touches the database:
+
+- It **must be set** when `DJANGO_DEBUG=0`. The app will refuse to start
+  otherwise (fail fast).
+- Rotating it invalidates every existing password hash. Pair any rotation with
+  a forced password reset for all users.
+- Existing users with legacy (un-peppered) hashes keep logging in normally;
+  their hash is upgraded transparently on the first successful login.
 
 ## Tests
 
