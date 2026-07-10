@@ -28,6 +28,7 @@ from apps.accounts.domain.errors import (
 )
 from apps.accounts.infrastructure.email_sender import DjangoEmailSender
 from apps.accounts.infrastructure.google_verifier import GoogleIdTokenVerifier
+from apps.accounts.infrastructure.password_hasher import Argon2PasswordHasher
 from apps.accounts.infrastructure.repositories import (
     OrmAuthIdentityRepository,
     OrmEmailConfirmationRepository,
@@ -38,11 +39,15 @@ from apps.accounts.infrastructure.repositories import (
 )
 from apps.audit.infrastructure.logger import OrmAuditLogger
 from shared.auth.jwt import now_utc
-from shared.auth.pepper_password_hasher import build_default_password_hasher
+from shared.utils.normalization import normalize_password
 
 
 class WrongCurrentPassword(Exception):
     """Raised when current password does not match (password change flow)."""
+
+
+def build_default_password_hasher() -> Argon2PasswordHasher:
+    return Argon2PasswordHasher()
 
 
 def get_cfg() -> AccountsAuthConfig:
@@ -301,7 +306,7 @@ def password_change_service(
     audit = OrmAuditLogger()
 
     stored_hash = passwords.get_password_hash(user_id=user_id)
-    if not stored_hash or not hasher.verify(stored_hash, current_password):
+    if not stored_hash or not hasher.verify(stored_hash, normalize_password(current_password)):
         audit.log(
             action="accounts.password_change_failed",
             actor_user_id=user_id,
@@ -313,7 +318,7 @@ def password_change_service(
         raise WrongCurrentPassword()
 
     now = now_utc()
-    password_hash = hasher.hash(new_password)
+    password_hash = hasher.hash(normalize_password(new_password))
     passwords.set_password(user_id=user_id, password_hash=password_hash, when=now)
     audit.log(
         action="accounts.password_changed",

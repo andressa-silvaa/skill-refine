@@ -1,8 +1,6 @@
 """JWT, refresh tokens, password reset, email confirmation, OAuth."""
 from __future__ import annotations
 
-from shared.auth.pepper_password_hasher import resolve_pepper_or_raise
-
 from .base import DEBUG, SECRET_KEY, env
 
 JWT_SECRET = env.str("JWT_SECRET", default=SECRET_KEY)
@@ -22,11 +20,6 @@ PASSWORD_RESET_CODE_PEPPER = env.str("PASSWORD_RESET_CODE_PEPPER", default=SECRE
 
 EMAIL_CONFIRMATION_TOKEN_TTL_HOURS = env.int("EMAIL_CONFIRMATION_TOKEN_TTL_HOURS", default=24)
 EMAIL_CONFIRMATION_TOKEN_PEPPER = env.str("EMAIL_CONFIRMATION_TOKEN_PEPPER", default=SECRET_KEY)
-
-PASSWORD_HASH_PEPPER = resolve_pepper_or_raise(
-    debug=DEBUG,
-    raw=env.str("PASSWORD_HASH_PEPPER", default=""),
-)
 
 FRONTEND_URL = env.str("FRONTEND_URL", default="http://localhost:3000")
 BACKEND_URL = env.str("BACKEND_URL", default="")

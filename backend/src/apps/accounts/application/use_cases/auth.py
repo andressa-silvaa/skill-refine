@@ -26,7 +26,7 @@ from apps.accounts.domain.ports import (
 )
 from apps.audit.domain.ports import AuditLogger
 from shared.auth.jwt import JwtConfig, encode_access_token, now_utc
-from shared.utils.normalization import normalize_email
+from shared.utils.normalization import normalize_email, normalize_password
 
 
 def register_user(
@@ -54,7 +54,7 @@ def register_user(
         raise EmailAlreadyInUse()
 
     user = users.create_user(email=email_n, full_name=full_name, birth_date=birth_date)
-    password_hash = password_hasher.hash(password)
+    password_hash = password_hasher.hash(normalize_password(password))
     now = now_utc()
     passwords.set_password(user_id=str(user.id), password_hash=password_hash, when=now)
     identities.ensure_password_identity(user_id=str(user.id), when=now)
@@ -117,8 +117,9 @@ def login_with_password(
         )
         raise UserDisabled()
 
+    password_n = normalize_password(password)
     stored_hash = passwords.get_password_hash(user_id=str(user.id))
-    if not stored_hash or not password_hasher.verify(stored_hash, password):
+    if not stored_hash or not password_hasher.verify(stored_hash, password_n):
         audit.log(
             action="accounts.login_failed",
             actor_user_id=str(user.id),
@@ -133,7 +134,7 @@ def login_with_password(
         try:
             passwords.set_password(
                 user_id=str(user.id),
-                password_hash=password_hasher.hash(password),
+                password_hash=password_hasher.hash(password_n),
                 when=now_utc(),
             )
         except Exception:

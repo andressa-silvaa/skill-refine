@@ -7,8 +7,6 @@ from apps.accounts.domain.ports import PasswordHasher as PasswordHasherPort
 
 
 class Argon2PasswordHasher(PasswordHasherPort):
-    """Plain Argon2id hasher (no pepper). Kept for legacy hashes."""
-
     def __init__(self) -> None:
         self._hasher = PasswordHasher()
 

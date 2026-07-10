@@ -1,9 +1,10 @@
-"""Integration tests for the rehash-on-login migration from legacy to peppered hashes."""
+"""Integration tests for the rehash-on-login upgrade when Argon2id params change."""
 from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from django.test import TestCase, override_settings
+from argon2 import PasswordHasher as _Argon2PasswordHasher
+from django.test import TestCase
 
 from apps.accounts.application.use_cases import (
     AccountsAuthConfig,
@@ -18,13 +19,9 @@ from apps.accounts.infrastructure.repositories import (
     OrmUserRepository,
 )
 from apps.audit.infrastructure.logger import OrmAuditLogger
-from shared.auth.pepper_password_hasher import (
-    PEPPER_PREFIX,
-    PepperedArgon2PasswordHasher,
-)
+from shared.utils.normalization import normalize_password
 
 PASSWORD = "MyStrong!Pass123"
-PEPPER = "unit-test-pepper"
 
 
 def _build_cfg() -> AccountsAuthConfig:
@@ -44,7 +41,6 @@ def _build_cfg() -> AccountsAuthConfig:
     )
 
 
-@override_settings(PASSWORD_HASH_PEPPER=PEPPER)
 class LoginRehashTests(TestCase):
     def setUp(self) -> None:
         self.user = User.objects.create(
@@ -53,23 +49,23 @@ class LoginRehashTests(TestCase):
             status="active",
             email_verified_at=datetime.now(UTC),
         )
-        legacy_hash = Argon2PasswordHasher().hash(PASSWORD)
+        weak = _Argon2PasswordHasher(time_cost=1, memory_cost=8, parallelism=1)
+        outdated_hash = weak.hash(normalize_password(PASSWORD))
         UserPassword.objects.create(
             user=self.user,
-            password_hash=legacy_hash,
+            password_hash=outdated_hash,
             password_updated_at=datetime.now(UTC),
         )
-        self.legacy_hash = legacy_hash
+        self.outdated_hash = outdated_hash
 
     def _login(self, password: str):
-        hasher = PepperedArgon2PasswordHasher(pepper=PEPPER)
         return login_with_password(
             cfg=_build_cfg(),
             users=OrmUserRepository(),
             passwords=OrmPasswordRepository(),
             identities=OrmAuthIdentityRepository(),
             sessions=OrmSessionRepository(),
-            password_hasher=hasher,
+            password_hasher=Argon2PasswordHasher(),
             audit=OrmAuditLogger(),
             email=self.user.email,
             password=password,
@@ -77,17 +73,17 @@ class LoginRehashTests(TestCase):
             user_agent="test",
         )
 
-    def test_legacy_hash_login_succeeds_and_rehashes_to_peppered(self) -> None:
+    def test_outdated_hash_login_succeeds_and_rehashes(self) -> None:
         result, refresh_cookie = self._login(PASSWORD)
 
         self.assertTrue(result.access_token)
         self.assertIn(".", refresh_cookie)
 
         updated = UserPassword.objects.get(user=self.user).password_hash
-        self.assertNotEqual(updated, self.legacy_hash)
-        self.assertTrue(updated.startswith(PEPPER_PREFIX))
+        self.assertNotEqual(updated, self.outdated_hash)
+        self.assertFalse(Argon2PasswordHasher().needs_rehash(updated))
         self.assertTrue(
-            PepperedArgon2PasswordHasher(pepper=PEPPER).verify(updated, PASSWORD)
+            Argon2PasswordHasher().verify(updated, normalize_password(PASSWORD))
         )
 
     def test_wrong_password_does_not_rehash(self) -> None:
@@ -97,7 +93,7 @@ class LoginRehashTests(TestCase):
             self._login(PASSWORD + "x")
 
         stored = UserPassword.objects.get(user=self.user).password_hash
-        self.assertEqual(stored, self.legacy_hash)
+        self.assertEqual(stored, self.outdated_hash)
 
     def test_second_login_does_not_rehash_again(self) -> None:
         self._login(PASSWORD)

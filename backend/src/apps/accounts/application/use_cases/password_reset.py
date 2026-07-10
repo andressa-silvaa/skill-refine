@@ -26,7 +26,7 @@ from apps.accounts.domain.ports import (
 )
 from apps.audit.domain.ports import AuditLogger
 from shared.auth.jwt import now_utc
-from shared.utils.normalization import normalize_email
+from shared.utils.normalization import normalize_email, normalize_password
 
 
 def request_password_reset(
@@ -215,7 +215,7 @@ def confirm_new_password(
     if not hmac.compare_digest(expected, provided):
         raise PasswordResetGrantInvalid()
 
-    password_hash = password_hasher.hash(new_password)
+    password_hash = password_hasher.hash(normalize_password(new_password))
     passwords.set_password(user_id=str(req.user_id), password_hash=password_hash, when=now)
     password_resets.consume(request_id=str(req.id), when=now)
     audit.log(
