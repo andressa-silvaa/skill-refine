@@ -7,7 +7,7 @@ import re
 from typing import Any
 
 from ..completeness import assess_completeness
-from ..predictors.quality import LEADERSHIP_WORDS, LINK_PATTERN
+from ..tasks.quality.predict import LEADERSHIP_WORDS, LINK_PATTERN
 from ..resume_signals import max_years_mentioned_in_work_context
 from ..types import ResumeSections
 from .date_math import experience_intervals, merge_intervals_months, months_in_current_role

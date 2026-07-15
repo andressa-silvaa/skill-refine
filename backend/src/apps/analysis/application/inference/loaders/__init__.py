@@ -1,1 +1,1 @@
-"""Heavy ML artifact loaders (singletons per process)."""
+"""Compatibility package — prefer ``inference.tasks.target_fit.loader_ml``."""

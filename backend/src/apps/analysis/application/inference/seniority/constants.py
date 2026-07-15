@@ -1,8 +1,2 @@
-"""Thresholds for ML gating and softmax confidence."""
-
-SENIORITY_POLICY_VERSION = "v1.0"
-
-MIN_COMPLETENESS_FOR_ML = 52
-MIN_TOKENS_FOR_ML = 48
-ML_SOFTMAX_GAP_MIN = 0.12
-ML_SOFTMAX_GAP_STRONG = 0.28
+"""Compatibility shim — prefer ``inference.tasks.seniority.constants``."""
+from apps.analysis.application.inference.tasks.seniority.constants import *  # noqa: F401,F403

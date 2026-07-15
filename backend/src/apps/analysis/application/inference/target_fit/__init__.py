@@ -1,13 +1,14 @@
-"""Target role fit: domain inference, structural signals, conservative target seniority."""
+"""Compatibility shim — prefer ``inference.tasks.target_fit``."""
 
-from .domain_inference import infer_domain_category
-from .fit_signals import TargetFitSignals, extract_target_fit_signals
-from .target_seniority import (
+from apps.analysis.application.inference.tasks.target_fit import (  # noqa: F401
     TARGET_FIT_POLICY_VERSION,
+    TargetFitSignals,
     compute_career_switch,
     compute_target_fit_policy,
     compute_target_seniority,
+    extract_target_fit_signals,
     heuristic_target_fit_score,
+    infer_domain_category,
 )
 
 __all__ = [
