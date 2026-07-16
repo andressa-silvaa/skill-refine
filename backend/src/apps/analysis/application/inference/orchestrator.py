@@ -95,43 +95,52 @@ def _resolve_seniority(
 
     language_mode = "multi" if config["multilang"] else "mono"
     signals_bundle = get_signals_ml_bundle(config)
-    final_label = base_label
-    seniority_confidence = base_confidence
-    seniority_evidence = list(base_evidence)
-    ml_status = "skipped_no_model"
+    signals_bundle_used: dict | None = None
 
-    if signals_bundle:
+    def _rule_policy_result(*, ml_status: str, extra_evidence: list | None = None) -> CascadeResult:
+        fl, ve = clamp_seniority_vetoes(base_label, rs)
+        evidence = list(base_evidence) + list(extra_evidence or []) + ve
+        return CascadeResult(
+            value=fl,
+            provider="rule_policy",
+            status="applied",
+            evidence=evidence,
+            extra={"confidence": base_confidence, "ml_status": ml_status},
+        )
+
+    def _step_signals_ml() -> CascadeResult | None:
+        nonlocal signals_bundle_used
+        if not signals_bundle:
+            return None
         sm_cfg = get_signals_ml_thresholds(settings, bundle_metadata=signals_bundle.get("_metadata"))
         ml_lab, ml_conf, _probs, ml_ev, st = signals_ml_predict(signals_bundle, rs, sm_cfg)
         if st == "applied":
             merged_evidence = list(base_evidence) + list(ml_ev)
             fl, veto_ev = clamp_seniority_vetoes(ml_lab, rs)
             merged_evidence.extend(veto_ev)
-            final_label = fl
-            seniority_confidence = ml_conf
-            seniority_evidence = merged_evidence
-            ml_status = "applied_signals_ml"
-        elif st == "error":
-            signals_bundle = None
-            ml_status = "signals_ml_error"
-        else:
-            merged_evidence = list(base_evidence) + list(ml_ev)
-            fl, ve = clamp_seniority_vetoes(base_label, rs)
-            merged_evidence.extend(ve)
-            final_label = fl
-            seniority_confidence = base_confidence
-            seniority_evidence = merged_evidence
-            ml_status = f"skipped_signals_ml:{st}"
+            signals_bundle_used = signals_bundle
+            return CascadeResult(
+                value=fl,
+                provider="signals_ml",
+                status="applied",
+                evidence=merged_evidence,
+                extra={"confidence": ml_conf, "ml_status": "applied_signals_ml"},
+            )
+        if st == "error":
+            return _rule_policy_result(ml_status="signals_ml_error")
+        return _rule_policy_result(ml_status=f"skipped_signals_ml:{st}", extra_evidence=list(ml_ev))
 
-    if signals_bundle is None:
-        fl, ve = clamp_seniority_vetoes(base_label, rs)
-        final_label = fl
-        seniority_confidence = base_confidence
-        seniority_evidence = list(base_evidence) + ve
-        if ml_status == "skipped_no_model":
-            ml_status = "skipped_no_signals_ml_bundle"
+    cascade = run_cascade(
+        [_step_signals_ml],
+        default=_rule_policy_result(ml_status="skipped_no_signals_ml_bundle"),
+    )
 
-    if ml_status == "applied_signals_ml" and signals_bundle is not None:
+    final_label = cascade.value
+    seniority_confidence = cascade.extra.get("confidence", base_confidence)
+    seniority_evidence = list(cascade.evidence or [])
+    ml_status = cascade.extra.get("ml_status", "skipped_no_model")
+
+    if ml_status == "applied_signals_ml" and signals_bundle_used is not None:
         meta_d = signals_ml_metadata_for_extra(signals_bundle)
         model_bundle = (
             None,

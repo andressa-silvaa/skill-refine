@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 
 from apps.analysis.application.inference.resume_mapper import resume_to_text
 from apps.analysis.application.inference.signals import extract_resume_signals
-from apps.analysis.application.inference.seniority.rule_based import rule_based_seniority
+from apps.analysis.application.inference.tasks.seniority.rule_based import rule_based_seniority
 from apps.analysis.application.seniority_persist import (
     SENIORITY_POLICY_VERSION,
     build_seniority_evidence_json,

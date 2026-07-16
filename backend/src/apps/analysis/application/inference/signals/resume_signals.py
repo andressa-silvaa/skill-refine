@@ -70,7 +70,9 @@ def extract_resume_signals(
     total_months = merge_intervals_months(intervals)
     work_years = max_years_mentioned_in_work_context(resume_data)
     text_months = min(120, work_years * 12) if work_years and experiences_count > 0 else 0
-    effective_months = max(total_months, text_months)
+    # Text-derived "N anos" mentions are noisy (may refer to study/hobby time, not
+    # tenure) — only trusted as a floor when structured dates yield nothing at all.
+    effective_months = total_months if total_months > 0 else text_months
     has_current = any(bool(e.get("isCurrent")) for e in experiences)
     months_current = months_in_current_role(experiences)
 

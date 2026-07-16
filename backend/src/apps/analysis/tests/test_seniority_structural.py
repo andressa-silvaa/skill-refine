@@ -4,7 +4,7 @@ from __future__ import annotations
 from django.test import TestCase
 
 from apps.analysis.application.inference.resume_mapper import resume_to_text
-from apps.analysis.application.inference.seniority.rule_based import rule_based_seniority
+from apps.analysis.application.inference.tasks.seniority.rule_based import rule_based_seniority
 from apps.analysis.application.inference.signals import extract_resume_signals
 
 
@@ -101,7 +101,7 @@ class MlAdjustStubTest(TestCase):
     """ml_adjust without loading torch — bundle None."""
 
     def test_skips_when_no_model(self) -> None:
-        from apps.analysis.application.inference.seniority.ml_adjust import ml_adjust_seniority
+        from apps.analysis.application.inference.tasks.seniority.ml_adjust import ml_adjust_seniority
         from apps.analysis.application.inference.signals.types import ResumeSignals
 
         s = ResumeSignals(

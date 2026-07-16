@@ -22,7 +22,7 @@ from apps.analysis.application.inference.loader_signals_model import (
     signals_ml_metadata_for_extra,
 )
 from apps.analysis.application.inference.orchestrator import analyze_resume
-from apps.analysis.application.inference.seniority.signals_ml_predict import signals_ml_predict
+from apps.analysis.application.inference.tasks.seniority.signals_ml_predict import signals_ml_predict
 from apps.analysis.application.inference.signals.types import ResumeSignals
 
 

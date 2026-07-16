@@ -76,8 +76,8 @@ def _has_senior_evidence(rs: Any, cfg: dict[str, Any]) -> bool:
 
 def main() -> int:
     _bootstrap_backend_src()
-    from apps.analysis.application.inference.seniority.rule_based import clamp_seniority_vetoes
-    from apps.analysis.application.inference.seniority.signals_ml_policy import apply_signals_ml_gates, raw_argmax_label
+    from apps.analysis.application.inference.tasks.seniority.rule_based import clamp_seniority_vetoes
+    from apps.analysis.application.inference.tasks.seniority.signals_ml_policy import apply_signals_ml_gates, raw_argmax_label
     from signals_features import feature_dict_from_signals
 
     ap = argparse.ArgumentParser()

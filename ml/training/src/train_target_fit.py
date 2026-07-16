@@ -2,7 +2,7 @@
 """
 Train Ridge regressor on target-fit JSONL (schema 1.0).
 
-Feature vector must match ``apps.analysis.application.inference.target_fit.ml_feature_row``.
+Feature vector must match ``apps.analysis.application.inference.tasks.target_fit.ml_feature_row``.
 
   python ml/training/src/train_target_fit.py \\
     --train_jsonl ml/data/splits/target_fit_v1/train.jsonl \\
@@ -31,13 +31,13 @@ def _bootstrap_backend_src() -> None:
 
 
 def _row_to_x(row: dict) -> list[float]:
-    from apps.analysis.application.inference.target_fit.ml_feature_row import target_fit_feature_row_from_jsonl
+    from apps.analysis.application.inference.tasks.target_fit.ml_feature_row import target_fit_feature_row_from_jsonl
 
     return target_fit_feature_row_from_jsonl(row)
 
 
 def _feature_names() -> list[str]:
-    from apps.analysis.application.inference.target_fit.ml_feature_row import target_fit_feature_names
+    from apps.analysis.application.inference.tasks.target_fit.ml_feature_row import target_fit_feature_names
 
     return target_fit_feature_names()
 

@@ -28,7 +28,7 @@ def _bootstrap_backend_src() -> None:
 
 
 def _row_to_x(row: dict) -> list[float]:
-    from apps.analysis.application.inference.target_fit.ml_feature_row import target_fit_feature_row_from_jsonl
+    from apps.analysis.application.inference.tasks.target_fit.ml_feature_row import target_fit_feature_row_from_jsonl
 
     return target_fit_feature_row_from_jsonl(row)
 

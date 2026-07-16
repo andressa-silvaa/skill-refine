@@ -17,8 +17,8 @@ from apps.analysis.application.inference.loaders.loader_target_fit_model import 
     predict_target_fit_ml_score,
 )
 from apps.analysis.application.inference.orchestrator import analyze_resume
-from apps.analysis.application.inference.target_fit.fit_signals import TargetFitSignals
-from apps.analysis.application.inference.target_fit.ml_feature_row import (
+from apps.analysis.application.inference.tasks.target_fit.fit_signals import TargetFitSignals
+from apps.analysis.application.inference.tasks.target_fit.ml_feature_row import (
     target_fit_feature_names,
     target_fit_feature_row,
 )

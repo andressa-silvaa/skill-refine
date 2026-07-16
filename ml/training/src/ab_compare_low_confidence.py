@@ -95,8 +95,8 @@ def _row_to_resume_signals(sig: dict[str, Any], language: str) -> Any:
 def main() -> int:
     _bootstrap_backend_src()
     from apps.analysis.application.inference.loader_signals_model import load_signals_ml_bundle
-    from apps.analysis.application.inference.seniority.rule_based import clamp_seniority_vetoes, rule_based_seniority
-    from apps.analysis.application.inference.seniority.signals_ml_predict import signals_ml_predict
+    from apps.analysis.application.inference.tasks.seniority.rule_based import clamp_seniority_vetoes, rule_based_seniority
+    from apps.analysis.application.inference.tasks.seniority.signals_ml_predict import signals_ml_predict
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--in_jsonl", required=True)

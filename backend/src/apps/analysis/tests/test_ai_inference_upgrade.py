@@ -8,8 +8,8 @@ from django.test import TestCase, override_settings
 from apps.analysis.application.inference.orchestrator import analyze_resume
 from apps.analysis.application.inference.text_sanitizer import resume_to_text_sanitized
 from apps.analysis.application.inference.loader import _metadata_supports_task
-from apps.analysis.application.inference.text_seniority.fuse_seniority import fuse_seniority
-from apps.analysis.application.inference.text_seniority.predict import predict_text_seniority
+from apps.analysis.application.inference.tasks.seniority.text.fuse_seniority import fuse_seniority
+from apps.analysis.application.inference.tasks.seniority.text.predict import predict_text_seniority
 
 
 class TextSanitizerTests(TestCase):

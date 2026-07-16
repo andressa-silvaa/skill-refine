@@ -42,11 +42,11 @@ def main() -> int:
 
     from django.conf import settings
 
-    from apps.analysis.application.inference.text_seniority.loader_text_seniority_model import (
+    from apps.analysis.application.inference.tasks.seniority.text.loader_text_seniority_model import (
         clear_text_seniority_cache,
         get_text_seniority_bundle,
     )
-    from apps.analysis.application.inference.text_seniority.predict import predict_text_seniority
+    from apps.analysis.application.inference.tasks.seniority.text.predict import predict_text_seniority
 
     clear_text_seniority_cache()
     bundle = get_text_seniority_bundle(settings)

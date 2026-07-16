@@ -24,9 +24,9 @@ from apps.analysis.application.inference.resume_signals import (
 )
 from apps.analysis.application.inference import orchestrator as orchestrator_mod
 from apps.analysis.application.inference.orchestrator import analyze_resume
-from apps.analysis.application.inference.seniority.constants import SENIORITY_POLICY_VERSION
-from apps.analysis.application.inference.predictors.quality import predict_quality
-from apps.analysis.application.inference.predictors.matching import predict_matching
+from apps.analysis.application.inference.tasks.seniority.constants import SENIORITY_POLICY_VERSION
+from apps.analysis.application.inference.tasks.quality.predict import predict_quality
+from apps.analysis.application.inference.tasks.matching.predict import predict_matching
 
 
 class ResumeToTextSectionsTest(TestCase):

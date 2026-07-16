@@ -4,7 +4,7 @@ from __future__ import annotations
 import unittest
 
 from apps.analysis.application.inference.resume_mapper import resume_to_text
-from apps.analysis.application.inference.target_fit import (
+from apps.analysis.application.inference.tasks.target_fit import (
     compute_career_switch,
     compute_target_fit_policy,
     compute_target_seniority,
@@ -12,7 +12,7 @@ from apps.analysis.application.inference.target_fit import (
     heuristic_target_fit_score,
     infer_domain_category,
 )
-from apps.analysis.application.inference.target_fit.fit_signals import TargetFitSignals
+from apps.analysis.application.inference.tasks.target_fit.fit_signals import TargetFitSignals
 
 
 class DomainInferenceTest(unittest.TestCase):

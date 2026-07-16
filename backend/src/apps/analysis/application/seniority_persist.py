@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .inference.seniority.constants import SENIORITY_POLICY_VERSION
+from .inference.tasks.seniority.constants import SENIORITY_POLICY_VERSION
 from .inference.signals.types import ResumeSignals
 VALID_SENIORITY_LABELS = frozenset({"intern", "junior", "mid", "senior"})
 VALID_LABEL_SOURCES = frozenset({"rule", "review"})

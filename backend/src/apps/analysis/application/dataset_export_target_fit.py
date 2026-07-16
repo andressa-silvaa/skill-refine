@@ -15,7 +15,7 @@ from apps.analysis.models import AnalysisStatus, ResumeAnalysis
 from apps.resumes.interfaces.api.payloads import resume_detail_payload
 
 from .inference.resume_mapper import resume_to_text
-from .inference.target_fit import (
+from .inference.tasks.target_fit import (
     compute_target_fit_policy,
     extract_target_fit_signals,
     infer_domain_category,

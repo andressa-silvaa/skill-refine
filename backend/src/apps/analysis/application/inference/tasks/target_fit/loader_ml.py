@@ -82,7 +82,7 @@ def predict_target_fit_ml_score(
 ) -> int:
     import numpy as np
 
-    from apps.analysis.application.inference.target_fit.ml_feature_row import target_fit_feature_row
+    from apps.analysis.application.inference.tasks.target_fit.ml_feature_row import target_fit_feature_row
 
     model = bundle["model"]
     scaler = bundle["scaler"]

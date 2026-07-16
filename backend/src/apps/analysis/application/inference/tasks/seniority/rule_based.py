@@ -63,7 +63,7 @@ def rule_based_seniority(signals: ResumeSignals) -> tuple[str, str, list[dict[st
 
 
 def clamp_seniority_vetoes(label: str, signals: ResumeSignals) -> tuple[str, list[dict[str, Any]]]:
-    """Post-ML vetoes: never senior without evidence."""
+    """Post-ML vetoes: never senior without evidence; never mid/senior on low real tenure."""
     extra: list[dict[str, Any]] = []
     if label == "senior":
         if signals.experiences_count == 0:
@@ -72,4 +72,16 @@ def clamp_seniority_vetoes(label: str, signals: ResumeSignals) -> tuple[str, lis
         if signals.bullets_count < 6:
             extra.append({"type": "veto", "rule": "never_senior_few_bullets", "count": signals.bullets_count})
             return "mid", extra
+    if label in ("mid", "senior") and signals.total_months_experience < 24:
+        capped = "junior" if signals.total_months_experience >= 12 else "intern"
+        extra.append(
+            {
+                "type": "veto",
+                "rule": "never_mid_or_above_on_low_tenure",
+                "from": label,
+                "to": capped,
+                "total_months_experience": signals.total_months_experience,
+            }
+        )
+        return capped, extra
     return label, extra
