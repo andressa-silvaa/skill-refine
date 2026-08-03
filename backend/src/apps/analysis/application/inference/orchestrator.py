@@ -18,6 +18,7 @@ from .loader import get_matching_bundle, get_model_bundle, get_quality_bundle
 from .loader_signals_model import get_signals_ml_bundle, signals_ml_metadata_for_extra
 from .overall_score import compute_overall_score
 from .postprocess.insights import derive_insights
+from .postprocess.llm_feedback import generate_ai_feedback
 from .postprocess.recommendations import build_recommendations
 from .resume_mapper import resume_to_text
 from .resume_signals import is_thin_student_or_intern_profile
@@ -658,6 +659,15 @@ def analyze_resume(
         w_target=float(config.get("overall_w_target_fit") or 0.10),
     )
 
+    ai_feedback = generate_ai_feedback(
+        resume_text=resume_text,
+        seniority_label=final_label,
+        quality_score=int(quality_score),
+        target_fit_score=int(fit_score) if target_pos else None,
+        target_position=target_pos,
+        language=lang,
+    )
+
     debug_block: dict[str, Any] | None = None
     if getattr(settings, "DEBUG", False):
         debug_block = build_debug_block(
@@ -692,6 +702,7 @@ def analyze_resume(
         rs=rs,
         target_fit_extra=target_fit_extra,
         debug_block=debug_block,
+        ai_feedback=ai_feedback,
     )
 
     result = AnalysisResult(
