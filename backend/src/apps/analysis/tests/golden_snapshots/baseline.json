@@ -3309,7 +3309,7 @@
           "seniorityConfidence": "medium",
           "seniorityEvidence": [
             {
-              "months": 139,
+              "months": 140,
               "rule": "senior_months_insufficient_evidence",
               "type": "structural"
             }
@@ -3369,7 +3369,7 @@
         "seniority_evidence_json": {
           "evidence": [
             {
-              "months": 139,
+              "months": 140,
               "rule": "senior_months_insufficient_evidence",
               "type": "structural"
             }
@@ -3379,15 +3379,15 @@
             "bullets_count": 2,
             "completeness_level": "adequate",
             "completeness_score": 55,
-            "effective_months_experience": 139,
+            "effective_months_experience": 140,
             "experiences_count": 1,
             "has_current_role": true,
             "has_internship_terms": false,
             "has_leadership_terms": true,
             "insufficient_data": false,
-            "months_in_current_role": 139,
+            "months_in_current_role": 140,
             "reasons": [],
-            "total_months_experience": 139,
+            "total_months_experience": 140,
             "word_count": 45
           }
         },
@@ -4131,8 +4131,8 @@
         "model_version": "v1.0",
         "payload_json": {
           "careerSwitch": {
-            "detected": true,
-            "reasonKey": "analysis.careerSwitch.reasonDomainMismatch"
+            "detected": false,
+            "reasonKey": ""
           },
           "completeness": {
             "confidence": "high",
@@ -4178,12 +4178,6 @@
               }
             ],
             "strengths": [
-              {
-                "key": "analysis.insights.strengths.career_switch_context",
-                "params": {
-                  "reasonKey": "analysis.careerSwitch.reasonDomainMismatch"
-                }
-              },
               {
                 "evidence": {
                   "has_metrics": true
@@ -4271,13 +4265,20 @@
             ]
           },
           "scoreMeaning": "analysis.scoreMeaning.resume_quality",
-          "seniorityClass": "mid",
+          "seniorityClass": "intern",
           "seniorityConfidence": "low",
           "seniorityEvidence": [
             {
               "months": 60,
               "rule": "total_months_25_60",
               "type": "structural"
+            },
+            {
+              "from": "mid",
+              "rule": "never_mid_or_above_on_low_tenure",
+              "to": "intern",
+              "total_months_experience": 0,
+              "type": "veto"
             }
           ],
           "seniorityMlStatus": "skipped_no_signals_ml_bundle",
@@ -4321,14 +4322,13 @@
           "targetSeniorityClampReasons": [
             "analysis.targetFit.clampMaxJuniorScore",
             "analysis.targetFit.clampNoExperiencePortfolio",
-            "analysis.targetFit.clampSkillsGap",
-            "analysis.targetFit.clampHighGeneralLowFit"
+            "analysis.targetFit.clampSkillsGap"
           ],
-          "targetSeniorityLabel": "junior",
+          "targetSeniorityLabel": "intern",
           "was_truncated": false
         },
         "provider": "rule_policy",
-        "score": 57,
+        "score": 51,
         "seniority_confidence_persist": "low",
         "seniority_evidence_json": {
           "evidence": [
@@ -4336,6 +4336,13 @@
               "months": 60,
               "rule": "total_months_25_60",
               "type": "structural"
+            },
+            {
+              "from": "mid",
+              "rule": "never_mid_or_above_on_low_tenure",
+              "to": "intern",
+              "total_months_experience": 0,
+              "type": "veto"
             }
           ],
           "policy_version": "v1.0",
@@ -4357,7 +4364,7 @@
             "word_count": 36
           }
         },
-        "seniority_final_label": "mid",
+        "seniority_final_label": "intern",
         "seniority_label_source": "rule_policy",
         "seniority_policy_version": "v1.0",
         "seniority_rule_label": "mid",
@@ -4370,9 +4377,9 @@
           "ats": 60,
           "clarity": 60,
           "matching": null,
-          "seniority": 75,
+          "seniority": 25,
           "target_fit": 14.0,
-          "target_seniority": 50.0
+          "target_seniority": 25.0
         }
       },
       "tags": [

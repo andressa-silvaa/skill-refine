@@ -20,9 +20,12 @@ _SENIOR_PATTERNS = re.compile(
     r"\b(?:8|9|1[0-5])\s*(?:anos?|years?|años)\s+(?:de\s+)?(?:experiência|experience|experiencia))\b",
     re.I,
 )
+_INTERN_PATTERNS = re.compile(
+    r"\b(estagi[áa]ri[oa]?|intern(?:ship)?|trainee|primeiro\s+emprego|first\s+job)\b",
+    re.I,
+)
 _JUNIOR_PATTERNS = re.compile(
-    r"\b(estagi[áa]rio|intern|trainee|junior|jr\.?|entry[\s-]?level|"
-    r"primeiro\s+emprego|first\s+job)\b",
+    r"\b(j[uú]nior|jr\.?|entry[\s-]?level)\b",
     re.I,
 )
 _MID_PATTERNS = re.compile(
@@ -75,7 +78,9 @@ def _lexical_seniority(text: str) -> tuple[str | None, str, float]:
     score = 0.0
     if _SENIOR_PATTERNS.search(t):
         score += 3.0
-    if _JUNIOR_PATTERNS.search(t):
+    if _INTERN_PATTERNS.search(t):
+        score -= 3.0
+    elif _JUNIOR_PATTERNS.search(t):
         score -= 2.0
     if _MID_PATTERNS.search(t) and score < 2.5:
         score += 0.5
@@ -83,6 +88,8 @@ def _lexical_seniority(text: str) -> tuple[str | None, str, float]:
         score += 1.0
     if score >= 2.5:
         return "senior", "high" if score >= 3.5 else "medium", min(1.0, score / 4.0)
+    if score <= -2.5:
+        return "intern", "medium", 0.5
     if score <= -1.0:
         return "junior", "medium", 0.45
     if 0.5 <= score < 2.5:
