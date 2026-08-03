@@ -77,6 +77,9 @@ ml/models/
 *.pt
 *.pth
 *.safetensors
+
+# Dados gerados/derivados — reproduzíveis via ml/scripts/generate_resumes_v2.py (seed fixo)
+ml/data/
 *.onnx
 *.h5
 

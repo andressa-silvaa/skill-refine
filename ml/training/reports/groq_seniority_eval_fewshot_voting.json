@@ -1,0 +1,44 @@
+{
+  "accuracy": 0.8518518518518519,
+  "n": 27,
+  "correct": 23,
+  "n_votes": 3,
+  "errors": [
+    {
+      "id": "fcd73dc6-93a0-4009-924b-9c1773298930",
+      "true": "intern",
+      "pred": "junior",
+      "votes": {
+        "junior": 3
+      },
+      "reasoning": "O cargo \"Tech Lead\" é inflado, mas o total real é de 12 meses em 1 vínculo com 2 realizações — o título não é sustentado por tempo real. Classificação correta: junior."
+    },
+    {
+      "id": "25c557fd-8b5a-4b28-81f7-92753038fef7",
+      "true": "mid",
+      "pred": "senior",
+      "votes": {
+        "senior": 3
+      },
+      "reasoning": "O total real é de 58 meses (~4,8 anos) em 4 vínculos, mas há um cargo antigo chamado \"Júnior\" e o último vínculo é \"Sênior\" — a liderança mencionada no último vínculo é um sinal forte de senioridade, mas a experiência total é ainda baixa demais para um \"senior\" de alto nível; entretanto, a classificação correta é senior."
+    },
+    {
+      "id": "d02c60f2-bda7-4888-848d-293f2eb8ce22",
+      "true": "senior",
+      "pred": "mid",
+      "votes": {
+        "mid": 3
+      },
+      "reasoning": "O total agregado real é de 73 meses (~6 anos) em 2 vínculos, com 10 realizações — o cargo anterior é \"Júnior\", mas o escopo reais e o tempo acumulados não são baixos. O cargo atual é \"Analista de Sistemas\", mas isso não é suficiente para justificar um \"senior\" sem evidência real de liderança ou autonomia."
+    },
+    {
+      "id": "e5d6c7a2-5253-475a-a645-3e8b22429611",
+      "true": "mid",
+      "pred": "senior",
+      "votes": {
+        "senior": 3
+      },
+      "reasoning": "O cargo atual é \"Engenheiro de Software Sênior\", mas o total agregado real é de 60 meses (~5 anos) em 3 vínculos com 13 realizações — apesar do cargo atual ser \"Sênior\", o tempo real não chega a 48 meses, mas o escopo e o tempo reais são elevados, e o cargo \"Sênior\" não é apenas um título inflado. Classificação correta: senior."
+    }
+  ]
+}
