@@ -19,7 +19,6 @@ export { ProgressBar } from './progress-bar/ProgressBar';
 export { DatePicker } from './date-picker/DatePicker';
 export { Tooltip } from './tooltip/Tooltip';
 export { Checkbox } from './checkbox/Checkbox';
-export { ColorPicker } from './color-picker/ColorPicker';
 export { PaletteChip } from './palette-chip/PaletteChip';
 export { PageLoader } from './page-loader';
 export { RouteContentLoader } from './route-content-loader';
