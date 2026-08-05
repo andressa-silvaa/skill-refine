@@ -544,6 +544,7 @@
           "seniorityConfidence": "medium",
           "seniorityEvidence": [
             {
+              "months": 0,
               "rule": "internship_terms_detected",
               "type": "structural"
             }
@@ -599,6 +600,7 @@
         "seniority_evidence_json": {
           "evidence": [
             {
+              "months": 0,
               "rule": "internship_terms_detected",
               "type": "structural"
             }
@@ -1023,6 +1025,7 @@
           "seniorityConfidence": "medium",
           "seniorityEvidence": [
             {
+              "months": 7,
               "rule": "internship_terms_detected",
               "type": "structural"
             }
@@ -1037,6 +1040,7 @@
         "seniority_evidence_json": {
           "evidence": [
             {
+              "months": 7,
               "rule": "internship_terms_detected",
               "type": "structural"
             }
@@ -7430,6 +7434,7 @@
           "seniorityConfidence": "medium",
           "seniorityEvidence": [
             {
+              "months": 0,
               "rule": "internship_terms_detected",
               "type": "structural"
             }
@@ -7444,6 +7449,7 @@
         "seniority_evidence_json": {
           "evidence": [
             {
+              "months": 0,
               "rule": "internship_terms_detected",
               "type": "structural"
             }
@@ -7778,6 +7784,7 @@
   ],
   "settings": {
     "ANALYSIS_EMBEDDINGS_ENABLED": false,
+    "ANALYSIS_LLM_FEEDBACK_ENABLED": false,
     "ANALYSIS_OVERALL_BLEND_ENABLED": true,
     "ANALYSIS_SIGNALS_ML_ENABLED": false,
     "ANALYSIS_TARGET_FIT_ML_ENABLED": false,

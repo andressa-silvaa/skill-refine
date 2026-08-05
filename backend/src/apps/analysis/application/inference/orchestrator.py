@@ -117,7 +117,9 @@ def _resolve_seniority(
         ml_lab, ml_conf, _probs, ml_ev, st = signals_ml_predict(signals_bundle, rs, sm_cfg)
         if st == "applied":
             merged_evidence = list(base_evidence) + list(ml_ev)
-            fl, veto_ev = clamp_seniority_vetoes(ml_lab, rs)
+            fl, veto_ev = clamp_seniority_vetoes(
+                ml_lab, rs, min_bullets=int(sm_cfg.get("SIGNALS_ML_SENIOR_MIN_BULLETS", 6))
+            )
             merged_evidence.extend(veto_ev)
             signals_bundle_used = signals_bundle
             return CascadeResult(

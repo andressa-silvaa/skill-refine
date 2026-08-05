@@ -37,8 +37,14 @@ def rule_based_seniority(signals: ResumeSignals) -> tuple[str, str, list[dict[st
         )
         return "junior", "low", evidence
 
-    if signals.has_internship_terms:
-        evidence.append({"type": "structural", "rule": "internship_terms_detected"})
+    if signals.has_internship_terms and signals.effective_months_experience < 24:
+        evidence.append(
+            {
+                "type": "structural",
+                "rule": "internship_terms_detected",
+                "months": signals.effective_months_experience,
+            }
+        )
         return "intern", "medium", evidence
 
     m = signals.effective_months_experience
@@ -62,14 +68,19 @@ def rule_based_seniority(signals: ResumeSignals) -> tuple[str, str, list[dict[st
     return "mid", "medium", evidence
 
 
-def clamp_seniority_vetoes(label: str, signals: ResumeSignals) -> tuple[str, list[dict[str, Any]]]:
+def clamp_seniority_vetoes(
+    label: str,
+    signals: ResumeSignals,
+    *,
+    min_bullets: int = 6,
+) -> tuple[str, list[dict[str, Any]]]:
     """Post-ML vetoes: never senior without evidence; never mid/senior on low real tenure."""
     extra: list[dict[str, Any]] = []
     if label == "senior":
         if signals.experiences_count == 0:
             extra.append({"type": "veto", "rule": "never_senior_without_experience"})
             return "junior", extra
-        if signals.bullets_count < 6:
+        if signals.bullets_count < min_bullets:
             extra.append({"type": "veto", "rule": "never_senior_few_bullets", "count": signals.bullets_count})
             return "mid", extra
     if label in ("mid", "senior") and signals.total_months_experience < 24:

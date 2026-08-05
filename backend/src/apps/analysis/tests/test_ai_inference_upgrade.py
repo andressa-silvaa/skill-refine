@@ -52,7 +52,11 @@ class TextSeniorityFusionTests(TestCase):
 
 
 class OrchestratorSeniorityLexicalTests(TestCase):
-    @override_settings(ANALYSIS_SIGNALS_ML_ENABLED=False)
+    @override_settings(
+        ANALYSIS_SIGNALS_ML_ENABLED=False,
+        ANALYSIS_TEXT_SENIORITY_ENABLED=False,
+        ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED=True,
+    )
     def test_senior_from_summary_without_dates(self) -> None:
         resume_data = {
             "data": {
