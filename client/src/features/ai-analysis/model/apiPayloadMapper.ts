@@ -108,12 +108,13 @@ export function apiPayloadToResult(
 
   const improvements: ImprovementInsightItem[] = (payload.insights?.improvements ?? []).map((i) => {
     const recommendation = recommendationsByKey.get(i.key);
-    const params = localizeInsightParams(i.params ?? recommendation?.params, t);
+    const rawParams = i.params ?? recommendation?.params;
+    const params = localizeInsightParams(rawParams, t);
     return {
       key: i.key,
       params,
       priority: i.priority ?? recommendation?.priority,
-      section: params.section ?? recommendation?.section,
+      section: rawParams?.section ?? recommendation?.section,
       fieldTarget: params.field_target ?? recommendation?.field_target,
       actionType: params.action_type ?? recommendation?.action_type,
       exampleKey: recommendation?.example_key,
@@ -183,6 +184,8 @@ export function apiPayloadToResult(
     };
   }
 
+  logAnalysisFlow(payload);
+
   return {
     score,
     scoreLabel: scoreToLabel(score),
@@ -198,4 +201,26 @@ export function apiPayloadToResult(
     strengths,
     improvements,
   };
+}
+
+function logAnalysisFlow(payload: AnalysisPayload): void {
+  const group = `[analysis] resume ${payload.resumeId} — analysis ${payload.id}`;
+  console.groupCollapsed(group);
+  console.log('core scoring provider:', payload.metadata.provider, '| model:', payload.metadata.modelName, payload.metadata.modelVersion);
+  console.log('seniority:', payload.seniorityLabel, '| confidence:', payload.seniorityConfidence, '| gating reasons:', payload.gatingReasons ?? []);
+  console.log(
+    'target fit:',
+    payload.targetFitScore,
+    '| provider:',
+    payload.targetFitProvider ?? 'n/a',
+    '| model version:',
+    payload.targetFitModelVersion ?? 'n/a'
+  );
+  console.log('task scores:', payload.taskScores);
+  if (payload.aiFeedback) {
+    console.log('LLM feedback (cloud): generated —', payload.aiFeedback);
+  } else {
+    console.log('LLM feedback (cloud): not present (disabled, unavailable, or call failed — scoring is unaffected either way)');
+  }
+  console.groupEnd();
 }

@@ -53,14 +53,6 @@ export function TargetRoleSection(props: Props) {
           </div>
         </div>
       ) : null}
-
-      {process.env.NODE_ENV === 'development' &&
-      tf.evidence.semanticKeywords &&
-      tf.evidence.semanticKeywords.length > 0 ? (
-        <p className="sr-target-role__dev-semantic" style={{ fontSize: '0.8rem', opacity: 0.9 }}>
-          semantic: {tf.evidence.semanticKeywords.join(', ')}
-        </p>
-      ) : null}
     </section>
   );
 }

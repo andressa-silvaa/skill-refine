@@ -94,6 +94,7 @@ export type AnalysisPayload = {
     modelVersion: string;
     provider: string;
   };
+  aiFeedback?: string | null;
   createdAt: string;
   updatedAt: string;
   errorMessage?: string;
