@@ -24,6 +24,11 @@ _INTERN_PATTERNS = re.compile(
     r"\b(estagi[áa]ri[oa]?|intern(?:ship)?|trainee|primeiro\s+emprego|first\s+job)\b",
     re.I,
 )
+_SUPERVISION_VERBS = re.compile(
+    r"\b(mentorei|liderei|treinei|orientei|supervisionei|coordenei|gerenciei|ensinei|"
+    r"mentored|led|trained|supervised|coordinated|managed|taught)\b",
+    re.I,
+)
 _JUNIOR_PATTERNS = re.compile(
     r"\b(j[uú]nior|jr\.?|entry[\s-]?level)\b",
     re.I,
@@ -45,15 +50,34 @@ def _normalize_label(raw: str | None) -> str | None:
         "stagiaire": "intern",
         "trainee": "intern",
         "estagiario": "intern",
+        "estagiário": "intern",
+        "estagiaria": "intern",
+        "estagiária": "intern",
         "intern": "intern",
+        "internship": "intern",
+        "becario": "intern",
+        "becaria": "intern",
+        "pasante": "intern",
+        "practicas": "intern",
+        "prácticas": "intern",
         "jr": "junior",
+        "jr.": "junior",
         "junior": "junior",
+        "júnior": "junior",
+        "entry-level": "junior",
+        "entry level": "junior",
         "pleno": "mid",
         "mid": "mid",
+        "mid-level": "mid",
         "middle": "mid",
+        "semi-senior": "mid",
+        "semisenior": "mid",
         "sr": "senior",
+        "sr.": "senior",
         "senior": "senior",
         "sênior": "senior",
+        "staff": "senior",
+        "principal": "senior",
     }
     if s in mapping and mapping[s]:
         return mapping[s]
@@ -78,7 +102,7 @@ def _lexical_seniority(text: str) -> tuple[str | None, str, float]:
     score = 0.0
     if _SENIOR_PATTERNS.search(t):
         score += 3.0
-    if _INTERN_PATTERNS.search(t):
+    if _INTERN_PATTERNS.search(t) and not _SUPERVISION_VERBS.search(t):
         score -= 3.0
     elif _JUNIOR_PATTERNS.search(t):
         score -= 2.0

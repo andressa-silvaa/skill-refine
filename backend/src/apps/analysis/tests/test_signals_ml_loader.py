@@ -15,6 +15,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
+from apps.analysis.application.inference.tasks.seniority.signals_ml_predict import (
+    FEATURE_TRANSFORM,
+)
 from apps.analysis.application.inference.loader_signals_model import (
     clear_signals_ml_cache,
     get_signals_ml_bundle,
@@ -66,6 +69,7 @@ class SignalsMlLoaderTest(TestCase):
             "dataset_version": "testhash",
             "task": "seniority_signals",
             "features_schema": feature_names,
+            "feature_transform": FEATURE_TRANSFORM,
         }
         (model_dir / "metadata.json").write_text(json.dumps(meta), encoding="utf-8")
 

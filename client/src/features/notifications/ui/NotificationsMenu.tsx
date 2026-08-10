@@ -103,6 +103,15 @@ export function NotificationsMenu(props: Props) {
 
   const hasActions = unreadCount > 0 || items.length > 0;
 
+  const viewportMargin = 16;
+  const panelWidth = typeof window !== 'undefined' ? Math.min(360, window.innerWidth - viewportMargin * 2) : 360;
+  const panelRight = triggerRect
+    ? Math.max(
+        viewportMargin,
+        Math.min(window.innerWidth - triggerRect.right, window.innerWidth - panelWidth - viewportMargin)
+      )
+    : viewportMargin;
+
   const panel = open && portalRoot ? (
     <div
       ref={panelRef}
@@ -113,9 +122,9 @@ export function NotificationsMenu(props: Props) {
       style={{
         position: 'fixed',
         top: triggerRect ? triggerRect.bottom + 8 : 0,
-        right: triggerRect ? Math.max(16, window.innerWidth - triggerRect.right) : 16,
+        right: panelRight,
         left: 'auto',
-        width: 'min(360px, calc(100vw - 32px))',
+        width: panelWidth,
         zIndex: 99999,
       }}
     >

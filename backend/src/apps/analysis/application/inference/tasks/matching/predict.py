@@ -7,6 +7,7 @@ from contextlib import nullcontext
 from typing import Any
 
 from apps.analysis.application.inference.cascade import CascadeResult, run_cascade
+from apps.analysis.application.inference.tasks.target_fit.embedding import embedding_fit_scores
 
 
 def _heuristic_matching(resume_text: str, job_text: str) -> tuple[int, list[str]]:
@@ -98,10 +99,11 @@ def predict_matching(
     job_text: str,
     language: str,
     matching_bundle: tuple[Any, dict] | None = None,
+    embeddings_model: Any = None,
 ) -> tuple[int, list[str]]:
     """
     Predict matching score 0-100 and top matches.
-    Cascade: custom bi-encoder → HF bi-encoder → heuristic keyword overlap.
+    Cascade: custom bi-encoder → HF bi-encoder → sentence embeddings → heuristic keyword overlap.
     """
     if not job_text or not resume_text:
         return (0, [])
@@ -153,8 +155,33 @@ def predict_matching(
             status="applied",
         )
 
+    def _step_embeddings() -> CascadeResult:
+        """
+        Sentence-embedding cosine between resume and job posting.
+
+        The two bundle-based steps above need artifacts that do not ship with the repo, so before
+        this existed the effective provider was keyword overlap — which cannot see that "gestão de
+        estoque" and "inventory control" are the same requirement. This reuses the multilingual
+        bi-encoder already loaded for target_fit, so it needs no extra artifact and no labels.
+        """
+        if embeddings_model is None:
+            return CascadeResult(value=None, provider="matching_embeddings", status="skipped_disabled")
+        try:
+            score, _cos, _kw = embedding_fit_scores(embeddings_model, resume_text, job_text)
+        except Exception:
+            return CascadeResult(value=None, provider="matching_embeddings", status="error")
+        if not score:
+            return CascadeResult(value=None, provider="matching_embeddings", status="error")
+        return CascadeResult(
+            value=(score, heuristic[1]),
+            provider="matching_embeddings",
+            status="applied",
+        )
+
     def _step_heuristic() -> CascadeResult:
         return CascadeResult(value=heuristic, provider="heuristics", status="applied")
 
-    result = run_cascade([_step_custom, _step_hf, _step_heuristic], default=_step_heuristic())
+    result = run_cascade(
+        [_step_custom, _step_hf, _step_embeddings, _step_heuristic], default=_step_heuristic()
+    )
     return result.value

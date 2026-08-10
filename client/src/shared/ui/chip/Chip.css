@@ -10,8 +10,12 @@
   display: inline-flex;
   align-items: center;
   max-width: 100%;
+  box-sizing: border-box;
+}
+
+.sr-chip__label {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  box-sizing: border-box;
 }

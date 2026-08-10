@@ -4,13 +4,19 @@ Extract structured ResumeSignals from payload + ResumeSections (feature engineer
 from __future__ import annotations
 
 import re
+from datetime import date
 from typing import Any
 
 from ..completeness import assess_completeness
 from ..tasks.quality.predict import LEADERSHIP_WORDS, LINK_PATTERN
 from ..resume_signals import max_years_mentioned_in_work_context
 from ..types import ResumeSections
-from .date_math import experience_intervals, merge_intervals_months, months_in_current_role
+from .date_math import (
+    experience_intervals,
+    merge_intervals_months,
+    months_in_current_role,
+    parse_payload_date,
+)
 from .types import ResumeSignals
 
 _INTERNSHIP_RE = re.compile(
@@ -31,6 +37,48 @@ def _career_text_blob(resume_data: dict[str, Any]) -> str:
     for key in ("targetPosition", "summary"):
         parts.append(str(data.get(key) or ""))
     for exp in data.get("experiences") or []:
+        parts.append(str(exp.get("position") or ""))
+        parts.append(str(exp.get("company") or ""))
+        for b in exp.get("description") or []:
+            parts.append(str(b))
+    return " ".join(parts).lower()
+
+
+def _experience_recency_key(exp: dict[str, Any]) -> date | None:
+    end = parse_payload_date(str(exp.get("endDate") or "").strip() or None)
+    if end:
+        return end
+    return parse_payload_date(str(exp.get("startDate") or "").strip() or None)
+
+
+def _most_recent_experiences(experiences: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Current role(s) if flagged, else the most recently dated one(s). Falls back to
+    every experience when none carries a usable date, since recency can't be judged.
+    """
+    if not experiences:
+        return []
+    current = [e for e in experiences if bool(e.get("isCurrent"))]
+    if current:
+        return current
+    dated = [(exp, _experience_recency_key(exp)) for exp in experiences]
+    known_dates = [d for _, d in dated if d]
+    if not known_dates:
+        return experiences
+    latest = max(known_dates)
+    return [exp for exp, d in dated if d == latest]
+
+
+def _recent_role_text_blob(resume_data: dict[str, Any]) -> str:
+    """
+    Scoped to the current/most recent role(s) only — an internship or trainee stint
+    years in the past shouldn't veto a candidate's present-day seniority.
+    """
+    data = _data(resume_data)
+    parts: list[str] = []
+    for key in ("targetPosition", "summary"):
+        parts.append(str(data.get(key) or ""))
+    for exp in _most_recent_experiences(list(data.get("experiences") or [])):
         parts.append(str(exp.get("position") or ""))
         parts.append(str(exp.get("company") or ""))
         for b in exp.get("description") or []:
@@ -77,7 +125,7 @@ def extract_resume_signals(
     months_current = months_in_current_role(experiences)
 
     blob = _career_text_blob(resume_data)
-    has_internship = bool(_INTERNSHIP_RE.search(blob))
+    has_internship = bool(_INTERNSHIP_RE.search(_recent_role_text_blob(resume_data)))
     has_leadership = bool(LEADERSHIP_WORDS.search(blob))
     section_text = ((sections.full_text if sections else "") or "").lower()
     has_links = _contact_links_present(resume_data) or bool(LINK_PATTERN.search(section_text))

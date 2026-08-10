@@ -17,7 +17,8 @@ ACTION_VERBS = {
     "es": ["lideró", "implementó", "desarrolló", "gestionó", "coordinó", "creó", "aumentó", "redujo"],
 }
 LEADERSHIP_WORDS = re.compile(
-    r"lider|lead|mentoria|mentoring|mentorship|coordena|coordinat|gest[aã]o|manager|roadmap|stakeholder|stakeholders",
+    r"l[ií]der|lead|mentoria|mentoring|mentorship|coordena|coordinat|gest[aã]o|gerenci|gerente|"
+    r"manager|roadmap|stakeholder|supervis|jefe|jefa|responsable|encargad",
     re.I,
 )
 ARCHITECTURE_WORDS = re.compile(

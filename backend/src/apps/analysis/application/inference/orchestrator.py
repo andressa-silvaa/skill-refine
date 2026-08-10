@@ -117,7 +117,9 @@ def _resolve_seniority(
         ml_lab, ml_conf, _probs, ml_ev, st = signals_ml_predict(signals_bundle, rs, sm_cfg)
         if st == "applied":
             merged_evidence = list(base_evidence) + list(ml_ev)
-            fl, veto_ev = clamp_seniority_vetoes(ml_lab, rs)
+            fl, veto_ev = clamp_seniority_vetoes(
+                ml_lab, rs, min_bullets=int(sm_cfg.get("SIGNALS_ML_SENIOR_MIN_BULLETS", 6))
+            )
             merged_evidence.extend(veto_ev)
             signals_bundle_used = signals_bundle
             return CascadeResult(
@@ -484,7 +486,13 @@ def _resolve_quality_and_matching(
         )
         matching_score = 0
         if job_text:
-            matching_score, _ = predict_matching(resume_text, job_text, lang, matching_bundle=matching_bundle)
+            matching_score, _ = predict_matching(
+                resume_text,
+                job_text,
+                lang,
+                matching_bundle=matching_bundle,
+                embeddings_model=get_embeddings_model(settings) if config.get("embeddings_enabled") else None,
+            )
     else:
         quality_score, quality_flags = predict_quality(
             resume_text,
@@ -496,7 +504,13 @@ def _resolve_quality_and_matching(
         )
         matching_score = 0
         if job_text:
-            matching_score, _ = predict_matching(resume_text, job_text, lang, matching_bundle=matching_bundle)
+            matching_score, _ = predict_matching(
+                resume_text,
+                job_text,
+                lang,
+                matching_bundle=matching_bundle,
+                embeddings_model=get_embeddings_model(settings) if config.get("embeddings_enabled") else None,
+            )
 
     return {
         "quality_bundle": quality_bundle,
