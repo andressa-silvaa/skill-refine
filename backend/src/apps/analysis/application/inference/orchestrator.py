@@ -486,7 +486,13 @@ def _resolve_quality_and_matching(
         )
         matching_score = 0
         if job_text:
-            matching_score, _ = predict_matching(resume_text, job_text, lang, matching_bundle=matching_bundle)
+            matching_score, _ = predict_matching(
+                resume_text,
+                job_text,
+                lang,
+                matching_bundle=matching_bundle,
+                embeddings_model=get_embeddings_model(settings) if config.get("embeddings_enabled") else None,
+            )
     else:
         quality_score, quality_flags = predict_quality(
             resume_text,
@@ -498,7 +504,13 @@ def _resolve_quality_and_matching(
         )
         matching_score = 0
         if job_text:
-            matching_score, _ = predict_matching(resume_text, job_text, lang, matching_bundle=matching_bundle)
+            matching_score, _ = predict_matching(
+                resume_text,
+                job_text,
+                lang,
+                matching_bundle=matching_bundle,
+                embeddings_model=get_embeddings_model(settings) if config.get("embeddings_enabled") else None,
+            )
 
     return {
         "quality_bundle": quality_bundle,
