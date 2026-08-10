@@ -26,7 +26,8 @@ Estado de cada tarefa:
 | quality | **78%** | `heuristics` | precisa de corpus rotulado — não iniciado |
 | seniority | 12% | `rule_policy` | corpus gerado, rotulagem em andamento |
 | target_fit | 10% | `target_fit_embedding_v1` | já é neural (MiniLM multilíngue) |
-| matching | quando há vaga | `matching_embeddings` | migrado para neural nesta sessão |
+| matching | quando há vaga | `matching_embeddings` | neural desde a sessão anterior |
+| domínio/ocupação | entra em target_fit | `domain_embeddings` | migrado para recuperação ESCO (§6) |
 
 Idiomas suportados: **pt-BR, en-US, es-ES**. Qualquer modelo novo deve ser multilíngue, e a
 plataforma tem de cobrir **qualquer ocupação**, não uma lista fechada de domínios.
@@ -100,7 +101,7 @@ tiver modelo, **o número principal que o usuário vê continua vindo de heurís
 ## 4. Estado atual
 
 ### Corpus
-- `ml/data/raw/resumes_v3/prose.jsonl` — **864 currículos** com prosa gerada
+- `ml/data/raw/resumes_v3/prose.jsonl` — **873 currículos** com prosa gerada
 - `specs.jsonl`, `specs_b.jsonl`, `specs_cal.jsonl`, `specs_q.jsonl` — as plantas estruturais
 - `ml/data/reference/esco_occupations.jsonl` — **1.701 ocupações ESCO** com labels pt/en/es e
   código ISCO-08
@@ -117,8 +118,22 @@ tiver modelo, **o número principal que o usuário vê continua vindo de heurís
 | `validate_corpus_v3.py` | validação dos sinais numéricos (exit 1 se reprovar) |
 | `inspect_corpus_text_v3.py` | validação do texto (escopo, idioma, ancoragem) |
 | `build_label_review_sample.py` | amostra estratificada para revisão humana |
+| `eval_domain_inference_esco.py` | avalia recuperação ESCO vs heurística de palavra-chave (§6) |
 
-### Código de produção alterado nesta sessão
+### Código de produção alterado na sessão da inferência de domínio (§6)
+- `tasks/target_fit/esco_retrieval.py` — **novo**: índice de labels ESCO, cache em disco,
+  recuperação top-k, confiança por margem, construção da query de ocupação
+- `tasks/target_fit/isco_domains.py` — **novo**: mapa ISCO-08 → domínio por prefixo mais longo
+- `tasks/target_fit/domain_inference.py` — cascata `domain_embeddings` → `domain_keywords`;
+  a heurística virou `_infer_domain_keywords` e continua como fallback
+- `orchestrator.py` — passa o modelo de embeddings e a query de ocupação; `_domain_block`
+  enriquece a resposta com ESCO **só no caminho neural** (o fallback mantém o shape antigo)
+- `config.py` + `settings_modules/ai.py` — `ANALYSIS_ESCO_*` (enabled, path, cache dir, top_k,
+  min_cosine, max_alt_labels)
+- `warmup.py` — pré-aquece o índice ESCO nos idiomas de `ANALYSIS_PREWARM_LANGUAGES`
+- `.gitignore` — `ml/data/` deixou de ignorar `esco_occupations.jsonl` (ver 5.7)
+
+### Código de produção alterado na sessão anterior
 - `text_sanitizer.py` — passou a incluir **bullets e duração em meses**; corrigido
   `data.get("education")` → `educations`; `max_chars` 2000 → 4000
 - `signals_ml_predict.py` + `ml/training/src/signals_features.py` — transformação **`log1p_v1`**
@@ -135,13 +150,13 @@ tiver modelo, **o número principal que o usuário vê continua vindo de heurís
   thresholds alinhados ao metadata do modelo
 
 ### Testes
-`apps.analysis.tests`: 95 testes, **3 falhas + 2 erros pré-existentes** (target_fit ml loader,
-run_creates_pending, target_fit policy metadata, quality logits 72≠75, synthetic jsonl ausente).
-Golden snapshot passa. Qualquer coisa além dessas 5 é regressão nova.
+`apps.analysis.tests`: 116 testes (21 novos em `test_domain_inference_esco.py`), **3 falhas + 2
+erros pré-existentes** (target_fit ml loader, run_creates_pending, target_fit policy metadata,
+quality logits 72≠75, synthetic jsonl ausente). Golden snapshot passa. Qualquer coisa além dessas
+5 é regressão nova.
 
 ### Git
-Branch `fix/seniority-thresholds-text-fusion`, 3 commits feitos. **Tudo desta sessão está
-sem commit.**
+Branch `fix/seniority-thresholds-text-fusion`.
 
 ---
 
@@ -186,7 +201,31 @@ Pedir "~35 palavras" ao 8b produzia 14, com 50% de falha. Pedir **array com exat
 funcionou: 10/10 sem falha. E quando o modelo devolve **mais** do que o pedido, **truncar** é
 melhor que rejeitar.
 
-### 5.6 Outros
+### 5.6 Varredura de palavra-chave no documento inteiro erra o domínio em 4 de 5 currículos
+A heurística de domínio media **21,4%** de acerto nos 873 currículos porque escaneia o texto todo:
+a seção de formação contém "universidade", "curso", "ensino" em **qualquer** currículo, então
+`education` venceu 231 vezes. É o mesmo modo de falha da varredura global em
+`has_internship_terms`. Quando a mesma heurística recebe só títulos e skills, cai para 20,8% — mas
+aí devolve `general` em 372 casos em vez de errar com confiança. **Restringir o campo de leitura
+não conserta um decisor que não entende sinônimos; só troca o tipo de erro.**
+
+### 5.7 `ml/data/` era ignorado pelo git — a taxonomia não existia fora desta máquina
+`esco_occupations.jsonl` é **entrada de produto**, lido em tempo de inferência, mas estava sob a
+regra `ml/data/` do `.gitignore` junto com os dados derivados. Em qualquer clone o passo ESCO
+cairia silenciosamente na heurística. Como `ml/data/` (diretório) impede o git de descer na árvore,
+negar um arquivo lá dentro exige trocar a regra por `ml/data/*` e re-incluir os pais:
+
+```
+ml/data/*
+!ml/data/reference/
+ml/data/reference/*
+!ml/data/reference/esco_occupations.jsonl
+```
+
+O cache de embeddings (`esco_embeddings/*.npz`) continua fora do git — é derivado e depende do
+modelo. `*.npz` também já é ignorado globalmente.
+
+### 5.8 Outros
 - `ConnectionResetError` **não** é subclasse de `URLError` — capturar `OSError`
 - `urllib` é bloqueado por Cloudflare (erro 1010) sem `User-Agent` customizado
 - Job em background com stdout num pipe não drenado **trava** ao encher o buffer; redirecionar
@@ -195,78 +234,242 @@ melhor que rejeitar.
 
 ---
 
-## 6. Próxima tarefa: inferência de ocupação e domínio via ESCO
+## 6. Concluído: inferência de ocupação e domínio via ESCO
 
-### Problema
-`infer_domain_category` (`tasks/target_fit/domain_inference.py:273`) classifica o domínio por
-**substring de palavra-chave** sobre 13 categorias fixas (`health`, `education`, `legal`,
-`finance`, `engineering`, `marketing`, `sales`, `technology`, `administrative`, `science`, `hr`,
-`operations`, `creative`, mais `general`). É heurística pura, tem conjunto fechado, e falha em
-qualquer ocupação fora dos dicionários.
+### O que foi feito
+`infer_domain_category` deixou de ser decidida por substring de palavra-chave. Agora é uma
+cascata: **`domain_embeddings` → `domain_keywords`**. O passo neural embeda o texto e os labels
+das 1.701 ocupações ESCO **no idioma do currículo** com o MiniLM multilíngue que já estava
+carregado para `target_fit`, tira o cosseno, e deriva o domínio do **ISCO-08** da ocupação
+vencedora. Sem treino, sem rótulo, sem consumir orçamento de LLM.
 
-### Solução proposta
-**Classificação zero-shot por recuperação semântica**, sem treino e sem rótulo:
+A heurística continua no lugar como fallback e é ela que responde quando: embeddings estão
+desligados, o `sentence-transformers` não importa, a taxonomia não está no disco, ou o cosseno
+top-1 fica abaixo de `ANALYSIS_ESCO_MIN_COSINE` (0,20).
 
-1. Embedar o texto do currículo com o MiniLM multilíngue já carregado
-   (`get_embeddings_model`, `paraphrase-multilingual-MiniLM-L12-v2`)
-2. Embedar os labels das 1.701 ocupações ESCO **no idioma do currículo**
-3. Cosseno, top-k ocupações mais próximas
-4. Derivar o domínio do **código ISCO-08** da ocupação vencedora
+### Resultado medido (873 currículos do corpus, `eval_domain_inference_esco.py`)
 
-Isso é PLN real, usa taxonomia oficial internacional, cobre qualquer ocupação, e não consome
-orçamento de rotulagem.
+| Provider | Acurácia de domínio | Ocupação top-1 | top-5 |
+|---|---|---|---|
+| `domain_keywords` (produção anterior, texto todo) | **21,4%** | — | — |
+| `domain_keywords` (mesma evidência: títulos+skills) | 20,8% | — | — |
+| `domain_embeddings` (query de títulos+skills) | **85,5%** | **66,1%** | **79,6%** |
+| `domain_embeddings` (currículo inteiro como query) | 79,6% | 54,2% | 75,4% |
+| `domain_embeddings` (só resumo+bullets, sem títulos) | 64,5% | 30,2% | 51,5% |
 
-### Detalhe crítico: qual nível do ISCO usar
-**Grupos ISCO de 1 dígito são nível de qualificação, não domínio.** O grupo 2 ("Profissionais")
-junta médico, advogado e engenheiro. Mapear 1 dígito → domínio produz lixo.
+Por idioma (configuração escolhida): **en 93,4% · es 85,9% · pt 80,4%** de domínio;
+top-1 de ocupação 86,3% / 60,7% / 57,0%.
 
-O domínio está no prefixo de **2 dígitos**:
+Confiança calibrada nesses dados: **high 98,2%** (n=494) · **medium 87,5%** (n=184) ·
+**low 51,3%** (n=195). Ou seja, `confidence` agora é informação, não enfeite.
 
-| ISCO | Domínio |
-|---|---|
-| 21 | engineering / science |
-| 22 | health |
-| 23 | education |
-| 24 | finance / administrative |
-| 25 | technology |
-| 26 | legal / creative |
-| 3x | technicians (usar 3 dígitos para desambiguar) |
-| 33 | finance / administrative |
-| 34 | legal / creative / hr |
-| 5x | sales / operations |
-| 7x, 8x | operations |
+**Ressalva honesta para a banca:** o gerador escreve o label ESCO dentro dos títulos dos cargos,
+então as linhas com título são um **limite superior**. A linha "só resumo+bullets" (64,5% de
+domínio, 30,2% de ocupação) é o piso — o que sobra quando o modelo tem de recuperar a ocupação a
+partir do trabalho descrito. O número honesto para currículo real está entre os dois, e mesmo o
+piso é 3× a heurística.
 
-A tabela acima precisa ser completada consultando a estrutura ISCO-08. O campo `isco` no
-`esco_occupations.jsonl` vem no formato `2165.4.1` — o prefixo antes do primeiro ponto é o código
-ISCO de 4 dígitos.
+### Decisões tomadas com base na medição
+- **Query de ocupação é título-primeiro** (`build_occupation_query`: targetPosition + cargos +
+  skills + cursos). Bate o currículo inteiro em 6 pontos de domínio e 12 de ocupação: label ESCO é
+  título, e parágrafos de realização diluem o sinal. O texto completo continua indo para a
+  heurística de fallback, que precisa dele.
+- **Só labels preferenciais** (`max_alt_labels=0`). Incluir 4 labels alternativos por ocupação
+  *piorou* (84,0% vs 85,5%; top-1 63,1% vs 66,1%): puxa a query para quem tem mais sinônimos
+  cadastrados. Ficou configurável porque é mensurável.
+- **Confiança pela margem entre domínios**, não pelo cosseno absoluto. Acurácia por margem:
+  98% acima de 0,10 · 90% entre 0,05 e 0,10 · 35–62% abaixo de 0,05. O cosseno quase não separa
+  (p05 = 0,579), então cosseno alto com margem fina é ambiguidade, exatamente como previsto.
+- **ISCO de 2 dígitos como base, 3 e 4 para desambiguar.** `isco_domains.py` faz busca por
+  **prefixo mais longo** (4 → 3 → 2). Assim `2166` (designers) vai para `creative` sem tirar
+  `21` de `engineering`, e `1211` (finance managers) sai de `administrative` para `finance`.
+  Cobertura: **0,6%** das 1.701 ocupações caem em `general`.
 
-### Requisitos de implementação
-- **Cascata, não substituição.** Novo passo `domain_embeddings` **antes** da heurística de
-  palavra-chave, que permanece como fallback (exigência de arquitetura do TCC)
-- **Cache dos embeddings do ESCO.** 1.701 × 384 dimensões é pequeno; calcular uma vez por processo
-  (ou pré-computar em disco) e reusar. Nunca reembedar por requisição
-- **Retornar o contrato atual** (`domainCategory`, `confidence`, `evidenceTokens`) para não quebrar
-  os consumidores em `fit_signals.py:200,242`. Enriquecer com a ocupação ESCO e o código ISCO em
-  campos novos
-- **Confiança pelo gap**, não pelo cosseno absoluto: diferença entre o top-1 e o top-2. Cosseno
-  alto com gap pequeno significa ambiguidade, não certeza
-- **Idioma**: usar o label ESCO no idioma do currículo. Os labels pt/es trazem variantes de gênero
-  separadas por `/` (`Operador.../Operadora...`) — separar e usar uma
-- Sem comentários em código, e se algum for inevitável, em inglês (preferência do repositório)
+### Onde ficou o código
+- `tasks/target_fit/esco_retrieval.py` — índice, cache, recuperação, confiança, query
+- `tasks/target_fit/isco_domains.py` — mapa ISCO → domínio
+- `tasks/target_fit/domain_inference.py` — a cascata
+- Contrato: `domainCategory` / `confidence` / `evidenceTokens` intactos (consumidores em
+  `fit_signals.py` e `ml_feature_row.py` não sabem que algo mudou). No caminho neural a resposta
+  ganha `provider`, `escoOccupation` (uri, label, isco, iscoGroup, cosine), `domainMargin` e
+  `occupationGap`. No fallback o shape é **byte a byte o de antes** — foi assim que o golden
+  snapshot continuou passando sem regravar baseline.
 
-### Como validar
-- Os 864 currículos do corpus têm a **ocupação ESCO verdadeira** nos metadados
-  (`occupation.uri`, `occupation.isco`). Isso é um conjunto de avaliação pronto e gratuito:
-  medir acurácia top-1 e top-5 de recuperação da ocupação, e acurácia do domínio derivado
-- Comparar contra a heurística atual no mesmo conjunto — é o número que vai para o TCC
-- Medir por idioma separadamente (pt/en/es), para provar que funciona nos três
-- Rodar `apps.analysis.tests`; qualquer falha além das 5 pré-existentes é regressão
+### Custo em produção
+Índice de 1.701 labels × 384 dims por idioma, gravado em
+`ml/data/reference/esco_embeddings/<modelo>__<lang>__alt0.npz` (2,4 MB cada). Processo novo lê o
+arquivo em vez de reembedar; `warmup.py` faz isso no startup do Celery. Medido: primeira análise
+31s (carga do MiniLM inclusa), seguintes **1,4–1,6s**. Nunca reembeda por requisição.
+
+### Limitação conhecida (candidata a próxima melhoria)
+**51% das ocupações ESCO caem em `operations`** — as 13 categorias do produto são de colarinho
+branco e jogam ofícios, operação de máquina, transporte e serviços todos no mesmo balde. A
+recuperação acerta a ocupação e depois perde resolução no mapeamento. Corrigir exige mexer em
+`DOMAIN_CATEGORIES`, que muda o comprimento do one-hot em `ml_feature_row.py` e invalida o bundle
+`target_fit_v1` — é mudança deliberada, com retreino, não ajuste de passagem.
 
 ---
 
-## 7. Backlog de senioridade (retomar quando o orçamento do 70b resetar)
+## 7. Roadmap: tirar a heurística de decisão de TODA a análise
 
-1. **Rotular os 864 currículos** com `llama-3.3-70b-versatile` (~195/dia → ~4-5 dias).
+Objetivo declarado: **nenhuma área da análise decide por regra quando um modelo pode decidir.**
+São ~20 pontos de decisão, mas não são 20 projetos — colapsam em **4 famílias de modelo**.
+
+### 7.1 Inventário completo
+
+**Grupo A — julgamento do texto** (um corpus, um professor, uma passada de rotulagem, várias cabeças)
+
+| Área | Decisor hoje | Vira | Rótulo |
+|---|---|---|---|
+| `seniority` | `rule_based_seniority`: faixas de meses + vetos | classificador ordinal sobre texto | rubrica do professor |
+| `quality` (78% do score) | `_heuristic_score`: 5 flags de regex | regressor multi-dimensão | rubrica |
+| `ats` | **cópia literal de `quality_score`** (`orchestrator.py:758`) | cabeça própria: higiene de palavra-chave e estrutura | rubrica |
+| `clarity` | **cópia literal de `quality_score`** (`orchestrator.py:759`) | cabeça própria: clareza e concisão | rubrica |
+| `has_metrics`, `has_action_verbs`, `has_leadership`, termos de estágio | `METRICS_PATTERN`, `ACTION_VERBS`, `LEADERSHIP_WORDS`, `_INTERNSHIP_RE` | classificador **por bullet** (~4.4k bullets no corpus) | desenho do gerador + verificação do professor |
+| `insights` (quais forças/melhorias mostrar) | `derive_insights`: if/else sobre as flags | ranking pelas cabeças acima, por ganho esperado | nenhum novo |
+| caps de completeness (40/72) | tabela fixa | abstenção calibrada sobre a incerteza do modelo | nenhum novo |
+
+**Grupo B — correspondência semântica** (encoder, quase sem rótulo novo)
+
+| Área | Decisor hoje | Vira | Rótulo |
+|---|---|---|---|
+| domínio/ocupação | ✅ `domain_embeddings` (§6) | feito | — |
+| `target_fit` | 0,65 × cosseno + **0,35 × policy** | 100% encoder + cabeça calibrada | revisão humana (`reviewed_score`) — **nunca** o score da policy, que é circular |
+| `matching` | cosseno ✅, mas evidência é interseção de tokens | extração de termo por similaridade no nível do token, mesmo encoder | nenhum |
+| `careerSwitch`, clamps de `targetSeniority` | if/else sobre score e domínio | classificador sobre (emb currículo, emb alvo) | revisão humana |
+| provider de matching na telemetria | **bug: reporta `heuristics` mesmo quando o cosseno respondeu** | propagar o provider da cascata | — |
+
+**Grupo C — extração e estruturação** (modelos prontos, zero rótulo)
+
+| Área | Decisor hoje | Vira |
+|---|---|---|
+| PII no `text_sanitizer` | regex | NER multilíngue |
+| idioma | **não existe** — vem da request | detector de idioma |
+| seções, bullets, datas, meses | leitura de campo e aritmética | **continua programático** (ver 7.4) |
+
+**Grupo D — geração**
+
+| Área | Decisor hoje | Vira |
+|---|---|---|
+| recomendações | 5 templates fixos em 3 idiomas (`EXAMPLE_TEMPLATES`) | `llm_feedback.py` (já existe, `ANALYSIS_LLM_FEEDBACK_ENABLED=false`) com os templates como fallback |
+
+### 7.2 A economia que faz isso caber: uma passada, uma rubrica
+
+O professor lê o currículo **uma vez** e devolve um JSON com tudo: banda de senioridade, as quatro
+dimensões de qualidade, e os atributos por bullet. `label_rubric_llm_v3.py` faz isso em dois
+estágios porque os dois modelos têm **orçamentos diários independentes**: julgamento no 70b,
+atributos por bullet no 8b.
+
+**Custo medido pela API (`usage`), não estimado** — 8 itens por estágio:
+
+| Estágio | Modelo | tokens/item | itens/dia | 873 currículos |
+|---|---|---|---|---|
+| judgment (banda + 4 dimensões) | 70b | **1.273** (1.235 prompt + 38 saída) | ~79 | **11,1 dias** |
+| bullets (3 atributos por bullet) | 8b | 695 (463 + 232) | ~719 | 1,2 dias |
+| judgment no 8b (mesma rubrica) | 8b | ~1.273 | ~392 | ~2,2 dias |
+
+**Ablação de professor × prompt** (mesmos 8 currículos, `--compare` mede professor contra professor):
+
+| Configuração | tokens/item | itens/dia | Banda exata vs 70b-fewshot | MAE das 4 dimensões |
+|---|---|---|---|---|
+| 70b + few-shot (referência) | 1.273 | 79 | — | — |
+| **70b + prompt curto (`--terse`)** | **825** | **121** | **5/8 (62%) · ±1 = 100%** | 0,12–0,25 |
+| 8b + prompt curto | ~650 | ~770 | 2/8 (25%) · ±1 = 88% | 0,12–**1,00** |
+
+Isolando um fator por vez: **encurtar o prompt é seguro, trocar o professor não é.** O prompt curto
+no 70b preserva as dimensões (erro médio 0,12–0,25 numa escala de 5) e corta 35% do custo. O 8b com
+o *mesmo* prompt cai a **25% de acerto de banda — o nível do chute para 4 classes** — e erra um
+ponto inteiro em `impact`. O 8b concorda em `language` (0,12) e razoavelmente em `clarity`/`ats`
+(0,75): serve para atributo mecânico (o estágio de bullets acertou 8/8 o contrato), não para julgar
+escopo de carreira. Ressalva: n=8, é sonda.
+
+Três coisas que essa medição estabelece:
+
+1. **Os ~195 rótulos/dia registrados em 5.1 estavam otimistas por ~2,5×.** O número real do 70b é
+   **79/dia** com a rubrica. Rotular os 873 no 70b é 11 dias, não 5.
+2. **A rubrica saiu de graça; o prompt é que custa.** A saída são 38 tokens de 1.273 — as quatro
+   dimensões de qualidade custaram ~18 tokens/item. Quem consome o orçamento é o system prompt +
+   few-shot, pagos 873 vezes. Encurtá-los é a única otimização grande de graça: cortar os dois
+   few-shots (~400 tokens) deve levar o 70b a ~125 itens/dia.
+3. **O contrato estrutural do 8b funciona**: 8/8 devolveram exatamente N objetos por bullet,
+   confirmando 5.5 (restrição estrutural funciona, restrição de contagem não).
+
+Corolário: rotular duas vezes (uma passada para senioridade, outra para qualidade) custaria o dobro
+do orçamento escasso. A rubrica tem de estar definida **antes** de disparar a rotulagem.
+
+### 7.2.1 A dimensão de qualidade nasce constante neste corpus
+
+Nos 8 itens de sonda o professor deu **impact 4,88 · clarity 4,88 · ats 5,00 · language 5,00** —
+8 de 8 no topo em duas dimensões. Não é o professor que está quebrado: **868 dos 873 currículos
+foram gerados sem `quality_target`**, portanto todos com a instrução `good` (ver §4). Rotular
+qualidade neste corpus hoje é comprar uma coluna constante.
+
+**A geração de prosa degradada (`poor`/`fair`) precisa vir antes da rotulagem de qualidade.** É no
+8b, não compete com o orçamento do 70b, e o gerador de specs já sorteia `quality_target`
+uniformemente (`generate_resume_specs_v3.py:315`) — specs novos saem instantaneamente, sem API.
+
+`specs_q2.jsonl`: **700 specs** gerados com seed 20260810 e prefixo `q`, qualidade
+223 poor / 237 fair / 240 good, bandas 173/177/177/173, 529 ocupações distintas, 30 grupos
+paralelos.
+
+### 7.2.2 Rotular o corpus NOVO, não o antigo
+
+O corpus antigo serve a **um** pilar: qualidade nele é constante, então rotulá-lo custaria 7,2 dias
+para cobrir os 12% da senioridade. Os specs novos têm `band_target` balanceado **e**
+`quality_target` uniforme — um único rótulo por currículo alimenta os dois pilares, mais os
+atributos por bullet. É por isso que a fila é: prosa nova (8b) → judgment terse (70b) → bullets (8b),
+e o corpus antigo fica como validação extra de senioridade se sobrar orçamento.
+
+Com 121 itens/dia no 70b-terse: **360 currículos ≈ 3,0 dias** e cobre senioridade + as 4 dimensões
+de qualidade + os bullets.
+
+### 7.2.3 O teto por minuto é o que trava os jobs, não o diário
+
+O 8b tem **6.000 tokens/min**. A ~1,9k tokens por currículo de prosa, isso são ~3 itens/min: o
+default de `--workers 2 --delay 6` tenta ~20/min e o job passa a vida em backoff de 429. Use
+`--delay 10` ou mais. E nunca rode um job de background com stdout num pipe de `grep`: o pipe não
+drenado esconde justamente as mensagens de 429 (§5.6).
+
+### 7.3 O que cada grupo destrava
+
+- **A** cobre `quality` + `ats` + `clarity` + `seniority` + as 4 famílias de regex + a seleção de
+  insights. É 90% do score e a maior parte do texto que o usuário lê.
+- **B** já está quase todo neural; falta tirar a fatia policy de 35% do `target_fit` e trocar a
+  evidência de sobreposição por extração semântica.
+- **C** e **D** não precisam de rótulo: são modelos pré-treinados e geração.
+
+### 7.4 O que continua programático — e por quê
+
+Extração de campo, aritmética de datas, contagem de bullets, truncamento e o fallback de i18n
+**não são julgamentos, são medição**. Foi justamente o controle exato dessas distribuições que
+salvou o corpus v3, e trocá-las por modelo adicionaria erro sem adicionar inteligência. A linha
+defensável na banca é: *o modelo julga, o código mede*. O que muda é que os **caps** derivados da
+medição (40/72) deixam de ser constantes e passam a ser abstenção calibrada na incerteza do modelo.
+
+### 7.5 Definição de pronto
+
+1. `ml/models/` deixa de estar vazio: artefato versionado e carregado (hoje qualquer treino cai em
+   fallback silencioso, com `ANALYSIS_SIGNALS_ML_ENABLED=false` e `TEXT_SENIORITY_ENABLED=false`)
+2. **teste de guarda**: para um currículo bem formado, nenhum provider da resposta pode ser
+   `heuristics` / `rule_policy` / `target_fit_policy` / `domain_keywords`
+3. telemetria reporta o provider **que respondeu**, não o bundle que existia
+4. pesos 0,78/0,12/0,10, `SENIORITY_TO_SCORE` e `cosine_to_fit_score` ajustados em rótulo humano
+   de score geral, ou declarados como política de produto
+
+### 7.6 Ordem de execução
+
+1. Definir a rubrica e estender o rotulador **antes** de gastar orçamento (7.2)
+2. Disparar a rotulagem (tempo de parede, roda desatendida)
+3. Em paralelo, sem API: Grupo C (NER + idioma), o bug de provider do matching, o teste de guarda
+4. Cabeças do Grupo A conforme os rótulos chegam
+5. Grupo B: cabeça calibrada de `target_fit`, evidência semântica de matching
+6. Grupo D: ligar a geração com fallback nos templates
+
+---
+
+## 8. Backlog de senioridade (retomar quando o orçamento do 70b resetar)
+
+1. **Rotular os 873 currículos** com `llama-3.3-70b-versatile` (~195/dia → ~4-5 dias).
    O renderizador dedicado (`render_for_labelling`) já inclui bullets e duração
 2. **Revisão manual de ~50 rótulos** via `build_label_review_sample.py` (amostra estratificada:
    40% discordâncias, 20% grupos com divergência de idioma, 40% baseline)
