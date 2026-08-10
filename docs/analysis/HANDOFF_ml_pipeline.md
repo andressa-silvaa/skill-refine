@@ -423,12 +423,24 @@ e o corpus antigo fica como validação extra de senioridade se sobrar orçament
 Com 121 itens/dia no 70b-terse: **360 currículos ≈ 3,0 dias** e cobre senioridade + as 4 dimensões
 de qualidade + os bullets.
 
-### 7.2.3 O teto por minuto é o que trava os jobs, não o diário
+### 7.2.3 Pacing e o teto diário do 8b
 
-O 8b tem **6.000 tokens/min**. A ~1,9k tokens por currículo de prosa, isso são ~3 itens/min: o
-default de `--workers 2 --delay 6` tenta ~20/min e o job passa a vida em backoff de 429. Use
-`--delay 10` ou mais. E nunca rode um job de background com stdout num pipe de `grep`: o pipe não
-drenado esconde justamente as mensagens de 429 (§5.6).
+Dois tetos diferentes, e confundi-los custa tempo:
+
+- **Por minuto**: o 8b tem 6.000 tokens/min. A ~1,9k tokens por currículo de prosa são ~3 itens/min,
+  então `--workers 1 --delay 20`. O default `--workers 2 --delay 6` tenta ~23k tokens/min e o job
+  passa a vida em backoff.
+- **Por dia (TPD)**: 500.000 no 8b, 100.000 no 70b, e **só aparecem no corpo do 429** — os headers
+  `x-ratelimit-*` mostram apenas requisições/dia e tokens/**min**. Corpo real medido:
+  `on tokens per day (TPD): Limit 500000, Used 499678 ... service tier on_demand`.
+
+A janela do TPD é **rolante**, não meia-noite: o `retry-after` volta em segundos e a cota
+libera conforme o uso de 24h atrás sai da janela. Um job resumível com `--delay` alto continua
+pingando; não precisa esperar o "dia seguinte" inteiro.
+
+Diagnóstico em uma chamada, quando um job entrar em 429 sem explicação: peça `max_tokens` alto ao
+modelo suspeito e imprima `HTTPError.read()`. E nunca rode job de background com stdout num pipe de
+`grep`: o pipe não drenado esconde justamente as mensagens de 429 (§5.6).
 
 ### 7.3 O que cada grupo destrava
 
