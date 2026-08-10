@@ -24,7 +24,7 @@ from .resume_mapper import resume_to_text
 from .resume_signals import is_thin_student_or_intern_profile
 from .safety import truncate_text
 from .signals import extract_resume_signals
-from .tasks.matching import predict_matching
+from .tasks.matching import predict_matching_detailed
 from .tasks.quality import predict_quality
 from .tasks.seniority import (
     SENIORITY_LABELS,
@@ -507,6 +507,7 @@ def _resolve_quality_and_matching(
 ) -> dict[str, Any]:
     quality_bundle = get_quality_bundle(language=lang, config=config)
     matching_bundle = get_matching_bundle(language=lang, config=config) if job_text else None
+    matching_provider = ""
 
     if _quality_needs_seniority_first(quality_bundle):
         quality_score, quality_flags = predict_quality(
@@ -519,7 +520,7 @@ def _resolve_quality_and_matching(
         )
         matching_score = 0
         if job_text:
-            matching_score, _ = predict_matching(
+            matching_score, _, matching_provider = predict_matching_detailed(
                 resume_text,
                 job_text,
                 lang,
@@ -537,7 +538,7 @@ def _resolve_quality_and_matching(
         )
         matching_score = 0
         if job_text:
-            matching_score, _ = predict_matching(
+            matching_score, _, matching_provider = predict_matching_detailed(
                 resume_text,
                 job_text,
                 lang,
@@ -551,7 +552,38 @@ def _resolve_quality_and_matching(
         "quality_score": quality_score,
         "quality_flags": quality_flags,
         "matching_score": matching_score,
+        "matching_extra": _matching_extra(matching_provider, matching_bundle),
     }
+
+
+def _matching_extra(
+    provider: str,
+    matching_bundle: tuple[Any, dict] | None,
+) -> dict[str, Any] | None:
+    """
+    Metadata for the step that actually scored the match.
+
+    The bundle's own extra is right only when a bundle answered; when the cascade fell through to
+    the sentence embeddings or to keyword overlap, the bundle describes an artifact that did not
+    produce the number.
+    """
+    if provider in ("matching_custom", "matching_hf"):
+        if isinstance(matching_bundle, tuple) and isinstance(matching_bundle[1], dict):
+            return matching_bundle[1]
+        return None
+    if provider == "matching_embeddings":
+        name = str(getattr(settings, "ANALYSIS_EMBEDDINGS_MODEL_NAME", "") or "MiniLM")
+        return {
+            "provider": "matching_embeddings",
+            "metadata": {
+                "model_name_base": name.split("/")[-1][:48],
+                "model_version": "matching_embeddings_v1",
+                "dataset_version": "",
+            },
+        }
+    if provider == "heuristics":
+        return {"provider": "heuristics", "metadata": {}}
+    return None
 
 
 def analyze_resume(
@@ -640,11 +672,13 @@ def analyze_resume(
 
     metadata_seniority = model_bundle[1] if isinstance(model_bundle[1], dict) else {}
     metadata_quality = quality_bundle[1] if isinstance(quality_bundle, tuple) and isinstance(quality_bundle[1], dict) else {}
-    metadata_matching = (
-        matching_bundle[1]
-        if isinstance(matching_bundle, tuple) and isinstance(matching_bundle[1], dict)
-        else {}
-    )
+    metadata_matching = qm.get("matching_extra")
+    if not isinstance(metadata_matching, dict):
+        metadata_matching = (
+            matching_bundle[1]
+            if isinstance(matching_bundle, tuple) and isinstance(matching_bundle[1], dict)
+            else {}
+        )
     model_metadata_by_task = build_model_metadata_by_task(
         config=config,
         metadata_seniority=metadata_seniority,

@@ -464,6 +464,9 @@ class AnalyzeResumeStableShapeTest(TestCase):
             "en-US=analysis_seniority_multi_v2_light;"
             "es-ES=analysis_seniority_multi_v2_light"
         ),
+        # Pinned off: matching now reports the step that answered, so with embeddings enabled the
+        # version below would be matching_embeddings_v1 and the assertion would depend on .env.
+        ANALYSIS_EMBEDDINGS_ENABLED=False,
     )
     def test_analyze_resume_exposes_task_specific_model_metadata(self) -> None:
         resume_data = {
