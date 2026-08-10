@@ -3,12 +3,34 @@ Signals-only sklearn seniority inference (used with loader_signals_model singlet
 """
 from __future__ import annotations
 
+import math
 from typing import Any
 
 import numpy as np
 
 from ...signals.types import ResumeSignals
 from .signals_ml_policy import apply_signals_ml_gates, raw_argmax_label
+
+
+FEATURE_TRANSFORM = "log1p_v1"
+
+# Must stay byte-for-byte equivalent to LOG1P_FEATURES in ml/training/src/signals_features.py.
+# A silent divergence here is the worst failure mode available: the model would receive a feature
+# space it was never fitted on and still answer confidently, which is exactly how
+# seniority_signals_v1 came to label every real resume "intern". The bundle records which
+# transform it was trained with and the loader refuses a mismatch.
+LOG1P_FEATURES = frozenset(
+    {
+        "summary_char_count",
+        "word_count",
+        "total_months_experience",
+        "effective_months_experience",
+        "months_in_current_role",
+        "bullets_count",
+        "experiences_count",
+        "skills_count",
+    }
+)
 
 
 def signals_to_feature_dict(signals: ResumeSignals) -> dict[str, float]:
@@ -21,7 +43,7 @@ def signals_to_feature_dict(signals: ResumeSignals) -> dict[str, float]:
         if isinstance(v, bool):
             out[k] = 1.0 if v else 0.0
         elif isinstance(v, (int, float)):
-            out[k] = float(v)
+            out[k] = math.log1p(max(0.0, float(v))) if k in LOG1P_FEATURES else float(v)
     return out
 
 

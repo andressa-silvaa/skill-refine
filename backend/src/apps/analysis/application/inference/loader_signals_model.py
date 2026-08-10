@@ -11,6 +11,8 @@ import threading
 from pathlib import Path
 from typing import Any
 
+from .tasks.seniority.signals_ml_predict import FEATURE_TRANSFORM
+
 logger = logging.getLogger(__name__)
 
 _lock = threading.Lock()
@@ -20,6 +22,21 @@ _cache: dict[str, Any | None] = {}
 def _expected_task(meta: dict[str, Any]) -> bool:
     t = str(meta.get("task") or "").strip().lower()
     return t in {"", "seniority_signals", "seniority-signals"}
+
+
+def _assert_feature_transform(meta: dict[str, Any]) -> None:
+    """
+    Refuse a bundle fitted on a different feature transform than inference applies.
+
+    Serving a model whose features were built by another formula produces confident nonsense with
+    no error anywhere — it is how seniority_signals_v1 came to answer "intern" for every real
+    resume. Failing to load instead falls back to the rule policy, which is auditable.
+    """
+    declared = str(meta.get("feature_transform") or "").strip()
+    if declared != FEATURE_TRANSFORM:
+        raise ValueError(
+            f"feature transform mismatch: bundle={declared or 'none'} inference={FEATURE_TRANSFORM}"
+        )
 
 
 def load_signals_ml_bundle(model_dir: Path) -> dict[str, Any]:
@@ -41,6 +58,7 @@ def load_signals_ml_bundle(model_dir: Path) -> dict[str, Any]:
     for key in ("pipeline", "label_encoder", "feature_names"):
         if key not in bundle:
             raise ValueError(f"invalid bundle: missing {key}")
+    _assert_feature_transform(meta)
     bundle["_metadata"] = meta
     return bundle
 
