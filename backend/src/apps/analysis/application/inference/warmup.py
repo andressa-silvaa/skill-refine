@@ -7,6 +7,8 @@ from django.conf import settings
 
 from .config import get_config
 from .loader import get_matching_bundle, get_model_bundle, get_quality_bundle
+from .tasks.target_fit.esco_retrieval import warm_occupation_index
+from .tasks.target_fit.loader_embeddings import get_embeddings_model
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +33,17 @@ def prewarm_analysis_models() -> None:
     started_at = time.monotonic()
     loaded: list[str] = []
 
+    esco_model = None
+    if config.get("embeddings_enabled") and config.get("esco_domain_enabled"):
+        esco_model = get_embeddings_model(settings)
+
     for language in languages:
         lang_started_at = time.monotonic()
         get_model_bundle(task="seniority", language_mode=language_mode, language=language, config=config)
         get_quality_bundle(language=language, config=config)
         get_matching_bundle(language=language, config=config)
+        if esco_model is not None:
+            warm_occupation_index(esco_model, language, config.get("esco_options"))
         loaded.append(f"{language}:{int((time.monotonic() - lang_started_at) * 1000)}ms")
 
     logger.info(

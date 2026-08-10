@@ -53,6 +53,7 @@ from .tasks.target_fit.embedding import (
     build_target_embedding_text,
     embedding_fit_scores,
 )
+from .tasks.target_fit.esco_retrieval import build_occupation_query
 from .tasks.target_fit.loader_embeddings import get_embeddings_model
 from .tasks.target_fit.loader_ml import (
     get_target_fit_ml_bundle,
@@ -240,6 +241,31 @@ def _resolve_seniority(
     }
 
 
+def _domain_block(domain: dict[str, Any]) -> dict[str, Any]:
+    """
+    Public shape of a domain inference: the legacy contract, plus the ESCO enrichment only on the
+    retrieval path — the keyword fallback keeps the exact shape consumers already receive.
+    """
+    block: dict[str, Any] = {
+        "category": domain.get("domainCategory"),
+        "confidence": domain.get("confidence"),
+        "evidenceTokens": list(domain.get("evidenceTokens") or [])[:8],
+    }
+    occupation = domain.get("occupation") if isinstance(domain.get("occupation"), dict) else None
+    if occupation:
+        block["provider"] = str(domain.get("provider") or "domain_embeddings")
+        block["escoOccupation"] = {
+            "uri": occupation.get("uri") or "",
+            "label": occupation.get("label") or "",
+            "isco": occupation.get("isco") or "",
+            "iscoGroup": occupation.get("iscoGroup") or "",
+            "cosine": occupation.get("cosine"),
+        }
+        block["domainMargin"] = domain.get("domainMargin")
+        block["occupationGap"] = domain.get("occupationGap")
+    return block
+
+
 def _resolve_target_fit(
     *,
     resume_data: dict[str, Any],
@@ -284,9 +310,25 @@ def _resolve_target_fit(
             "target_fit_bundle_extra": target_fit_bundle_extra,
         }
 
-    domain_target = infer_domain_category(f"{target_pos} {job_text}".strip(), lang=lang)
+    emb_model = get_embeddings_model(settings) if config.get("embeddings_enabled") else None
+    esco_model = emb_model if config.get("esco_domain_enabled") else None
+    esco_options = config.get("esco_options") or {}
+
+    domain_target = infer_domain_category(
+        f"{target_pos} {job_text}".strip(),
+        lang=lang,
+        embeddings_model=esco_model,
+        occupation_query=target_pos,
+        esco_options=esco_options,
+    )
     resume_domain_text = (resume_text[:12000] if resume_text else "") or sections.full_text[:12000]
-    domain_resume = infer_domain_category(resume_domain_text, lang=lang)
+    domain_resume = infer_domain_category(
+        resume_domain_text,
+        lang=lang,
+        embeddings_model=esco_model,
+        occupation_query=build_occupation_query(resume_data),
+        esco_options=esco_options,
+    )
     tf_signals = extract_target_fit_signals(
         resume_data,
         target_pos,
@@ -368,7 +410,6 @@ def _resolve_target_fit(
     fit_signals_score = int(fit_score)
     fit_embedding_score = None
     semantic_kw: list[str] = []
-    emb_model = get_embeddings_model(settings) if config.get("embeddings_enabled") else None
     if emb_model is not None:
         try:
             cv_emb_text = build_cv_embedding_text(sanitized_cv)
@@ -425,16 +466,8 @@ def _resolve_target_fit(
         "targetFitFinalScore": int(fit_score),
         "targetSeniorityLabel": target_seniority_label,
         "targetSeniorityClampReasons": list(ts_pack.get("clampReasonKeys") or []),
-        "targetRoleDomain": {
-            "category": domain_target.get("domainCategory"),
-            "confidence": domain_target.get("confidence"),
-            "evidenceTokens": list(domain_target.get("evidenceTokens") or [])[:8],
-        },
-        "resumeDomain": {
-            "category": domain_resume.get("domainCategory"),
-            "confidence": domain_resume.get("confidence"),
-            "evidenceTokens": list(domain_resume.get("evidenceTokens") or [])[:8],
-        },
+        "targetRoleDomain": _domain_block(domain_target),
+        "resumeDomain": _domain_block(domain_resume),
         "targetFitEvidence": tfe,
         "careerSwitch": {
             "detected": bool(career_sw.get("detected")),

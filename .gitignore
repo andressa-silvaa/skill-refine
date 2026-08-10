@@ -79,7 +79,11 @@ ml/models/
 *.safetensors
 
 # Dados gerados/derivados — reproduzíveis via ml/scripts/generate_resumes_v2.py (seed fixo)
-ml/data/
+ml/data/*
+# The ESCO taxonomy is a product input, not generated data: inference reads it at runtime.
+!ml/data/reference/
+ml/data/reference/*
+!ml/data/reference/esco_occupations.jsonl
 *.onnx
 *.h5
 

@@ -75,6 +75,16 @@ ANALYSIS_EMBEDDINGS_MODEL_NAME = env.str(
 # Final target fit = w * embedding + (1-w) * signals (policy / sklearn).
 ANALYSIS_TARGET_FIT_EMBED_WEIGHT = env.float("ANALYSIS_TARGET_FIT_EMBED_WEIGHT", default=0.65)
 
+# Zero-shot domain inference by retrieval over the ESCO occupation taxonomy (needs embeddings).
+ANALYSIS_ESCO_DOMAIN_ENABLED = env.bool("ANALYSIS_ESCO_DOMAIN_ENABLED", default=True)
+ANALYSIS_ESCO_OCCUPATIONS_PATH = env.str("ANALYSIS_ESCO_OCCUPATIONS_PATH", default="")
+ANALYSIS_ESCO_EMBEDDINGS_DIR = env.str("ANALYSIS_ESCO_EMBEDDINGS_DIR", default="")
+ANALYSIS_ESCO_TOP_K = env.int("ANALYSIS_ESCO_TOP_K", default=5)
+# Below this cosine the nearest occupation is noise; the keyword fallback takes over.
+ANALYSIS_ESCO_MIN_COSINE = env.float("ANALYSIS_ESCO_MIN_COSINE", default=0.20)
+# Preferred labels only: alternative labels measured worse on the v3 corpus.
+ANALYSIS_ESCO_MAX_ALT_LABELS = env.int("ANALYSIS_ESCO_MAX_ALT_LABELS", default=0)
+
 # Overall score = quality-only, or blend with seniority / target fit (reduces plateau).
 ANALYSIS_OVERALL_BLEND_ENABLED = env.bool("ANALYSIS_OVERALL_BLEND_ENABLED", default=True)
 ANALYSIS_OVERALL_WEIGHT_QUALITY = env.float("ANALYSIS_OVERALL_WEIGHT_QUALITY", default=0.78)

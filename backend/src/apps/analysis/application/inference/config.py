@@ -61,6 +61,23 @@ def _parse_model_version_by_task_lang(raw: str) -> dict[str, str]:
     return out
 
 
+def _esco_options(settings) -> dict:
+    """Kwargs for esco_retrieval; omitted keys keep the module defaults."""
+    options: dict = {
+        "top_k": int(getattr(settings, "ANALYSIS_ESCO_TOP_K", 5)),
+        "min_cosine": float(getattr(settings, "ANALYSIS_ESCO_MIN_COSINE", 0.20)),
+        "max_alt_labels": int(getattr(settings, "ANALYSIS_ESCO_MAX_ALT_LABELS", 0)),
+        "model_name": str(getattr(settings, "ANALYSIS_EMBEDDINGS_MODEL_NAME", "") or ""),
+    }
+    occupations_path = str(getattr(settings, "ANALYSIS_ESCO_OCCUPATIONS_PATH", "") or "").strip()
+    if occupations_path:
+        options["occupations_path"] = occupations_path
+    cache_dir = str(getattr(settings, "ANALYSIS_ESCO_EMBEDDINGS_DIR", "") or "").strip()
+    if cache_dir:
+        options["cache_dir"] = cache_dir
+    return options
+
+
 def get_config(settings) -> dict:
     """
     Build config dict from Django settings.
@@ -110,6 +127,8 @@ def get_config(settings) -> dict:
         "text_seniority_fusion_enabled": bool(getattr(settings, "ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED", True)),
         "embeddings_enabled": bool(getattr(settings, "ANALYSIS_EMBEDDINGS_ENABLED", False)),
         "target_fit_embed_weight": float(getattr(settings, "ANALYSIS_TARGET_FIT_EMBED_WEIGHT", 0.65)),
+        "esco_domain_enabled": bool(getattr(settings, "ANALYSIS_ESCO_DOMAIN_ENABLED", True)),
+        "esco_options": _esco_options(settings),
         "overall_blend_enabled": bool(getattr(settings, "ANALYSIS_OVERALL_BLEND_ENABLED", True)),
         "overall_w_quality": float(getattr(settings, "ANALYSIS_OVERALL_WEIGHT_QUALITY", 0.78)),
         "overall_w_seniority": float(getattr(settings, "ANALYSIS_OVERALL_WEIGHT_SENIORITY", 0.12)),
