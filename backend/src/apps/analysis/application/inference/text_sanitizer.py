@@ -4,6 +4,7 @@ Sanitized resume/job text for neural inference (no PII in model input).
 from __future__ import annotations
 
 import re
+from datetime import date
 from typing import Any
 
 EMAIL_RE = re.compile(r"\b[\w.+-]+@[\w-]+\.[\w.-]+\b", re.I)
@@ -27,10 +28,41 @@ def _clean_ws(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").strip())
 
 
-def resume_to_text_sanitized(resume_data: dict[str, Any], *, max_chars: int = 2000) -> str:
+def _duration_months(exp: dict[str, Any]) -> int:
+    def ym(value: Any) -> tuple[int, int] | None:
+        parts = str(value or "").strip().split("-")
+        if len(parts) >= 2:
+            try:
+                return int(parts[0]), int(parts[1])
+            except ValueError:
+                return None
+        return None
+
+    start = ym(exp.get("startDate"))
+    if not start:
+        return 0
+    today = date.today()
+    end = (
+        (today.year, today.month)
+        if exp.get("isCurrent") or not exp.get("endDate")
+        else ym(exp.get("endDate"))
+    )
+    if not end:
+        return 0
+    return max(0, (end[0] - start[0]) * 12 + (end[1] - start[1]) + 1)
+
+
+def resume_to_text_sanitized(resume_data: dict[str, Any], *, max_chars: int = 4000) -> str:
     """
-    Build a single sanitized string: summary, target role, experience titles,
-    education course names, skills. Removes emails, phones, URLs; truncates.
+    Build the sanitized string a model reads: summary, target role, then each experience with its
+    duration and its achievement bullets, plus education and skills. Strips PII; truncates.
+
+    Bullets and tenure were originally left out, so every neural task saw only titles and skills —
+    the evidence that decides seniority and quality never reached the model. Duration is expressed
+    in months rather than raw dates because PHONE_RE would eat date-like digit runs.
+
+    Experiences stay in payload order (most recent first) so that truncation drops the least
+    decision-relevant content.
     """
     data = resume_data.get("data") if isinstance(resume_data.get("data"), dict) else {}
     parts: list[str] = []
@@ -49,10 +81,20 @@ def resume_to_text_sanitized(resume_data: dict[str, Any], *, max_chars: int = 20
             if not isinstance(exp, dict):
                 continue
             title = str(exp.get("position") or exp.get("title") or "").strip()
-            if title:
-                parts.append(title)
+            months = _duration_months(exp)
+            header = title
+            if months:
+                header = f"{title} ({months} meses)" if title else f"({months} meses)"
+            if exp.get("isCurrent"):
+                header = f"{header} (atual)".strip()
+            if header:
+                parts.append(header)
+            for bullet in (exp.get("description") or [])[:10]:
+                text = str(bullet).strip()
+                if text:
+                    parts.append(f"- {text}")
 
-    education = data.get("education") or []
+    education = data.get("educations") or data.get("education") or []
     if isinstance(education, list):
         for ed in education[:6]:
             if not isinstance(ed, dict):
