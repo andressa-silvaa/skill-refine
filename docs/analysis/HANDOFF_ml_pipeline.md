@@ -496,6 +496,55 @@ a chave fornecida. `probe_llm_providers.py` refaz esse teste em um comando.
   Fica documentado como dimensão que o gerador atual não consegue produzir — a instrução `poor`
   degrada conteúdo, não gramática
 
+### 7.2.2d A revisão humana inverteu a fonte do rótulo de senioridade
+
+46 currículos revisados à mão (`build_label_review_sample.py` + `score_label_review.py`), amostra
+estratificada: 20 discordâncias professor × gerador, 2 divergências de idioma, 24 de linha de base.
+É o único ponto do pipeline em que a verdade não vem de um modelo.
+
+| Medida | Resultado |
+|---|---|
+| estrato C (linha de base, única estimativa não viesada) | **24/24 (100%)** |
+| nas 21 linhas contestadas, humano fica com o **alvo plantado** | **17/21 (81%)** |
+| nas mesmas, humano fica com o **professor** | 4/21 (19%) |
+| concordância geral na amostra | 29/46 (63%), ±1 nível **100%** |
+
+Extrapolando para os 207 rótulos existentes (o professor concorda com o alvo em 73,4%):
+
+| Fonte do rótulo | Acurácia estimada contra julgamento humano |
+|---|---|
+| **`band_target`** (alvo plantado) | **94,9%** |
+| Professor LLM (Llama-3.3-70B) | 78,5% |
+
+**O alvo plantado é um rótulo melhor que o professor.** Os erros do professor se concentram em
+`junior` (37%) e `mid` (64%) — `intern` e `senior` saíram 100% — e em **pt-BR (47%, contra en 71% e
+es 80%)**, que é o maior idioma do corpus.
+
+Isso refina a doutrina anti-circularidade em vez de contrariá-la. O pecado do v2 era o rótulo vir de
+uma **fórmula sobre as mesmas features que o classificador recebia**. Para um modelo que lê contagens
+(meses, bullets), `band_target` continua circular. Para um modelo **só de texto**, a revisão humana
+mostra que o texto expressa a banda em ~95% dos casos: o rótulo passa a ser validado por humano, base
+mais forte do que confiar no julgamento da LLM.
+
+**Ressalva medida, não escondida:** o texto revisado inclui a duração em meses de cada cargo, então
+parte da concordância com o alvo pode vir da leitura das datas, não da prosa. Separar isso custa ~15
+minutos — reamostrar ~15 currículos com a duração removida e reler.
+
+**A dimensão de qualidade, ao contrário, ficou triplamente confirmada:**
+
+| Fonte | poor | fair | good |
+|---|---|---|---|
+| **Humano** | **1,50** | **2,61** | **3,64** |
+| Professor Llama-3.3-70B | 1,56 | 3,00 | 3,96 |
+| Mistral small | 1,50 | 2,73 | 3,75 |
+
+Humano contra professor em `impact`: erro médio **0,35 ponto**, exato 70%, ±1 96%, viés −0,30 (o
+professor é levemente generoso). **O rótulo do pilar que vale 78% está ancorado.**
+
+Consequência de cronograma: **a rotulagem sai do caminho crítico.** `band_target` cobre 1.613
+currículos e `quality_target` cobre os 745 novos, ambos validados por humano. Os rótulos do professor
+passam a ser conjunto de validação de resolução fina (1-5 em quatro dimensões), não rótulo primário.
+
 ### 7.2.3 Pacing e o teto diário do 8b
 
 Dois tetos diferentes, e confundi-los custa tempo:
