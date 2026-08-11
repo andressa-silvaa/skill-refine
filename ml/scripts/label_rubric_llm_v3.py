@@ -96,6 +96,26 @@ PROVIDERS: dict[str, tuple[str, str, str, int]] = {
         900,
     ),
     "mistral": ("https://api.mistral.ai/v1/chat/completions", "mistral-small-latest", "MISTRAL_API_KEY", 200),
+    # These two serve the same Llama-3.3-70B weights the Groq reference teacher uses, so they add
+    # throughput without adding a calibration shift — unlike a smaller model, which shifts bands.
+    "sambanova": (
+        "https://api.sambanova.ai/v1/chat/completions",
+        "Meta-Llama-3.3-70B-Instruct",
+        "SAMBANOVA_API_KEY",
+        140,
+    ),
+    "huggingface": (
+        "https://router.huggingface.co/v1/chat/completions",
+        "meta-llama/Llama-3.3-70B-Instruct",
+        "HF_TOKEN",
+        140,
+    ),
+    "nvidia": (
+        "https://integrate.api.nvidia.com/v1/chat/completions",
+        "nvidia/llama-3.3-nemotron-super-49b-v1",
+        "NVIDIA_API_KEY",
+        900,
+    ),
 }
 
 

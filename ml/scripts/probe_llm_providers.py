@@ -90,12 +90,6 @@ CANDIDATES: dict[str, tuple[str, str, str, tuple[str, ...]]] = {
         "https://studio.nebius.com",
         ("meta-llama/Llama-3.3-70B-Instruct", "Qwen/Qwen3-235B-A22B"),
     ),
-    "deepinfra": (
-        "https://api.deepinfra.com/v1/openai",
-        "DEEPINFRA_API_KEY",
-        "https://deepinfra.com/dash/api_keys",
-        ("meta-llama/Llama-3.3-70B-Instruct", "Qwen/Qwen2.5-72B-Instruct"),
-    ),
     "dashscope": (
         "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
         "DASHSCOPE_API_KEY",

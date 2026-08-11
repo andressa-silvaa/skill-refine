@@ -461,10 +461,37 @@ A leitura que importa: o desacordo de banda **não é ruído, é viés de calibr
 limiar mais severo e erra sempre para o mesmo lado, o que é corrigível e mensurável — diferente do
 8b, que errava espalhado no nível do chute.
 
-**Divisão de trabalho decidida por essa medição:**
-- **Mistral no volume das dimensões de qualidade** — o pilar de 78%, e sem teto diário aparente o
-  corpus inteiro sai em minutos em vez de dias
-- **Groq 70b nas bandas de senioridade**, onde os 153/dia bastam para algumas centenas
+### 7.2.2c O mesmo modelo em outro provedor mata o gargalho
+
+O teto de 153 rótulos/dia era do **provedor**, não do modelo. SambaNova e Hugging Face servem o
+mesmo `Llama-3.3-70B-Instruct` que o Groq, e por serem os mesmos pesos entram sem desvio de
+calibração — o que um professor menor nunca conseguiria.
+
+Concordância com o Groq 70b no mesmo conjunto de ids:
+
+| Professor | Modelo | n | Banda exata | ±1 | MAE impact / clarity / ats |
+|---|---|---|---|---|---|
+| **Hugging Face** | Llama-3.3-70B-Instruct | 41 | **93%** | 100% | **0,15 / 0,10 / 0,12** |
+| **SambaNova** | Meta-Llama-3.3-70B-Instruct | 19 | **95%** | 100% | 0,21 / 0,21 / 0,21 |
+| Mistral | mistral-small-latest | 130 | 58% | 98% | 0,51 / 0,85 / 1,03 |
+
+Os 5-7% de desacordo entre os iguais são não-determinismo de amostragem, não calibração: os desvios
+se espalham para os dois lados (`{-1: 2, 0: 38, 1: 1}`), enquanto os do Mistral apontam todos para
+baixo (`{-1: 51, 0: 75}`).
+
+**Consequência de cronograma:** o Hugging Face sustenta ~12-15 itens/min, então os 873 currículos
+saem em **~1,2 hora** em vez de 5,7 dias. A rotulagem deixa de ser o gargalho do projeto; o gargalho
+volta a ser a geração de prosa (8b, 500k tokens/dia) e o treino.
+
+Provedores testados e descartados, com o motivo: **Cerebras** e **DeepInfra** exigem saldo
+(HTTP 402), **GitHub Models** responde 410 (serviço em desativação), **Together** devolveu 401 com
+a chave fornecida. `probe_llm_providers.py` refaz esse teste em um comando.
+
+**Divisão de trabalho decidida por essas medições:**
+- **Hugging Face é o professor primário** — mesmo modelo da referência, bandas e dimensões
+- **Groq 70b e SambaNova** como referência e transbordo
+- **Mistral sai do volume**: os 253 rótulos dele ficam como segundo anotador para a tabela de
+  concordância, que é evidência de que os rótulos não são artefato de um fornecedor só
 - **`language` sai do escopo**: saturado no professor forte (4-5) e o pior erro entre professores.
   Fica documentado como dimensão que o gerador atual não consegue produzir — a instrução `poor`
   degrada conteúdo, não gramática
