@@ -68,72 +68,7 @@ DIMENSIONS = ("impact", "clarity", "ats", "language")
 
 DAILY_TOKEN_BUDGET = {"llama-3.3-70b-versatile": 100_000, "llama-3.1-8b-instant": 500_000}
 
-GROQ = "https://api.groq.com/openai/v1/chat/completions"
-
-# Every entry speaks the OpenAI chat-completions shape, so switching teacher is a base URL and a
-# model name. Model ids were read from each provider's /models endpoint, not guessed: names churn
-# and several published ones are already retired.
-#
-# The fourth field is the judgment token allowance, and it is not cosmetic: a reasoning model spends
-# it thinking before it writes. Gemini burned ~470 tokens of thought on this rubric, so at 140 the
-# reply came back truncated at '{"level": "intern' with finish_reason=length. Groq does not think
-# here, and there max_tokens is billed as reserved, so keeping it tight is what protects the budget.
-PROVIDERS: dict[str, tuple[str, str, str, int]] = {
-    "groq": (GROQ, "llama-3.3-70b-versatile", "AI_CLOUD_API_KEY", 140),
-    "groq8b": (GROQ, "llama-3.1-8b-instant", "AI_CLOUD_API_KEY", 140),
-    # flash-lite, not flash-latest: this key has no free quota for the bigger model, and the lite
-    # ones do not spend the allowance thinking (360 tokens/item against 799).
-    "gemini": (
-        "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-        "gemini-flash-lite-latest",
-        "GEMINI_API_KEY",
-        200,
-    ),
-    "openrouter": (
-        "https://openrouter.ai/api/v1/chat/completions",
-        "nvidia/nemotron-3-super-120b-a12b:free",
-        "OPENROUTER_API_KEY",
-        900,
-    ),
-    "mistral": ("https://api.mistral.ai/v1/chat/completions", "mistral-small-latest", "MISTRAL_API_KEY", 200),
-    # These two serve the same Llama-3.3-70B weights the Groq reference teacher uses, so they add
-    # throughput without adding a calibration shift — unlike a smaller model, which shifts bands.
-    "sambanova": (
-        "https://api.sambanova.ai/v1/chat/completions",
-        "Meta-Llama-3.3-70B-Instruct",
-        "SAMBANOVA_API_KEY",
-        140,
-    ),
-    "huggingface": (
-        "https://router.huggingface.co/v1/chat/completions",
-        "meta-llama/Llama-3.3-70B-Instruct",
-        "HF_TOKEN",
-        140,
-    ),
-    "nvidia": (
-        "https://integrate.api.nvidia.com/v1/chat/completions",
-        "nvidia/llama-3.3-nemotron-super-49b-v1",
-        "NVIDIA_API_KEY",
-        900,
-    ),
-}
-
-
-def _key_for(env_name: str) -> str:
-    env_file = REPO_ROOT / "backend" / ".env"
-    if env_file.exists():
-        for line in env_file.read_text(encoding="utf-8", errors="ignore").splitlines():
-            line = line.strip()
-            if line.startswith(f"{env_name}="):
-                value = line.split("=", 1)[1].strip()
-                if value:
-                    return value
-    import os
-
-    value = os.environ.get(env_name, "").strip()
-    if not value:
-        raise SystemExit(f"no {env_name} in backend/.env or environment")
-    return value
+from llm_providers import GROQ, PROVIDERS, key_for as _key_for  # noqa: E402
 
 QUALITY_RUBRIC = """You also rate how well the resume is WRITTEN, on four independent 1-5 scales.
 Writing quality is not seniority: a senior can write badly and an intern can write well.

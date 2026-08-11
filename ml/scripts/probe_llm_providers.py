@@ -72,12 +72,6 @@ CANDIDATES: dict[str, tuple[str, str, str, tuple[str, ...]]] = {
         "https://build.nvidia.com",
         ("meta/llama-3.3-70b-instruct", "nvidia/llama-3.3-nemotron-super-49b-v1"),
     ),
-    "together": (
-        "https://api.together.xyz/v1",
-        "TOGETHER_API_KEY",
-        "https://api.together.ai/settings/api-keys",
-        ("meta-llama/Llama-3.3-70B-Instruct-Turbo-Free", "meta-llama/Llama-3.3-70B-Instruct-Turbo"),
-    ),
     "huggingface": (
         "https://router.huggingface.co/v1",
         "HF_TOKEN",
