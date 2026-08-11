@@ -81,11 +81,13 @@ GROQ = "https://api.groq.com/openai/v1/chat/completions"
 PROVIDERS: dict[str, tuple[str, str, str, int]] = {
     "groq": (GROQ, "llama-3.3-70b-versatile", "AI_CLOUD_API_KEY", 140),
     "groq8b": (GROQ, "llama-3.1-8b-instant", "AI_CLOUD_API_KEY", 140),
+    # flash-lite, not flash-latest: this key has no free quota for the bigger model, and the lite
+    # ones do not spend the allowance thinking (360 tokens/item against 799).
     "gemini": (
         "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
-        "gemini-flash-latest",
+        "gemini-flash-lite-latest",
         "GEMINI_API_KEY",
-        900,
+        200,
     ),
     "openrouter": (
         "https://openrouter.ai/api/v1/chat/completions",

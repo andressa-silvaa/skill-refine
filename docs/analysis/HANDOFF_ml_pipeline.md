@@ -423,6 +423,52 @@ e o corpus antigo fica como validação extra de senioridade se sobrar orçament
 Com 121 itens/dia no 70b-terse: **360 currículos ≈ 3,0 dias** e cobre senioridade + as 4 dimensões
 de qualidade + os bullets.
 
+### 7.2.2b Professores alternativos: quem serve para quê
+
+O gargalho da rotulagem é cota, não capacidade, então testei cinco provedores com camada gratuita.
+Todos falam o formato OpenAI, então `PROVIDERS` em `label_rubric_llm_v3.py` mapeia
+nome → endpoint, modelo, variável de chave e teto de tokens.
+
+| Provedor | Modelo | Situação |
+|---|---|---|
+| Groq | `llama-3.3-70b-versatile` | ~11/min, teto 100k tokens/dia → 153 itens/dia |
+| **Mistral** | `mistral-small-latest` | **580 tokens/item, ~40/min, 50k tokens/min, sem teto diário aparente** |
+| Gemini | `gemini-flash-latest` | funciona, mas a cota gratuita estoura em poucas dezenas |
+| OpenRouter | `nvidia/nemotron-3-super-120b-a12b:free` | funciona, ~2/min |
+| ~~Cerebras~~ | `gpt-oss-120b` | **HTTP 402 pagamento exigido** — removido do código e do `.env` |
+| ~~GitHub Models~~ | — | **HTTP 410**, serviço em desativação |
+
+Os ids de modelo têm de ser lidos do endpoint `/models` de cada serviço: nomes publicados como
+`llama-3.3-70b` na Cerebras e `gemini-2.0-flash` já estavam retirados.
+
+**Modelo de raciocínio gasta a cota pensando antes de escrever.** O Gemini queimou ~470 tokens de
+pensamento nesta rubrica e com `max_tokens=140` devolvia `{"level": "intern` truncado, com
+`finish_reason=length` — parecia falha de JSON e era falta de espaço. Daí o teto ser por provedor.
+No Groq ele continua apertado, porque lá `max_tokens` é cobrado como reservado.
+
+**Mistral contra o 70b, n=60 no mesmo conjunto de ids (`--overlap-with`):**
+
+| Medida | Resultado |
+|---|---|
+| banda exata | 33/60 (55%), **±1 nível 98%** |
+| desvio de banda | `{-1: 27, 0: 33}` — **todo erro é um nível para baixo, nenhum para cima** |
+| `impact` | erro médio 0,43 ponto (escala 1-5) |
+| `clarity` / `ats` | 0,87 / 0,98 |
+| `language` | 1,67 |
+| monotonia no alvo plantado | poor 1,50 → fair 2,73 → good 3,75 (70b: 1,56 → 3,00 → 3,96) |
+
+A leitura que importa: o desacordo de banda **não é ruído, é viés de calibração**. Ele aplica um
+limiar mais severo e erra sempre para o mesmo lado, o que é corrigível e mensurável — diferente do
+8b, que errava espalhado no nível do chute.
+
+**Divisão de trabalho decidida por essa medição:**
+- **Mistral no volume das dimensões de qualidade** — o pilar de 78%, e sem teto diário aparente o
+  corpus inteiro sai em minutos em vez de dias
+- **Groq 70b nas bandas de senioridade**, onde os 153/dia bastam para algumas centenas
+- **`language` sai do escopo**: saturado no professor forte (4-5) e o pior erro entre professores.
+  Fica documentado como dimensão que o gerador atual não consegue produzir — a instrução `poor`
+  degrada conteúdo, não gramática
+
 ### 7.2.3 Pacing e o teto diário do 8b
 
 Dois tetos diferentes, e confundi-los custa tempo:
