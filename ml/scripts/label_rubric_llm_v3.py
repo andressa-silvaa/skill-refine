@@ -68,6 +68,51 @@ DIMENSIONS = ("impact", "clarity", "ats", "language")
 
 DAILY_TOKEN_BUDGET = {"llama-3.3-70b-versatile": 100_000, "llama-3.1-8b-instant": 500_000}
 
+GROQ = "https://api.groq.com/openai/v1/chat/completions"
+
+# Every entry speaks the OpenAI chat-completions shape, so switching teacher is a base URL and a
+# model name. Model ids were read from each provider's /models endpoint, not guessed: names churn
+# and several published ones are already retired.
+#
+# The fourth field is the judgment token allowance, and it is not cosmetic: a reasoning model spends
+# it thinking before it writes. Gemini burned ~470 tokens of thought on this rubric, so at 140 the
+# reply came back truncated at '{"level": "intern' with finish_reason=length. Groq does not think
+# here, and there max_tokens is billed as reserved, so keeping it tight is what protects the budget.
+PROVIDERS: dict[str, tuple[str, str, str, int]] = {
+    "groq": (GROQ, "llama-3.3-70b-versatile", "AI_CLOUD_API_KEY", 140),
+    "groq8b": (GROQ, "llama-3.1-8b-instant", "AI_CLOUD_API_KEY", 140),
+    "gemini": (
+        "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        "gemini-flash-latest",
+        "GEMINI_API_KEY",
+        900,
+    ),
+    "openrouter": (
+        "https://openrouter.ai/api/v1/chat/completions",
+        "nvidia/nemotron-3-super-120b-a12b:free",
+        "OPENROUTER_API_KEY",
+        900,
+    ),
+    "mistral": ("https://api.mistral.ai/v1/chat/completions", "mistral-small-latest", "MISTRAL_API_KEY", 200),
+}
+
+
+def _key_for(env_name: str) -> str:
+    env_file = REPO_ROOT / "backend" / ".env"
+    if env_file.exists():
+        for line in env_file.read_text(encoding="utf-8", errors="ignore").splitlines():
+            line = line.strip()
+            if line.startswith(f"{env_name}="):
+                value = line.split("=", 1)[1].strip()
+                if value:
+                    return value
+    import os
+
+    value = os.environ.get(env_name, "").strip()
+    if not value:
+        raise SystemExit(f"no {env_name} in backend/.env or environment")
+    return value
+
 QUALITY_RUBRIC = """You also rate how well the resume is WRITTEN, on four independent 1-5 scales.
 Writing quality is not seniority: a senior can write badly and an intern can write well.
 
@@ -192,7 +237,13 @@ def build_bullet_messages(bullets: list[str]) -> list[dict[str, str]]:
     ]
 
 
-def call_json(key: str, model: str, messages: list[dict[str, str]], max_tokens: int) -> dict[str, Any] | None:
+def call_json(
+    endpoint: str,
+    key: str,
+    model: str,
+    messages: list[dict[str, str]],
+    max_tokens: int,
+) -> dict[str, Any] | None:
     body = json.dumps(
         {
             "model": model,
@@ -204,7 +255,7 @@ def call_json(key: str, model: str, messages: list[dict[str, str]], max_tokens: 
     ).encode("utf-8")
     for attempt in range(5):
         req = urllib.request.Request(
-            "https://api.groq.com/openai/v1/chat/completions",
+            endpoint,
             data=body,
             headers={
                 "Authorization": f"Bearer {key}",
@@ -248,7 +299,15 @@ def _dimension(raw: Any) -> int | None:
     return max(1, min(5, value))
 
 
-def judge_one(row: dict[str, Any], key: str, model: str, *, terse: bool = False) -> dict[str, Any] | None:
+def judge_one(
+    row: dict[str, Any],
+    key: str,
+    model: str,
+    *,
+    endpoint: str = GROQ,
+    terse: bool = False,
+    max_tokens: int = 140,
+) -> dict[str, Any] | None:
     try:
         text, _bullets = render_indexed(row["resume_data"])
     except Exception:
@@ -258,7 +317,7 @@ def judge_one(row: dict[str, Any], key: str, model: str, *, terse: bool = False)
     messages = build_judgment_messages(text, terse=terse)
     for _ in range(2):
         base._wait_turn()
-        parsed = call_json(key, model, messages, max_tokens=70)
+        parsed = call_json(endpoint, key, model, messages, max_tokens=max_tokens)
         if not isinstance(parsed, dict):
             continue
         level = str(parsed.get("level") or "").strip().lower()
@@ -284,7 +343,13 @@ def judge_one(row: dict[str, Any], key: str, model: str, *, terse: bool = False)
     return None
 
 
-def bullets_one(row: dict[str, Any], key: str, model: str) -> dict[str, Any] | None:
+def bullets_one(
+    row: dict[str, Any],
+    key: str,
+    model: str,
+    *,
+    endpoint: str = GROQ,
+) -> dict[str, Any] | None:
     try:
         _text, bullets = render_indexed(row["resume_data"])
     except Exception:
@@ -295,7 +360,7 @@ def bullets_one(row: dict[str, Any], key: str, model: str) -> dict[str, Any] | N
     budget = 40 + 26 * len(bullets)
     for _ in range(2):
         base._wait_turn()
-        parsed = call_json(key, model, messages, max_tokens=budget)
+        parsed = call_json(endpoint, key, model, messages, max_tokens=budget)
         raw = (parsed or {}).get("bullets")
         if not isinstance(raw, list) or not raw:
             continue
@@ -326,7 +391,7 @@ def bullets_one(row: dict[str, Any], key: str, model: str) -> dict[str, Any] | N
     return None
 
 
-def cost_report(model: str) -> None:
+def cost_report(model: str, provider: str = "") -> None:
     with _usage_lock:
         items, prompt, completion = _usage["items"], _usage["prompt"], _usage["completion"]
     if not items:
@@ -334,15 +399,18 @@ def cost_report(model: str) -> None:
     total = prompt + completion
     per_item = total / items
     budget = DAILY_TOKEN_BUDGET.get(model, 0)
+    label = f"{provider}/{model}" if provider else model
     print("\n" + "=" * 70)
     print("CUSTO MEDIDO (usage reportado pela API, nao estimativa)")
     print("=" * 70)
-    print(f"  chamadas: {items}  prompt: {prompt}  saida: {completion}  total: {total}")
+    print(f"  {label}: chamadas {items}  prompt {prompt}  saida {completion}  total {total}")
     print(f"  por item: {per_item:.0f} tokens  ({prompt / items:.0f} prompt + {completion / items:.0f} saida)")
     if budget:
         per_day = budget / per_item
         print(f"  orcamento diario {budget} -> ~{per_day:.0f} itens/dia")
         print(f"  873 curriculos -> {873 / max(1e-9, per_day):.1f} dias")
+    else:
+        print("  teto diario deste provedor: desconhecido, aparece no corpo do 429")
 
 
 def quality_report(rows: list[dict[str, Any]]) -> None:
@@ -436,6 +504,7 @@ def agreement_report(rows: list[dict[str, Any]], compare_path: Path) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", choices=("judgment", "bullets"), default="judgment")
+    ap.add_argument("--provider", choices=tuple(PROVIDERS), default="")
     ap.add_argument("--model", default="")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--limit", type=int, default=0)
@@ -452,7 +521,9 @@ def main() -> None:
     args = ap.parse_args()
 
     judgment = args.stage == "judgment"
-    model = args.model or ("llama-3.3-70b-versatile" if judgment else "llama-3.1-8b-instant")
+    provider = args.provider or ("groq" if judgment else "groq8b")
+    endpoint, default_model, env_name, judgment_tokens = PROVIDERS[provider]
+    model = args.model or default_model
     out_path = OUT_DIR / (args.out or ("labels_rubric.jsonl" if judgment else "labels_bullets.jsonl"))
     base._delay[0] = max(0.5, args.delay)
 
@@ -474,7 +545,10 @@ def main() -> None:
         todo = _round_robin(todo)
     if args.limit:
         todo = todo[: args.limit]
-    print(f"stage={args.stage} model={model} prose={len(rows)} feitos={len(done)} a fazer={len(todo)}")
+    print(
+        f"stage={args.stage} provider={provider} model={model} "
+        f"prose={len(rows)} feitos={len(done)} a fazer={len(todo)}"
+    )
     if todo:
         print(
             "  bandas: "
@@ -483,12 +557,19 @@ def main() -> None:
             + json.dumps(dict(Counter(r.get("language") for r in todo)), ensure_ascii=False)
         )
 
-    key = base._api_key()
+    key = _key_for(env_name)
 
     def worker(row: dict[str, Any], api_key: str, model_name: str) -> dict[str, Any] | None:
         if judgment:
-            return judge_one(row, api_key, model_name, terse=args.terse)
-        return bullets_one(row, api_key, model_name)
+            return judge_one(
+                row,
+                api_key,
+                model_name,
+                endpoint=endpoint,
+                terse=args.terse,
+                max_tokens=judgment_tokens,
+            )
+        return bullets_one(row, api_key, model_name, endpoint=endpoint)
     written = 0
     started = time.time()
 
@@ -515,7 +596,7 @@ def main() -> None:
                 print(f"  ok={written}/{len(todo)} ({rate:.1f}/min)", flush=True)
 
     print(f"\ndone: +{written} -> {out_path}")
-    cost_report(model)
+    cost_report(model, provider)
     if judgment:
         labelled = [r for r in done.values() if r.get("llm_label")]
         if labelled:
