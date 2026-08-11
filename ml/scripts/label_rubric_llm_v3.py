@@ -514,6 +514,12 @@ def main() -> None:
     ap.add_argument("--compare", default="", help="jsonl of labels from another labeller to agree against")
     ap.add_argument("--only", default="", help="regex on row id, e.g. '^q' for the quality-varied batch")
     ap.add_argument(
+        "--overlap-with",
+        default="",
+        help="label only ids already present in this labels file, so agreement is measured on a "
+        "chosen set instead of on whatever the two runs happened to share",
+    )
+    ap.add_argument(
         "--stratify",
         action="store_true",
         help="round-robin over (band, language) so a --limit subset stays balanced",
@@ -541,6 +547,16 @@ def main() -> None:
     if args.only:
         pattern = re.compile(args.only)
         todo = [r for r in todo if pattern.search(str(r.get("id") or ""))]
+    if args.overlap_with:
+        reference: set[str] = set()
+        ref_path = OUT_DIR / args.overlap_with
+        for line in ref_path.read_text(encoding="utf-8").splitlines() if ref_path.exists() else []:
+            if line.strip():
+                try:
+                    reference.add(json.loads(line)["id"])
+                except (json.JSONDecodeError, KeyError):
+                    continue
+        todo = [r for r in todo if r["id"] in reference]
     if args.stratify:
         todo = _round_robin(todo)
     if args.limit:
