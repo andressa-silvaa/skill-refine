@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import threading
 import time
@@ -367,6 +368,33 @@ def quality_report(rows: list[dict[str, Any]]) -> None:
                 print(f"    {target:<5} n={len(subset):3d}  impact medio {mean:.2f}")
 
 
+def _round_robin(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Interleave by (band, language) so truncating with --limit keeps the subset balanced.
+
+    File order is generation order, so a plain head of the corpus can silently skew a whole
+    band or language out of the training set.
+    """
+    buckets: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for row in rows:
+        key = (str(row.get("band_target") or ""), str(row.get("language") or ""))
+        buckets.setdefault(key, []).append(row)
+    ordered: list[dict[str, Any]] = []
+    keys = sorted(buckets)
+    position = 0
+    while len(ordered) < len(rows):
+        drained = True
+        for key in keys:
+            bucket = buckets[key]
+            if position < len(bucket):
+                ordered.append(bucket[position])
+                drained = False
+        if drained:
+            break
+        position += 1
+    return ordered
+
+
 def agreement_report(rows: list[dict[str, Any]], compare_path: Path) -> None:
     """Teacher-vs-teacher agreement on the same ids: the number that justifies a cheaper labeller."""
     if not compare_path.exists():
@@ -415,6 +443,12 @@ def main() -> None:
     ap.add_argument("--out", default="")
     ap.add_argument("--terse", action="store_true", help="short prompt, no few-shots: ~half the tokens")
     ap.add_argument("--compare", default="", help="jsonl of labels from another labeller to agree against")
+    ap.add_argument("--only", default="", help="regex on row id, e.g. '^q' for the quality-varied batch")
+    ap.add_argument(
+        "--stratify",
+        action="store_true",
+        help="round-robin over (band, language) so a --limit subset stays balanced",
+    )
     args = ap.parse_args()
 
     judgment = args.stage == "judgment"
@@ -433,9 +467,21 @@ def main() -> None:
                 except (json.JSONDecodeError, KeyError):
                     continue
     todo = [r for r in rows if r["id"] not in done]
+    if args.only:
+        pattern = re.compile(args.only)
+        todo = [r for r in todo if pattern.search(str(r.get("id") or ""))]
+    if args.stratify:
+        todo = _round_robin(todo)
     if args.limit:
         todo = todo[: args.limit]
     print(f"stage={args.stage} model={model} prose={len(rows)} feitos={len(done)} a fazer={len(todo)}")
+    if todo:
+        print(
+            "  bandas: "
+            + json.dumps(dict(Counter(r.get("band_target") for r in todo)), ensure_ascii=False)
+            + "  idiomas: "
+            + json.dumps(dict(Counter(r.get("language") for r in todo)), ensure_ascii=False)
+        )
 
     key = base._api_key()
 
