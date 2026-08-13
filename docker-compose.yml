@@ -58,6 +58,13 @@ services:
       - ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS=5
       - ANALYSIS_TEXT_SENIORITY_ENABLED=false
       - ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED=false
+      - ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=true
+      - ANALYSIS_QUALITY_PROBE_ENABLED=true
+      - ANALYSIS_BULLET_PROBE_ENABLED=true
+      - ANALYSIS_INSIGHT_RANKING_ENABLED=true
+      # Load-bearing, not optional: the three probes above read this encoder. Leaving it to a gitignored
+      # .env means a fresh clone silently answers with regex instead.
+      - ANALYSIS_EMBEDDINGS_ENABLED=true
     depends_on:
       postgres:
         condition: service_healthy
@@ -112,6 +119,13 @@ services:
       - ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS=5
       - ANALYSIS_TEXT_SENIORITY_ENABLED=false
       - ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED=false
+      - ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=true
+      - ANALYSIS_QUALITY_PROBE_ENABLED=true
+      - ANALYSIS_BULLET_PROBE_ENABLED=true
+      - ANALYSIS_INSIGHT_RANKING_ENABLED=true
+      # Load-bearing, not optional: the three probes above read this encoder. Leaving it to a gitignored
+      # .env means a fresh clone silently answers with regex instead.
+      - ANALYSIS_EMBEDDINGS_ENABLED=true
       - OMP_NUM_THREADS=4
       - MKL_NUM_THREADS=4
       - TOKENIZERS_PARALLELISM=false

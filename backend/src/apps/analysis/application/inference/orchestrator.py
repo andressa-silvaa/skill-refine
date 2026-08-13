@@ -14,9 +14,13 @@ from apps.analysis.application.seniority_persist import build_seniority_evidence
 from .cascade import CascadeResult, run_cascade
 from .completeness import matching_score_cap, quality_score_cap
 from .config import get_config, get_signals_ml_thresholds
+from .integrity import ModelAnswerRequired, build_integrity_block
 from .loader import get_matching_bundle, get_model_bundle, get_quality_bundle
 from .loader_signals_model import get_signals_ml_bundle, signals_ml_metadata_for_extra
 from .overall_score import compute_overall_score
+from .postprocess.insight_ranking import PROVIDER as INSIGHT_RANKING_PROVIDER
+from .postprocess.insight_ranking import FALLBACK_PROVIDER as INSIGHT_RANKING_FALLBACK
+from .postprocess.insight_ranking import load_gain_table
 from .postprocess.insights import derive_insights
 from .postprocess.llm_feedback import generate_ai_feedback
 from .postprocess.recommendations import build_recommendations
@@ -25,7 +29,10 @@ from .resume_signals import is_thin_student_or_intern_profile
 from .safety import truncate_text
 from .signals import extract_resume_signals
 from .tasks.matching import predict_matching_detailed
-from .tasks.quality import predict_quality
+from .tasks.quality import predict_quality_detailed
+from .tasks.quality.bullet_flags import predict_bullet_flags
+from .tasks.quality.loader_bullet_probe import get_bullet_probe_bundle
+from .tasks.quality.loader_quality_probe import get_quality_probe_bundle
 from .tasks.seniority import (
     SENIORITY_LABELS,
     clamp_seniority_vetoes,
@@ -40,6 +47,8 @@ from .tasks.seniority.text import (
     predict_text_seniority,
     structural_signals_strength,
 )
+from .tasks.seniority.text.loader_seniority_probe import get_seniority_probe_bundle
+from .text_probe import probe_metadata_for_task
 from .tasks.target_fit import (
     TARGET_FIT_POLICY_VERSION,
     compute_career_switch,
@@ -73,15 +82,6 @@ from .types import AnalysisResult
 logger = logging.getLogger(__name__)
 
 SENIORITY_TO_SCORE = {"intern": 25, "junior": 50, "mid": 75, "senior": 100}
-
-
-def _quality_needs_seniority_first(quality_bundle: tuple[Any, dict] | None) -> bool:
-    if not quality_bundle:
-        return False
-    model_or_none, extra = quality_bundle
-    if not isinstance(extra, dict):
-        return False
-    return extra.get("kind") == "hybrid" and model_or_none is not None
 
 
 def _resolve_seniority(
@@ -187,7 +187,54 @@ def _resolve_seniority(
     if ml_status == "applied_signals_ml":
         seniority_label_source = "signals_ml"
 
-    if config["text_seniority_fusion_enabled"]:
+    probe_bundle = get_seniority_probe_bundle(config)
+    encoder = get_embeddings_model(settings) if config.get("embeddings_enabled") else None
+
+    if probe_bundle is not None and encoder is not None:
+        # The probe decides. Blending it back into the rule was measured and it loses to both
+        # components — see ml/reports/seniority_fusion_v3.md — so the rule stays behind it as the
+        # fallback rather than as a co-signer, and only the vetoes still touch the answer.
+        text_pred = predict_text_seniority(
+            sanitized_cv,
+            lang,
+            None,
+            allow_lexical_fallback=False,
+            probe_bundle=probe_bundle,
+            embeddings_model=encoder,
+            resume_data=resume_data,
+        )
+        probe_label = text_pred.get("label")
+        if probe_label:
+            final_label = str(probe_label)
+            seniority_confidence = str(text_pred.get("confidence") or "low")
+            seniority_label_source = "text_seniority_probe"
+            final_label, veto_evidence = clamp_seniority_vetoes(final_label, rs)
+            seniority_evidence.extend(veto_evidence)
+            seniority_evidence.append(
+                {
+                    "type": "text_seniority",
+                    "label": probe_label,
+                    "confidence": text_pred.get("confidence"),
+                    "source": text_pred.get("source"),
+                }
+            )
+            model_bundle = (
+                None,
+                {
+                    "labels": list(SENIORITY_LABELS),
+                    **probe_metadata_for_task(probe_bundle, provider="text_seniority_probe"),
+                },
+            )
+    elif config.get("require_model_answer", True):
+        seniority_label_source = "rule_policy"
+        logger.warning(
+            "seniority answered by rule_policy: the text probe is unavailable",
+            extra={
+                "probe_enabled": bool(config.get("text_seniority_probe_enabled")),
+                "encoder_loaded": encoder is not None,
+            },
+        )
+    elif config["text_seniority_fusion_enabled"]:
         tbundle = get_text_seniority_bundle(settings) if config["text_seniority_enabled"] else None
         text_pred = predict_text_seniority(
             sanitized_cv,
@@ -497,6 +544,7 @@ def _resolve_target_fit(
 
 def _resolve_quality_and_matching(
     *,
+    resume_data: dict[str, Any],
     resume_text: str,
     job_text: str,
     lang: str,
@@ -504,56 +552,84 @@ def _resolve_quality_and_matching(
     config: dict[str, Any],
     final_label: str,
     allow_quality_neural: bool,
+    bullet_detail: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     quality_bundle = get_quality_bundle(language=lang, config=config)
     matching_bundle = get_matching_bundle(language=lang, config=config) if job_text else None
     matching_provider = ""
+    encoder = get_embeddings_model(settings) if config.get("embeddings_enabled") else None
+    quality_probe_bundle = get_quality_probe_bundle(config)
+    bullet_probe_bundle = get_bullet_probe_bundle(config)
 
-    if _quality_needs_seniority_first(quality_bundle):
-        quality_score, quality_flags = predict_quality(
-            resume_text,
-            lang,
-            sections,
-            seniority_hint=final_label,
-            quality_bundle=quality_bundle,
-            neural_allowed=allow_quality_neural,
+    require_model = bool(config.get("require_model_answer", True))
+    quality_score, quality_flags, quality_detail = predict_quality_detailed(
+        resume_text,
+        lang,
+        sections,
+        None,
+        quality_bundle,
+        neural_allowed=allow_quality_neural,
+        probe_bundle=quality_probe_bundle,
+        embeddings_model=encoder,
+        resume_data=resume_data,
+        allow_heuristic_answer=not require_model,
+        bullet_bundle=bullet_probe_bundle,
+        bullet_detail=bullet_detail,
+    )
+    if quality_score is None:
+        raise ModelAnswerRequired(
+            "quality",
+            str(quality_detail.get("provider") or ""),
+            str(quality_detail.get("reason") or ""),
         )
-        matching_score = 0
-        if job_text:
-            matching_score, _, matching_provider = predict_matching_detailed(
-                resume_text,
-                job_text,
-                lang,
-                matching_bundle=matching_bundle,
-                embeddings_model=get_embeddings_model(settings) if config.get("embeddings_enabled") else None,
-            )
-    else:
-        quality_score, quality_flags = predict_quality(
+    matching_score = 0
+    if job_text:
+        matching_score, _, matching_provider = predict_matching_detailed(
             resume_text,
+            job_text,
             lang,
-            sections,
-            None,
-            quality_bundle,
-            neural_allowed=allow_quality_neural,
+            matching_bundle=matching_bundle,
+            embeddings_model=encoder,
         )
-        matching_score = 0
-        if job_text:
-            matching_score, _, matching_provider = predict_matching_detailed(
-                resume_text,
-                job_text,
-                lang,
-                matching_bundle=matching_bundle,
-                embeddings_model=get_embeddings_model(settings) if config.get("embeddings_enabled") else None,
-            )
+
+    quality_extra: dict[str, Any] | None = None
+    if quality_detail.get("provider") == "quality_probe" and quality_probe_bundle is not None:
+        quality_extra = {
+            "labels": [],
+            **probe_metadata_for_task(quality_probe_bundle, provider="quality_probe"),
+        }
 
     return {
         "quality_bundle": quality_bundle,
         "matching_bundle": matching_bundle,
         "quality_score": quality_score,
         "quality_flags": quality_flags,
+        "quality_detail": quality_detail,
+        "quality_extra": quality_extra,
         "matching_score": matching_score,
         "matching_extra": _matching_extra(matching_provider, matching_bundle),
     }
+
+
+def _dimension_score(
+    quality_meta: dict[str, Any],
+    key: str,
+    fallback: int,
+    cap: int,
+) -> int:
+    """
+    A dimension head's answer, capped by the same completeness ceiling as the headline score.
+
+    Falling back to ``fallback`` reproduces the historical behaviour exactly: before the probe, ``ats``
+    and ``clarity`` were literal copies of ``quality_score``.
+    """
+    detail = quality_meta.get("quality_detail")
+    dimensions = detail.get("dimensions") if isinstance(detail, dict) else None
+    if isinstance(dimensions, dict):
+        value = dimensions.get(key)
+        if isinstance(value, (int, float)):
+            return int(min(int(cap), max(0, round(float(value)))))
+    return int(fallback)
 
 
 def _matching_extra(
@@ -603,7 +679,19 @@ def analyze_resume(
     resume_text = sections.full_text
     resume_text, was_truncated = truncate_text(resume_text, max_resume)
 
-    rs = extract_resume_signals(resume_data, sections, language=lang)
+    shared_encoder = get_embeddings_model(settings) if config.get("embeddings_enabled") else None
+    bullet_detail = predict_bullet_flags(
+        get_bullet_probe_bundle(config), shared_encoder, resume_data
+    )
+    insight_gain_table = load_gain_table(config)
+    rs = extract_resume_signals(
+        resume_data,
+        sections,
+        language=lang,
+        leadership_override=(
+            bool(bullet_detail["flags"]["has_leadership"]) if bullet_detail else None
+        ),
+    )
     completeness = {"score": rs.completeness_score, "level": rs.completeness_level}
     level = rs.completeness_level
 
@@ -656,6 +744,7 @@ def analyze_resume(
     target_fit_bundle_extra = target_fit["target_fit_bundle_extra"]
 
     qm = _resolve_quality_and_matching(
+        resume_data=resume_data,
         resume_text=resume_text,
         job_text=job_text,
         lang=lang,
@@ -663,6 +752,7 @@ def analyze_resume(
         config=config,
         final_label=final_label,
         allow_quality_neural=allow_quality_neural,
+        bullet_detail=bullet_detail,
     )
     quality_bundle = qm["quality_bundle"]
     matching_bundle = qm["matching_bundle"]
@@ -672,6 +762,8 @@ def analyze_resume(
 
     metadata_seniority = model_bundle[1] if isinstance(model_bundle[1], dict) else {}
     metadata_quality = quality_bundle[1] if isinstance(quality_bundle, tuple) and isinstance(quality_bundle[1], dict) else {}
+    if isinstance(qm.get("quality_extra"), dict):
+        metadata_quality = qm["quality_extra"]
     metadata_matching = qm.get("matching_extra")
     if not isinstance(metadata_matching, dict):
         metadata_matching = (
@@ -687,11 +779,21 @@ def analyze_resume(
         job_text=job_text,
         target_pos=target_pos,
         target_fit_bundle_extra=target_fit_bundle_extra,
+        flags_provider=str(qm["quality_detail"].get("flags_provider") or ""),
+        insight_ranking_provider=(
+            INSIGHT_RANKING_PROVIDER if insight_gain_table else INSIGHT_RANKING_FALLBACK
+        ),
     )
     model_name, model_version, dataset_version, provider = resolve_top_level_model_meta(
         config=config,
         metadata_seniority=metadata_seniority,
         metadata_quality=metadata_quality,
+    )
+    integrity = build_integrity_block(
+        {
+            task: str((meta or {}).get("provider") or "")
+            for task, meta in model_metadata_by_task.items()
+        }
     )
 
     thin_profile = is_thin_student_or_intern_profile(resume_data)
@@ -712,6 +814,7 @@ def analyze_resume(
         completeness_level=level,
         resume_data=resume_data,
         signals=rs,
+        gain_table=insight_gain_table,
     )
     if tf_imp:
         improvements = list(insights.get("improvements") or [])
@@ -784,13 +887,16 @@ def analyze_resume(
         target_fit_extra=target_fit_extra,
         debug_block=debug_block,
         ai_feedback=ai_feedback,
+        integrity=integrity,
     )
 
     result = AnalysisResult(
         score=overall_quality,
         task_scores={
-            "ats": quality_score,
-            "clarity": quality_score,
+            # Each dimension the quality probe carries its own head for answers for itself. Without a
+            # probe they stay copies of the headline score, which is what they always were.
+            "ats": _dimension_score(qm, "ats", quality_score, q_cap),
+            "clarity": _dimension_score(qm, "clarity", quality_score, q_cap),
             "seniority": seniority_score,
             "matching": matching_score if job_text else None,
             **target_fit_task,

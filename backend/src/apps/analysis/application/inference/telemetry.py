@@ -45,11 +45,21 @@ def build_model_metadata_by_task(
     job_text: str,
     target_pos: str,
     target_fit_bundle_extra: dict[str, Any] | None,
+    flags_provider: str = "",
+    insight_ranking_provider: str = "",
 ) -> dict[str, dict[str, str]]:
     model_metadata_by_task = {
         "seniority": build_task_metadata("seniority", metadata_seniority, config),
         "quality": build_task_metadata("quality", metadata_quality, config),
     }
+    if flags_provider:
+        model_metadata_by_task["insight_flags"] = build_task_metadata(
+            "insight_flags", {"provider": flags_provider}, config
+        )
+    if insight_ranking_provider:
+        model_metadata_by_task["insight_ranking"] = build_task_metadata(
+            "insight_ranking", {"provider": insight_ranking_provider}, config
+        )
     if job_text:
         model_metadata_by_task["matching"] = build_task_metadata("matching", metadata_matching, config)
     if target_pos and target_fit_bundle_extra is not None:
@@ -148,12 +158,14 @@ def build_payload_body(
     target_fit_extra: dict[str, Any],
     debug_block: dict[str, Any] | None,
     ai_feedback: str | None = None,
+    integrity: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload_body: dict[str, Any] = {
         "insights": insights,
         "recommendations": recommendations,
         "was_truncated": was_truncated,
         "model_metadata_by_task": model_metadata_by_task,
+        "analysisIntegrity": integrity or {},
         "completeness": {
             "score": completeness["score"],
             "level": completeness["level"],

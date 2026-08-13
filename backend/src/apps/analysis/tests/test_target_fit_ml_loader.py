@@ -109,9 +109,19 @@ class TargetFitMlLoaderTests(SimpleTestCase):
                 encoding="utf-8",
             )
             clear_target_fit_ml_cache()
+            # This case is about which provider answers target_fit, not about quality. Production
+            # refuses a heuristic quality score, so without REQUIRE_MODEL_ANSWER off the orchestrator
+            # raises ModelAnswerRequired before target_fit is ever reached.
+            #
+            # Embeddings are off because the encoder step runs *after* the ml/policy cascade and
+            # relabels the provider ``target_fit_embedding_v1`` whenever it is available, so the ml
+            # bundle can never be the reported provider with it on. That is the shipped behaviour;
+            # this case exercises the branch below it.
             with self.settings(
                 ANALYSIS_TARGET_FIT_ML_ENABLED=True,
                 ANALYSIS_TARGET_FIT_MODEL_DIR=str(root.resolve()),
+                ANALYSIS_REQUIRE_MODEL_ANSWER=False,
+                ANALYSIS_EMBEDDINGS_ENABLED=False,
             ):
                 resume_data = {
                     "data": {
