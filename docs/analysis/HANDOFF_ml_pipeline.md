@@ -23,11 +23,18 @@ Estado de cada tarefa:
 
 | Tarefa | Peso | Provider hoje | Situação |
 |---|---|---|---|
-| quality | **78%** | `heuristics` | precisa de corpus rotulado — não iniciado |
-| seniority | 12% | `rule_policy` | corpus gerado, rotulagem em andamento |
+| quality | **78%** | `quality_probe` | sonda linear sobre MiniLM congelado (§9) |
+| seniority | 12% | `text_seniority_probe` | sonda só de texto, decide sozinha (§9) |
 | target_fit | 10% | `target_fit_embedding_v1` | já é neural (MiniLM multilíngue) |
 | matching | quando há vaga | `matching_embeddings` | neural desde a sessão anterior |
 | domínio/ocupação | entra em target_fit | `domain_embeddings` | migrado para recuperação ESCO (§6) |
+| flags dos insights | o que aparece na tela | `bullet_probe` | classificador por bullet (§10.1) |
+| ordem dos insights | o que se lê primeiro | `insight_gain_v1` | ranking por ganho medido (§10.3) |
+
+`ats` e `clarity` deixaram de ser cópia literal de `quality_score` e ganharam cabeça própria — com
+uma ressalva medida em §9.5. Nenhuma tarefa da resposta responde mais por regra: `HEURISTIC_TASKS_TODAY`
+em `test_provider_inventory.py` está **vazio**, e o inventário agora cobre `insight_flags` e
+`insight_ranking` além dos pilares.
 
 Idiomas suportados: **pt-BR, en-US, es-ES**. Qualquer modelo novo deve ser multilíngue, e a
 plataforma tem de cobrir **qualquer ocupação**, não uma lista fechada de domínios.
@@ -150,13 +157,13 @@ tiver modelo, **o número principal que o usuário vê continua vindo de heurís
   thresholds alinhados ao metadata do modelo
 
 ### Testes
-`apps.analysis.tests`: 116 testes (21 novos em `test_domain_inference_esco.py`), **3 falhas + 2
-erros pré-existentes** (target_fit ml loader, run_creates_pending, target_fit policy metadata,
-quality logits 72≠75, synthetic jsonl ausente). Golden snapshot passa. Qualquer coisa além dessas
-5 é regressão nova.
+`apps.analysis.tests`: **166 testes, `OK`**. Golden snapshot passa. Não há mais falha herdada — as
+quatro que o documento carregou por várias sessões foram diagnosticadas e corrigidas em §10.5, e três
+delas eram defeito real. **Qualquer falha agora é regressão nova**, sem exceção a memorizar.
 
 ### Git
-Branch `fix/seniority-thresholds-text-fusion`.
+Branch `fix/seniority-thresholds-text-fusion`. O trabalho do §9 e do §10 está commitado em cinco
+commits temáticos; antes disso o §9 inteiro vivia só no working tree.
 
 ---
 
@@ -325,8 +332,9 @@ São ~20 pontos de decisão, mas não são 20 projetos — colapsam em **4 famí
 | `quality` (78% do score) | `_heuristic_score`: 5 flags de regex | regressor multi-dimensão | rubrica |
 | `ats` | **cópia literal de `quality_score`** (`orchestrator.py:758`) | cabeça própria: higiene de palavra-chave e estrutura | rubrica |
 | `clarity` | **cópia literal de `quality_score`** (`orchestrator.py:759`) | cabeça própria: clareza e concisão | rubrica |
-| `has_metrics`, `has_action_verbs`, `has_leadership`, termos de estágio | `METRICS_PATTERN`, `ACTION_VERBS`, `LEADERSHIP_WORDS`, `_INTERNSHIP_RE` | classificador **por bullet** (~4.4k bullets no corpus) | desenho do gerador + verificação do professor |
-| `insights` (quais forças/melhorias mostrar) | `derive_insights`: if/else sobre as flags | ranking pelas cabeças acima, por ganho esperado | nenhum novo |
+| `has_metrics`, `has_action_verbs`, `has_leadership` | ✅ `bullet_probe` (§10.1) | feito | — |
+| termos de estágio (`_INTERNSHIP_RE`) | regex sobre o cargo recente | ainda de pé; escopo já restrito ao cargo atual | — |
+| `insights` (quais forças/melhorias mostrar) | ✅ `insight_gain_v1` decide a ordem (§10.3) | as *condições* ainda são `if`; a **seleção** é medida | nenhum novo |
 | caps de completeness (40/72) | tabela fixa | abstenção calibrada sobre a incerteza do modelo | nenhum novo |
 
 **Grupo B — correspondência semântica** (encoder, quase sem rótulo novo)
@@ -598,6 +606,293 @@ medição (40/72) deixam de ser constantes e passam a ser abstenção calibrada 
 4. Cabeças do Grupo A conforme os rótulos chegam
 5. Grupo B: cabeça calibrada de `target_fit`, evidência semântica de matching
 6. Grupo D: ligar a geração com fallback nos templates
+
+---
+
+## 9. Concluído: as duas cabeças treinadas, e a heurística sai do caminho de decisão
+
+### 9.1 O que ficou de pé
+
+Duas sondas lineares sobre o **MiniLM multilíngue congelado** — o mesmo encoder que já estava
+carregado para `target_fit`, então cada análise ganha um matmul e zero memória nova. Treino é
+comando de segundos na CPU, o que torna barato retreinar quando mais rótulo chega.
+
+| cabeça | rótulo | acurácia (held-out por **ocupação**) | macro-F1 |
+|---|---|---|---|
+| `text_seniority_probe` | `band_target` | **75,9%** · ±1 94,5% | 0,749 |
+| `quality_probe` (nível) | `quality_target` | **75,1%** · ±1 98,6% | 0,755 |
+| `quality_probe` (`impact`) | rubrica do professor 1-5 | MAE **0,62** (baseline 1,30) | ρ 0,859 |
+| `quality_probe` (`clarity` / `ats`) | rubrica do professor 1-5 | MAE 0,39 / 0,42 | ρ 0,76 / 0,73 |
+
+Baselines nas mesmas linhas: `rule_based_seniority` 70,4%, classe majoritária 31,2%, chance 33% em
+qualidade. **Contra os 46 verdicts humanos — a única referência que não é modelo — a sonda faz 82,6%
+contra 67,4% da regra.**
+
+### 9.2 O ganho foi de representação, não de hiperparâmetro
+
+Uma média sobre o currículo inteiro deixa uma lista de 40 skills e duas linhas de conquista caírem no
+mesmo vetor, e a lista longa ganha. A transformação passou a embedar **as quatro seções separadamente**
+(resumo · cargos · realizações · formação+skills) e concatenar, mais o vetor do documento inteiro.
+Medido em `sweep_probe_designs_v3.py`, com protocolo idêntico:
+
+| representação | senioridade | qualidade |
+|---|---|---|
+| média do documento inteiro | 67,6% | 62,2% |
+| **por seção (+ documento)** | **75,9%** | **76,4%** |
+
+Testados e descartados **com número**, não por preferência: MLP de 256 (74,9% / 75,1%), SVM linear
+calibrado (74,9% / 74,8%), ordinal ridge (62,9% / 75,1%) e gradient boosting — este último excluído
+porque split eixo-alinhado em vetor semântico denso é o *inductive bias* errado (nenhuma coordenada
+de embedding carrega um limiar) e custava horas por célula. Regressão logística ganhou nos dois alvos.
+
+`C` é escolhido por **CV aninhado dentro de cada fold de treino**. Reportar o melhor `C` encontrado
+nos folds que estão sendo pontuados seria citar número ajustado como se fosse held-out.
+
+### 9.3 As duas ablações que fecham a circularidade
+
+**Tenure.** As quatro seções não contêm contagem de meses em lugar nenhum — só o bloco do documento
+tem os marcadores `(N meses)`. Então:
+
+| variante | acurácia |
+|---|---|
+| seções + documento com meses (produção) | 75,9% |
+| seções + documento com meses removidos | 74,7% |
+| **só seções — zero contagem de meses** | **74,3%** |
+
+Ler os meses vale 1,6 ponto. A linha de baixo é impossível de acusar de reaprender a fórmula do
+gerador, e ainda assim **bate por 4 pontos a regra que só lê meses**. Isso encerra a ressalva aberta
+em §7.2.2d de forma muito mais forte do que reamostrar 15 currículos à mão.
+
+**Nível declarado no título.** O gerador pôde escrever a banda no cargo em 22% do corpus
+(`may_state_seniority`). Nessas linhas a sonda faz 76,4%; nas outras 78%, faz 75,7%. Diferença de
+0,7 ponto — o modelo não está vivendo de ler "Senior" no título.
+
+### 9.4 A fusão de produção era pior que os dois componentes dela
+
+`fuse_seniority` pesava a regra em `0,4 + 0,45 × strength`. Medido contra as duas referências
+(`eval_seniority_fusion_v3.py`):
+
+| decisor | vs `band_target` | vs humano (n=46) | macro-F1 vs humano |
+|---|---|---|---|
+| sonda sozinha | 67,5%¹ | **67,4%** | **0,671** |
+| regra sozinha | 70,4% | 67,4% | 0,611 |
+| **fusão (produção)** | **64,3%** | **58,7%** | **0,542** |
+
+¹ medido antes da troca de representação; a sonda de produção hoje faz 75,9%.
+
+Média de rank ordinal seguida de re-thresholding **não** divide a diferença entre dois decisores: ela
+empurra desacordo para as bandas do meio. A coluna de distribuição mostra direto — a fusão inflava
+`mid` e matava `senior` até onde um dos componentes acertava. Não existe versão disso em que manter a
+fusão se defende. **A sonda decide, a regra é fallback, o blend está desligado.**
+`clamp_seniority_vetoes` fica: veto sobre evidência ausente ("nunca `senior` sem seção de experiência")
+é segurança de produto declarada como política, não julgamento competindo com o modelo.
+
+### 9.5 Limites medidos, não escondidos
+
+**`ats` e `clarity` não se separam.** O professor dá o **mesmo número** para as duas em 97,7% das
+linhas rotuladas (Pearson 0,978), e nunca difere por mais de um ponto. As duas cabeças existem e
+consertam o defeito que importava — `ats` e `clarity` deixam de ser cópia literal de `quality_score`,
+que media outra coisa. O que **não** está consertado é que elas quase não diferem entre si, e isso é
+propriedade da rubrica, não do modelo: o prompt faz duas perguntas que o professor responde como uma.
+Separar exige rubrica que pontue higiene de palavra-chave e estrutura à parte de concisão, e um
+gerador cuja instrução `poor` degrade formatação e não só conteúdo. É trabalho de re-rotulagem, não
+de retreino — mesmo limite já registrado para `language` em §7.2.2b.
+
+**A generalização para escritor novo é menor que o número principal.** O corpus tem dois escritores de
+prosa, e os dois rótulos são *instruções dadas a um escritor*, não medições do que voltou. Treinar
+numa e testar na outra:
+
+| alvo | dentro do mesmo escritor | entre escritores | queda | comparação balanceada? |
+|---|---|---|---|---|
+| `quality_target` | 72,9% | **64,6%** | 8,3 pontos | **sim** (326 vs 317 linhas de treino) |
+| `band_target` | 73,3% | 70,3% | 3,0 pontos | **não** (1185 vs 326) |
+
+**Os dois resultados não significam a mesma coisa, e a diferença é tamanho de amostra.**
+
+Em `quality_target` os dois sentidos treinam em ~320 linhas cada e dão 65,6% e 63,5% — comparação
+balanceada, queda real. Parte do score agrupado é estilo de escritor e não o construto, então **64,6%
+é a estimativa honesta do que produção entrega** e 75,1% é limite superior.
+
+Em `band_target` os sentidos são assimétricos: treinar nas 1.185 linhas do 8b e testar nas 326 do
+Mistral dá **78,2% — acima do próprio número agrupado de 75,9%**; o sentido inverso, com 326 linhas de
+treino, cai para 62,4%. A média de 70,3% mistura um sentido bem-alimentado com um faminto, então ela
+**subestima** a cabeça. A senioridade é robusta a escritor; a qualidade não demonstrou ser.
+
+Em ambos os casos o que conserta é diversidade de escritor no corpus, que dois geradores não dão — não
+é outra cabeça nem outro hiperparâmetro. **Um usuário real é sempre um terceiro escritor que a cabeça
+nunca leu.**
+
+**O dedupe pegou mais do que o esperado.** Além das linhas repetidas em `labels_rubric.jsonl`,
+`prose.jsonl` também tinha ids duplicados (90 linhas) — jobs de prosa resumíveis rodados mais de uma
+vez. Sem deduplicar, esses currículos treinariam com peso dobrado. `corpus_frame_v3.py` deduplica
+todo arquivo por id com last-write-wins e **reporta a contagem**, para o dedupe ser visível em vez de
+implícito.
+
+**A monotonia por escritor via rótulo do professor não deu para fazer:** todo rótulo existente está em
+prosa de um único escritor (351 linhas do Mistral seguem sem rótulo). A transferência entre escritores
+acima responde a mesma pergunta sem depender de rótulo nenhum, e no corpus inteiro em vez da fatia
+rotulada.
+
+### 9.6 Onde ficou o código
+
+- `text_probe.py` — **novo**: `TRANSFORM_ID`, janelamento, `section_texts`, `build_feature_matrix`
+  (uma implementação, usada por treino e inferência), e `load_probe_bundle`, que **recusa** bundle cujo
+  `feature_transform` ou largura divirja do que a inferência calcula — a mesma trava que
+  `loader_signals_model` ganhou depois de um skew silencioso
+- `tasks/quality/loader_quality_probe.py`, `tasks/seniority/text/loader_seniority_probe.py` — **novos**
+- `tasks/quality/predict.py` — passo `quality_probe` na frente da cascata; `predict_quality_detailed`
+  devolve provider e as dimensões, no mesmo idioma de `predict_matching_detailed`
+- `tasks/seniority/text/predict.py` — passo de sonda na frente do bundle HF e do léxico
+- `orchestrator.py` — sonda primária de senioridade, `ats`/`clarity` das cabeças próprias
+- `config.py` + `settings_modules/ai.py` — `ANALYSIS_QUALITY_PROBE_*`, `ANALYSIS_TEXT_SENIORITY_PROBE_*`
+- `docker-compose.yml` — as duas flags ligadas
+- `ml/scripts/`: `corpus_frame_v3.py`, `train_text_probes_v3.py`, `sweep_probe_designs_v3.py`,
+  `eval_seniority_fusion_v3.py`, `analyze_label_evidence_v3.py`, `finetune_text_heads_v3.py`
+- `ml/reports/`: `text_probes_v3.md`, `label_evidence_v3.md`, `seniority_fusion_v3.md`
+
+### 9.7 O que ainda impede o fechamento em produção
+
+1. ~~`ml/models/` continua no `.gitignore`~~ — resolvido no §10.5, e reincidiu duas vezes.
+2. ~~`ANALYSIS_EMBEDDINGS_ENABLED` só existe em `backend/.env`~~ — explícito no compose.
+3. O rotulador do SambaNova está inteiramente em backoff de rate limit (~0,65 rótulo/min). As cabeças
+   de resolução fina (`impact`/`clarity`/`ats`) melhoram com cada rótulo novo, então vale retreinar
+   quando a fila andar.
+
+---
+
+## 10. Concluído: bullets viram modelo, insights viram ranking, e a suíte fecha
+
+### 10.1 Classificador por bullet — três famílias de regex aposentadas
+
+`METRICS_PATTERN`, `ACTION_VERBS` e `LEADERSHIP_WORDS` decidiam um fato por bullet varrendo o
+documento inteiro. Medidos contra o **consenso de dois anotadores** de famílias de modelo diferentes,
+sobre 4.682 bullets:
+
+| atributo | regex F1 | sonda F1 | regex recall |
+|---|---|---|---|
+| `quantified` | 0,81 | **0,92** | 0,77 |
+| `outcome` | 0,34 | **0,83** | 0,21 |
+| `leadership` | 0,33 | **0,70** | 0,32 |
+
+**`LEADERSHIP_WORDS` pontua 79,0% contra 80,1% da classe majoritária** — responder "não" para tudo
+bate a regex que decidia o que aparece na tela. Em espanhol o recall de `ACTION_VERBS` é **0,03 sobre
+60 positivos**: são oito formas fixas por idioma e o corpus escreve primeira pessoa do pretérito.
+
+O modo de falha que resume tudo: *"supervisar la tensión y la corriente"* acendia `leadership` — está
+supervisionando tensão elétrica, não pessoas. Igual a "gerenciamento de conteúdo".
+
+`bullet_probe_v1`: 5.750 bullets de 764 currículos, 573 ocupações, GroupKFold pela ocupação.
+**Sem janelamento, e isso é medição**: bullets têm média 15,8 palavras e máximo 44, nenhum alcança a
+janela de 60, então o encoding é exato e não aproximação. Acurácia 92,8% / 83,8% / 85,6%.
+
+**Transferência entre escritores é segura aqui**, diferente da qualidade: perde 1–3 pontos contra os
+8,3 do `quality_target`. E o sentido com 1.227 linhas de treino empata com o inverso com 4.523 — a
+cabeça está **saturada de dado**, então mais rótulo não ajuda. Isso foi medido, não suposto.
+
+### 10.2 O teto agora é o rótulo, não o modelo
+
+`outcome`: os dois anotadores concordam em 81,7% (**κ 0,54**) e a sonda faz 83,8%. Ela concorda com o
+anotador A tanto quanto o anotador B concorda. **Não há o que retreinar** — conserta com rubrica.
+O mistral chama 82% dos bullets de "outcome" contra 65% do 8b: é o mesmo viés de calibração
+unidirecional do §7.2.2b, não ruído espalhado.
+
+Mesmo limite já registrado para `clarity`/`ats` (§9.5) e `language` (§7.2.2b). São três agora.
+
+### 10.3 Insights por ganho medido
+
+`derive_insights` decidia *quais* sugestões aparecem por evidência, mas não *qual vem primeiro*: era
+a ordem em que os `if`s rodam, com `high`/`medium`/`low` escrito à mão. Medido sobre 1.399 currículos
+pelo caminho de produção real:
+
+| melhoria | agrupado | dentro da banda |
+|---|---|---|
+| `add_metrics` | +14,58 | +2,90 |
+| `use_action_verbs` | +8,66 | +1,73 |
+| `add_education` | +0,29 | +0,33 |
+| `relevant_links` | −0,46 | −0,08 |
+| `add_skills` | −0,69 | −0,66 |
+| **`education_target_gap`** | **−3,24** | **−0,80** |
+
+**`education_target_gap` mede ganho negativo** — é mostrada a currículos que pontuam *mais alto* que
+aqueles de quem ela é omitida. Era `priority="high"` e vinha primeiro; passa a última e `low`.
+
+Três conservadorismos: sugestão não medida mantém a prioridade declarada e ordena depois das medidas
+(`ats_keywords` dispara para todos, não tem grupo de contraste); os cortes são os **tercis dos
+próprios ganhos**, sem limiar inventado; e o número **não vai para a tela**, só a posição.
+
+**Ressalvas que não podem sumir:** é correlacional; o score previsto é o nosso próprio, então parte
+do sinal é uma cabeça concordando com a outra sobre as mesmas frases; e o agrupado é confundido por
+nível — `add_metrics` cai de +14,58 para +2,90 quando se fixa a banda.
+
+### 10.4 Alinhamento de formação: resultado negativo, medido e revertido
+
+Tentativa de trocar `_TECH_EDU_RE`/`_NON_TECH_EDU_RE` por similaridade no encoder. Construída, ligada,
+e **revertida**. A suíte pegou no caso canônico: Biologia + Programador saiu como "alinhada".
+
+| formação | alvo | alinhado? | margem |
+|---|---|---|---|
+| Enfermagem | Enfermeiro chefe | sim | +0,6130 |
+| Ciência da Computação | Programador | sim | +0,3169 |
+| **Biologia** | **Programador** | **não** | **+0,1842** |
+| Análise e Desenv. de Sistemas | Desenvolvedor Backend | sim | +0,1523 |
+| **Ingeniería en Sistemas** | **Desarrollador** | **sim** | **+0,1130** |
+
+Alinhado mínimo 0,1130 **abaixo** de não-alinhado máximo 0,1842. As classes se sobrepõem: nenhum
+limiar classifica nem esses dez pares fáceis.
+
+**Por que a calibração proxy enganou:** pares ESCO comparam rótulo de ocupação com rótulo de ocupação,
+mesmo registro. A tarefa real compara **área de estudo com cargo**, registros diferentes, e a escala
+da margem se move com eles. O proxy mediu o encoder, não a decisão. Sinal ignorado: 68–72% de
+acurácia já era medíocre e os limiares por idioma variavam 2,3×.
+
+**Não há par rotulado no disco:** o corpus grava só o nível do diploma (12 strings distintas,
+`Graduação`/`Bachelor`/`Máster`) e nunca a área. Isso move o item para perto do custo do `target_fit`.
+
+### 10.5 A suíte fecha inteira — 166 testes, zero falhas
+
+As 4 falhas herdadas eram **três defeitos reais**, não testes desatualizados:
+
+1. **`loader_target_fit_model` era um shim que omitia `load_target_fit_ml_bundle`.** O `ImportError`
+   acontecia na coleção, então os **dois** testes do arquivo sumiam em vez de falhar. *Desaparecer é
+   pior que falhar.*
+2. **`run_resume_analysis_task` abre com `connection.close()`** — correto num worker Celery real, mas
+   a task roda inline no teste e fechava a conexão dele.
+3. **`ml/data/synthetic/target_fit_smoke.jsonl` não existia** e estava sob `ml/data/*`: passaria aqui
+   e falharia em qualquer clone.
+4. `test_target_position_exposes_target_fit_policy_metadata` **fixava a heurística como resposta
+   esperada** de um pilar que virou neural no §6. Virou dois casos: com encoder o provider é neural,
+   sem encoder é a policy — o fallback continua testado sem continuar sendo o esperado.
+
+### 10.6 A armadilha do §5.7 reincidiu duas vezes
+
+`bullet_probe_v1` e `insight_gain_v1` são entrada de produto lida em inferência e estavam ignorados
+pelo `.gitignore`. **Terceira ocorrência.** A diferença que importa: o bundle da sonda o `warmup`
+pega alto com `SystemExit`; **a tabela de ganho degradava em silêncio**, voltando à ordem chutada com
+uma linha de log. Fail-fast só cobre o que alguém lembrou de registrar.
+
+`load_rows()` também passou a deduplicar por id. As 89 linhas repetidas em `prose.jsonl` **não são
+cópias**: carregam texto de bullet diferente e `writer_model` diferente, e rótulo de bullet é chaveado
+por `(id, índice)` — rotular uma linha e juntar na outra desalinha atributo com frase, em silêncio.
+
+E `_round_robin` balanceia `(banda, idioma)` mas **não escritor**: os 600 primeiros saíram 100% de um
+escritor só, não os ~74% previstos, porque os escritores foram anexados em bloco. `--writer` novo, e
+a run agora imprime a distribuição de escritores.
+
+### 10.7 O que falta, em ordem de custo
+
+**Sem rótulo novo:** detector de idioma (não existe, vem da request) · evidência semântica de matching
+(score já é cosseno, evidência ainda é interseção de token) · caps 40/72 → abstenção calibrada ·
+ligar `llm_feedback` · PII → NER.
+
+**Com anotação nova:** `target_fit` (35% policy em `orchestrator.py` + 22 `if`s de `target_seniority`,
+vale ~3,5 pts) · alinhamento de formação (§10.4, precisa de área de estudo no corpus).
+
+**Defeitos registrados e não consertados:**
+- **A telemetria de `target_fit` mente por omissão.** O passo de embeddings roda depois da cascata e
+  reescreve o provider para `target_fit_embedding_v1`, mas o score é `0,65 × embedding + 0,35 ×
+  (ml ou policy)`. A tabela de providers esconde que 35% veio do outro caminho — mesmo espírito do bug
+  de matching do §7.1.
+- `education_target_gap` mede ganho negativo e continua sendo exibida, só que por último.
 
 ---
 
