@@ -51,6 +51,11 @@ class TextSeniorityFusionTests(TestCase):
         self.assertEqual(meta.get("fusion"), "signals_ml_text")
 
 
+# Exercises the fallback path on purpose: these assertions are about completeness caps, thin-
+# profile guards, insights, target_fit and persistence — not about the quality model. Production
+# refuses a heuristic quality score (ANALYSIS_REQUIRE_MODEL_ANSWER defaults on), so the flag is
+# turned off here rather than left to a suite-wide default that would hide the policy.
+@override_settings(ANALYSIS_REQUIRE_MODEL_ANSWER=False)
 class OrchestratorSeniorityLexicalTests(TestCase):
     @override_settings(
         ANALYSIS_SIGNALS_ML_ENABLED=False,
@@ -76,6 +81,11 @@ class OrchestratorSeniorityLexicalTests(TestCase):
         self.assertEqual(result.get("seniority_label_source"), "fused")
 
 
+# Exercises the fallback path on purpose: these assertions are about completeness caps, thin-
+# profile guards, insights, target_fit and persistence — not about the quality model. Production
+# refuses a heuristic quality score (ANALYSIS_REQUIRE_MODEL_ANSWER defaults on), so the flag is
+# turned off here rather than left to a suite-wide default that would hide the policy.
+@override_settings(ANALYSIS_REQUIRE_MODEL_ANSWER=False)
 class OverallScoreVariationTests(TestCase):
     def test_scores_differ_across_distinct_resumes(self) -> None:
         sparse = {
@@ -113,6 +123,11 @@ class OverallScoreVariationTests(TestCase):
         self.assertNotEqual(a, b)
 
 
+# Exercises the fallback path on purpose: these assertions are about completeness caps, thin-
+# profile guards, insights, target_fit and persistence — not about the quality model. Production
+# refuses a heuristic quality score (ANALYSIS_REQUIRE_MODEL_ANSWER defaults on), so the flag is
+# turned off here rather than left to a suite-wide default that would hide the policy.
+@override_settings(ANALYSIS_REQUIRE_MODEL_ANSWER=False)
 class EmbeddingTargetFitPatchTests(TestCase):
     @override_settings(ANALYSIS_EMBEDDINGS_ENABLED=True, ANALYSIS_TARGET_FIT_EMBED_WEIGHT=1.0)
     @patch(

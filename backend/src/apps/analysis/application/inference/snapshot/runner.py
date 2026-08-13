@@ -12,8 +12,6 @@ from apps.analysis.application.inference.orchestrator import analyze_resume
 
 from .dataset import GOLDEN_CASES, iter_golden_cases
 
-# Deterministic settings for refactoring snapshots (heuristic/policy paths).
-# Optional neural overlays are disabled so CI and local runs share one baseline.
 GOLDEN_SNAPSHOT_SETTINGS: dict[str, Any] = {
     "DEBUG": False,
     "ANALYSIS_SIGNALS_ML_ENABLED": False,
@@ -21,6 +19,9 @@ GOLDEN_SNAPSHOT_SETTINGS: dict[str, Any] = {
     "ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED": False,
     "ANALYSIS_EMBEDDINGS_ENABLED": False,
     "ANALYSIS_TARGET_FIT_ML_ENABLED": False,
+    "ANALYSIS_QUALITY_PROBE_ENABLED": False,
+    "ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED": False,
+    "ANALYSIS_REQUIRE_MODEL_ANSWER": False,
     "ANALYSIS_OVERALL_BLEND_ENABLED": True,
     "ANALYSIS_LLM_FEEDBACK_ENABLED": False,
 }

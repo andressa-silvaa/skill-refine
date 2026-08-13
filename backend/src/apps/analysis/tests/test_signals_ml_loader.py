@@ -29,6 +29,11 @@ from apps.analysis.application.inference.tasks.seniority.signals_ml_predict impo
 from apps.analysis.application.inference.signals.types import ResumeSignals
 
 
+# Exercises the fallback path on purpose: these assertions are about completeness caps, thin-
+# profile guards, insights, target_fit and persistence — not about the quality model. Production
+# refuses a heuristic quality score (ANALYSIS_REQUIRE_MODEL_ANSWER defaults on), so the flag is
+# turned off here rather than left to a suite-wide default that would hide the policy.
+@override_settings(ANALYSIS_REQUIRE_MODEL_ANSWER=False)
 class SignalsMlLoaderTest(TestCase):
     def tearDown(self) -> None:
         clear_signals_ml_cache()

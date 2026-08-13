@@ -1,0 +1,275 @@
+{
+  "task": "text_seniority_probe",
+  "model_name": "text_seniority_probe",
+  "model_version": "text_seniority_probe_v1",
+  "dataset_version": "resumes_v3_1559rows_2026-08-12",
+  "feature_transform": "sections_chunked_mean_60w_l2_v2",
+  "embedding_model": "paraphrase-multilingual-MiniLM-L12-v2",
+  "embedding_dim": 1920,
+  "include_document": true,
+  "sections": [
+    "summary",
+    "roles",
+    "bullets",
+    "credentials"
+  ],
+  "labels": [
+    "intern",
+    "junior",
+    "mid",
+    "senior"
+  ],
+  "label_source": "band_target",
+  "label_validation": "human review of 46 resumes put band_target at ~94.9% vs ~78.5% for the LLM teacher (handoff 7.2.2d)",
+  "training_rows": 1559,
+  "evaluation": "GroupKFold over ESCO occupation",
+  "metrics": {
+    "text": {
+      "n": 1559,
+      "accuracy": 0.758819756254009,
+      "within_one": 0.9454778704297627,
+      "macro_f1": 0.7488933348337137,
+      "predicted_distribution": {
+        "junior": 368,
+        "intern": 486,
+        "senior": 404,
+        "mid": 301
+      },
+      "deviation": {
+        "1": 155,
+        "0": 1183,
+        "-1": 136,
+        "2": 33,
+        "-2": 23,
+        "-3": 16,
+        "3": 13
+      }
+    },
+    "sections_only": {
+      "n": 1559,
+      "accuracy": 0.7434252726106478,
+      "within_one": 0.9397049390635023,
+      "macro_f1": 0.7337012616058454,
+      "predicted_distribution": {
+        "junior": 381,
+        "intern": 470,
+        "senior": 406,
+        "mid": 302
+      },
+      "deviation": {
+        "1": 166,
+        "0": 1159,
+        "-1": 140,
+        "2": 40,
+        "-3": 12,
+        "3": 13,
+        "-2": 29
+      }
+    },
+    "text_no_tenure": {
+      "n": 1559,
+      "accuracy": 0.7466324567030147,
+      "within_one": 0.9429121231558691,
+      "macro_f1": 0.7362406570547148,
+      "predicted_distribution": {
+        "junior": 369,
+        "intern": 478,
+        "senior": 408,
+        "mid": 304
+      },
+      "deviation": {
+        "1": 169,
+        "0": 1164,
+        "-1": 137,
+        "2": 34,
+        "-2": 24,
+        "-3": 16,
+        "3": 15
+      }
+    },
+    "rule_based": {
+      "n": 1559,
+      "accuracy": 0.7042976266837716,
+      "within_one": 1.0,
+      "macro_f1": 0.6962776876656636,
+      "predicted_distribution": {
+        "intern": 429,
+        "mid": 541,
+        "junior": 302,
+        "senior": 287
+      },
+      "deviation": {
+        "0": 1098,
+        "-1": 184,
+        "1": 277
+      }
+    },
+    "majority": {
+      "n": 1559,
+      "accuracy": 0.31173829377806284,
+      "within_one": 0.554842847979474,
+      "macro_f1": 0.11882640586797066,
+      "predicted_distribution": {
+        "intern": 1559
+      },
+      "deviation": {
+        "0": 486,
+        "-2": 309,
+        "-1": 379,
+        "-3": 385
+      }
+    },
+    "stated_seniority": {
+      "n": 339,
+      "accuracy": 0.7640117994100295,
+      "within_one": 0.9469026548672567,
+      "macro_f1": 0.7539360874019494,
+      "predicted_distribution": {
+        "intern": 102,
+        "senior": 106,
+        "junior": 72,
+        "mid": 59
+      },
+      "deviation": {
+        "0": 259,
+        "1": 34,
+        "-1": 28,
+        "2": 7,
+        "3": 4,
+        "-2": 4,
+        "-3": 3
+      }
+    },
+    "unstated_seniority": {
+      "n": 1220,
+      "accuracy": 0.7573770491803279,
+      "within_one": 0.9450819672131148,
+      "macro_f1": 0.7470915280400342,
+      "predicted_distribution": {
+        "junior": 296,
+        "intern": 384,
+        "senior": 298,
+        "mid": 242
+      },
+      "deviation": {
+        "1": 121,
+        "0": 924,
+        "-1": 108,
+        "2": 26,
+        "-2": 19,
+        "-3": 13,
+        "3": 9
+      }
+    },
+    "cross_writer": {
+      "llama-3.1-8b-instant->mistral-small-latest": {
+        "n": 326,
+        "accuracy": 0.7822085889570553,
+        "within_one": 0.9478527607361963,
+        "macro_f1": 0.773403985380315,
+        "predicted_distribution": {
+          "intern": 102,
+          "senior": 84,
+          "junior": 87,
+          "mid": 53
+        },
+        "deviation": {
+          "0": 255,
+          "-2": 11,
+          "-1": 36,
+          "1": 18,
+          "-3": 5,
+          "2": 1
+        },
+        "n_train": 1185
+      },
+      "mistral-small-latest->llama-3.1-8b-instant": {
+        "n": 1185,
+        "accuracy": 0.6236286919831223,
+        "within_one": 0.9029535864978903,
+        "macro_f1": 0.6124188544010081,
+        "predicted_distribution": {
+          "junior": 177,
+          "intern": 312,
+          "mid": 383,
+          "senior": 313
+        },
+        "deviation": {
+          "1": 206,
+          "0": 739,
+          "-1": 125,
+          "2": 75,
+          "3": 30,
+          "-3": 4,
+          "-2": 6
+        },
+        "n_train": 326
+      },
+      "within:llama-3.1-8b-instant": 0.7240506329113924,
+      "within:mistral-small-latest": 0.7423312883435583,
+      "summary": {
+        "within_writer_mean": 0.7331909606274754,
+        "cross_writer_mean": 0.7029186404700888,
+        "drop": 0.030272320157386567,
+        "chance_floor": 0.25
+      }
+    },
+    "vs_teacher": {
+      "n": 257,
+      "accuracy": 0.6653696498054474,
+      "within_one": 0.9610894941634242,
+      "macro_f1": 0.6670303040495983,
+      "predicted_distribution": {
+        "junior": 70,
+        "intern": 76,
+        "mid": 54,
+        "senior": 57
+      },
+      "deviation": {
+        "0": 171,
+        "-1": 51,
+        "-2": 4,
+        "1": 25,
+        "3": 1,
+        "-3": 3,
+        "2": 2
+      }
+    },
+    "vs_human": {
+      "n": 46,
+      "accuracy": 0.8260869565217391,
+      "within_one": 0.9782608695652174,
+      "macro_f1": 0.8083333333333333,
+      "predicted_distribution": {
+        "junior": 12,
+        "intern": 15,
+        "senior": 13,
+        "mid": 6
+      },
+      "deviation": {
+        "0": 38,
+        "-1": 3,
+        "1": 4,
+        "-3": 1
+      }
+    },
+    "rule_vs_human": {
+      "n": 46,
+      "accuracy": 0.6739130434782609,
+      "within_one": 1.0,
+      "macro_f1": 0.6106227106227106,
+      "predicted_distribution": {
+        "junior": 5,
+        "intern": 15,
+        "senior": 3,
+        "mid": 23
+      },
+      "deviation": {
+        "0": 31,
+        "-1": 10,
+        "1": 5
+      }
+    }
+  },
+  "trained_on": "2026-08-12"
+}

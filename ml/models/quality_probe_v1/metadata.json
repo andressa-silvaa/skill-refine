@@ -1,0 +1,200 @@
+{
+  "task": "quality_probe",
+  "model_name": "quality_probe",
+  "model_version": "quality_probe_v1",
+  "dataset_version": "resumes_v3_1559rows_2026-08-12",
+  "feature_transform": "sections_chunked_mean_60w_l2_v2",
+  "embedding_model": "paraphrase-multilingual-MiniLM-L12-v2",
+  "embedding_dim": 1920,
+  "include_document": true,
+  "sections": [
+    "summary",
+    "roles",
+    "bullets",
+    "credentials"
+  ],
+  "labels": [
+    "poor",
+    "fair",
+    "good"
+  ],
+  "label_source": "quality_target for the level head, LLM teacher rubric for impact/clarity/ats",
+  "quality_level_to_score": {
+    "poor": 30,
+    "fair": 55,
+    "good": 78
+  },
+  "score_map_status": "declared product policy, not fitted (handoff 7.5 item 4)",
+  "dimension_calibration": {
+    "impact": {
+      "observed_low": 1.0,
+      "observed_high": 5.0,
+      "score_low": 30.0,
+      "score_high": 78.0
+    },
+    "clarity": {
+      "observed_low": 3.0,
+      "observed_high": 5.0,
+      "score_low": 30.0,
+      "score_high": 78.0
+    },
+    "ats": {
+      "observed_low": 3.0,
+      "observed_high": 5.0,
+      "score_low": 30.0,
+      "score_high": 78.0
+    }
+  },
+  "dimension_calibration_status": "monotone rescale from the teacher's observed range onto the level head's endpoints, so ats/clarity/impact publish on the same scale as quality_score; ordering is the model's, units are policy",
+  "training_rows": 691,
+  "dimension_rows": {
+    "impact": 257,
+    "clarity": 257,
+    "ats": 257
+  },
+  "dimension_heads": [
+    "ats",
+    "clarity",
+    "impact"
+  ],
+  "evaluation": "GroupKFold over ESCO occupation",
+  "metrics": {
+    "quality_target": {
+      "n": 691,
+      "accuracy": 0.7510853835021708,
+      "within_one": 0.9855282199710564,
+      "macro_f1": 0.7548285093786157,
+      "predicted_distribution": {
+        "good": 234,
+        "poor": 219,
+        "fair": 238
+      },
+      "deviation": {
+        "0": 519,
+        "-1": 81,
+        "2": 5,
+        "1": 81,
+        "-2": 5
+      }
+    },
+    "heuristic_separation": {
+      "good": {
+        "n": 235,
+        "mean": 57.765957446808514
+      },
+      "poor": {
+        "n": 220,
+        "mean": 41.40909090909091
+      },
+      "fair": {
+        "n": 236,
+        "mean": 52.3728813559322
+      }
+    },
+    "probe_separation": {
+      "good": {
+        "n": 235,
+        "mean": 70.42127659574469
+      },
+      "poor": {
+        "n": 220,
+        "mean": 32.79545454545455
+      },
+      "fair": {
+        "n": 236,
+        "mean": 59.94915254237288
+      }
+    },
+    "impact": {
+      "n": 257,
+      "mae": 0.6171982882087796,
+      "baseline_mae": 1.3033656830534905,
+      "exact": 0.48638132295719844,
+      "within_one": 0.9299610894941635,
+      "spearman": 0.8585373124159854,
+      "label_distribution": {
+        "1.0": 58,
+        "4.0": 27,
+        "2.0": 55,
+        "5.0": 68,
+        "3.0": 49
+      }
+    },
+    "clarity": {
+      "n": 257,
+      "mae": 0.38901883711610785,
+      "baseline_mae": 0.5341488894608548,
+      "exact": 0.688715953307393,
+      "within_one": 1.0,
+      "spearman": 0.764223477219993,
+      "label_distribution": {
+        "3.0": 65,
+        "4.0": 122,
+        "5.0": 70
+      }
+    },
+    "ats": {
+      "n": 257,
+      "mae": 0.41584649995143314,
+      "baseline_mae": 0.5265181910399854,
+      "exact": 0.6614785992217899,
+      "within_one": 0.9961089494163424,
+      "spearman": 0.7309747131763195,
+      "label_distribution": {
+        "3.0": 64,
+        "4.0": 124,
+        "5.0": 69
+      }
+    },
+    "cross_writer": {
+      "mistral-small-latest->llama-3.1-8b-instant": {
+        "n": 317,
+        "accuracy": 0.6561514195583596,
+        "within_one": 0.9589905362776026,
+        "macro_f1": 0.6381413788183725,
+        "predicted_distribution": {
+          "poor": 142,
+          "fair": 89,
+          "good": 86
+        },
+        "deviation": {
+          "0": 208,
+          "-1": 63,
+          "2": 1,
+          "-2": 12,
+          "1": 33
+        },
+        "n_train": 326
+      },
+      "llama-3.1-8b-instant->mistral-small-latest": {
+        "n": 326,
+        "accuracy": 0.6349693251533742,
+        "within_one": 0.9631901840490797,
+        "macro_f1": 0.6378764677838925,
+        "predicted_distribution": {
+          "good": 170,
+          "fair": 101,
+          "poor": 55
+        },
+        "deviation": {
+          "0": 207,
+          "1": 88,
+          "-1": 19,
+          "2": 12
+        },
+        "n_train": 317
+      },
+      "within:mistral-small-latest": 0.7607361963190185,
+      "within:llama-3.1-8b-instant": 0.6971608832807571,
+      "summary": {
+        "within_writer_mean": 0.7289485397998878,
+        "cross_writer_mean": 0.6455603723558669,
+        "drop": 0.08338816744402089,
+        "chance_floor": 0.3333333333333333
+      }
+    },
+    "clarity_ats_identical": 0.9766536964980544,
+    "clarity_ats_correlation": 0.977622938737351
+  },
+  "trained_on": "2026-08-12"
+}

@@ -121,19 +121,72 @@ def _lexical_seniority(text: str) -> tuple[str | None, str, float]:
     return None, "low", 0.0
 
 
+def _predict_probe(
+    probe_bundle: dict[str, Any],
+    encoder: Any,
+    text: str,
+    resume_data: dict[str, Any],
+) -> dict[str, Any] | None:
+    """
+    Linear probe over the frozen multilingual encoder already loaded for target_fit.
+
+    Trained on ``band_target`` from text alone. Human review of 46 resumes put that label at ~94.9%
+    against ~78.5% for the LLM teacher, so it is the primary label for a text-only model — but only for
+    a text-only model: anything reading month counts would be relearning the generator's formula.
+    """
+    from apps.analysis.application.inference.text_probe import encode_for_bundle
+
+    head = (probe_bundle.get("heads") or {}).get("band")
+    if head is None:
+        return None
+    matrix = encode_for_bundle(probe_bundle, encoder, text, resume_data)
+    probabilities = [float(p) for p in head.predict_proba(matrix)[0]]
+    classes = [str(c) for c in head.classes_]
+    if not probabilities:
+        return None
+    probs_map: dict[str, float] = {}
+    for raw_label, probability in zip(classes, probabilities):
+        key = _normalize_label(raw_label) or raw_label
+        probs_map[key] = probability
+    best = max(range(len(probabilities)), key=lambda i: probabilities[i])
+    label = _normalize_label(classes[best])
+    if label is None:
+        return None
+    return {
+        "label": label,
+        "confidence": _max_prob_confidence(max(probabilities)),
+        "probs": probs_map,
+        "source": "probe",
+    }
+
+
 def predict_text_seniority(
     sanitized_text: str,
     language: str,
     bundle: dict[str, Any] | None,
     *,
     allow_lexical_fallback: bool = True,
+    probe_bundle: dict[str, Any] | None = None,
+    embeddings_model: Any = None,
+    resume_data: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """
-    Returns dict: label (or None), confidence (low/medium/high), probs, source (neural|lexical|none).
+    Returns dict: label (or None), confidence (low/medium/high), probs, source.
+
+    Source is one of probe|neural|lexical|none, in cascade order. The probe leads because it is the
+    only step fitted on this corpus; the HF bundle and the lexical rules stay behind it as fallbacks.
     """
     text = (sanitized_text or "").strip()
     if not text and not allow_lexical_fallback:
         return {"label": None, "confidence": "low", "probs": {}, "source": "none"}
+
+    if text and probe_bundle and embeddings_model is not None and resume_data is not None:
+        try:
+            predicted = _predict_probe(probe_bundle, embeddings_model, text, resume_data)
+            if predicted:
+                return predicted
+        except Exception as exc:
+            logger.warning("text_seniority probe predict failed: %s", exc)
 
     if bundle and bundle.get("model") is not None and bundle.get("tokenizer") is not None:
         try:
