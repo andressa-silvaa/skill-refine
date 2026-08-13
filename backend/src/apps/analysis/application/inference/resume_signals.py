@@ -309,6 +309,12 @@ def education_aligned_with_target(resume_data: dict[str, Any]) -> bool:
     """
     Só elogiar 'formação alinhada' quando há indício real de aderência ao cargo alvo.
     Ex.: programador + biologia => False.
+
+    Still keyword-driven, and known to be pt-BR shaped and tech-gated. Replacing it with encoder
+    similarity was attempted and measured as not separable on this task — aligned pairs bottom out
+    at 0.113 margin while unrelated ones reach 0.184, so no threshold classifies them. See
+    ml/reports/education_alignment_v3.md before trying again; it needs education field-of-study data
+    that no file on disk currently carries.
     """
     if not _has_nonempty_education(resume_data):
         return False
