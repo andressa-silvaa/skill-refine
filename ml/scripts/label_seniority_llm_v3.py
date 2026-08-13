@@ -304,16 +304,35 @@ def label_one(row: dict[str, Any], key: str, model: str) -> dict[str, Any] | Non
 
 
 def load_rows() -> list[dict[str, Any]]:
+    """
+    Deduped by id with last-write-wins, the same rule corpus_frame_v3 applies, and the count is
+    printed so the dedupe is visible instead of implicit.
+
+    Resumable prose jobs re-ran ids, and the repeated lines are not copies: they carry different
+    bullet text and a different writer_model. Bullet labels are keyed by (id, bullet index), so
+    labelling one line and joining the label to the other silently attaches an attribute to a
+    different sentence — on top of paying for every duplicate twice.
+    """
     if not PROSE_PATH.exists():
         raise SystemExit(f"missing {PROSE_PATH} — run write_resume_prose_v3.py first")
-    rows = []
+    rows: dict[str, dict[str, Any]] = {}
+    duplicates = 0
     for line in PROSE_PATH.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError:
-                continue
-    return rows
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        row_id = str(row.get("id") or "")
+        if not row_id:
+            continue
+        if row_id in rows:
+            duplicates += 1
+        rows[row_id] = row
+    if duplicates:
+        print(f"prose dedupe: {duplicates} duplicate lines dropped (last write wins)", flush=True)
+    return list(rows.values())
 
 
 def report(labels: list[dict[str, Any]]) -> None:

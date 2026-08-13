@@ -1,0 +1,103 @@
+{
+  "task": "bullet_probe",
+  "model_name": "bullet_probe",
+  "model_version": "bullet_probe_v1",
+  "dataset_version": "resumes_v3_5750bullets_2026-08-12",
+  "feature_transform": "bullet_mean_l2_v1",
+  "embedding_model": "paraphrase-multilingual-MiniLM-L12-v2",
+  "embedding_dim": 384,
+  "attributes": [
+    "quantified",
+    "outcome",
+    "leadership"
+  ],
+  "label_source": "llama-3.1-8b-instant bullets stage of label_rubric_llm_v3.py",
+  "label_second_annotator": "mistral-small-latest on 716 bullets, kappa quantified=0.77, outcome=0.54, leadership=0.70",
+  "training_bullets": 5750,
+  "training_resumes": 764,
+  "evaluation": "GroupKFold over ESCO occupation",
+  "replaces": [
+    "METRICS_PATTERN",
+    "ACTION_VERBS",
+    "LEADERSHIP_WORDS"
+  ],
+  "metrics": {
+    "quantified": {
+      "probe": {
+        "accuracy": 0.9281739130434783,
+        "precision": 0.917633845001872,
+        "recall": 0.9270045385779122,
+        "f1": 0.9222953904045155,
+        "tp": 2451,
+        "fp": 220,
+        "fn": 193,
+        "tn": 2886
+      },
+      "regex": {
+        "accuracy": 0.8485217391304348,
+        "precision": 0.9562532166752444,
+        "recall": 0.7027231467473525,
+        "f1": 0.8101155439284935,
+        "tp": 1858,
+        "fp": 85,
+        "fn": 786,
+        "tn": 3021
+      },
+      "majority_accuracy": 0.5401739130434783,
+      "positive_rate": 0.4598260869565217
+    },
+    "outcome": {
+      "probe": {
+        "accuracy": 0.8384347826086956,
+        "precision": 0.848153730218538,
+        "recall": 0.810586964350018,
+        "f1": 0.8289449456821949,
+        "tp": 2251,
+        "fp": 403,
+        "fn": 526,
+        "tn": 2570
+      },
+      "regex": {
+        "accuracy": 0.5843478260869566,
+        "precision": 0.7362637362637363,
+        "recall": 0.21714079942383868,
+        "f1": 0.3353726362625139,
+        "tp": 603,
+        "fp": 216,
+        "fn": 2174,
+        "tn": 2757
+      },
+      "majority_accuracy": 0.5170434782608696,
+      "positive_rate": 0.48295652173913045
+    },
+    "leadership": {
+      "probe": {
+        "accuracy": 0.8558260869565217,
+        "precision": 0.6005072923272036,
+        "recall": 0.8263525305410122,
+        "f1": 0.6955563716489167,
+        "tp": 947,
+        "fp": 630,
+        "fn": 199,
+        "tn": 3974
+      },
+      "regex": {
+        "accuracy": 0.7899130434782609,
+        "precision": 0.4518633540372671,
+        "recall": 0.25392670157068065,
+        "f1": 0.32513966480446926,
+        "tp": 291,
+        "fp": 353,
+        "fn": 855,
+        "tn": 4251
+      },
+      "majority_accuracy": 0.800695652173913,
+      "positive_rate": 0.19930434782608697
+    },
+    "writers": {
+      "llama-3.1-8b-instant": 4523,
+      "mistral-small-latest": 1227
+    }
+  },
+  "trained_on": "2026-08-12"
+}

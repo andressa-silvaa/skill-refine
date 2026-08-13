@@ -481,6 +481,13 @@ def main() -> None:
         action="store_true",
         help="round-robin over (band, language) so a --limit subset stays balanced",
     )
+    ap.add_argument(
+        "--writer",
+        default="",
+        help="substring of writer_model, e.g. 'mistral'. --stratify balances band and language but "
+        "not the prose writer, and the writers were appended in blocks, so one writer sits at the "
+        "tail of every bucket and a --limit subset can miss it entirely",
+    )
     args = ap.parse_args()
 
     judgment = args.stage == "judgment"
@@ -504,6 +511,8 @@ def main() -> None:
     if args.only:
         pattern = re.compile(args.only)
         todo = [r for r in todo if pattern.search(str(r.get("id") or ""))]
+    if args.writer:
+        todo = [r for r in todo if args.writer.lower() in str(r.get("writer_model") or "").lower()]
     if args.overlap_with:
         reference: set[str] = set()
         ref_path = OUT_DIR / args.overlap_with
@@ -528,6 +537,12 @@ def main() -> None:
             + json.dumps(dict(Counter(r.get("band_target") for r in todo)), ensure_ascii=False)
             + "  idiomas: "
             + json.dumps(dict(Counter(r.get("language") for r in todo)), ensure_ascii=False)
+        )
+        print(
+            "  escritores: "
+            + json.dumps(
+                dict(Counter(r.get("writer_model") or "(none)" for r in todo)), ensure_ascii=False
+            )
         )
 
     key = _key_for(env_name)
