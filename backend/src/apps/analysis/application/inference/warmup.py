@@ -8,6 +8,7 @@ from django.conf import settings
 
 from .config import get_config
 from .loader import get_matching_bundle, get_model_bundle, get_quality_bundle
+from .language_detection import get_language_detector
 from .tasks.quality.loader_bullet_probe import get_bullet_probe_bundle
 from .tasks.quality.loader_quality_probe import get_quality_probe_bundle
 from .tasks.seniority.text.loader_seniority_probe import get_seniority_probe_bundle
@@ -64,6 +65,12 @@ def verify_enabled_probes(config: dict[str, Any]) -> list[str]:
         problems.append(
             "ANALYSIS_BULLET_PROBE_ENABLED is on but the bullet_probe bundle did not load from "
             f"{config.get('model_root')}"
+        )
+    if config.get("language_detection_enabled") and get_language_detector(config) is None:
+        problems.append(
+            "ANALYSIS_LANGUAGE_DETECTION_ENABLED is on but the language_detector bundle did not "
+            f"load from {config.get('model_root')}; every analysis would silently use the user's "
+            "interface preference as the resume language"
         )
     return problems
 

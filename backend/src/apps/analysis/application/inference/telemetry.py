@@ -47,6 +47,7 @@ def build_model_metadata_by_task(
     target_fit_bundle_extra: dict[str, Any] | None,
     flags_provider: str = "",
     insight_ranking_provider: str = "",
+    language_provider: str = "",
 ) -> dict[str, dict[str, str]]:
     model_metadata_by_task = {
         "seniority": build_task_metadata("seniority", metadata_seniority, config),
@@ -59,6 +60,10 @@ def build_model_metadata_by_task(
     if insight_ranking_provider:
         model_metadata_by_task["insight_ranking"] = build_task_metadata(
             "insight_ranking", {"provider": insight_ranking_provider}, config
+        )
+    if language_provider:
+        model_metadata_by_task["language"] = build_task_metadata(
+            "language", {"provider": language_provider}, config
         )
     if job_text:
         model_metadata_by_task["matching"] = build_task_metadata("matching", metadata_matching, config)

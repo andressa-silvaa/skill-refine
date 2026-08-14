@@ -62,6 +62,7 @@ services:
       - ANALYSIS_QUALITY_PROBE_ENABLED=true
       - ANALYSIS_BULLET_PROBE_ENABLED=true
       - ANALYSIS_INSIGHT_RANKING_ENABLED=true
+      - ANALYSIS_LANGUAGE_DETECTION_ENABLED=true
       # Load-bearing, not optional: the three probes above read this encoder. Leaving it to a gitignored
       # .env means a fresh clone silently answers with regex instead.
       - ANALYSIS_EMBEDDINGS_ENABLED=true
@@ -123,6 +124,7 @@ services:
       - ANALYSIS_QUALITY_PROBE_ENABLED=true
       - ANALYSIS_BULLET_PROBE_ENABLED=true
       - ANALYSIS_INSIGHT_RANKING_ENABLED=true
+      - ANALYSIS_LANGUAGE_DETECTION_ENABLED=true
       # Load-bearing, not optional: the three probes above read this encoder. Leaving it to a gitignored
       # .env means a fresh clone silently answers with regex instead.
       - ANALYSIS_EMBEDDINGS_ENABLED=true

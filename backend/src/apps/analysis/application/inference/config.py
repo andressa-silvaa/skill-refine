@@ -163,6 +163,17 @@ def get_config(settings) -> dict:
             or "insight_gain_v1"
         ),
         "insight_gain_cache_key": "insight_gain_v1",
+        "language_detection_enabled": bool(
+            getattr(settings, "ANALYSIS_LANGUAGE_DETECTION_ENABLED", False)
+        ),
+        "language_detector_model_dir": str(
+            getattr(settings, "ANALYSIS_LANGUAGE_DETECTOR_MODEL_DIR", "") or ""
+        ).strip(),
+        "language_detector_subdir": str(
+            getattr(settings, "ANALYSIS_LANGUAGE_DETECTOR_SUBDIR", "language_detector_v1")
+            or "language_detector_v1"
+        ),
+        "language_detector_cache_key": "language_detector_v1",
         "require_model_answer": bool(getattr(settings, "ANALYSIS_REQUIRE_MODEL_ANSWER", True)),
         "fail_fast_on_missing_bundle": bool(
             getattr(settings, "ANALYSIS_FAIL_FAST_ON_MISSING_BUNDLE", True)

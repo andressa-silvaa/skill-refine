@@ -23,6 +23,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -98,6 +99,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -249,6 +256,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -324,6 +332,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -476,6 +490,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -553,6 +568,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -761,6 +782,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -846,6 +868,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -1060,6 +1088,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -1121,6 +1150,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -1257,6 +1292,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -1350,6 +1386,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -1578,6 +1620,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -1655,6 +1698,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -1849,6 +1898,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -1916,6 +1966,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -2043,6 +2099,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -2112,6 +2169,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -2248,6 +2311,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -2323,6 +2387,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -2463,6 +2533,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy"
@@ -2541,6 +2612,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -2699,6 +2776,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy",
@@ -2773,6 +2851,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -2976,6 +3060,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy"
@@ -3047,6 +3132,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -3203,6 +3294,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -3273,6 +3365,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -3421,6 +3519,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -3488,6 +3587,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -3617,6 +3722,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy",
@@ -3701,6 +3807,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -3929,6 +4041,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy",
@@ -4012,6 +4125,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -4216,6 +4335,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -4285,6 +4405,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -4422,6 +4548,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -4510,6 +4637,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -4724,6 +4857,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -4800,6 +4934,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -5023,6 +5163,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -5104,6 +5245,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -5308,6 +5455,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -5390,6 +5538,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -5594,6 +5748,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy"
@@ -5665,6 +5820,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -5818,6 +5979,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy",
@@ -5908,6 +6070,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -6129,6 +6297,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy",
@@ -6211,6 +6380,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -6412,6 +6587,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -6478,6 +6654,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -6620,6 +6802,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -6676,6 +6859,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -6813,6 +7002,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy"
@@ -6889,6 +7079,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -7022,6 +7218,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -7111,6 +7308,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -7319,6 +7522,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -7396,6 +7600,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -7546,6 +7756,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy",
@@ -7622,6 +7833,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -7832,6 +8049,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "matching": "heuristics",
               "quality": "heuristics",
               "seniority": "rule_policy"
@@ -7908,6 +8126,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "matching": {
               "datasetVersion": "",
@@ -8072,6 +8296,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -8155,6 +8380,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -8366,6 +8597,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy"
             },
@@ -8421,6 +8653,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",
@@ -8559,6 +8797,7 @@
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
+              "language": "user_preference",
               "quality": "heuristics",
               "seniority": "rule_policy",
               "target_fit": "target_fit_policy"
@@ -8649,6 +8888,12 @@
               "modelName": "heuristics-only",
               "modelVersion": "analysis_v1_pt",
               "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
             },
             "quality": {
               "datasetVersion": "",

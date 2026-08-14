@@ -83,6 +83,7 @@ ml/models/*
 # insight_gain_v1 is the one that degrades *silently*: warmup fail-fast covers a missing probe
 # bundle, but a missing gain table just restores the guessed insight order with a log line.
 !ml/models/insight_gain_v1/
+!ml/models/language_detector_v1/
 *.pt
 *.pth
 *.safetensors

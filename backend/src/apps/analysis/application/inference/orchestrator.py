@@ -18,6 +18,7 @@ from .integrity import ModelAnswerRequired, build_integrity_block
 from .loader import get_matching_bundle, get_model_bundle, get_quality_bundle
 from .loader_signals_model import get_signals_ml_bundle, signals_ml_metadata_for_extra
 from .overall_score import compute_overall_score
+from .language_detection import detect_language, get_language_detector
 from .postprocess.insight_ranking import PROVIDER as INSIGHT_RANKING_PROVIDER
 from .postprocess.insight_ranking import FALLBACK_PROVIDER as INSIGHT_RANKING_FALLBACK
 from .postprocess.insight_ranking import load_gain_table
@@ -671,9 +672,17 @@ def analyze_resume(
     Full analysis pipeline. Returns dict for ResumeAnalysis persistence.
     """
     config = get_config(settings)
-    lang = (language or "pt-BR").strip()
+    preferred_lang = (language or "pt-BR").strip()
     max_resume = config["max_chars_resume"]
     max_job = config["max_chars_job"]
+
+    # Detect before anything reads `lang`: the ESCO index, the section renderer and the insight copy
+    # all key off it, and `language` is only the user's interface preference (see worker.py).
+    lang, language_provider, _language_confidence = detect_language(
+        get_language_detector(config),
+        resume_to_text(resume_data, language=preferred_lang).full_text,
+        preferred_lang,
+    )
 
     sections = resume_to_text(resume_data, language=lang)
     resume_text = sections.full_text
@@ -783,6 +792,7 @@ def analyze_resume(
         insight_ranking_provider=(
             INSIGHT_RANKING_PROVIDER if insight_gain_table else INSIGHT_RANKING_FALLBACK
         ),
+        language_provider=language_provider,
     )
     model_name, model_version, dataset_version, provider = resolve_top_level_model_meta(
         config=config,

@@ -96,6 +96,15 @@ ANALYSIS_INSIGHT_RANKING_ENABLED = env.bool("ANALYSIS_INSIGHT_RANKING_ENABLED", 
 ANALYSIS_INSIGHT_GAIN_MODEL_DIR = env.str("ANALYSIS_INSIGHT_GAIN_MODEL_DIR", default="")
 ANALYSIS_INSIGHT_GAIN_SUBDIR = env.str("ANALYSIS_INSIGHT_GAIN_SUBDIR", default="insight_gain_v1")
 
+# Read the resume's language from the document instead of the user's interface preference. The ESCO
+# index is per language, so the wrong one costs 29.5 points of occupation retrieval and 14.9 of
+# domain (ml/reports/language_mismatch_v3.md). Overrides the preference only above a confidence floor.
+ANALYSIS_LANGUAGE_DETECTION_ENABLED = env.bool("ANALYSIS_LANGUAGE_DETECTION_ENABLED", default=False)
+ANALYSIS_LANGUAGE_DETECTOR_MODEL_DIR = env.str("ANALYSIS_LANGUAGE_DETECTOR_MODEL_DIR", default="")
+ANALYSIS_LANGUAGE_DETECTOR_SUBDIR = env.str(
+    "ANALYSIS_LANGUAGE_DETECTOR_SUBDIR", default="language_detector_v1"
+)
+
 # Refuse to publish a quality score that came from the regex heuristic instead of the probe.
 # `_heuristic_score` averages 41.4 / 52.4 / 57.8 on resumes planted poor / fair / good — nearly flat
 # on the axis it claims to measure, while carrying 78% of the final score. A number that uninformative
