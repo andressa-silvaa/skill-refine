@@ -23,15 +23,6 @@ LEADERSHIP_WORDS = re.compile(
     r"manager|roadmap|stakeholder|supervis|jefe|jefa|responsable|encargad",
     re.I,
 )
-ARCHITECTURE_WORDS = re.compile(
-    r"arquitet|architecture|microsservi|microservice|integra[cç][aã]o|integration|platform|plataforma|governan|observability|observabilidade",
-    re.I,
-)
-TECH_KEYWORDS = re.compile(
-    r"\b(python|django|fastapi|react|sql|api|apis|etl|cloud|aws|azure|gcp|cypress|docker|kubernetes|nlp|java|node|typescript|postgres|redis)\b",
-    re.I,
-)
-
 # Below this margin between the head's top two classes, the quality score is published but marked
 # low confidence. The value is the 10% operating point of the measured risk-coverage curve
 # (ml/reports/completeness_caps_v3.md): withholding confidence from the lowest-margin 10% of resumes
