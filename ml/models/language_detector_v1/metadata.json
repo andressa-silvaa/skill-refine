@@ -1,0 +1,18 @@
+{
+  "task": "language_detector",
+  "model_name": "language_detector",
+  "model_version": "language_detector_v1",
+  "dataset_version": "resumes_v3_1559rows_2026-08-14",
+  "features": "tfidf char_wb 1-3grams, max 50k",
+  "languages": [
+    "pt",
+    "en",
+    "es"
+  ],
+  "label_source": "corpus language, true by construction",
+  "training_rows": 1559,
+  "evaluation": "GroupKFold over ESCO occupation",
+  "heldout_accuracy": 1.0,
+  "adversarial_mixed_cases": "10/12",
+  "trained_on": "2026-08-14"
+}

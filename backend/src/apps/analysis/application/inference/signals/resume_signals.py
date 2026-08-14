@@ -100,9 +100,16 @@ def extract_resume_signals(
     resume_data: dict[str, Any],
     sections: ResumeSections | None,
     language: str = "pt-BR",
+    leadership_override: bool | None = None,
 ) -> ResumeSignals:
     """
     Build signals from structured fields + section strings (no reliance on full_text alone).
+
+    ``leadership_override`` carries the ``bullet_probe`` answer when the head is loaded. The regex
+    below stays as the fallback: it scans the whole career blob, so a job title alone sets the flag
+    and "supervisar la tensión y la corriente" reads as directing people. Measured against a
+    two-annotator consensus it recovers 0.32 of the positives at 0.57 precision, which is below the
+    majority class (ml/reports/bullet_probe_v3.md).
     """
     lang = (language or "pt-BR").strip()
     data = _data(resume_data)
@@ -126,7 +133,11 @@ def extract_resume_signals(
 
     blob = _career_text_blob(resume_data)
     has_internship = bool(_INTERNSHIP_RE.search(_recent_role_text_blob(resume_data)))
-    has_leadership = bool(LEADERSHIP_WORDS.search(blob))
+    has_leadership = (
+        bool(leadership_override)
+        if leadership_override is not None
+        else bool(LEADERSHIP_WORDS.search(blob))
+    )
     section_text = ((sections.full_text if sections else "") or "").lower()
     has_links = _contact_links_present(resume_data) or bool(LINK_PATTERN.search(section_text))
 

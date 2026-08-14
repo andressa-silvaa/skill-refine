@@ -41,7 +41,7 @@ class ResumeAnalysis(UUIDPrimaryKeyModel, TimestampedModel):
     model_name = models.CharField(max_length=80, default="", blank=True)
     model_version = models.CharField(max_length=40, default="", blank=True)
     dataset_version = models.CharField(max_length=64, default="", blank=True)
-    provider = models.CharField(max_length=16, default="local", blank=True)
+    provider = models.CharField(max_length=32, default="local", blank=True)
     job_description_text = models.TextField(null=True, blank=True)
     error_message = models.TextField(null=True, blank=True)
     # Resume.updated_at when this run was enqueued; analysis is valid only while it still matches.
@@ -51,7 +51,7 @@ class ResumeAnalysis(UUIDPrimaryKeyModel, TimestampedModel):
     seniority_rule_label = models.CharField(max_length=16, blank=True, default="")
     seniority_review_label = models.CharField(max_length=16, blank=True, null=True)
     seniority_final_label = models.CharField(max_length=16, blank=True, default="")
-    seniority_label_source = models.CharField(max_length=16, blank=True, default="")
+    seniority_label_source = models.CharField(max_length=32, blank=True, default="")
     seniority_policy_version = models.CharField(max_length=24, blank=True, default="")
     seniority_confidence = models.CharField(max_length=16, blank=True, default="")
     seniority_evidence = models.JSONField(null=True, blank=True)

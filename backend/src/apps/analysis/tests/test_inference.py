@@ -130,6 +130,11 @@ class InsightsKeysCanonicalTest(TestCase):
         self.assertIn("analysis.insights.improvements.fill_core_sections", keys)
 
 
+# Exercises the fallback path on purpose: these assertions are about completeness caps, thin-
+# profile guards, insights, target_fit and persistence — not about the quality model. Production
+# refuses a heuristic quality score (ANALYSIS_REQUIRE_MODEL_ANSWER defaults on), so the flag is
+# turned off here rather than left to a suite-wide default that would hide the policy.
+@override_settings(ANALYSIS_REQUIRE_MODEL_ANSWER=False)
 class CompletenessAssessmentTest(TestCase):
     """Completeness gates neural models and caps."""
 
@@ -376,6 +381,11 @@ class CompletenessAssessmentTest(TestCase):
         self.assertGreaterEqual(result["task_scores"]["seniority"], 50)
 
 
+# Exercises the fallback path on purpose: these assertions are about completeness caps, thin-
+# profile guards, insights, target_fit and persistence — not about the quality model. Production
+# refuses a heuristic quality score (ANALYSIS_REQUIRE_MODEL_ANSWER defaults on), so the flag is
+# turned off here rather than left to a suite-wide default that would hide the policy.
+@override_settings(ANALYSIS_REQUIRE_MODEL_ANSWER=False)
 class AnalyzeResumeStableShapeTest(TestCase):
     """Test analyze_resume returns stable shape."""
 
@@ -422,29 +432,50 @@ class AnalyzeResumeStableShapeTest(TestCase):
         self.assertIn("seniority", payload["model_metadata_by_task"])
         self.assertIn("quality", payload["model_metadata_by_task"])
 
-    def test_target_position_exposes_target_fit_policy_metadata(self) -> None:
-        resume_data = {
-            "data": {
-                "targetPosition": "Analista",
-                "summary": "Profissional com experiência.",
-                "contact": {},
-                "experiences": [
-                    {"company": "Co", "position": "Analista", "description": ["Relatórios e conciliação."]}
-                ],
-                "educations": [],
-                "skills": [{"name": "Excel"}],
-                "languages": [],
-            }
+    TARGET_FIT_RESUME = {
+        "data": {
+            "targetPosition": "Analista",
+            "summary": "Profissional com experiência.",
+            "contact": {},
+            "experiences": [
+                {"company": "Co", "position": "Analista", "description": ["Relatórios e conciliação."]}
+            ],
+            "educations": [],
+            "skills": [{"name": "Excel"}],
+            "languages": [],
         }
-        result = analyze_resume(resume_data, None, "pt-BR")
-        payload = result["payload_json"]
+    }
+
+    def _assert_target_fit_shape(self, payload: dict, task_scores: dict, provider: str) -> None:
         self.assertIn("targetFitScore", payload)
-        self.assertEqual(payload.get("targetFitProvider"), "target_fit_policy")
         self.assertIn("targetFitModelVersion", payload)
+        self.assertEqual(payload.get("targetFitProvider"), provider)
         meta = payload.get("model_metadata_by_task") or {}
         self.assertIn("target_fit", meta)
-        self.assertEqual((meta.get("target_fit") or {}).get("provider"), "target_fit_policy")
-        self.assertIsNotNone(result["task_scores"].get("target_fit"))
+        self.assertEqual((meta.get("target_fit") or {}).get("provider"), provider)
+        self.assertIsNotNone(task_scores.get("target_fit"))
+
+    @override_settings(ANALYSIS_EMBEDDINGS_ENABLED=True)
+    def test_target_position_is_answered_by_the_encoder(self) -> None:
+        """
+        With the encoder available target_fit is neural, and the payload has to say so.
+
+        This assertion used to name `target_fit_policy`, which was correct before section 6 moved
+        domain and fit onto the multilingual encoder. Left alone it froze the heuristic as the
+        expected answer for the pillar, which is the opposite of what the provider table is for.
+        """
+        result = analyze_resume(self.TARGET_FIT_RESUME, None, "pt-BR")
+        self._assert_target_fit_shape(
+            result["payload_json"], result["task_scores"], "target_fit_embedding_v1"
+        )
+
+    @override_settings(ANALYSIS_EMBEDDINGS_ENABLED=False)
+    def test_target_fit_falls_back_to_policy_without_the_encoder(self) -> None:
+        """The policy path still has to produce the same payload shape — fallback stays tested."""
+        result = analyze_resume(self.TARGET_FIT_RESUME, None, "pt-BR")
+        self._assert_target_fit_shape(
+            result["payload_json"], result["task_scores"], "target_fit_policy"
+        )
 
     @override_settings(
         ANALYSIS_MODEL_VERSION_BY_TASK=(
@@ -464,6 +495,9 @@ class AnalyzeResumeStableShapeTest(TestCase):
             "en-US=analysis_seniority_multi_v2_light;"
             "es-ES=analysis_seniority_multi_v2_light"
         ),
+        # Pinned off: matching now reports the step that answered, so with embeddings enabled the
+        # version below would be matching_embeddings_v1 and the assertion would depend on .env.
+        ANALYSIS_EMBEDDINGS_ENABLED=False,
     )
     def test_analyze_resume_exposes_task_specific_model_metadata(self) -> None:
         resume_data = {
@@ -556,96 +590,6 @@ class QualityBundleTaskMismatchTest(TestCase):
 
         self.assertIsNone(model)
         self.assertEqual(extra["provider"], "heuristics-only")
-
-
-class QualityPredictorOrdinalModelTest(TestCase):
-    """Quality predictor should map ordinal HF logits back to 0-100 score."""
-
-    def test_predict_quality_maps_classification_logits_to_score(self) -> None:
-        class DummyTokenizer:
-            def __call__(self, *args, **kwargs):
-                return {
-                    "input_ids": [[1, 2, 3]],
-                    "attention_mask": [[1, 1, 1]],
-                }
-
-        class DummyConfig:
-            id2label = {0: "poor", 1: "ok", 2: "good", 3: "excellent"}
-
-        class DummyArgmax:
-            def __init__(self, value: int):
-                self._value = value
-
-            def item(self) -> int:
-                return self._value
-
-        class DummyLogits:
-            ndim = 2
-            shape = (1, 4)
-
-            def argmax(self, dim: int = -1) -> DummyArgmax:
-                return DummyArgmax(2)
-
-        class DummyModel:
-            config = DummyConfig()
-
-            def __call__(self, **kwargs):
-                return type("Out", (), {"logits": DummyLogits()})()
-
-        score, flags = predict_quality(
-            resume_text="Implementou melhorias com 20% de ganho e github.com/foo",
-            language="pt-BR",
-            sections=None,
-            quality_bundle=(
-                DummyModel(),
-                {
-                    "tokenizer": DummyTokenizer(),
-                    "metadata": {"input_limits": {"max_tokens": 128}},
-                },
-            ),
-        )
-
-        self.assertEqual(score, 75)
-        self.assertTrue(flags["has_metrics"])
-
-
-class QualityPredictorHybridModelTest(TestCase):
-    """Quality predictor should support hybrid sklearn-like bundles."""
-
-    def test_predict_quality_uses_hybrid_bundle(self) -> None:
-        class DummyVectorizer:
-            def transform(self, rows):
-                self.rows = rows
-                return rows
-
-        class DummyEstimator:
-            classes_ = [0, 1, 2, 3]
-
-            def predict_proba(self, rows):
-                return [[0.05, 0.10, 0.70, 0.15]]
-
-        score, flags = predict_quality(
-            resume_text="Implementei 12 endpoints, reduzi o tempo em 20% e publiquei github.com/foo",
-            language="pt-BR",
-            sections=None,
-            seniority_hint="junior",
-            quality_bundle=(
-                {
-                    "vectorizer": DummyVectorizer(),
-                    "estimator": DummyEstimator(),
-                    "quality_level_to_score": {"poor": 30, "ok": 55, "good": 75, "excellent": 92},
-                },
-                {
-                    "kind": "hybrid",
-                    "metadata": {"artifact_kind": "hybrid"},
-                    "provider": "hybrid-local",
-                },
-            ),
-        )
-
-        self.assertGreaterEqual(score, 70)
-        self.assertLessEqual(score, 80)
-        self.assertTrue(flags["has_links"])
 
 
 class MatchingPredictorCustomModelTest(TestCase):

@@ -1,0 +1,70 @@
+{
+  "task": "insight_gain",
+  "model_name": "insight_gain",
+  "model_version": "insight_gain_v1",
+  "dataset_version": "resumes_v3_1399rows_2026-08-12",
+  "measure": "mean(quality | absent) - mean(quality | shown)",
+  "causal": false,
+  "scored_with": "quality_probe_v1",
+  "resumes": 1399,
+  "corpus_mean_quality": 59.47,
+  "gains": {
+    "analysis.insights.improvements.add_metrics": {
+      "pooled_gain": 14.58,
+      "within_band_gain": 2.9,
+      "n_fired": 507,
+      "n_not_fired": 892,
+      "mean_when_fired": 50.2,
+      "mean_when_absent": 64.8
+    },
+    "analysis.insights.improvements.use_action_verbs": {
+      "pooled_gain": 8.66,
+      "within_band_gain": 1.73,
+      "n_fired": 424,
+      "n_not_fired": 975,
+      "mean_when_fired": 53.4,
+      "mean_when_absent": 62.1
+    },
+    "analysis.insights.improvements.fill_core_sections": {
+      "pooled_gain": 2.23,
+      "within_band_gain": -0.18,
+      "n_fired": 45,
+      "n_not_fired": 1354,
+      "mean_when_fired": 57.3,
+      "mean_when_absent": 59.5
+    },
+    "analysis.insights.improvements.add_education": {
+      "pooled_gain": 0.29,
+      "within_band_gain": 0.33,
+      "n_fired": 124,
+      "n_not_fired": 1275,
+      "mean_when_fired": 59.2,
+      "mean_when_absent": 59.5
+    },
+    "analysis.insights.improvements.relevant_links": {
+      "pooled_gain": -0.46,
+      "within_band_gain": -0.08,
+      "n_fired": 1070,
+      "n_not_fired": 329,
+      "mean_when_fired": 59.6,
+      "mean_when_absent": 59.1
+    },
+    "analysis.insights.improvements.add_skills": {
+      "pooled_gain": -0.69,
+      "within_band_gain": -0.66,
+      "n_fired": 323,
+      "n_not_fired": 1076,
+      "mean_when_fired": 60,
+      "mean_when_absent": 59.3
+    },
+    "analysis.insights.improvements.education_target_gap": {
+      "pooled_gain": -3.24,
+      "within_band_gain": -0.8,
+      "n_fired": 270,
+      "n_not_fired": 1129,
+      "mean_when_fired": 62.1,
+      "mean_when_absent": 58.8
+    }
+  },
+  "trained_on": "2026-08-12"
+}

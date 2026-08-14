@@ -18,20 +18,30 @@ app.autodiscover_tasks()
 
 @worker_ready.connect
 def _prewarm_analysis_models(**kwargs) -> None:
-    try:
-        from django.conf import settings
+    import logging
 
+    from django.conf import settings
+
+    from apps.analysis.application.inference.warmup import (
+        ProbeBundleMissing,
+        prewarm_analysis_models,
+    )
+
+    logger = logging.getLogger(__name__)
+    try:
         if not getattr(settings, "ANALYSIS_PREWARM_ENABLED", False):
             return
-
-        from apps.analysis.application.inference.warmup import prewarm_analysis_models
-
         prewarm_analysis_models()
+    except ProbeBundleMissing as exc:
+        # Deliberately not swallowed. A worker that starts without its probes serves regex under a
+        # model's name, which is the silent-degradation failure this project keeps paying for. Killing
+        # the worker makes the container restart-loop, which is visible; a warning is not.
+        logger.critical("Analysis probes unavailable, shutting the worker down: %s", exc)
+        raise SystemExit(1) from exc
     except Exception:
-        # Do not break worker startup if pre-warm fails.
-        import logging
-
-        logging.getLogger(__name__).warning(
+        # Anything else (a slow model download, a transient disk error) must not block startup: the
+        # per-request loaders retry, and the probe check above already covers the case that matters.
+        logger.warning(
             "Failed to pre-warm analysis models on Celery startup",
             exc_info=True,
         )

@@ -4,6 +4,8 @@ Run: python manage.py test apps.analysis.tests.test_analysis_api -v 2
 """
 from __future__ import annotations
 
+from unittest import mock
+
 from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -170,13 +172,27 @@ class TestLatestInvalidatedAfterResumeEdit(AnalysisAPITestCase):
 
 
 class TestRunCreatesPendingAnalysis(AnalysisAPITestCase):
+    """
+    The API contract for POST /run: a pending row exists and 202 comes back. Not the worker.
+
+    The dispatch is stubbed because ``run_resume_analysis_task`` opens with ``connection.close()``.
+    That is right for a Celery worker process, which should drop a possibly-stale connection before
+    it starts, but the task runs inline here, so it closed the connection this test was using and
+    every assertion below failed with "the connection is closed". What the worker does has its own
+    suites (``test_worker``, ``test_batch_run_analysis``).
+    """
+
     def test_run_creates_pending_and_returns_202(self):
         self.client.force_authenticate(user=self.user_a)
-        resp = self.client.post(
-            self.run_url,
-            {"resume_id": str(self.resume_a.id)},
-            format="json",
-        )
+        with mock.patch(
+            "apps.analysis.interfaces.api.services.run_resume_analysis_task"
+        ) as dispatch:
+            resp = self.client.post(
+                self.run_url,
+                {"resume_id": str(self.resume_a.id)},
+                format="json",
+            )
+        self.assertEqual(dispatch.delay.call_count, 1)
         self.assertEqual(resp.status_code, status.HTTP_202_ACCEPTED)
         data = resp.json()
         self.assertIn("id", data)

@@ -61,6 +61,23 @@ def _parse_model_version_by_task_lang(raw: str) -> dict[str, str]:
     return out
 
 
+def _esco_options(settings) -> dict:
+    """Kwargs for esco_retrieval; omitted keys keep the module defaults."""
+    options: dict = {
+        "top_k": int(getattr(settings, "ANALYSIS_ESCO_TOP_K", 5)),
+        "min_cosine": float(getattr(settings, "ANALYSIS_ESCO_MIN_COSINE", 0.20)),
+        "max_alt_labels": int(getattr(settings, "ANALYSIS_ESCO_MAX_ALT_LABELS", 0)),
+        "model_name": str(getattr(settings, "ANALYSIS_EMBEDDINGS_MODEL_NAME", "") or ""),
+    }
+    occupations_path = str(getattr(settings, "ANALYSIS_ESCO_OCCUPATIONS_PATH", "") or "").strip()
+    if occupations_path:
+        options["occupations_path"] = occupations_path
+    cache_dir = str(getattr(settings, "ANALYSIS_ESCO_EMBEDDINGS_DIR", "") or "").strip()
+    if cache_dir:
+        options["cache_dir"] = cache_dir
+    return options
+
+
 def get_config(settings) -> dict:
     """
     Build config dict from Django settings.
@@ -108,8 +125,63 @@ def get_config(settings) -> dict:
         "target_fit_ml_cache_key": "target_fit_v1",
         "text_seniority_enabled": bool(getattr(settings, "ANALYSIS_TEXT_SENIORITY_ENABLED", False)),
         "text_seniority_fusion_enabled": bool(getattr(settings, "ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED", True)),
+        "text_seniority_probe_enabled": bool(
+            getattr(settings, "ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED", False)
+        ),
+        "text_seniority_probe_model_dir": str(
+            getattr(settings, "ANALYSIS_TEXT_SENIORITY_PROBE_MODEL_DIR", "") or ""
+        ).strip(),
+        "text_seniority_probe_subdir": str(
+            getattr(settings, "ANALYSIS_TEXT_SENIORITY_PROBE_SUBDIR", "text_seniority_probe_v1")
+            or "text_seniority_probe_v1"
+        ),
+        "text_seniority_probe_cache_key": "text_seniority_probe_v1",
+        "quality_probe_enabled": bool(getattr(settings, "ANALYSIS_QUALITY_PROBE_ENABLED", False)),
+        "quality_probe_model_dir": str(
+            getattr(settings, "ANALYSIS_QUALITY_PROBE_MODEL_DIR", "") or ""
+        ).strip(),
+        "quality_probe_subdir": str(
+            getattr(settings, "ANALYSIS_QUALITY_PROBE_SUBDIR", "quality_probe_v1") or "quality_probe_v1"
+        ),
+        "quality_probe_cache_key": "quality_probe_v1",
+        "bullet_probe_enabled": bool(getattr(settings, "ANALYSIS_BULLET_PROBE_ENABLED", False)),
+        "bullet_probe_model_dir": str(
+            getattr(settings, "ANALYSIS_BULLET_PROBE_MODEL_DIR", "") or ""
+        ).strip(),
+        "bullet_probe_subdir": str(
+            getattr(settings, "ANALYSIS_BULLET_PROBE_SUBDIR", "bullet_probe_v1") or "bullet_probe_v1"
+        ),
+        "bullet_probe_cache_key": "bullet_probe_v1",
+        "insight_ranking_enabled": bool(
+            getattr(settings, "ANALYSIS_INSIGHT_RANKING_ENABLED", False)
+        ),
+        "insight_gain_model_dir": str(
+            getattr(settings, "ANALYSIS_INSIGHT_GAIN_MODEL_DIR", "") or ""
+        ).strip(),
+        "insight_gain_subdir": str(
+            getattr(settings, "ANALYSIS_INSIGHT_GAIN_SUBDIR", "insight_gain_v1")
+            or "insight_gain_v1"
+        ),
+        "insight_gain_cache_key": "insight_gain_v1",
+        "language_detection_enabled": bool(
+            getattr(settings, "ANALYSIS_LANGUAGE_DETECTION_ENABLED", False)
+        ),
+        "language_detector_model_dir": str(
+            getattr(settings, "ANALYSIS_LANGUAGE_DETECTOR_MODEL_DIR", "") or ""
+        ).strip(),
+        "language_detector_subdir": str(
+            getattr(settings, "ANALYSIS_LANGUAGE_DETECTOR_SUBDIR", "language_detector_v1")
+            or "language_detector_v1"
+        ),
+        "language_detector_cache_key": "language_detector_v1",
+        "require_model_answer": bool(getattr(settings, "ANALYSIS_REQUIRE_MODEL_ANSWER", True)),
+        "fail_fast_on_missing_bundle": bool(
+            getattr(settings, "ANALYSIS_FAIL_FAST_ON_MISSING_BUNDLE", True)
+        ),
         "embeddings_enabled": bool(getattr(settings, "ANALYSIS_EMBEDDINGS_ENABLED", False)),
         "target_fit_embed_weight": float(getattr(settings, "ANALYSIS_TARGET_FIT_EMBED_WEIGHT", 0.65)),
+        "esco_domain_enabled": bool(getattr(settings, "ANALYSIS_ESCO_DOMAIN_ENABLED", True)),
+        "esco_options": _esco_options(settings),
         "overall_blend_enabled": bool(getattr(settings, "ANALYSIS_OVERALL_BLEND_ENABLED", True)),
         "overall_w_quality": float(getattr(settings, "ANALYSIS_OVERALL_WEIGHT_QUALITY", 0.78)),
         "overall_w_seniority": float(getattr(settings, "ANALYSIS_OVERALL_WEIGHT_SENIORITY", 0.12)),

@@ -1,0 +1,108 @@
+{
+  "corpus_rows": 873,
+  "model": "paraphrase-multilingual-MiniLM-L12-v2",
+  "keyword": {
+    "full": {
+      "domain_accuracy": 0.21420389461626574,
+      "by_language": {
+        "pt": 0.21608040201005024,
+        "en": 0.26141078838174275,
+        "es": 0.1623931623931624
+      },
+      "predicted_mix": {
+        "education": 231,
+        "marketing": 110,
+        "finance": 88,
+        "engineering": 88,
+        "health": 64,
+        "technology": 61,
+        "creative": 59,
+        "operations": 49,
+        "general": 35,
+        "legal": 32,
+        "science": 25,
+        "sales": 19,
+        "administrative": 8,
+        "hr": 4
+      }
+    },
+    "title": {
+      "domain_accuracy": 0.20847651775486828,
+      "by_language": {
+        "pt": 0.20603015075376885,
+        "en": 0.26141078838174275,
+        "es": 0.1581196581196581
+      },
+      "predicted_mix": {
+        "general": 372,
+        "engineering": 95,
+        "technology": 68,
+        "finance": 60,
+        "marketing": 58,
+        "operations": 49,
+        "health": 38,
+        "science": 34,
+        "creative": 27,
+        "administrative": 24,
+        "legal": 16,
+        "education": 15,
+        "sales": 13,
+        "hr": 4
+      }
+    }
+  },
+  "embeddings": {
+    "alt0_title": {
+      "occupation_top1": 0.6609392898052692,
+      "occupation_top5": 0.7961053837342497,
+      "domain_accuracy": 0.854524627720504,
+      "by_language": {
+        "en": 0.9336099585062241,
+        "es": 0.8589743589743589,
+        "pt": 0.8040201005025126
+      },
+      "cosine_median": 0.7298439741134644,
+      "margin_median": 0.1233866810798645,
+      "confidence": {
+        "low": {
+          "accuracy": 0.5128205128205128,
+          "n": 195
+        },
+        "high": {
+          "accuracy": 0.9817813765182186,
+          "n": 494
+        },
+        "medium": {
+          "accuracy": 0.875,
+          "n": 184
+        }
+      }
+    },
+    "alt0_full": {
+      "occupation_top1": 0.5418098510882016,
+      "occupation_top5": 0.7537227949599083,
+      "domain_accuracy": 0.7961053837342497,
+      "by_language": {
+        "en": 0.950207468879668,
+        "es": 0.7692307692307693,
+        "pt": 0.7185929648241206
+      },
+      "cosine_median": 0.6695834398269653,
+      "margin_median": 0.06830215454101562,
+      "confidence": {
+        "high": {
+          "accuracy": 0.9879154078549849,
+          "n": 331
+        },
+        "medium": {
+          "accuracy": 0.8860103626943006,
+          "n": 193
+        },
+        "low": {
+          "accuracy": 0.5644699140401146,
+          "n": 349
+        }
+      }
+    }
+  }
+}

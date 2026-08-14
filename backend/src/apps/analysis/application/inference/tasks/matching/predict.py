@@ -94,19 +94,22 @@ def _predict_custom_matching(model, tokenizer, resume_text: str, job_text: str, 
     return None
 
 
-def predict_matching(
+def predict_matching_detailed(
     resume_text: str,
     job_text: str,
     language: str,
     matching_bundle: tuple[Any, dict] | None = None,
     embeddings_model: Any = None,
-) -> tuple[int, list[str]]:
+) -> tuple[int, list[str], str]:
     """
-    Predict matching score 0-100 and top matches.
-    Cascade: custom bi-encoder → HF bi-encoder → sentence embeddings → heuristic keyword overlap.
+    Predict matching score 0-100, top matches, and the provider that actually answered.
+
+    Telemetry used to read the provider off the loaded bundle, so an analysis scored by
+    matching_embeddings was still reported as heuristics — the provider table is evidence, so it
+    has to name the step that produced the number.
     """
     if not job_text or not resume_text:
-        return (0, [])
+        return (0, [], "skipped_no_input")
 
     heuristic = _heuristic_matching(resume_text, job_text)
 
@@ -184,4 +187,23 @@ def predict_matching(
     result = run_cascade(
         [_step_custom, _step_hf, _step_embeddings, _step_heuristic], default=_step_heuristic()
     )
-    return result.value
+    score, top = result.value
+    return score, top, result.provider
+
+
+def predict_matching(
+    resume_text: str,
+    job_text: str,
+    language: str,
+    matching_bundle: tuple[Any, dict] | None = None,
+    embeddings_model: Any = None,
+) -> tuple[int, list[str]]:
+    """Score and top matches only; see predict_matching_detailed for the provider."""
+    score, top, _provider = predict_matching_detailed(
+        resume_text,
+        job_text,
+        language,
+        matching_bundle=matching_bundle,
+        embeddings_model=embeddings_model,
+    )
+    return score, top

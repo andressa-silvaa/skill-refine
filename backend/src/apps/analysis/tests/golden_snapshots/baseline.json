@@ -11,6 +11,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "insufficient",
@@ -70,6 +88,24 @@
           },
           "insufficientData": true,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -208,6 +244,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "insufficient",
@@ -267,6 +321,24 @@
           },
           "insufficientData": true,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -405,6 +477,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -465,6 +557,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -659,6 +769,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -727,6 +857,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -928,6 +1076,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "low",
@@ -973,6 +1139,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -1095,6 +1279,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -1171,6 +1375,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -1385,6 +1607,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -1445,6 +1687,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -1626,6 +1886,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -1677,6 +1955,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -1791,6 +2087,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -1844,6 +2158,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -1967,6 +2299,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -2026,6 +2376,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -2152,6 +2520,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -2213,6 +2601,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -2356,6 +2762,28 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -2412,6 +2840,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -2601,6 +3047,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -2655,6 +3121,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -2798,6 +3282,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -2852,6 +3354,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -2987,6 +3507,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -3038,6 +3576,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -3152,6 +3708,28 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -3218,6 +3796,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -3431,6 +4027,28 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -3496,6 +4114,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -3687,6 +4323,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -3740,6 +4394,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -3863,6 +4535,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": true,
             "reasonKey": "analysis.careerSwitch.reasonDomainMismatch"
@@ -3934,6 +4626,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -4134,6 +4844,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -4193,6 +4923,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -4402,6 +5150,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -4466,6 +5234,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -4656,6 +5442,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": true,
             "reasonKey": "analysis.careerSwitch.reasonLowFitMidPlus"
@@ -4721,6 +5527,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -4911,6 +5735,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "low",
@@ -4965,6 +5809,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -5103,6 +5965,28 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": true,
             "reasonKey": "analysis.careerSwitch.reasonDomainMismatch"
@@ -5175,6 +6059,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -5381,6 +6283,28 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -5445,6 +6369,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -5633,6 +6575,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "insufficient",
@@ -5683,6 +6643,24 @@
           },
           "insufficientData": true,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -5812,6 +6790,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "low",
@@ -5852,6 +6848,24 @@
           },
           "insufficientData": true,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -5975,6 +6989,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -6034,6 +7068,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -6153,6 +7205,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": true,
             "reasonKey": "analysis.careerSwitch.reasonLowFitMidPlus"
@@ -6225,6 +7297,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -6420,6 +7510,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "high",
             "level": "adequate",
@@ -6481,6 +7589,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -6616,6 +7742,28 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -6674,6 +7822,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -6870,6 +8036,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "matching",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "matching": "heuristics",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "insufficient",
@@ -6929,6 +8115,24 @@
           },
           "insufficientData": true,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "matching": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -7079,6 +8283,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -7145,6 +8369,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -7343,6 +8585,24 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "completeness": {
             "confidence": "low",
             "level": "low",
@@ -7382,6 +8642,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -7506,6 +8784,26 @@
         "model_name": "rule_policy",
         "model_version": "v1.0",
         "payload_json": {
+          "analysisIntegrity": {
+            "degraded": true,
+            "degradedTasks": [
+              "insight_flags",
+              "insight_ranking",
+              "quality",
+              "seniority",
+              "target_fit"
+            ],
+            "lowConfidenceTasks": [],
+            "providersByTask": {
+              "insight_flags": "heuristics",
+              "insight_ranking": "heuristics",
+              "language": "user_preference",
+              "quality": "heuristics",
+              "seniority": "rule_policy",
+              "target_fit": "target_fit_policy"
+            },
+            "reason": "one or more pillars were answered by a rule rather than a trained model"
+          },
           "careerSwitch": {
             "detected": false,
             "reasonKey": ""
@@ -7579,6 +8877,24 @@
           },
           "insufficientData": false,
           "model_metadata_by_task": {
+            "insight_flags": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "insight_ranking": {
+              "datasetVersion": "",
+              "modelName": "heuristics-only",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "heuristics"
+            },
+            "language": {
+              "datasetVersion": "",
+              "modelName": "tfidf-logreg-seniority",
+              "modelVersion": "analysis_v1_pt",
+              "provider": "user_preference"
+            },
             "quality": {
               "datasetVersion": "",
               "modelName": "heuristics-only",
@@ -7786,10 +9102,13 @@
     "ANALYSIS_EMBEDDINGS_ENABLED": false,
     "ANALYSIS_LLM_FEEDBACK_ENABLED": false,
     "ANALYSIS_OVERALL_BLEND_ENABLED": true,
+    "ANALYSIS_QUALITY_PROBE_ENABLED": false,
+    "ANALYSIS_REQUIRE_MODEL_ANSWER": false,
     "ANALYSIS_SIGNALS_ML_ENABLED": false,
     "ANALYSIS_TARGET_FIT_ML_ENABLED": false,
     "ANALYSIS_TEXT_SENIORITY_ENABLED": false,
     "ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED": false,
+    "ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED": false,
     "DEBUG": false
   },
   "version": 1

@@ -11,15 +11,15 @@ toward the rows whose verdict actually changes a decision:
   C. a stratified baseline of agreements across the four labels, so the sample also measures the
      ordinary case and not only the hard tail.
 
-The text shown is exactly what the labeller saw (resume_to_text_sanitized), so a disagreement is
-about judgement rather than about different evidence.
+The text shown is exactly what the teacher saw (render_indexed: duration, numbered bullets and
+all), so a disagreement is about judgement rather than about different evidence.
 
 Writes:
   ml/data/raw/resumes_v3/review_sample.md      the reading material, one resume per block
   ml/data/raw/resumes_v3/review_verdicts.jsonl one prefilled line per row, `verdict` left empty
 
-Fill `verdict` with intern|junior|mid|senior (or "ok" to accept llm_label), then run
-score_label_review.py to get the agreement rate.
+Fill `verdict` with intern|junior|mid|senior (or "ok" to accept llm_label) and optionally
+`impact_verdict` with 1-5, then run score_label_review.py to get the agreement rates.
 
 Usage (from repo root):
   ./backend/.venv/Scripts/python.exe ml/scripts/build_label_review_sample.py --count 50
@@ -43,9 +43,9 @@ import django  # noqa: E402
 
 django.setup()
 
-from apps.analysis.application.inference.text_sanitizer import (  # noqa: E402
-    resume_to_text_sanitized,
-)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from label_rubric_llm_v3 import render_indexed  # noqa: E402
 
 DATA_DIR = REPO_ROOT / "ml" / "data" / "raw" / "resumes_v3"
 LABELS = ("intern", "junior", "mid", "senior")
@@ -68,11 +68,15 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--count", type=int, default=50)
     ap.add_argument("--seed", type=int, default=11)
+    ap.add_argument("--labels", default="labels_rubric.jsonl")
+    ap.add_argument("--force", action="store_true", help="overwrite verdicts already filled in")
     args = ap.parse_args()
     rng = random.Random(args.seed)
 
     prose = {r["id"]: r for r in _read(DATA_DIR / "prose.jsonl")}
-    labels = {r["id"]: r for r in _read(DATA_DIR / "labels.jsonl")}
+    # Last write wins on repeated ids: two labelling jobs writing the same file each read the
+    # done-list at their own start, so the same resume can appear twice.
+    labels = {r["id"]: r for r in _read(DATA_DIR / args.labels)}
     pairs = [(i, labels[i]) for i in labels if i in prose]
     if not pairs:
         raise SystemExit("no labelled rows yet")
@@ -113,9 +117,13 @@ def main() -> None:
     md = [
         "# Revisao manual dos rotulos de senioridade",
         "",
-        f"{len(ordered)} curriculos. Para cada um: leia o texto, decida o nivel, e anote em",
-        "`review_verdicts.jsonl` (campo `verdict`): `intern`, `junior`, `mid`, `senior`,",
-        "ou `ok` se concorda com o rotulo do LLM.",
+        f"{len(ordered)} curriculos. Para cada um, em `review_verdicts.jsonl`:",
+        "",
+        "- `verdict`: o nivel que VOCE leria — `intern`, `junior`, `mid`, `senior`,",
+        "  ou `ok` para aceitar o rotulo do LLM",
+        "- `impact_verdict`: nota 1-5 de quanto o curriculo mostra RESULTADO em vez de obrigacao",
+        "  (1 = so lista tarefas, 5 = quase todo bullet tem numero ou resultado). Deixe vazio para",
+        "  aceitar a nota do LLM. E o unico ancoramento humano do pilar que vale 78% do score.",
         "",
         "O rotulo do LLM e o alvo de geracao ficam no FIM de cada bloco, para nao ancorar a leitura.",
         "",
@@ -126,7 +134,7 @@ def main() -> None:
     for n, (rid, why) in enumerate(ordered, 1):
         row = prose[rid]
         lab = labels[rid]
-        text = resume_to_text_sanitized(row["resume_data"])
+        text, _bullets = render_indexed(row["resume_data"])
         md += [
             f"## {n}. `{rid}`  ({row['language']})",
             "",
@@ -136,10 +144,12 @@ def main() -> None:
             text.strip(),
             "```",
             "",
-            f"<details><summary>rotulo do LLM</summary>",
+            "<details><summary>rotulo do LLM</summary>",
             "",
-            f"- LLM: **{lab['llm_label']}**",
+            f"- LLM: **{lab['llm_label']}**  (professor: {lab.get('labeler_model', '?')})",
             f"- alvo de geracao: {lab['band_target']}",
+            f"- escrita pelo LLM: {json.dumps(lab.get('quality') or {}, ensure_ascii=False)}",
+            f"- qualidade plantada: {lab.get('quality_target') or '(nao plantada)'}",
             "</details>",
             "",
             "---",
@@ -153,7 +163,11 @@ def main() -> None:
                 "llm_label": lab["llm_label"],
                 "band_target": lab["band_target"],
                 "reason": why,
+                "quality_target": lab.get("quality_target"),
+                "llm_impact": (lab.get("quality") or {}).get("impact"),
+                "labeler_model": lab.get("labeler_model"),
                 "verdict": "",
+                "impact_verdict": "",
             }
         )
 

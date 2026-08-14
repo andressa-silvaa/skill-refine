@@ -1,242 +1,216 @@
 """
-Quality predictor: HF regression/classification or heuristic-based score 0-100.
+Quality predictor: the embedding probe decides, and refuses when it cannot.
+
+The regex tables and the heuristic score live in ``heuristics.py``; the rubric rescale lives in
+``dimensions.py``. Both are re-exported here because ``resume_signals.py``, the test suite and the
+ml scripts import those names from this module.
 """
 from __future__ import annotations
 
 from contextlib import nullcontext
-import re
 from typing import Any
 
 from apps.analysis.application.inference.cascade import CascadeResult, run_cascade
 
-LINK_PATTERN = re.compile(r"linkedin\.com|github\.com|portfolio|\.me/", re.I)
-METRICS_PATTERN = re.compile(r"\d+%|\d+\s*(?:anos?|years?|años?)|R\$\s*\d+|\$\d+|%\s*(?:de|of)", re.I)
-ACTION_VERBS = {
-    "pt": ["liderou", "implementou", "desenvolveu", "gerenciou", "coordenou", "criou", "aumentou", "reduziu"],
-    "en": ["led", "implemented", "developed", "managed", "coordinated", "created", "increased", "reduced"],
-    "es": ["lideró", "implementó", "desarrolló", "gestionó", "coordinó", "creó", "aumentó", "redujo"],
-}
-LEADERSHIP_WORDS = re.compile(
-    r"l[ií]der|lead|mentoria|mentoring|mentorship|coordena|coordinat|gest[aã]o|gerenci|gerente|"
-    r"manager|roadmap|stakeholder|supervis|jefe|jefa|responsable|encargad",
-    re.I,
-)
-ARCHITECTURE_WORDS = re.compile(
-    r"arquitet|architecture|microsservi|microservice|integra[cç][aã]o|integration|platform|plataforma|governan|observability|observabilidade",
-    re.I,
-)
-TECH_KEYWORDS = re.compile(
-    r"\b(python|django|fastapi|react|sql|api|apis|etl|cloud|aws|azure|gcp|cypress|docker|kubernetes|nlp|java|node|typescript|postgres|redis)\b",
-    re.I,
+from .bullet_flags import predict_bullet_flags
+from .dimensions import DIMENSION_KEYS, dimension_to_score
+from .heuristics import (
+    ACTION_VERBS,
+    DEFAULT_QUALITY_LEVEL_TO_SCORE,
+    LEADERSHIP_WORDS,
+    LINK_PATTERN,
+    METRICS_PATTERN,
+    heuristic_flags,
+    heuristic_score,
+    lang_code,
+    resolve_quality_score_from_label,
 )
 
-DEFAULT_QUALITY_LEVEL_TO_SCORE = {
-    "poor": 30,
-    "ok": 55,
-    "strong": 78,
-    "good": 72,
-    "excellent": 92,
-}
+__all__ = [
+    "ACTION_VERBS",
+    "DEFAULT_QUALITY_LEVEL_TO_SCORE",
+    "DIMENSION_KEYS",
+    "LEADERSHIP_WORDS",
+    "LINK_PATTERN",
+    "LOW_CONFIDENCE_MARGIN",
+    "METRICS_PATTERN",
+    "predict_quality",
+    "predict_quality_detailed",
+]
+
+# Below this margin between the head's top two classes, the quality score is published but marked
+# low confidence. The value is the 10% operating point of the measured risk-coverage curve
+# (ml/reports/completeness_caps_v3.md): withholding confidence from the lowest-margin 10% of resumes
+# takes accuracy on the rest from 92.9% to 96.5%, removing 27 of 49 errors. 15% would reach 97.4%
+# and 30% only 98.8%, so the return flattens right after this point. Where the knee sits is measured;
+# choosing to sit on it is declared product policy.
+#
+# This does NOT replace the completeness caps, and the two are not interchangeable. A completely
+# empty resume scores 78 with a *confident* margin of 0.368, because an all-zero feature vector lands
+# on the linear head's bias term. That is an out-of-distribution failure, invisible to any
+# uncertainty measure, and the completeness cap is what catches it.
+LOW_CONFIDENCE_MARGIN = 0.158
 
 
-def _lang_code(lang: str) -> str:
-    return (lang or "pt").split("-")[0]
 
+def _predict_probe_quality(
+    bundle: dict[str, Any],
+    encoder: Any,
+    resume_text: str,
+    resume_data: dict[str, Any],
+) -> tuple[int, dict[str, int], float] | None:
+    """
+    Score the level head, then each rubric dimension head that the bundle carries.
 
-def _heuristic_flags(text: str, lang: str) -> dict[str, bool | int | float]:
-    text_lower = (text or "").lower()
-    lang_code = _lang_code(lang)
-    verbs = ACTION_VERBS.get(lang_code, ACTION_VERBS["pt"])
-    has_metrics = bool(METRICS_PATTERN.search(text_lower))
-    has_links = bool(LINK_PATTERN.search(text_lower))
-    action_count = sum(1 for v in verbs if v in text_lower)
-    has_action_verbs = action_count > 0
-    bullets = text_lower.count("- ")
-    bullet_density = bullets / max(1, len(text_lower.split()))
-    return {
-        "has_metrics": has_metrics,
-        "has_links": has_links,
-        "has_action_verbs": has_action_verbs,
-        "action_verbs_count": action_count,
-        "bullet_density": bullet_density,
-    }
+    The level head decides the headline number, because its label (``quality_target``) exists on every
+    generated resume and was confirmed by human review. The dimension heads are trained on the LLM
+    teacher's 1-5 rubric and exist only to give ``ats`` and ``clarity`` their own answer instead of a
+    copy of the headline.
 
+    Also returns the **margin** between the top two class probabilities. Measured over 691 labelled
+    resumes, that margin ranks a correct prediction above an incorrect one with AUC 0.880, against
+    0.872 for the raw top probability and 0.805 for entropy — the same ordering section 6 found for
+    domain retrieval, where a margin separated what an absolute score could not.
+    """
+    from apps.analysis.application.inference.text_probe import encode_for_bundle
 
-def _heuristic_score(flags: dict[str, bool | int]) -> int:
-    score = 30
-    if flags.get("has_metrics"):
-        score += 25
-    if flags.get("has_links"):
-        score += 20
-    if flags.get("has_action_verbs"):
-        score += 25
-    if flags.get("action_verbs_count", 0) >= 3:
-        score += 5
-    if (flags.get("bullet_density") or 0) > 0.01:
-        score += 5
-    return min(100, score)
-
-
-def _extract_hybrid_features(
-    text: str,
-    language: str,
-    seniority_hint: str | None = None,
-) -> dict[str, float]:
-    text = str(text or "")
-    text_lower = text.lower()
-    lang_code = _lang_code(language)
-    flags = _heuristic_flags(text, language)
-    words = re.findall(r"\w+", text_lower, re.UNICODE)
-    sentences = [part.strip() for part in re.split(r"[.!?]+", text) if part.strip()]
-    unique_ratio = (len(set(words)) / len(words)) if words else 0.0
-    metrics_hits = len(METRICS_PATTERN.findall(text_lower))
-    tech_hits = len(set(match.group(0).lower() for match in TECH_KEYWORDS.finditer(text_lower)))
-    action_count = sum(text_lower.count(verb) for verb in ACTION_VERBS.get(lang_code, ACTION_VERBS["pt"]))
-    leadership_hits = len(LEADERSHIP_WORDS.findall(text_lower))
-    architecture_hits = len(ARCHITECTURE_WORDS.findall(text_lower))
-    github_hits = len(re.findall(r"github\.com", text_lower))
-    linkedin_hits = len(re.findall(r"linkedin\.com", text_lower))
-    portfolio_hits = len(re.findall(r"portfolio|portf[oó]lio|website|site pessoal|\.me/", text_lower))
-    bullets = text_lower.count("- ")
-    digit_count = sum(ch.isdigit() for ch in text)
-    heuristic_score = _heuristic_score(flags) if isinstance(flags, dict) else 0
-    features: dict[str, float] = {
-        "word_count": float(len(words)),
-        "sentence_count": float(len(sentences)),
-        "avg_words_per_sentence": float(len(words) / max(1, len(sentences))),
-        "unique_ratio": float(unique_ratio),
-        "bullet_count": float(bullets),
-        "bullet_density": float(bullets / max(1, len(words))),
-        "digit_count": float(digit_count),
-        "metrics_hits": float(metrics_hits),
-        "has_metrics": float(metrics_hits > 0),
-        "action_count": float(action_count),
-        "has_action_verbs": float(action_count > 0),
-        "leadership_hits": float(leadership_hits),
-        "architecture_hits": float(architecture_hits),
-        "tech_hits": float(tech_hits),
-        "has_links": float(bool(LINK_PATTERN.search(text_lower))),
-        "github_hits": float(github_hits),
-        "linkedin_hits": float(linkedin_hits),
-        "portfolio_hits": float(portfolio_hits),
-        "heuristic_score": float(heuristic_score),
-        "lang_pt": float(lang_code == "pt"),
-        "lang_en": float(lang_code == "en"),
-        "lang_es": float(lang_code == "es"),
-    }
-    for label in ("intern", "junior", "mid", "senior"):
-        features[f"seniority_{label}"] = float((seniority_hint or "").strip().lower() == label)
-    return features
-
-
-def _resolve_quality_score_from_label(label: str) -> int | None:
-    label_norm = str(label or "").strip().lower()
-    if not label_norm:
+    heads = bundle.get("heads") or {}
+    level_head = heads.get("level")
+    if level_head is None:
         return None
-    if label_norm.startswith("label_"):
-        label_norm = label_norm.split("_", 1)[-1]
-    return DEFAULT_QUALITY_LEVEL_TO_SCORE.get(label_norm)
+    matrix = encode_for_bundle(bundle, encoder, resume_text, resume_data)
+    metadata = bundle.get("_metadata") if isinstance(bundle.get("_metadata"), dict) else {}
+    score_map = metadata.get("quality_level_to_score") or DEFAULT_QUALITY_LEVEL_TO_SCORE
 
-
-def _predict_hf_quality(model, tokenizer, text: str, max_length: int = 512) -> int | None:
-    """Run HF regression or ordinal classification. Returns score 0-100 or None on error."""
-    try:
-        try:
-            import torch
-        except Exception:
-            torch = None
-        inputs = tokenizer(
-            text[:12000],
-            return_tensors="pt",
-            padding=True,
-            truncation=True,
-            max_length=max_length,
-        )
-        if torch is not None:
-            ctx = getattr(torch, "inference_mode", None)
-            context = ctx() if callable(ctx) else torch.no_grad()
-        else:
-            context = nullcontext()
-        with context:
-            out = model(**inputs)
-        logits = out.logits
-        if getattr(logits, "ndim", 0) == 2 and getattr(logits, "shape", [0, 0])[-1] > 1:
-            n_cls = int(logits.shape[-1])
-            id2label = getattr(getattr(model, "config", None), "id2label", {}) or {}
-            try:
-                probs = torch.softmax(logits, dim=-1).squeeze(0).tolist()
-            except Exception:
-                probs = []
-            if n_cls == 3:
-                fallback_scores = [30, 55, 78]
-            elif n_cls == 4:
-                fallback_scores = [28, 48, 68, 88]
-            else:
-                fallback_scores = [int(round(20 + 70 * i / max(1, n_cls - 1))) for i in range(n_cls)]
-            total = 0.0
-            for i in range(min(len(probs), n_cls)):
-                label = id2label.get(i) if isinstance(id2label, dict) else None
-                if label is None and isinstance(id2label, dict):
-                    label = id2label.get(str(i))
-                mapped = _resolve_quality_score_from_label(str(label)) if label is not None else None
-                if mapped is None and i < len(fallback_scores):
-                    mapped = fallback_scores[i]
-                if mapped is None:
-                    mapped = 55
-                total += float(probs[i]) * float(mapped)
-            if probs:
-                return int(round(min(100, max(0, total))))
-            pred_idx = int(logits.argmax(dim=-1).item())
-            label = id2label.get(pred_idx) if isinstance(id2label, dict) else None
-            mapped_score = _resolve_quality_score_from_label(str(label)) if label is not None else None
-            if mapped_score is not None:
-                return mapped_score
-            if 0 <= pred_idx < len(fallback_scores):
-                return fallback_scores[pred_idx]
-            return None
-        logit = logits.squeeze(-1).item()
-        score = int(min(100, max(0, round(logit))))
-        return score
-    except Exception:
-        pass
-    return None
-
-
-def _predict_hybrid_quality(bundle: dict[str, Any], text: str, language: str, seniority_hint: str | None = None) -> int | None:
-    try:
-        vectorizer = bundle.get("vectorizer")
-        estimator = bundle.get("estimator")
-        if vectorizer is None or estimator is None:
-            return None
-        features = _extract_hybrid_features(text, language, seniority_hint=seniority_hint)
-        encoded = vectorizer.transform([features])
-        score_map = bundle.get("quality_level_to_score") or DEFAULT_QUALITY_LEVEL_TO_SCORE
-        if hasattr(estimator, "predict_proba"):
-            probs = estimator.predict_proba(encoded)[0]
-            classes = list(getattr(estimator, "classes_", list(range(len(probs)))))
-            total = 0.0
-            for idx, prob in zip(classes, probs):
-                label = f"label_{idx}"
-                if isinstance(idx, str):
-                    label = idx
-                mapped = _resolve_quality_score_from_label(label)
-                if mapped is None and isinstance(idx, int):
-                    mapped = list(score_map.values())[int(idx)] if 0 <= int(idx) < len(score_map) else None
-                if mapped is not None:
-                    total += float(prob) * float(mapped)
-            return int(round(min(100, max(0, total))))
-        pred = estimator.predict(encoded)[0]
-        mapped = _resolve_quality_score_from_label(str(pred))
+    probabilities = level_head.predict_proba(matrix)[0]
+    total = 0.0
+    weight = 0.0
+    for label, probability in zip(list(level_head.classes_), probabilities):
+        mapped = score_map.get(str(label))
+        if mapped is None:
+            mapped = resolve_quality_score_from_label(str(label))
         if mapped is not None:
-            return mapped
-        if isinstance(pred, (int, float)):
-            scores = list(score_map.values())
-            pred_idx = int(pred)
-            if 0 <= pred_idx < len(scores):
-                return int(scores[pred_idx])
-    except Exception:
-        pass
-    return None
+            total += float(probability) * float(mapped)
+            weight += float(probability)
+    if weight <= 0:
+        return None
+    score = int(round(min(100, max(0, total / weight))))
+
+    calibration = metadata.get("dimension_calibration")
+    calibration = calibration if isinstance(calibration, dict) else {}
+    dimensions: dict[str, int] = {}
+    for key in (*DIMENSION_KEYS, "impact"):
+        head = heads.get(key)
+        if head is None:
+            continue
+        dimensions[key] = dimension_to_score(
+            float(head.predict(matrix)[0]), calibration.get(key)
+        )
+    ordered = sorted((float(p) for p in probabilities), reverse=True)
+    margin = float(ordered[0] - ordered[1]) if len(ordered) > 1 else float(ordered[0])
+    return score, dimensions, margin
+
+
+def predict_quality_detailed(
+    resume_text: str,
+    language: str,
+    sections: Any,
+    seniority_hint: str | None = None,
+    quality_bundle: tuple[Any, dict] | None = None,
+    *,
+    neural_allowed: bool = True,
+    probe_bundle: dict[str, Any] | None = None,
+    embeddings_model: Any = None,
+    resume_data: dict[str, Any] | None = None,
+    allow_heuristic_answer: bool = False,
+    bullet_bundle: dict[str, Any] | None = None,
+    bullet_detail: dict[str, Any] | None = None,
+) -> tuple[int | None, dict[str, bool | int], dict[str, Any]]:
+    """
+    Predict quality score 0-100, feature flags, and the per-dimension block.
+
+    Two steps only: the embedding probe, then a refusal. The heuristic no longer decides.
+
+    ``_heuristic_score`` averages 41.4 / 52.4 / 57.8 on resumes planted as poor / fair / good — it is
+    nearly flat on the axis it claims to measure, while carrying 78% of the final score. Serving that
+    as a fallback does not give the user an answer, it gives them a number indistinguishable from a
+    model's. So when the probe cannot answer, the score is ``None`` and the caller decides what to do.
+
+    ``allow_heuristic_answer`` exists for the golden snapshot suite, which freezes the old behaviour so
+    the fallback code stays correct even though it no longer serves users. The flags are always
+    returned regardless, because ``derive_insights`` reads them to choose which strengths and
+    improvements to show — that is a separate, still-heuristic decision (handoff 7.1 group A).
+    """
+    flags = heuristic_flags(resume_text, language)
+    if bullet_detail is None:
+        bullet_detail = predict_bullet_flags(bullet_bundle, embeddings_model, resume_data)
+    flags_provider = "heuristics"
+    if bullet_detail is not None:
+        flags.update(bullet_detail["flags"])
+        flags_provider = "bullet_probe"
+
+    def _step_probe() -> CascadeResult:
+        if not neural_allowed or not probe_bundle or embeddings_model is None or resume_data is None:
+            return CascadeResult(value=None, provider="quality_probe", status="skipped")
+        predicted = _predict_probe_quality(probe_bundle, embeddings_model, resume_text, resume_data)
+        if predicted is None:
+            return CascadeResult(value=None, provider="quality_probe", status="error")
+        score, dimensions, margin = predicted
+        return CascadeResult(
+            value=(score, flags),
+            provider="quality_probe",
+            status="applied",
+            extra={"dimensions": dimensions, "margin": margin},
+        )
+
+    def _terminal() -> CascadeResult:
+        if not allow_heuristic_answer and not neural_allowed:
+            # Distinct from a missing bundle, and the operator must not be sent looking for one.
+            # The probe was never consulted: completeness read `insufficient`, and the orchestrator
+            # gates the neural path off for that level. Refusing is the intended outcome; blaming
+            # the artefact is not.
+            return CascadeResult(
+                value=(None, flags),
+                provider="no_model",
+                status="applied",
+                extra={
+                    "reason": "resume too incomplete to score: completeness is 'insufficient', so "
+                    "the quality probe was not consulted. This is not a missing bundle."
+                },
+            )
+        if allow_heuristic_answer:
+            return CascadeResult(
+                value=(heuristic_score(flags), flags),
+                provider="heuristics",
+                status="applied",
+            )
+        return CascadeResult(
+            value=(None, flags),
+            provider="no_model",
+            status="applied",
+            extra={"reason": "quality probe unavailable and the heuristic is not allowed to answer"},
+        )
+
+    result = run_cascade([_step_probe], default=_terminal())
+    score, resolved_flags = result.value
+    detail: dict[str, Any] = {"provider": result.provider, "flags_provider": flags_provider}
+    if bullet_detail is not None:
+        detail["bullets"] = {
+            "count": bullet_detail["bullet_count"],
+            "positives": bullet_detail["counts"],
+        }
+    if isinstance(result.extra, dict):
+        dimensions = result.extra.get("dimensions")
+        if isinstance(dimensions, dict) and dimensions:
+            detail["dimensions"] = dimensions
+        margin = result.extra.get("margin")
+        if isinstance(margin, (int, float)):
+            detail["margin"] = float(margin)
+            detail["confidence"] = "high" if float(margin) >= LOW_CONFIDENCE_MARGIN else "low"
+        reason = result.extra.get("reason")
+        if reason:
+            detail["reason"] = str(reason)
+    return score, resolved_flags, detail
 
 
 def predict_quality(
@@ -247,47 +221,28 @@ def predict_quality(
     quality_bundle: tuple[Any, dict] | None = None,
     *,
     neural_allowed: bool = True,
+    probe_bundle: dict[str, Any] | None = None,
+    embeddings_model: Any = None,
+    resume_data: dict[str, Any] | None = None,
+    allow_heuristic_answer: bool = True,
 ) -> tuple[int, dict[str, bool | int]]:
     """
-    Predict quality score 0-100 and feature flags.
-    Cascade: hybrid → HF (BERT) → heuristics.
-    When neural_allowed is False, skips HF/hybrid (sparse or empty resumes).
+    Score and flags only; see ``predict_quality_detailed`` for the provider and the reason.
+
+    Defaults to allowing the heuristic answer so that callers holding a plain ``(score, flags)``
+    contract keep a number to work with. Production goes through ``predict_quality_detailed``, which
+    defaults the other way.
     """
-    flags = _heuristic_flags(resume_text, language)
-
-    def _step_hybrid() -> CascadeResult:
-        if not neural_allowed or not quality_bundle:
-            return CascadeResult(value=None, provider="quality_hybrid", status="skipped")
-        model_or_none, extra = quality_bundle
-        if model_or_none is None or not isinstance(extra, dict) or extra.get("kind") != "hybrid":
-            return CascadeResult(value=None, provider="quality_hybrid", status="skipped")
-        score = _predict_hybrid_quality(model_or_none, resume_text, language, seniority_hint=seniority_hint)
-        if score is None:
-            return CascadeResult(value=None, provider="quality_hybrid", status="error")
-        return CascadeResult(value=(score, flags), provider="quality_hybrid", status="applied")
-
-    def _step_hf() -> CascadeResult:
-        if not neural_allowed or not quality_bundle:
-            return CascadeResult(value=None, provider="quality_hf", status="skipped")
-        model_or_none, extra = quality_bundle
-        if model_or_none is None or not isinstance(extra, dict) or not extra.get("tokenizer"):
-            return CascadeResult(value=None, provider="quality_hf", status="skipped")
-        tokenizer = extra["tokenizer"]
-        max_length = 512
-        if isinstance(extra.get("metadata"), dict):
-            limits = extra["metadata"].get("input_limits") or {}
-            max_length = limits.get("max_tokens", 512)
-        score = _predict_hf_quality(model_or_none, tokenizer, resume_text, max_length)
-        if score is None:
-            return CascadeResult(value=None, provider="quality_hf", status="error")
-        return CascadeResult(value=(score, flags), provider="quality_hf", status="applied")
-
-    def _step_heuristic() -> CascadeResult:
-        return CascadeResult(
-            value=(_heuristic_score(flags), flags),
-            provider="heuristics",
-            status="applied",
-        )
-
-    result = run_cascade([_step_hybrid, _step_hf, _step_heuristic], default=_step_heuristic())
-    return result.value
+    score, flags, _detail = predict_quality_detailed(
+        resume_text,
+        language,
+        sections,
+        seniority_hint,
+        quality_bundle,
+        neural_allowed=neural_allowed,
+        probe_bundle=probe_bundle,
+        embeddings_model=embeddings_model,
+        resume_data=resume_data,
+        allow_heuristic_answer=allow_heuristic_answer,
+    )
+    return int(score if score is not None else heuristic_score(flags)), flags

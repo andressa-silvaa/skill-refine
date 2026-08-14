@@ -1,0 +1,1439 @@
+[
+  {
+    "id": "insufficient_empty_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "insufficient_data",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Estudante",
+        "contact": {},
+        "experiences": [],
+        "educations": [],
+        "skills": [],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "insufficient_blank_en",
+    "language": "en-US",
+    "job_description_text": null,
+    "tags": [
+      "insufficient_data",
+      "en"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "",
+        "contact": {},
+        "experiences": [],
+        "educations": [],
+        "skills": [],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "thin_intern_biology_vs_dev_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "thin_profile",
+      "intern",
+      "target",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Estudante de biologia buscando oportunidades em desenvolvimento.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Empresa X",
+            "position": "Estagiário de TI",
+            "description": [
+              "Apoio em projetos por duas semanas."
+            ]
+          }
+        ],
+        "educations": [
+          {
+            "institution": "Universidade",
+            "course": "Biologia",
+            "degree": "Graduação em andamento"
+          }
+        ],
+        "skills": [],
+        "languages": [],
+        "targetPosition": "Programador"
+      }
+    }
+  },
+  {
+    "id": "thin_shallow_no_intern_keyword_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "thin_profile",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Buscando primeira oportunidade.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Empresa",
+            "position": "Programador",
+            "description": [
+              "Duas semanas de atividades."
+            ]
+          }
+        ],
+        "educations": [
+          {
+            "institution": "UF",
+            "course": "Biologia",
+            "degree": "Graduação"
+          }
+        ],
+        "skills": [],
+        "languages": [],
+        "targetPosition": "Programador"
+      }
+    }
+  },
+  {
+    "id": "intern_estagio_software_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "intern",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Estudante de computação em estágio.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Startup Y",
+            "position": "Estagiário de Desenvolvimento",
+            "description": [
+              "Corrigi bugs em Python.",
+              "Acompanhei daily meetings."
+            ],
+            "startDate": "2024-06",
+            "endDate": "2024-12"
+          }
+        ],
+        "educations": [
+          {
+            "institution": "UFX",
+            "course": "Ciência da Computação",
+            "degree": "Graduação em andamento"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Git"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "junior_with_dates_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "junior",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Foco em APIs e qualidade de código.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Tech Co",
+            "position": "Desenvolvedor Júnior",
+            "description": [
+              "Desenvolvimento de APIs REST.",
+              "Participação em code review."
+            ],
+            "startDate": "2023-01-01",
+            "endDate": "2024-12-31"
+          }
+        ],
+        "educations": [
+          {
+            "institution": "UF",
+            "course": "Ciência da Computação",
+            "degree": "Bacharelado"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Django"
+          },
+          {
+            "name": "PostgreSQL"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Desenvolvedor Júnior"
+      }
+    }
+  },
+  {
+    "id": "junior_two_years_summary_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "junior",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Desenvolvedor júnior com 2 anos de experiência em desenvolvimento front-end.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Empresa",
+            "position": "Desenvolvedor Front-end",
+            "description": [
+              "Componentes React e integração com APIs."
+            ]
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "React"
+          },
+          {
+            "name": "TypeScript"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Desenvolvedor Front-end"
+      }
+    }
+  },
+  {
+    "id": "junior_en",
+    "language": "en-US",
+    "job_description_text": null,
+    "tags": [
+      "junior",
+      "en"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Junior developer with 2 years building REST APIs and writing tests.",
+        "contact": {
+          "github": "github.com/junior-dev"
+        },
+        "experiences": [
+          {
+            "company": "Acme",
+            "position": "Junior Developer",
+            "description": [
+              "Implemented 8 REST endpoints.",
+              "Reduced bug rate by 12% with automated tests."
+            ],
+            "startDate": "2023-03",
+            "endDate": "2025-03"
+          }
+        ],
+        "educations": [
+          {
+            "institution": "State U",
+            "course": "Computer Science",
+            "degree": "BSc"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Django"
+          },
+          {
+            "name": "PostgreSQL"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "junior_es",
+    "language": "es-ES",
+    "job_description_text": null,
+    "tags": [
+      "junior",
+      "es"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Desarrollador junior con 2 años en backend y APIs.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Empresa Latam",
+            "position": "Desarrollador Junior",
+            "description": [
+              "Desarrolló APIs con Django.",
+              "Participó en code reviews."
+            ],
+            "startDate": "2023-01",
+            "endDate": "2025-01"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "SQL"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "mid_backend_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "mid",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Desenvolvedor com 5 anos em backend. Implementei 10 APIs e reduzi latência em 15%.",
+        "contact": {
+          "linkedin": "linkedin.com/in/foo",
+          "github": "github.com/foo"
+        },
+        "experiences": [
+          {
+            "company": "Empresa X",
+            "position": "Desenvolvedor Pleno",
+            "description": [
+              "Desenvolvi sistemas críticos em Python e Django.",
+              "Coordenei equipe de 3 pessoas em entregas ágeis."
+            ],
+            "startDate": "2019-01",
+            "endDate": "2024-12"
+          }
+        ],
+        "educations": [
+          {
+            "institution": "UFX",
+            "course": "Computação",
+            "degree": "Bacharelado"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Django"
+          },
+          {
+            "name": "AWS"
+          },
+          {
+            "name": "Docker"
+          }
+        ],
+        "languages": [
+          {
+            "name": "Português",
+            "level": "native"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "mid_with_job_pt",
+    "language": "pt-BR",
+    "job_description_text": "Vaga backend com Python, Django e PostgreSQL. Experiência com APIs REST e Docker.",
+    "tags": [
+      "mid",
+      "matching",
+      "job",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Engenheiro backend com 5 anos. Implementei 10 APIs e reduzi latencia em 15%.",
+        "contact": {
+          "github": "github.com/foo"
+        },
+        "experiences": [
+          {
+            "company": "X",
+            "position": "Dev Pleno",
+            "description": [
+              "Python e Django.",
+              "PostgreSQL e filas."
+            ],
+            "startDate": "2019-01",
+            "endDate": "2024-06"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Django"
+          },
+          {
+            "name": "PostgreSQL"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "mid_finance_target_pt",
+    "language": "pt-BR",
+    "job_description_text": "Orçamento forecast FP&A e Power BI.",
+    "tags": [
+      "mid",
+      "target",
+      "job",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Analista financeiro com 5 anos em FP&A e orçamento.",
+        "contact": {
+          "linkedin": "https://linkedin.com/in/x"
+        },
+        "experiences": [
+          {
+            "company": "ACME",
+            "position": "Analista Financeiro",
+            "description": [
+              "Forecast",
+              "Budget",
+              "Reporting"
+            ],
+            "startDate": "2019-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [
+          {
+            "course": "Administração",
+            "degree": "Graduação",
+            "institution": "FGV"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Excel"
+          },
+          {
+            "name": "Orçamento"
+          },
+          {
+            "name": "Power BI"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Analista Financeiro Pleno"
+      }
+    }
+  },
+  {
+    "id": "mid_en_product",
+    "language": "en-US",
+    "job_description_text": "Looking for a mid-level product engineer with React and APIs.",
+    "tags": [
+      "mid",
+      "matching",
+      "en",
+      "job"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Product engineer with 4 years shipping web apps and APIs.",
+        "contact": {
+          "github": "github.com/mid"
+        },
+        "experiences": [
+          {
+            "company": "ProdCo",
+            "position": "Software Engineer",
+            "description": [
+              "Built React dashboards used by 20k users.",
+              "Improved API latency by 25%."
+            ],
+            "startDate": "2020-01",
+            "endDate": "2024-06"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "React"
+          },
+          {
+            "name": "TypeScript"
+          },
+          {
+            "name": "Node.js"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "mid_es_data",
+    "language": "es-ES",
+    "job_description_text": null,
+    "tags": [
+      "mid",
+      "es"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Analista de datos con 4 años en Python, SQL y visualización.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Datos SA",
+            "position": "Analista de Datos",
+            "description": [
+              "Pipelines ETL en Python.",
+              "Dashboards en Power BI."
+            ],
+            "startDate": "2020-02",
+            "endDate": "2024-08"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "SQL"
+          },
+          {
+            "name": "Power BI"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "senior_leadership_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "senior",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Engenheiro sênior com 10 anos. Liderou arquitetura de microsserviços e mentoria de equipes.",
+        "contact": {
+          "linkedin": "linkedin.com/in/senior",
+          "github": "github.com/senior"
+        },
+        "experiences": [
+          {
+            "company": "BigTech",
+            "position": "Engenheiro de Software Sênior",
+            "description": [
+              "Liderou roadmap de plataforma e governança.",
+              "Mentoria de 8 engenheiros; reduziu incidentes em 40%.",
+              "Definiu arquitetura de microsserviços e observabilidade."
+            ],
+            "startDate": "2014-01",
+            "endDate": "2024-12"
+          },
+          {
+            "company": "Startup Z",
+            "position": "Tech Lead",
+            "description": [
+              "Coordenei squad de 6 pessoas.",
+              "Implementei CI/CD na AWS."
+            ],
+            "startDate": "2010-01",
+            "endDate": "2013-12"
+          }
+        ],
+        "educations": [
+          {
+            "institution": "USP",
+            "course": "Engenharia",
+            "degree": "Mestrado"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Kubernetes"
+          },
+          {
+            "name": "AWS"
+          },
+          {
+            "name": "Arquitetura"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "senior_with_job_and_target_pt",
+    "language": "pt-BR",
+    "job_description_text": "Vaga sênior: Python, arquitetura de microsserviços, mentoria, AWS, Kubernetes.",
+    "tags": [
+      "senior",
+      "matching",
+      "target",
+      "job",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Engenheiro sênior com 10 anos em plataformas e mentoria.",
+        "contact": {
+          "github": "github.com/staff"
+        },
+        "experiences": [
+          {
+            "company": "Cloud Co",
+            "position": "Staff Engineer",
+            "description": [
+              "Arquitetura de microsserviços e observability.",
+              "Mentoria técnica e code review."
+            ],
+            "startDate": "2015-01",
+            "isCurrent": true
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Kubernetes"
+          },
+          {
+            "name": "AWS"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Engenheiro de Software Sênior"
+      }
+    }
+  },
+  {
+    "id": "senior_en",
+    "language": "en-US",
+    "job_description_text": "Senior engineer role: mentoring, architecture, cloud.",
+    "tags": [
+      "senior",
+      "en",
+      "job",
+      "matching"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Senior engineer with 12 years leading platform teams.",
+        "contact": {
+          "linkedin": "linkedin.com/in/senior-en"
+        },
+        "experiences": [
+          {
+            "company": "MegaCorp",
+            "position": "Senior Software Engineer",
+            "description": [
+              "Led architecture for multi-region services.",
+              "Mentored 10 engineers; cut MTTR by 35%."
+            ],
+            "startDate": "2012-01",
+            "endDate": "2024-12"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Go"
+          },
+          {
+            "name": "Kubernetes"
+          },
+          {
+            "name": "AWS"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Senior Software Engineer"
+      }
+    }
+  },
+  {
+    "id": "senior_es",
+    "language": "es-ES",
+    "job_description_text": null,
+    "tags": [
+      "senior",
+      "es"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Ingeniero senior con 11 años liderando equipos y arquitectura.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Corp ES",
+            "position": "Ingeniero Senior",
+            "description": [
+              "Lideró arquitectura de microservicios.",
+              "Mentoría de equipos multidisciplinares."
+            ],
+            "startDate": "2013-01",
+            "endDate": "2024-12"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Java"
+          },
+          {
+            "name": "Kubernetes"
+          },
+          {
+            "name": "AWS"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "career_switch_bio_to_dev_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "target",
+      "career_switch",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Bióloga com 10 anos de pesquisa em ecologia e laboratório.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "USP",
+            "position": "Pesquisadora",
+            "description": [
+              "Campo",
+              "Análise de dados ecológicos",
+              "Publicações"
+            ],
+            "startDate": "2014-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [
+          {
+            "course": "Biologia",
+            "degree": "Mestrado",
+            "institution": "Universidade"
+          }
+        ],
+        "skills": [
+          {
+            "name": "PCR"
+          },
+          {
+            "name": "Ecologia"
+          },
+          {
+            "name": "Estatística"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Desenvolvedor(a) Full Stack"
+      }
+    }
+  },
+  {
+    "id": "career_switch_finance_to_ux_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "target",
+      "career_switch",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Analista financeiro com 5 anos em FP&A e orçamento.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "ACME",
+            "position": "Analista Financeiro",
+            "description": [
+              "Forecast",
+              "Budget",
+              "Reporting"
+            ]
+          }
+        ],
+        "educations": [
+          {
+            "course": "Administração",
+            "degree": "Graduação",
+            "institution": "FGV"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Excel"
+          },
+          {
+            "name": "Orçamento"
+          },
+          {
+            "name": "Power BI"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "UX Designer"
+      }
+    }
+  },
+  {
+    "id": "aligned_bio_senior_target_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "target",
+      "senior",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Bióloga com 10 anos de pesquisa em ecologia e laboratório.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "USP",
+            "position": "Pesquisadora",
+            "description": [
+              "Campo",
+              "Análise de dados ecológicos",
+              "Publicações"
+            ],
+            "startDate": "2014-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [
+          {
+            "course": "Biologia",
+            "degree": "Mestrado",
+            "institution": "Universidade"
+          }
+        ],
+        "skills": [
+          {
+            "name": "PCR"
+          },
+          {
+            "name": "Ecologia"
+          },
+          {
+            "name": "Estatística"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Bióloga Sênior"
+      }
+    }
+  },
+  {
+    "id": "target_only_no_job_analista_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "target",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Profissional com experiência.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Co",
+            "position": "Analista",
+            "description": [
+              "Relatórios e conciliação."
+            ],
+            "startDate": "2020-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Excel"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Analista"
+      }
+    }
+  },
+  {
+    "id": "job_only_no_target_pt",
+    "language": "pt-BR",
+    "job_description_text": "Precisamos de Python, Django, testes automatizados e SQL.",
+    "tags": [
+      "matching",
+      "job",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Desenvolvedor com 3 anos em Python.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "X",
+            "position": "Dev",
+            "description": [
+              "Django e testes."
+            ],
+            "startDate": "2021-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Django"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "en_target_nurse_switch",
+    "language": "en-US",
+    "job_description_text": "Registered nurse position in hospital care unit.",
+    "tags": [
+      "en",
+      "target",
+      "job",
+      "career_switch"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Software engineer with 6 years building healthcare SaaS backends.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "HealthTech",
+            "position": "Backend Engineer",
+            "description": [
+              "Built patient scheduling APIs.",
+              "HIPAA-aware data pipelines."
+            ],
+            "startDate": "2018-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "PostgreSQL"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Registered Nurse"
+      }
+    }
+  },
+  {
+    "id": "es_target_profesor_aligned",
+    "language": "es-ES",
+    "job_description_text": "Profesor de matemáticas para secundaria.",
+    "tags": [
+      "es",
+      "target",
+      "job"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Profesor con 7 años enseñando matemáticas y algebra.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Colegio Norte",
+            "position": "Profesor",
+            "description": [
+              "Clases de algebra y calculo.",
+              "Tutorias semanales."
+            ],
+            "startDate": "2017-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [
+          {
+            "course": "Matemáticas",
+            "degree": "Licenciatura",
+            "institution": "UNAM"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Pedagogía"
+          },
+          {
+            "name": "Álgebra"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Profesor de matemáticas"
+      }
+    }
+  },
+  {
+    "id": "partial_skills_only_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "insufficient_data",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "",
+        "contact": {},
+        "experiences": [],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Excel"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "education_heavy_no_exp_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "intern",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Recém-formado buscando primeira vaga.",
+        "contact": {},
+        "experiences": [],
+        "educations": [
+          {
+            "institution": "Unicamp",
+            "course": "Engenharia de Computação",
+            "degree": "Bacharelado"
+          }
+        ],
+        "skills": [
+          {
+            "name": "C++"
+          },
+          {
+            "name": "Python"
+          }
+        ],
+        "languages": [],
+        "projects": [
+          {
+            "name": "TCC",
+            "description": [
+              "Sistema web de inventário."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "rich_links_metrics_pt",
+    "language": "pt-BR",
+    "job_description_text": "Python Django AWS Docker métricas latência.",
+    "tags": [
+      "mid",
+      "matching",
+      "job",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Profissional com 6 anos. Reduzi latência em 30% e custo em R$ 50 mil.",
+        "contact": {
+          "linkedin": "linkedin.com/in/rich",
+          "github": "github.com/rich",
+          "portfolio": "https://rich.dev"
+        },
+        "experiences": [
+          {
+            "company": "Empresa Q",
+            "position": "Analista Pleno",
+            "description": [
+              "Implementou microsserviços com Docker.",
+              "Liderou projeto que aumentou conversão em 18%."
+            ],
+            "startDate": "2018-01",
+            "endDate": "2024-06"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "Django"
+          },
+          {
+            "name": "AWS"
+          },
+          {
+            "name": "Docker"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "interno_not_intern_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "junior",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Sistemas internos e integrações.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Banco",
+            "position": "Desenvolvedor Interno",
+            "description": [
+              "Sistemas internos e APIs.",
+              "2 anos em integração bancária."
+            ],
+            "startDate": "2022-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Java"
+          },
+          {
+            "name": "SQL"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Dev"
+      }
+    }
+  },
+  {
+    "id": "mid_no_skills_list_pt",
+    "language": "pt-BR",
+    "job_description_text": null,
+    "tags": [
+      "mid",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Desenvolvedor com 4 anos em produto web e APIs REST.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "WebCo",
+            "position": "Desenvolvedor",
+            "description": [
+              "APIs REST.",
+              "Frontend React.",
+              "Code review."
+            ],
+            "startDate": "2020-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [
+          {
+            "institution": "UFSC",
+            "course": "Sistemas de Informação",
+            "degree": "Bacharelado"
+          }
+        ],
+        "skills": [],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "senior_target_ml_path_shape_pt",
+    "language": "pt-BR",
+    "job_description_text": "Machine learning engineer: Python, NLP, models, mentorship.",
+    "tags": [
+      "senior",
+      "target",
+      "job",
+      "matching",
+      "pt"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Engenheiro ML com 8 anos em NLP e modelos em produção.",
+        "contact": {
+          "github": "github.com/ml"
+        },
+        "experiences": [
+          {
+            "company": "AI Lab",
+            "position": "ML Engineer",
+            "description": [
+              "Deployed NLP models reducing ticket time by 22%.",
+              "Mentored juniors on experiment design."
+            ],
+            "startDate": "2016-01",
+            "endDate": "2024-12"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "NLP"
+          },
+          {
+            "name": "PyTorch"
+          },
+          {
+            "name": "AWS"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Machine Learning Engineer"
+      }
+    }
+  },
+  {
+    "id": "sparse_with_job_en",
+    "language": "en-US",
+    "job_description_text": "Need Django and PostgreSQL experience.",
+    "tags": [
+      "insufficient_data",
+      "job",
+      "matching",
+      "en"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Student looking for a job.",
+        "contact": {},
+        "experiences": [],
+        "educations": [],
+        "skills": [],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "mid_target_same_domain_en",
+    "language": "en-US",
+    "job_description_text": null,
+    "tags": [
+      "mid",
+      "target",
+      "en"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Backend engineer with 5 years in Python APIs and Postgres.",
+        "contact": {
+          "github": "github.com/be"
+        },
+        "experiences": [
+          {
+            "company": "ApiCo",
+            "position": "Backend Engineer",
+            "description": [
+              "Built billing APIs.",
+              "Cut query latency by 20%."
+            ],
+            "startDate": "2019-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [],
+        "skills": [
+          {
+            "name": "Python"
+          },
+          {
+            "name": "PostgreSQL"
+          },
+          {
+            "name": "Django"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Backend Engineer"
+      }
+    }
+  },
+  {
+    "id": "intern_en",
+    "language": "en-US",
+    "job_description_text": null,
+    "tags": [
+      "intern",
+      "en"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "CS student seeking internship opportunities.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Campus Lab",
+            "position": "Software Intern",
+            "description": [
+              "Fixed UI bugs.",
+              "Wrote unit tests."
+            ]
+          }
+        ],
+        "educations": [
+          {
+            "institution": "Tech U",
+            "course": "Computer Science",
+            "degree": "BSc in progress"
+          }
+        ],
+        "skills": [
+          {
+            "name": "JavaScript"
+          }
+        ],
+        "languages": []
+      }
+    }
+  },
+  {
+    "id": "mid_healthcare_es",
+    "language": "es-ES",
+    "job_description_text": null,
+    "tags": [
+      "mid",
+      "target",
+      "es"
+    ],
+    "resume_data": {
+      "data": {
+        "summary": "Enfermero con 5 años en cuidados intensivos.",
+        "contact": {},
+        "experiences": [
+          {
+            "company": "Hospital Central",
+            "position": "Enfermero",
+            "description": [
+              "Cuidados intensivos.",
+              "Protocolos de seguridad del paciente."
+            ],
+            "startDate": "2019-01",
+            "endDate": "2024-01"
+          }
+        ],
+        "educations": [
+          {
+            "course": "Enfermería",
+            "degree": "Licenciatura",
+            "institution": "Universidad"
+          }
+        ],
+        "skills": [
+          {
+            "name": "Cuidados intensivos"
+          },
+          {
+            "name": "Protocolos"
+          }
+        ],
+        "languages": [],
+        "targetPosition": "Enfermero hospitalar"
+      }
+    }
+  }
+]

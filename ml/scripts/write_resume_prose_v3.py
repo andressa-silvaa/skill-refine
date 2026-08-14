@@ -133,6 +133,7 @@ _gate_lock = threading.Lock()
 _next_slot = [0.0]
 _delay = [6.0]
 _backoff_until = [0.0]
+_ENDPOINT = [""]
 
 
 def _wait_turn() -> None:
@@ -264,7 +265,7 @@ def build_prompt(spec: dict[str, Any]) -> str:
 
 
 def call_groq(
-    key: str, model: str, prompt: str, max_tokens: int
+    key: str, model: str, prompt: str, max_tokens: int, endpoint: str = ""
 ) -> tuple[dict[str, Any] | None, float]:
     body = json.dumps(
         {
@@ -276,7 +277,7 @@ def call_groq(
         }
     ).encode("utf-8")
     req = urllib.request.Request(
-        "https://api.groq.com/openai/v1/chat/completions",
+        endpoint or "https://api.groq.com/openai/v1/chat/completions",
         data=body,
         headers={
             "Authorization": f"Bearer {key}",
@@ -465,7 +466,7 @@ def process(spec: dict[str, Any], key: str, model: str) -> dict[str, Any] | None
     max_tokens = min(1000, _estimate_tokens(spec))
     for attempt in range(3):
         _wait_turn()
-        out, _ = call_groq(key, model, prompt, max_tokens)
+        out, _ = call_groq(key, model, prompt, max_tokens, endpoint=_ENDPOINT[0])
         if out is None:
             continue
         out = normalize(spec, out)
@@ -481,6 +482,7 @@ def process(spec: dict[str, Any], key: str, model: str) -> dict[str, Any] | None
                 "may_state_seniority": spec.get("may_state_seniority"),
                 "quality_target": spec.get("quality_target"),
                 "seniority_word_in_prose": leaked or None,
+                "writer_model": model,
                 "resume_data": to_resume_data(spec, out),
             }
         with _lock:
@@ -490,7 +492,12 @@ def process(spec: dict[str, Any], key: str, model: str) -> dict[str, Any] | None
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="llama-3.1-8b-instant")
+    ap.add_argument("--model", default="")
+    ap.add_argument(
+        "--provider",
+        default="groq8b",
+        help="entry in ml/scripts/llm_providers.py; the daily cap that gates this job is per provider",
+    )
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--delay", type=float, default=6.0, help="seconds between API calls")
@@ -523,9 +530,16 @@ def main() -> None:
         todo = [s for s in todo if pattern.search(s["id"])]
     if args.limit:
         todo = todo[: args.limit]
-    print(f"specs={len(specs)} done={len(done)} todo={len(todo)} model={args.model}", flush=True)
+    from llm_providers import resolve
 
-    key = _api_key()
+    endpoint, model_name, key, _allowance = resolve(args.provider, args.model)
+    _ENDPOINT[0] = endpoint
+    args.model = model_name
+    print(
+        f"specs={len(specs)} done={len(done)} todo={len(todo)} "
+        f"provider={args.provider} model={args.model}",
+        flush=True,
+    )
     written = failed = 0
     started = time.time()
     with OUT_PATH.open("a", encoding="utf-8") as fh:

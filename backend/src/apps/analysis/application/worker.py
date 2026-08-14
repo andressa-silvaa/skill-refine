@@ -6,6 +6,7 @@ import time
 
 from django.utils import timezone
 
+from apps.analysis.application.inference.integrity import ModelAnswerRequired
 from apps.analysis.application.inference.orchestrator import analyze_resume
 from apps.analysis.application.inference.safety import safe_error_message
 from apps.analysis.models import AnalysisStatus, ResumeAnalysis
@@ -79,9 +80,11 @@ def run_analysis_worker(analysis_id: str) -> None:
     analysis.target_fit_signals_score = result.get("target_fit_signals_score")
     analysis.target_fit_final_score = result.get("target_fit_final_score")
     analysis.status = AnalysisStatus.DONE
+    analysis.error_message = None
     analysis.save(
         update_fields=[
             "status",
+            "error_message",
             "score",
             "task_scores",
             "payload_json",
@@ -164,6 +167,21 @@ def run_analysis_worker_safe(analysis_id: str) -> None:
         run_analysis_worker(analysis_id)
     except ResumeAnalysis.DoesNotExist:
         logger.warning("Analysis task: record not found", extra={"analysis_id": analysis_id})
+    except ModelAnswerRequired as exc:
+        # Not an unexpected fault: a pillar that must be model-driven had no model. Logged at error
+        # with the task named, because the fix is an operator action (missing bundle, disabled flag)
+        # and a generic stacktrace would bury it.
+        logger.error(
+            "Analysis refused: no model answer",
+            extra={"analysis_id": analysis_id, "task": exc.task, "provider": exc.provider},
+        )
+        try:
+            ResumeAnalysis.objects.filter(id=analysis_id).update(
+                status=AnalysisStatus.FAILED,
+                error_message=safe_error_message(exc, max_len=2000),
+            )
+        except Exception:
+            logger.exception("Could not persist refusal", extra={"analysis_id": analysis_id})
     except Exception as exc:
         logger.exception(
             "Analysis task failed",

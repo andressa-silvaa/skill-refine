@@ -2,12 +2,19 @@
 Generalist domain inference from free text (job title, summary, etc.).
 No fixed IT taxonomy: broad sectors with multilingual keyword hints.
 Output: stable English snake_case category + confidence + matched evidence tokens.
+
+Cascade: ESCO semantic retrieval first (open label space, any occupation), keyword matching as
+the fallback for when embeddings are unavailable or the nearest occupation is too far away.
 """
 from __future__ import annotations
 
 import re
 import unicodedata
 from typing import Any
+
+from apps.analysis.application.inference.cascade import CascadeResult, run_cascade
+
+from .esco_retrieval import infer_occupation_domain
 
 # Stable API-facing categories (never "unknown"; use "general" as fallback).
 DOMAIN_CATEGORIES: tuple[str, ...] = (
@@ -270,14 +277,7 @@ def _token_windows(text: str) -> list[str]:
     return windows
 
 
-def infer_domain_category(text: str, lang: str | None = None) -> dict[str, Any]:
-    """
-    Returns:
-      domainCategory: str (member of DOMAIN_CATEGORIES)
-      confidence: "low" | "medium" | "high"
-      evidenceTokens: list[str] (matched snippets, max 8, no PII — generic keywords only)
-    """
-    _ = lang
+def _infer_domain_keywords(text: str) -> dict[str, Any]:
     if not (text or "").strip():
         return {"domainCategory": "general", "confidence": "low", "evidenceTokens": []}
 
@@ -310,3 +310,49 @@ def infer_domain_category(text: str, lang: str | None = None) -> dict[str, Any]:
 
     tokens = hits.get(best, [])[:8]
     return {"domainCategory": best, "confidence": conf, "evidenceTokens": tokens}
+
+
+_ESCO_OPTION_KEYS = frozenset(
+    {"top_k", "min_cosine", "occupations_path", "cache_dir", "max_alt_labels", "model_name"}
+)
+
+
+def infer_domain_category(
+    text: str,
+    lang: str | None = None,
+    *,
+    embeddings_model: Any = None,
+    occupation_query: str | None = None,
+    esco_options: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """
+    Returns:
+      domainCategory: str (member of DOMAIN_CATEGORIES)
+      confidence: "low" | "medium" | "high"
+      evidenceTokens: list[str] (matched snippets, max 8, no PII — generic keywords only)
+      provider: "domain_embeddings" | "domain_keywords"
+      occupation / domainMargin / occupationGap: only on the embeddings path
+    """
+
+    def _step_embeddings() -> CascadeResult:
+        if embeddings_model is None:
+            return CascadeResult(value=None, provider="domain_embeddings", status="skipped_disabled")
+        query = str(occupation_query or text or "").strip()
+        if not query:
+            return CascadeResult(value=None, provider="domain_embeddings", status="skipped_empty")
+        options = {k: v for k, v in (esco_options or {}).items() if k in _ESCO_OPTION_KEYS}
+        found = infer_occupation_domain(embeddings_model, query, lang or "", **options)
+        if not found:
+            return CascadeResult(value=None, provider="domain_embeddings", status="skipped_low_signal")
+        found["provider"] = "domain_embeddings"
+        return CascadeResult(value=found, provider="domain_embeddings", status="applied")
+
+    def _step_keywords() -> CascadeResult:
+        found = _infer_domain_keywords(text)
+        found["provider"] = "domain_keywords"
+        return CascadeResult(value=found, provider="domain_keywords", status="applied")
+
+    outcome = run_cascade([_step_embeddings, _step_keywords], default=None)
+    if isinstance(outcome.value, dict):
+        return outcome.value
+    return {**_infer_domain_keywords(text), "provider": "domain_keywords"}

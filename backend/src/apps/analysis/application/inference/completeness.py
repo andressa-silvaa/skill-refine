@@ -100,7 +100,39 @@ def assess_completeness(resume_data: dict[str, Any], sections: ResumeSections) -
 
 
 def quality_score_cap(completeness: dict[str, Any]) -> int:
-    """Max quality/ATS score allowed for this completeness level."""
+    """
+    Max quality/ATS score allowed for this completeness level.
+
+    This is an **out-of-distribution guard, not an uncertainty proxy**, and the difference is
+    measured. The roadmap once proposed replacing these caps with calibrated abstention on the
+    model's own uncertainty; the measurement killed that plan and justified keeping them for a
+    different reason (ml/reports/completeness_caps_v3.md):
+
+    * The head's confidence does **not** fall on sparse resumes — mean margin 0.683 on ``adequate``
+      against 0.669 on ``low``. Completeness does not predict how sure the model is, so it was never
+      an uncertainty proxy and can't be replaced by one.
+    * It does predict something an uncertainty measure cannot see. Asked directly, the head scores a
+      completely empty resume at **78**, with a *confident* margin of 0.368 — an all-zero feature
+      vector lands on the linear head's bias term. No abstention keyed on confidence catches that,
+      because the model is not uncertain; it is confidently answering a question it was never shown.
+
+    Where each guard actually fires, which is easy to get wrong:
+
+    * ``insufficient`` never reaches the head at all. ``allow_quality_neural`` in the orchestrator
+      gates the neural path off at that level, so quality refuses and the analysis fails. **The cap
+      of 40 is therefore unreachable in production** and only applies in the golden snapshot, where
+      the heuristic is allowed to answer. It is kept for that path, not because it guards anything.
+    * ``low`` does reach the head, so 72 is the cap that can really bind — measured at 33% of that
+      group.
+
+    Both numbers remain declared product policy rather than derived. The corpus contains no resume
+    that reads ``insufficient``, and only 16 labelled ones read ``low`` — too few to fit a value on.
+    Declaring them beats implying they were measured.
+
+    The two mechanisms cover different failures and both stay: this cap and the completeness gate for
+    degenerate input, ``LOW_CONFIDENCE_MARGIN`` in ``tasks/quality/predict.py`` for in-distribution
+    doubt. The shallow-but-``adequate`` resume is the case only the margin catches.
+    """
     level = completeness.get("level") or "adequate"
     if level == "insufficient":
         return 40

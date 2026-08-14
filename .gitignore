@@ -73,13 +73,35 @@ ml/**/runs/
 .cache/
 
 # Modelos e artefatos pesados
-ml/models/
+# As sondas lineares sao entrada de produto, nao artefato derivado: a inferencia as le em runtime e
+# sem elas quality e seniority caem em regex silenciosamente. Mesmo caso da taxonomia ESCO abaixo.
+# Regra de diretorio impede o git de descer na arvore, por isso `ml/models/*` mais as reinclusoes.
+ml/models/*
+!ml/models/quality_probe_v1/
+!ml/models/text_seniority_probe_v1/
+!ml/models/bullet_probe_v1/
+# insight_gain_v1 is the one that degrades *silently*: warmup fail-fast covers a missing probe
+# bundle, but a missing gain table just restores the guessed insight order with a log line.
+!ml/models/insight_gain_v1/
+!ml/models/language_detector_v1/
 *.pt
 *.pth
 *.safetensors
 
+# Validation reports rewritten by the smoke test on every run — output, not source.
+ml/training/reports/
+
 # Dados gerados/derivados — reproduzíveis via ml/scripts/generate_resumes_v2.py (seed fixo)
-ml/data/
+ml/data/*
+# The ESCO taxonomy is a product input, not generated data: inference reads it at runtime.
+!ml/data/reference/
+ml/data/reference/*
+!ml/data/reference/esco_occupations.jsonl
+# Test input, not derived data: test_target_fit_dataset_validate_smoke reads this fixture, so a
+# fresh clone without it fails a test that has nothing to do with the change being made.
+!ml/data/synthetic/
+ml/data/synthetic/*
+!ml/data/synthetic/target_fit_smoke.jsonl
 *.onnx
 *.h5
 
