@@ -30,6 +30,7 @@ Estado de cada tarefa:
 | domínio/ocupação | entra em target_fit | `domain_embeddings` | migrado para recuperação ESCO (§6) |
 | flags dos insights | o que aparece na tela | `bullet_probe` | classificador por bullet (§10.1) |
 | ordem dos insights | o que se lê primeiro | `insight_gain_v1` | ranking por ganho medido (§10.3) |
+| idioma do currículo | debaixo de todo o resto | `language_detector_v1` | lido do documento, não da UI (§12) |
 
 `ats` e `clarity` deixaram de ser cópia literal de `quality_score` e ganharam cabeça própria — com
 uma ressalva medida em §9.5. Nenhuma tarefa da resposta responde mais por regra: `HEURISTIC_TASKS_TODAY`
@@ -157,7 +158,7 @@ tiver modelo, **o número principal que o usuário vê continua vindo de heurís
   thresholds alinhados ao metadata do modelo
 
 ### Testes
-`apps.analysis.tests`: **181 testes, `OK`**. Golden snapshot passa. Não há mais falha herdada — as
+`apps.analysis.tests`: **192 testes, `OK`**. Golden snapshot passa. Não há mais falha herdada — as
 quatro que o documento carregou por várias sessões foram diagnosticadas e corrigidas em §10.5, e três
 delas eram defeito real. **Qualquer falha agora é regressão nova**, sem exceção a memorizar.
 
@@ -352,7 +353,7 @@ São ~20 pontos de decisão, mas não são 20 projetos — colapsam em **4 famí
 | Área | Decisor hoje | Vira |
 |---|---|---|
 | PII no `text_sanitizer` | regex | NER multilíngue |
-| idioma | **não existe** — vem da request | detector de idioma |
+| idioma | ✅ `language_detector_v1` (§12) | feito — vinha da preferência de interface, não do documento |
 | seções, bullets, datas, meses | leitura de campo e aritmética | **continua programático** (ver 7.4) |
 
 **Grupo D — geração**
@@ -887,7 +888,7 @@ a run agora imprime a distribuição de escritores.
 
 ### 10.7 O que falta, em ordem de custo
 
-**Sem rótulo novo:** detector de idioma (não existe, vem da request) · evidência semântica de matching
+**Sem rótulo novo:** ~~detector de idioma~~ (feito, §12) · evidência semântica de matching
 (score já é cosseno, evidência ainda é interseção de token) · ~~caps 40/72 → abstenção calibrada~~
 (feito no §11, mas **não** como este item previa) · ligar `llm_feedback` · PII → NER.
 
@@ -996,6 +997,85 @@ causa e a mensagem mandava o operador para o lugar errado.**
 O corpus tem **zero** currículos `insufficient` e só **16 rotulados** em `low`. Os valores 40 e 72
 continuam **política declarada, não derivada**, e agora está escrito assim em vez de implícito. Os 3
 currículos rotulados que o cap corta são amostra pequena demais para concluir qualquer coisa.
+
+---
+
+## 12. Concluído: o idioma passa a vir do currículo
+
+### 12.1 O bug estrutural: a análise usava a língua da interface
+
+`worker.py:55` passava `UserPreferences.language` para `analyze_resume` e **nunca lia o documento**.
+Isso é a língua da **interface**: um brasileiro com a UI em português que sobe um CV em inglês tinha
+tudo analisado como pt-BR. E `pt-BR` é também o *default* de quem nunca salvou preferência, então esse
+é o caminho de quem não mexeu em configuração.
+
+Não havia campo mais barato: `resume_languages` guarda os idiomas que o candidato **fala**.
+
+### 12.2 O custo, medido antes de escrever o detector
+
+`ml/reports/language_mismatch_v3.md` — 1.559 currículos contra o índice ESCO de cada idioma:
+
+| medida | idioma certo | idioma errado | queda |
+|---|---|---|---|
+| ocupação top-1 | 64,5% | 35,0% | **29,5 pts** |
+| **domínio** (alimenta `careerSwitch` e `target_seniority`) | 84,3% | 69,4% | **14,9 pts** |
+
+Pior caso, e o mais provável em produção: **currículo em inglês lido como pt-BR perde 17,4 pontos de
+domínio** (94,3% → 76,9%).
+
+Domínio é mais robusto que ocupação — dá para errar a ocupação e ainda cair no balde certo, ainda mais
+com 51% delas em `operations` (§6). O dano real a jusante é metade do que a recuperação sugere, e está
+registrado assim em vez de inflado.
+
+**Isso qualifica um número da defesa:** os 85,5% do §6 pressupõem idioma correto. Nada antes disto
+tinha testado o contrário.
+
+### 12.3 O detector
+
+TF-IDF de n-gramas de caractere (1-3, `char_wb`) + regressão logística. Held-out por ocupação:
+**100%** em 1.559 currículos. **Zero anotação nova** — o corpus rotula o idioma por construção.
+
+N-gramas de caractere e **não** o MiniLM residente, por uma razão de fundo: identidade de idioma vive
+em sequência de letras e diacrítico, e um encoder de sentença é treinado para colocar *a mesma frase
+em três idiomas no mesmo lugar* — o oposto do que se quer aqui.
+
+### 12.4 A preferência do usuário ganha o empate
+
+O detector **sobrepõe uma configuração declarada pelo usuário**, então só faz isso quando tem certeza.
+O piso saiu de medição, não dos exemplos:
+
+| | valor |
+|---|---|
+| percentil 1 da confiança no held-out | **0,953** |
+| confiança nas falhas do bloco adversarial | **0,35 e 0,39** |
+| `MIN_CONFIDENCE` embarcado | **0,50** |
+
+Longe dos dois lados: não descarta nada bem formado e recusa exatamente o ambíguo. Onde está esse vão
+é medido; sentar no meio dele é política declarada.
+
+Abaixo do piso, com texto curto demais, sem bundle, com idioma fora dos três suportados, ou com o
+pipeline levantando — a preferência volta **intacta**. *Sobrepor uma preferência correta com um
+palpite confiante seria pior que o bug original.*
+
+### 12.5 O bloco adversarial, e um erro meu que ele expôs
+
+Prosa gerada é limpa e monolíngue; currículo real não é. Bloco escrito à mão: **10/12**. Um CV de
+tecnologia em português listando React, Docker e code review em inglês passa. As duas falhas são a
+mesma frase curta de marketing, quase idêntica em pt e es — e caem **abaixo do piso**, então na
+prática viram deferência à preferência, não erro publicado.
+
+**Erro de método que vale registrar:** escrevi os casos em espanhol sem `ñ` por causa do encoding do
+console, e concluí que o modelo falhava em espanhol. Tinha removido justamente o que caracteriza
+espanhol. Corrigido, e o bloco passou a ter duas partes — ortografia correta e acentos removidos —
+porque as duas ocorrem em currículo real com dificuldade diferente. *Um teste adversarial mal escrito
+condena o modelo pelo defeito do teste.*
+
+### 12.6 O que continua não medido
+
+O detector é treinado em **prosa gerada por LLM**, não em currículo real. Os 100% de held-out medem
+separação entre três idiomas em texto limpo — **não** robustez a currículo real. A única evidência
+fora do gerador são 12 casos escritos à mão. Currículo em francês, italiano ou alemão recebe um dos
+três; o piso de confiança é o que impede isso de virar afirmação.
 
 ---
 
