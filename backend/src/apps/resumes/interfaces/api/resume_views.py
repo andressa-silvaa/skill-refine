@@ -38,6 +38,9 @@ from .view_helpers import (
     require_user_id,
 )
 
+from .resume_action_views import ResumeDuplicateView, ResumePdfDataView, ResumePdfTokenView
+
+
 PAGINATION_LIMIT_MIN = 1
 PAGINATION_LIMIT_MAX = 100
 PAGINATION_LIMIT_DEFAULT = 20
@@ -256,54 +259,3 @@ class ResumeDraftUpdateView(APIView):
             return _error("not_found", "Currículo não encontrado.", status.HTTP_404_NOT_FOUND)
         invalidate_dashboard_cache_for_user(user_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ResumeDuplicateView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def post(self, request, resume_id):
-        user_id, error_response = require_user_id(request)
-        if error_response:
-            return error_response
-
-        new_resume = duplicate_resume(user_id, resume_id)
-        if not new_resume:
-            return _error("not_found", "Currículo não encontrado.", status.HTTP_404_NOT_FOUND)
-        invalidate_dashboard_cache_for_user(user_id)
-
-        return Response(resume_payload(new_resume), status=status.HTTP_201_CREATED)
-
-
-class ResumePdfTokenView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, resume_id):
-        user_id, error_response = require_user_id(request)
-        if error_response:
-            return error_response
-
-        resume = get_resume_by_id_and_user(user_id, resume_id)
-        if not resume:
-            return _error("not_found", "Currículo não encontrado.", status.HTTP_404_NOT_FOUND)
-
-        token = create_pdf_token(str(resume.id), str(user_id))
-        return Response({"token": token}, status=status.HTTP_200_OK)
-
-
-class ResumePdfDataView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def get(self, request, resume_id):
-        token = (request.query_params.get("token") or "").strip()
-        payload = parse_pdf_token(token)
-        if not payload:
-            return _error("invalid_token", "Token inválido.", status.HTTP_401_UNAUTHORIZED)
-
-        if payload.get("resume_id") != str(resume_id):
-            return _error("invalid_token", "Token inválido.", status.HTTP_401_UNAUTHORIZED)
-
-        resume = get_resume_for_pdf_data(resume_id, payload.get("user_id", ""))
-        if not resume:
-            return _error("not_found", "Currículo não encontrado.", status.HTTP_404_NOT_FOUND)
-
-        return Response(resume_detail_payload(resume), status=status.HTTP_200_OK)
