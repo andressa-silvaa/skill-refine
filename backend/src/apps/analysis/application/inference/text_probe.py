@@ -70,7 +70,16 @@ def embed_documents(encoder: Any, texts: Sequence[str], *, batch_size: int = 64)
         spans.append((start, len(flat)))
 
     if not flat:
-        return np.zeros((len(texts), 0), dtype=np.float32)
+        # Every text was empty. Training reaches this branch essentially never, because it encodes
+        # the whole corpus at once and some row always has content, so an empty section became a
+        # zero vector of full width. Inference encodes one resume, so a resume with no summary made
+        # this return width 0, the concatenation came out 1536 instead of 1920, and the loader's
+        # width interlock refused the row — surfacing as "quality has no model answer" with an
+        # operator pointed at a bundle that was fine. 10.3% of the corpus has an empty section.
+        # Zeros at the encoder's real width is what training produced, so it is what inference owes.
+        probe = np.asarray(encoder.encode([" "], show_progress_bar=False), dtype=np.float32)
+        width = int(probe.shape[1]) if probe.ndim == 2 else int(probe.shape[0])
+        return np.zeros((len(texts), width), dtype=np.float32)
 
     encoded = np.asarray(
         encoder.encode(flat, batch_size=batch_size, show_progress_bar=False),
