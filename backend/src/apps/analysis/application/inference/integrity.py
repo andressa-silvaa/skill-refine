@@ -58,18 +58,28 @@ def is_heuristic(provider: str | None) -> bool:
     return str(provider or "").strip() in HEURISTIC_PROVIDERS
 
 
-def build_integrity_block(providers_by_task: dict[str, str]) -> dict[str, Any]:
+def build_integrity_block(
+    providers_by_task: dict[str, str], *, low_confidence_tasks: list[str] | None = None
+) -> dict[str, Any]:
     """
     Summarise which pillars are model-driven, for the response and for telemetry.
 
     Emitted on every analysis, degraded or not: a field that only appears when something is wrong is
     a field consumers forget to check.
+
+    ``lowConfidenceTasks`` is a different claim from ``degradedTasks`` and the two must not be read
+    as one. Degraded means a rule answered instead of a model. Low confidence means the model
+    answered and its own margin says the answer is one of the ones it tends to get wrong: over 691
+    labelled resumes, withholding confidence from the lowest-margin 10% takes accuracy from 92.9% to
+    96.5% (ml/reports/completeness_caps_v3.md).
     """
     degraded = sorted(task for task, provider in providers_by_task.items() if is_heuristic(provider))
+    low_confidence = sorted(low_confidence_tasks or [])
     return {
         "degraded": bool(degraded),
         "degradedTasks": degraded,
         "providersByTask": dict(sorted(providers_by_task.items())),
+        "lowConfidenceTasks": low_confidence,
         "reason": (
             "one or more pillars were answered by a rule rather than a trained model"
             if degraded

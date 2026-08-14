@@ -19,6 +19,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -244,6 +245,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -470,6 +472,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -754,6 +757,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -1052,6 +1056,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -1248,6 +1253,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -1568,6 +1574,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -1838,6 +1845,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -2031,6 +2039,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -2235,6 +2244,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -2449,6 +2459,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -2684,6 +2695,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -2960,6 +2972,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -3186,6 +3199,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -3403,6 +3417,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -3598,6 +3613,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -3909,6 +3925,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -4195,6 +4212,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -4400,6 +4418,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -4701,6 +4720,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -4999,6 +5019,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -5283,6 +5304,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -5568,6 +5590,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -5791,6 +5814,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -6101,6 +6125,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -6383,6 +6408,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -6590,6 +6616,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -6782,6 +6809,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -6990,6 +7018,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -7286,6 +7315,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -7512,6 +7542,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -7797,6 +7828,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -8036,6 +8068,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -8329,6 +8362,7 @@
               "quality",
               "seniority"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",
@@ -8521,6 +8555,7 @@
               "seniority",
               "target_fit"
             ],
+            "lowConfidenceTasks": [],
             "providersByTask": {
               "insight_flags": "heuristics",
               "insight_ranking": "heuristics",

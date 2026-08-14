@@ -793,7 +793,10 @@ def analyze_resume(
         {
             task: str((meta or {}).get("provider") or "")
             for task, meta in model_metadata_by_task.items()
-        }
+        },
+        low_confidence_tasks=(
+            ["quality"] if qm["quality_detail"].get("confidence") == "low" else []
+        ),
     )
 
     thin_profile = is_thin_student_or_intern_profile(resume_data)
