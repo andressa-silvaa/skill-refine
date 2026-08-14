@@ -157,7 +157,7 @@ tiver modelo, **o número principal que o usuário vê continua vindo de heurís
   thresholds alinhados ao metadata do modelo
 
 ### Testes
-`apps.analysis.tests`: **166 testes, `OK`**. Golden snapshot passa. Não há mais falha herdada — as
+`apps.analysis.tests`: **181 testes, `OK`**. Golden snapshot passa. Não há mais falha herdada — as
 quatro que o documento carregou por várias sessões foram diagnosticadas e corrigidas em §10.5, e três
 delas eram defeito real. **Qualquer falha agora é regressão nova**, sem exceção a memorizar.
 
@@ -335,7 +335,7 @@ São ~20 pontos de decisão, mas não são 20 projetos — colapsam em **4 famí
 | `has_metrics`, `has_action_verbs`, `has_leadership` | ✅ `bullet_probe` (§10.1) | feito | — |
 | termos de estágio (`_INTERNSHIP_RE`) | regex sobre o cargo recente | ainda de pé; escopo já restrito ao cargo atual | — |
 | `insights` (quais forças/melhorias mostrar) | ✅ `insight_gain_v1` decide a ordem (§10.3) | as *condições* ainda são `if`; a **seleção** é medida | nenhum novo |
-| caps de completeness (40/72) | tabela fixa | abstenção calibrada sobre a incerteza do modelo | nenhum novo |
+| caps de completeness (40/72) | ✅ ficam, e a razão mudou (§11.4) | guarda de **fora da distribuição**, não proxy de incerteza; abstenção por margem entrou **ao lado**, não no lugar | nenhum novo |
 
 **Grupo B — correspondência semântica** (encoder, quase sem rótulo novo)
 
@@ -585,8 +585,15 @@ modelo suspeito e imprima `HTTPError.read()`. E nunca rode job de background com
 Extração de campo, aritmética de datas, contagem de bullets, truncamento e o fallback de i18n
 **não são julgamentos, são medição**. Foi justamente o controle exato dessas distribuições que
 salvou o corpus v3, e trocá-las por modelo adicionaria erro sem adicionar inteligência. A linha
-defensável na banca é: *o modelo julga, o código mede*. O que muda é que os **caps** derivados da
-medição (40/72) deixam de ser constantes e passam a ser abstenção calibrada na incerteza do modelo.
+defensável na banca é: *o modelo julga, o código mede*.
+
+**Correção do que esta seção previa** (medido no §11): os **caps** 40/72 *não* viraram abstenção
+calibrada. Completude não prevê a incerteza do modelo — a confiança é a mesma em currículo esparso e
+completo. O que ela prevê é entrada **fora da distribuição**, onde o modelo está *confiantemente*
+errado (currículo vazio pontua 78 com margem 0,368). Abstenção por margem entrou **ao lado** dos caps,
+para dúvida dentro da distribuição, não no lugar deles. Uma frase importante sobreviveu à medição com
+sentido novo: *o código mede* também significa que o código detecta quando o modelo não deveria estar
+respondendo.
 
 ### 7.5 Definição de pronto
 
@@ -881,8 +888,8 @@ a run agora imprime a distribuição de escritores.
 ### 10.7 O que falta, em ordem de custo
 
 **Sem rótulo novo:** detector de idioma (não existe, vem da request) · evidência semântica de matching
-(score já é cosseno, evidência ainda é interseção de token) · caps 40/72 → abstenção calibrada ·
-ligar `llm_feedback` · PII → NER.
+(score já é cosseno, evidência ainda é interseção de token) · ~~caps 40/72 → abstenção calibrada~~
+(feito no §11, mas **não** como este item previa) · ligar `llm_feedback` · PII → NER.
 
 **Com anotação nova:** `target_fit` (35% policy em `orchestrator.py` + 22 `if`s de `target_seniority`,
 vale ~3,5 pts) · alinhamento de formação (§10.4, precisa de área de estudo no corpus).
@@ -893,6 +900,102 @@ vale ~3,5 pts) · alinhamento de formação (§10.4, precisa de área de estudo 
   (ml ou policy)`. A tabela de providers esconde que 35% veio do outro caminho — mesmo espírito do bug
   de matching do §7.1.
 - `education_target_gap` mede ganho negativo e continua sendo exibida, só que por último.
+
+---
+
+## 11. Concluído: abstenção por margem — e por que os caps ficaram
+
+O roadmap (§7.1, §7.4) prometia trocar os caps de completude por "abstenção calibrada sobre a
+incerteza do modelo". **A medição derrubou esse plano e justificou outro desenho.** Os dois
+mecanismos cobrem falhas diferentes e ambos ficam.
+
+### 11.1 O bug que apareceu no caminho: currículo sem resumo derrubava a análise
+
+Achado porque o script de medição bateu nele. Assimetria treino/inferência: `embed_documents`
+devolvia largura **0** quando todo texto do lote era vazio. No treino o corpus inteiro é encodado de
+uma vez e alguma linha sempre tem conteúdo, então seção vazia virava vetor zero de 384. Na inferência
+encoda-se **um** currículo: quem não tem resumo caía nesse ramo, a concatenação saía 1536 em vez de
+1920, e a trava de largura recusava a linha.
+
+**Alcance: 160 de 1.559 currículos (10,3%) têm seção vazia, e 134 deles é resumo ausente** — ordinário
+em currículo real, não caso de borda.
+
+O sintoma não parecia com a causa. Morria com `ModelAnswerRequired` mandando conferir
+`ANALYSIS_QUALITY_PROBE_ENABLED` e o bundle — tudo correto e irrelevante. A trava do §9.6 fez o
+trabalho dela: recusou uma linha que o modelo não devia ver. **O defeito era a linha chegar
+malformada, não a trava reclamar.**
+
+### 11.2 A premissa do roadmap era falsa
+
+| grupo | n | confiança média | acurácia | cap morde |
+|---|---|---|---|---|
+| `adequate` | 1505 | 0,683 | 93,0% (n=675) | 0% |
+| `low` | 54 | 0,669 | 87,5% (n=16) | 33% |
+| `thin` | 50 | 0,674 | 85,7% (n=14) | 36% |
+
+**A confiança não cai em currículo esparso.** Completude nunca foi proxy de incerteza, então não podia
+ser substituída por uma. Pior: a acurácia cai enquanto a confiança fica parada — o modelo é confiante
+onde erra.
+
+### 11.3 Mas a incerteza prevê erro, e só uma medida mostrou isso
+
+Sobre **691 rotulados** (642 acertos, 49 erros) — não os 16 de `low`:
+
+| medida | AUC (acerto vs erro) |
+|---|---|
+| probabilidade máxima | 0,872 |
+| **margem top-1 − top-2** | **0,880** |
+| entropia | 0,805 |
+
+Mesma ordem que o §6 achou para domínio: **margem separa onde valor absoluto não separa.** Ter parado
+na primeira medida teria produzido a conclusão errada — "não há sinal de incerteza" — e matado um
+mecanismo que funciona.
+
+**Curva risco-cobertura** fixou o corte em vez de eu escolher:
+
+| abstém | corte | acurácia no respondido | erros restantes |
+|---|---|---|---|
+| 0% | — | 92,9% | 49 |
+| **10%** | **0,158** | **96,5%** | **22** |
+| 15% | 0,223 | 97,4% | 15 |
+| 30% | 0,391 | 98,8% | 6 |
+
+Onde está o joelho é medido; sentar nele é política declarada.
+
+### 11.4 O caso que salvou os caps
+
+Um currículo **completamente vazio recebe 78 com margem 0,368** — ou seja, **confiante**. Vetor de
+features todo zero cai no termo de viés da regressão logística.
+
+**Nenhuma abstenção por confiança pega isso**, porque o modelo não está incerto: está respondendo com
+segurança uma pergunta que nunca viu. É falha **fora da distribuição**, e completude é a variável certa
+para ela.
+
+Então o desenho final:
+
+- **`LOW_CONFIDENCE_MARGIN` (0,158)** → dúvida *dentro* da distribuição. O currículo raso porém
+  `adequate` é o caso que **só a margem pega** — o cap não o alcança.
+- **Caps e portão de completude** → entrada degenerada, onde o modelo está confiantemente errado.
+
+`analysisIntegrity` ganhou **`lowConfidenceTasks`**, separado de `degradedTasks`: um diz que o modelo
+respondeu e a margem dele desconfia, o outro diz que uma regra respondeu. **O score continua
+publicado** — a abstenção marca a resposta, não a retira.
+
+### 11.5 O cap de 40 é inalcançável em produção
+
+`allow_quality_neural = level != "insufficient"` corta o caminho neural antes da sonda, então um
+currículo `insufficient` **nunca chega no modelo** e a análise recusa. O cap de 40 só se aplica no
+golden snapshot, onde a heurística pode responder. Está documentado assim em `completeness.py`.
+
+E a recusa culpava o artefato errado — mandava procurar bundle ausente quando o bundle estava correto.
+Agora nomeia a causa real. **Segundo defeito da sessão com o mesmo padrão: o sintoma não parecia com a
+causa e a mensagem mandava o operador para o lugar errado.**
+
+### 11.6 O que continua não medido
+
+O corpus tem **zero** currículos `insufficient` e só **16 rotulados** em `low`. Os valores 40 e 72
+continuam **política declarada, não derivada**, e agora está escrito assim em vez de implícito. Os 3
+currículos rotulados que o cap corta são amostra pequena demais para concluir qualquer coisa.
 
 ---
 
