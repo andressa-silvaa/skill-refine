@@ -1,28 +1,43 @@
 """
-Quality predictor: HF regression/classification or heuristic-based score 0-100.
+Quality predictor: the embedding probe decides, and refuses when it cannot.
+
+The regex tables and the heuristic score live in ``heuristics.py``; the rubric rescale lives in
+``dimensions.py``. Both are re-exported here because ``resume_signals.py``, the test suite and the
+ml scripts import those names from this module.
 """
 from __future__ import annotations
 
 from contextlib import nullcontext
-import re
 from typing import Any
 
 from apps.analysis.application.inference.cascade import CascadeResult, run_cascade
 
 from .bullet_flags import predict_bullet_flags
-
-LINK_PATTERN = re.compile(r"linkedin\.com|github\.com|portfolio|\.me/", re.I)
-METRICS_PATTERN = re.compile(r"\d+%|\d+\s*(?:anos?|years?|años?)|R\$\s*\d+|\$\d+|%\s*(?:de|of)", re.I)
-ACTION_VERBS = {
-    "pt": ["liderou", "implementou", "desenvolveu", "gerenciou", "coordenou", "criou", "aumentou", "reduziu"],
-    "en": ["led", "implemented", "developed", "managed", "coordinated", "created", "increased", "reduced"],
-    "es": ["lideró", "implementó", "desarrolló", "gestionó", "coordinó", "creó", "aumentó", "redujo"],
-}
-LEADERSHIP_WORDS = re.compile(
-    r"l[ií]der|lead|mentoria|mentoring|mentorship|coordena|coordinat|gest[aã]o|gerenci|gerente|"
-    r"manager|roadmap|stakeholder|supervis|jefe|jefa|responsable|encargad",
-    re.I,
+from .dimensions import DIMENSION_KEYS, dimension_to_score
+from .heuristics import (
+    ACTION_VERBS,
+    DEFAULT_QUALITY_LEVEL_TO_SCORE,
+    LEADERSHIP_WORDS,
+    LINK_PATTERN,
+    METRICS_PATTERN,
+    heuristic_flags,
+    heuristic_score,
+    lang_code,
+    resolve_quality_score_from_label,
 )
+
+__all__ = [
+    "ACTION_VERBS",
+    "DEFAULT_QUALITY_LEVEL_TO_SCORE",
+    "DIMENSION_KEYS",
+    "LEADERSHIP_WORDS",
+    "LINK_PATTERN",
+    "LOW_CONFIDENCE_MARGIN",
+    "METRICS_PATTERN",
+    "predict_quality",
+    "predict_quality_detailed",
+]
+
 # Below this margin between the head's top two classes, the quality score is published but marked
 # low confidence. The value is the 10% operating point of the measured risk-coverage curve
 # (ml/reports/completeness_caps_v3.md): withholding confidence from the lowest-margin 10% of resumes
@@ -36,91 +51,6 @@ LEADERSHIP_WORDS = re.compile(
 # uncertainty measure, and the completeness cap is what catches it.
 LOW_CONFIDENCE_MARGIN = 0.158
 
-DEFAULT_QUALITY_LEVEL_TO_SCORE = {
-    "poor": 30,
-    "ok": 55,
-    "strong": 78,
-    "good": 72,
-    "excellent": 92,
-}
-
-
-def _lang_code(lang: str) -> str:
-    return (lang or "pt").split("-")[0]
-
-
-def _heuristic_flags(text: str, lang: str) -> dict[str, bool | int | float]:
-    text_lower = (text or "").lower()
-    lang_code = _lang_code(lang)
-    verbs = ACTION_VERBS.get(lang_code, ACTION_VERBS["pt"])
-    has_metrics = bool(METRICS_PATTERN.search(text_lower))
-    has_links = bool(LINK_PATTERN.search(text_lower))
-    action_count = sum(1 for v in verbs if v in text_lower)
-    has_action_verbs = action_count > 0
-    bullets = text_lower.count("- ")
-    bullet_density = bullets / max(1, len(text_lower.split()))
-    return {
-        "has_metrics": has_metrics,
-        "has_links": has_links,
-        "has_action_verbs": has_action_verbs,
-        "action_verbs_count": action_count,
-        "bullet_density": bullet_density,
-    }
-
-
-def _heuristic_score(flags: dict[str, bool | int]) -> int:
-    score = 30
-    if flags.get("has_metrics"):
-        score += 25
-    if flags.get("has_links"):
-        score += 20
-    if flags.get("has_action_verbs"):
-        score += 25
-    if flags.get("action_verbs_count", 0) >= 3:
-        score += 5
-    if (flags.get("bullet_density") or 0) > 0.01:
-        score += 5
-    return min(100, score)
-
-
-def _resolve_quality_score_from_label(label: str) -> int | None:
-    label_norm = str(label or "").strip().lower()
-    if not label_norm:
-        return None
-    if label_norm.startswith("label_"):
-        label_norm = label_norm.split("_", 1)[-1]
-    return DEFAULT_QUALITY_LEVEL_TO_SCORE.get(label_norm)
-
-
-DIMENSION_KEYS = ("ats", "clarity")
-
-
-def _dimension_to_score(value: float, calibration: dict[str, Any] | None) -> int:
-    """
-    Map a rubric dimension onto the 0-100 scale, using the range the teacher actually used.
-
-    A naive 1-5 -> 0-100 map is wrong here and it shows on screen. The teacher never scores `clarity`
-    or `ats` below 3, so that map floors those dimensions near 50 and a resume whose quality reads 42
-    would publish an `ats` of 72 — three numbers that contradict each other.
-
-    So the observed label range is recorded at export time and mapped onto the same endpoints the
-    level head uses (`quality_level_to_score`), which puts every published number on one scale. This
-    is a rescale, not a re-decision: it is monotone, so the model's ordering survives untouched, and
-    like the level map it is declared product policy rather than a fitted quantity.
-    """
-    if not isinstance(calibration, dict):
-        clamped = max(1.0, min(5.0, float(value)))
-        return int(round((clamped - 1.0) / 4.0 * 100.0))
-
-    low = float(calibration.get("observed_low", 1.0))
-    high = float(calibration.get("observed_high", 5.0))
-    score_low = float(calibration.get("score_low", 30.0))
-    score_high = float(calibration.get("score_high", 78.0))
-    if high <= low:
-        return int(round(max(0.0, min(100.0, score_high))))
-    position = (float(value) - low) / (high - low)
-    scaled = score_low + max(0.0, min(1.0, position)) * (score_high - score_low)
-    return int(round(max(0.0, min(100.0, scaled))))
 
 
 def _predict_probe_quality(
@@ -158,7 +88,7 @@ def _predict_probe_quality(
     for label, probability in zip(list(level_head.classes_), probabilities):
         mapped = score_map.get(str(label))
         if mapped is None:
-            mapped = _resolve_quality_score_from_label(str(label))
+            mapped = resolve_quality_score_from_label(str(label))
         if mapped is not None:
             total += float(probability) * float(mapped)
             weight += float(probability)
@@ -173,7 +103,7 @@ def _predict_probe_quality(
         head = heads.get(key)
         if head is None:
             continue
-        dimensions[key] = _dimension_to_score(
+        dimensions[key] = dimension_to_score(
             float(head.predict(matrix)[0]), calibration.get(key)
         )
     ordered = sorted((float(p) for p in probabilities), reverse=True)
@@ -211,7 +141,7 @@ def predict_quality_detailed(
     returned regardless, because ``derive_insights`` reads them to choose which strengths and
     improvements to show — that is a separate, still-heuristic decision (handoff 7.1 group A).
     """
-    flags = _heuristic_flags(resume_text, language)
+    flags = heuristic_flags(resume_text, language)
     if bullet_detail is None:
         bullet_detail = predict_bullet_flags(bullet_bundle, embeddings_model, resume_data)
     flags_provider = "heuristics"
@@ -250,7 +180,7 @@ def predict_quality_detailed(
             )
         if allow_heuristic_answer:
             return CascadeResult(
-                value=(_heuristic_score(flags), flags),
+                value=(heuristic_score(flags), flags),
                 provider="heuristics",
                 status="applied",
             )
@@ -315,4 +245,4 @@ def predict_quality(
         resume_data=resume_data,
         allow_heuristic_answer=allow_heuristic_answer,
     )
-    return int(score if score is not None else _heuristic_score(flags)), flags
+    return int(score if score is not None else heuristic_score(flags)), flags

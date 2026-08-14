@@ -131,7 +131,7 @@ class OverallScoreVariationTests(TestCase):
 class EmbeddingTargetFitPatchTests(TestCase):
     @override_settings(ANALYSIS_EMBEDDINGS_ENABLED=True, ANALYSIS_TARGET_FIT_EMBED_WEIGHT=1.0)
     @patch(
-        "apps.analysis.application.inference.orchestrator.embedding_fit_scores",
+        "apps.analysis.application.inference.resolve_target_fit.embedding_fit_scores",
         return_value=(88, 0.91, ["python", "stack"]),
     )
     @patch("apps.analysis.application.inference.orchestrator.get_embeddings_model")

@@ -1,0 +1,769 @@
+[
+  {
+    "key": "empty",
+    "payload": {
+      "name": "CTRL-empty",
+      "target_position": "",
+      "summary": "",
+      "contact": {
+        "fullName": "Perfil Controle 1",
+        "email": "seed.ctrl.1@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [],
+      "educations": [],
+      "skills": [],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "junior",
+    "payload": {
+      "name": "CTRL-junior",
+      "target_position": "Desenvolvedor Junior",
+      "summary": "Estudante de computação, primeiro estágio em desenvolvimento.",
+      "contact": {
+        "fullName": "Perfil Controle 2",
+        "email": "seed.ctrl.2@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Empresa Alfa",
+          "position": "Estagiário de desenvolvimento",
+          "startDate": "2024-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Suporte a APIs internas.",
+            "Testes automatizados."
+          ]
+        }
+      ],
+      "educations": [
+        {
+          "institution": "Universidade Pública",
+          "course": "Ciência da Computação",
+          "degree": "Bacharelado",
+          "startDate": "2022-01-01",
+          "endDate": "",
+          "status": "in_progress"
+        }
+      ],
+      "skills": [
+        {
+          "name": "Python",
+          "level": null
+        },
+        {
+          "name": "Git",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "mid",
+    "payload": {
+      "name": "CTRL-mid",
+      "target_position": "Desenvolvedor Pleno Backend",
+      "summary": "Desenvolvedor backend com cerca de 3 anos em APIs REST e bancos relacionais.",
+      "contact": {
+        "fullName": "Perfil Controle 3",
+        "email": "seed.ctrl.3@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Tech Beta",
+          "position": "Desenvolvedor Backend",
+          "startDate": "2022-06-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "APIs REST",
+            "PostgreSQL",
+            "Code review"
+          ]
+        },
+        {
+          "company": "Startup Gama",
+          "position": "Desenvolvedor",
+          "startDate": "2021-01-01",
+          "endDate": "2022-05-31",
+          "isCurrent": false,
+          "description": [
+            "Manutenção de serviços internos."
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Python",
+          "level": null
+        },
+        {
+          "name": "Django",
+          "level": null
+        },
+        {
+          "name": "SQL",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "senior_explicit",
+    "payload": {
+      "name": "CTRL-senior",
+      "target_position": "Staff Engineer",
+      "summary": "Desenvolvedor sênior full-stack com 10 anos de experiência. Líder de tecnologia e arquitetura em produtos SaaS. Mentoria de times.",
+      "contact": {
+        "fullName": "Perfil Controle 4",
+        "email": "seed.ctrl.4@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Corp Delta",
+          "position": "Staff Software Engineer",
+          "startDate": "2018-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Arquitetura de microsserviços",
+            "Roadmap técnico",
+            "Mentoria."
+          ]
+        }
+      ],
+      "educations": [
+        {
+          "institution": "Universidade",
+          "course": "Engenharia",
+          "degree": "Bacharelado",
+          "startDate": "2010-01-01",
+          "endDate": "2014-12-01",
+          "status": "completed"
+        }
+      ],
+      "skills": [
+        {
+          "name": "Python",
+          "level": null
+        },
+        {
+          "name": "Kubernetes",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "migration_no_evidence",
+    "payload": {
+      "name": "CTRL-migration-A",
+      "target_position": "Desenvolvedor Backend Sênior",
+      "summary": "Enfermeiro com 12 anos em UTI e gestão de equipe clínica. Foco em protocolos e indicadores hospitalares.",
+      "contact": {
+        "fullName": "Perfil Controle 5",
+        "email": "seed.ctrl.5@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Hospital Epsilon",
+          "position": "Enfermeiro coordenador",
+          "startDate": "2012-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "UTI",
+            "Escalas",
+            "Treinamento de equipe"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Protocolos clínicos",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "migration_with_evidence",
+    "payload": {
+      "name": "CTRL-migration-B",
+      "target_position": "Desenvolvedor Backend",
+      "summary": "Profissional de saúde migrando para tecnologia. Projetos pessoais com Python, Django e APIs.",
+      "contact": {
+        "fullName": "Perfil Controle 6",
+        "email": "seed.ctrl.6@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Hospital Zeta",
+          "position": "Técnico em informática hospitalar",
+          "startDate": "2020-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Integração de sistemas",
+            "Suporte a ERP"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Python",
+          "level": null
+        },
+        {
+          "name": "Django",
+          "level": null
+        },
+        {
+          "name": "PostgreSQL",
+          "level": null
+        },
+        {
+          "name": "REST",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "aligned_high_tech",
+    "payload": {
+      "name": "CTRL-aligned",
+      "target_position": "Engenheiro de Software Backend Sênior",
+      "summary": "Engenheiro backend sênior: Python, Django, PostgreSQL, filas, observabilidade, 8 anos.",
+      "contact": {
+        "fullName": "Perfil Controle 7",
+        "email": "seed.ctrl.7@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "SaaS Omega",
+          "position": "Senior Backend Engineer",
+          "startDate": "2017-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Django",
+            "Celery",
+            "Redis",
+            "Kubernetes"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Python",
+          "level": null
+        },
+        {
+          "name": "Django",
+          "level": null
+        },
+        {
+          "name": "PostgreSQL",
+          "level": null
+        },
+        {
+          "name": "Docker",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "no_target_position",
+    "payload": {
+      "name": "CTRL-no-target",
+      "target_position": "",
+      "summary": "Analista com experiência em relatórios e planilhas.",
+      "contact": {
+        "fullName": "Perfil Controle 8",
+        "email": "seed.ctrl.8@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Consultoria",
+          "position": "Analista",
+          "startDate": "2020-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Relatórios",
+            "Excel avançado"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Excel",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "many_skills_little_exp",
+    "payload": {
+      "name": "CTRL-skills-heavy",
+      "target_position": "Desenvolvedor Full Stack",
+      "summary": "Autodidata, muitos cursos online.",
+      "contact": {
+        "fullName": "Perfil Controle 9",
+        "email": "seed.ctrl.9@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Python",
+          "level": null
+        },
+        {
+          "name": "JavaScript",
+          "level": null
+        },
+        {
+          "name": "React",
+          "level": null
+        },
+        {
+          "name": "Node",
+          "level": null
+        },
+        {
+          "name": "Docker",
+          "level": null
+        },
+        {
+          "name": "AWS",
+          "level": null
+        },
+        {
+          "name": "GraphQL",
+          "level": null
+        },
+        {
+          "name": "MongoDB",
+          "level": null
+        },
+        {
+          "name": "TypeScript",
+          "level": null
+        },
+        {
+          "name": "Kubernetes",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "much_exp_few_skills",
+    "payload": {
+      "name": "CTRL-exp-heavy",
+      "target_position": "Gerente de Operações",
+      "summary": "Gestão operacional e processos.",
+      "contact": {
+        "fullName": "Perfil Controle 10",
+        "email": "seed.ctrl.10@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Logística 1",
+          "position": "Supervisor",
+          "startDate": "2015-01-01",
+          "endDate": "2019-12-31",
+          "isCurrent": false,
+          "description": [
+            "KPIs",
+            "Turnos"
+          ]
+        },
+        {
+          "company": "Logística 2",
+          "position": "Gerente operacional",
+          "startDate": "2020-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Melhoria contínua",
+            "Contratos"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Excel",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "target_with_short_job",
+    "payload": {
+      "name": "CTRL-jobtext",
+      "target_position": "Analista de Dados",
+      "summary": "SQL, dashboards, indicadores.",
+      "contact": {
+        "fullName": "Perfil Controle 11",
+        "email": "seed.ctrl.11@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Retail",
+          "position": "Analista",
+          "startDate": "2021-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "SQL",
+            "Power BI"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "SQL",
+          "level": null
+        },
+        {
+          "name": "Python",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": "Vaga: SQL, Python, análise de dados, dashboards."
+    }
+  },
+  {
+    "key": "summary_en",
+    "payload": {
+      "name": "CTRL-en",
+      "target_position": "Senior Software Engineer",
+      "summary": "Senior software engineer with 9 years building distributed systems and leading squads.",
+      "contact": {
+        "fullName": "Perfil Controle 12",
+        "email": "seed.ctrl.12@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Tech US",
+          "position": "Senior Engineer",
+          "startDate": "2019-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Microservices",
+            "AWS",
+            "Mentoring"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Java",
+          "level": null
+        },
+        {
+          "name": "AWS",
+          "level": null
+        }
+      ],
+      "languages": [
+        {
+          "name": "English",
+          "level": "fluent"
+        }
+      ],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "intern_like",
+    "payload": {
+      "name": "CTRL-intern",
+      "target_position": "Estágio em desenvolvimento",
+      "summary": "Buscando primeiro estágio na área de tecnologia.",
+      "contact": {
+        "fullName": "Perfil Controle 13",
+        "email": "seed.ctrl.13@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [],
+      "educations": [
+        {
+          "institution": "Faculdade",
+          "course": "ADS",
+          "degree": "Tecnólogo",
+          "startDate": "2023-01-01",
+          "endDate": "",
+          "status": "in_progress"
+        }
+      ],
+      "skills": [
+        {
+          "name": "HTML",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "career_switch_marketing_dev",
+    "payload": {
+      "name": "CTRL-mkt-dev",
+      "target_position": "Desenvolvedor Frontend",
+      "summary": "Especialista em marketing digital e conteúdo, 6 anos em agências.",
+      "contact": {
+        "fullName": "Perfil Controle 14",
+        "email": "seed.ctrl.14@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Agência",
+          "position": "Coordenador de marketing",
+          "startDate": "2018-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Campanhas",
+            "SEO",
+            "Métricas"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Google Analytics",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "data_aligned",
+    "payload": {
+      "name": "CTRL-data",
+      "target_position": "Cientista de Dados",
+      "summary": "Modelos preditivos, feature engineering, MLOps básico, 5 anos.",
+      "contact": {
+        "fullName": "Perfil Controle 15",
+        "email": "seed.ctrl.15@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Insurtech",
+          "position": "Cientista de dados",
+          "startDate": "2020-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "scikit-learn",
+            "pipelines",
+            "monitoramento"
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Python",
+          "level": null
+        },
+        {
+          "name": "pandas",
+          "level": null
+        },
+        {
+          "name": "SQL",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "senior_sparse_structured",
+    "payload": {
+      "name": "CTRL-senior-sparse",
+      "target_position": "Arquiteto de Software",
+      "summary": "Sênior; arquitetura; integrações; 12 anos.",
+      "contact": {
+        "fullName": "Perfil Controle 16",
+        "email": "seed.ctrl.16@local.invalid",
+        "phone": "",
+        "city": "",
+        "country": "",
+        "linkedin": null,
+        "github": null,
+        "portfolio": null,
+        "website": null
+      },
+      "experiences": [
+        {
+          "company": "Empresa K",
+          "position": "Arquiteto de software",
+          "startDate": "2013-01-01",
+          "endDate": "",
+          "isCurrent": true,
+          "description": [
+            "Integrações."
+          ]
+        }
+      ],
+      "educations": [],
+      "skills": [
+        {
+          "name": "Java",
+          "level": null
+        }
+      ],
+      "languages": [],
+      "job_description_text": null
+    }
+  }
+]

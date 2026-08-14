@@ -111,7 +111,14 @@ def build_debug_block(
     ml_status: str,
     text_pred: dict[str, Any],
     config: dict[str, Any],
-) -> dict[str, Any]:
+) -> dict[str, Any] | None:
+    """Returns None unless DEBUG is on: whether to emit the block is telemetry's call, not the
+    orchestrator's."""
+    from django.conf import settings as _settings
+
+    if not getattr(_settings, "DEBUG", False):
+        return None
+
     tf_dbg = None
     tf_sig_dbg = None
     tf_emb_dbg = None
