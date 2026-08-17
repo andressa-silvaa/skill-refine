@@ -15,6 +15,7 @@ from .loader import get_model_bundle
 from .loader_signals_model import get_signals_ml_bundle, signals_ml_metadata_for_extra
 from .tasks.seniority import (
     SENIORITY_LABELS,
+    apply_tenure_floor,
     clamp_seniority_vetoes,
     predict_hf_seniority_probs,
     rule_based_seniority,
@@ -161,8 +162,19 @@ def _resolve_seniority(
             final_label = str(probe_label)
             seniority_confidence = str(text_pred.get("confidence") or "low")
             seniority_label_source = "text_seniority_probe"
+            # Piso antes dos vetos: o piso levanta com base em evidencia presente, os vetos descem
+            # com base em evidencia ausente, e a seguranca precisa ter a ultima palavra.
+            final_label, floor_evidence = apply_tenure_floor(final_label, resume_data)
+            seniority_evidence.extend(floor_evidence)
             final_label, veto_evidence = clamp_seniority_vetoes(final_label, rs)
             seniority_evidence.extend(veto_evidence)
+            # Quem mudou o rotulo assina. Manter `text_seniority_probe` quando uma regra trocou a
+            # resposta atribuiria ao modelo uma decisao que nao foi dele — e nos 20 curriculos
+            # escritos a mao o piso trocou 12, ou seja a atribuicao erraria na maioria deles.
+            if floor_evidence or veto_evidence:
+                marks = ["floor"] if floor_evidence else []
+                marks += ["veto"] if veto_evidence else []
+                seniority_label_source = "probe+" + "+".join(marks)
             seniority_evidence.append(
                 {
                     "type": "text_seniority",

@@ -1,5 +1,5 @@
 """
-Vinte currículos variados para testar a análise pela interface.
+Currículos variados para testar a análise pela interface (a quantidade é a do JSON de cenários).
 
 Diferente de ``seed_controlled_resumes``, que são fixtures de borda para validação: aqui a intenção é
 cobrir a faixa de resultados que a tela mostra. Os cenários variam de propósito em qualidade da
@@ -40,7 +40,7 @@ def load_scenarios() -> list[tuple[str, dict]]:
 
 
 class Command(BaseCommand):
-    help = "Cria 20 currículos variados (sem PII) para testar a análise pela interface."
+    help = "Cria os currículos de demo_scenarios.json (sem PII) para testar a análise pela interface."
 
     def add_arguments(self, parser):
         parser.add_argument("--user-email", type=str, default="", dest="user_email")
