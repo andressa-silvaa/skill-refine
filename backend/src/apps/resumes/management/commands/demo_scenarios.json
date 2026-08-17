@@ -1,0 +1,324 @@
+[
+  {
+    "key": "senior_tech_forte",
+    "payload": {
+      "name": "Sênior tech — métricas e liderança",
+      "target_position": "Engenheiro de Software Sênior",
+      "summary": "Engenheiro de software com nove anos em plataformas de alto tráfego. Conduzi a migração de um monólito para serviços, reduzindo o tempo de deploy de duas horas para onze minutos, e lidero um time de seis pessoas.",
+      "contact": {"fullName": "Perfil Demo 01", "email": "demo01@local.invalid", "city": "São Paulo", "country": "Brasil", "linkedin": "https://linkedin.com/in/demo01", "github": "https://github.com/demo01"},
+      "experiences": [
+        {"company": "Empresa Alfa", "position": "Engenheiro de Software Sênior", "startDate": "2021-02", "isCurrent": true, "description": ["Reduzi a latência p95 da API de 820ms para 180ms reescrevendo as consultas mais quentes.", "Liderei um time de seis engenheiros na migração de monólito para serviços.", "Cortei o custo de infraestrutura em 34% ao revisar o dimensionamento dos clusters.", "Implantei observabilidade com métricas e traces, derrubando o tempo médio de diagnóstico de 4h para 25min."]},
+        {"company": "Empresa Beta", "position": "Engenheiro de Software Pleno", "startDate": "2017-06", "endDate": "2021-01", "description": ["Construí o pipeline de cobrança que processa 90 mil transações por dia.", "Automatizei a esteira de testes, elevando a cobertura de 41% para 78%."]}
+      ],
+      "educations": [{"institution": "Universidade Federal", "course": "Ciência da Computação", "degree": "Bacharelado"}],
+      "skills": [{"name": "Python"}, {"name": "PostgreSQL"}, {"name": "Kubernetes"}, {"name": "AWS"}, {"name": "Terraform"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "pleno_sem_metricas",
+    "payload": {
+      "name": "Pleno — só atribuições, nenhum resultado",
+      "target_position": "Desenvolvedor Back-end Pleno",
+      "summary": "Desenvolvedor back-end com quatro anos de experiência em sistemas corporativos e integrações.",
+      "contact": {"fullName": "Perfil Demo 02", "email": "demo02@local.invalid", "city": "Curitiba", "country": "Brasil"},
+      "experiences": [
+        {"company": "Empresa Gama", "position": "Desenvolvedor Back-end", "startDate": "2020-03", "isCurrent": true, "description": ["Responsável pela manutenção dos serviços internos da área financeira.", "Participei das reuniões semanais de alinhamento com o time de produto.", "Atuei na correção de defeitos reportados pelo suporte.", "Documentei rotinas de integração com sistemas de terceiros."]}
+      ],
+      "educations": [{"institution": "Centro Universitário", "course": "Sistemas de Informação", "degree": "Bacharelado"}],
+      "skills": [{"name": "Java"}, {"name": "Spring"}, {"name": "Oracle"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "junior_com_metricas",
+    "payload": {
+      "name": "Júnior — resultados claros, pouco tempo",
+      "target_position": "Desenvolvedora Front-end Júnior",
+      "summary": "Desenvolvedora front-end com um ano e meio de experiência, focada em acessibilidade e performance de interface.",
+      "contact": {"fullName": "Perfil Demo 03", "email": "demo03@local.invalid", "city": "Recife", "country": "Brasil", "github": "https://github.com/demo03"},
+      "experiences": [
+        {"company": "Agência Delta", "position": "Desenvolvedora Front-end Júnior", "startDate": "2024-01", "isCurrent": true, "description": ["Reduzi o tempo de carregamento da página inicial em 48% otimizando imagens e fontes.", "Corrigi 23 problemas de acessibilidade apontados em auditoria, levando o site ao nível AA.", "Criei a biblioteca de componentes usada hoje em quatro projetos da agência."]}
+      ],
+      "educations": [{"institution": "Instituto Federal", "course": "Análise e Desenvolvimento de Sistemas", "degree": "Tecnólogo"}],
+      "skills": [{"name": "React"}, {"name": "TypeScript"}, {"name": "CSS"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "estagiario_raso",
+    "payload": {
+      "name": "Estagiário — perfil raso",
+      "target_position": "Estágio em Desenvolvimento",
+      "summary": "Estudante de engenharia de computação buscando primeiro estágio na área de tecnologia.",
+      "contact": {"fullName": "Perfil Demo 04", "email": "demo04@local.invalid", "city": "Belo Horizonte", "country": "Brasil"},
+      "experiences": [
+        {"company": "Empresa Épsilon", "position": "Estagiário de TI", "startDate": "2025-08", "isCurrent": true, "description": ["Apoiei o time no atendimento de chamados internos."]}
+      ],
+      "educations": [{"institution": "Universidade Estadual", "course": "Engenharia de Computação", "degree": "Graduação em andamento"}],
+      "skills": [{"name": "Python"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "quase_vazio",
+    "payload": {
+      "name": "Quase vazio — deve ser recusado",
+      "target_position": "Analista",
+      "summary": "",
+      "contact": {"fullName": "Perfil Demo 05", "email": "demo05@local.invalid"},
+      "experiences": [],
+      "educations": [],
+      "skills": [],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "sem_resumo",
+    "payload": {
+      "name": "Sem resumo — regressão do bug de largura",
+      "target_position": "Analista de Dados",
+      "summary": "",
+      "contact": {"fullName": "Perfil Demo 06", "email": "demo06@local.invalid", "city": "Porto Alegre", "country": "Brasil", "linkedin": "https://linkedin.com/in/demo06"},
+      "experiences": [
+        {"company": "Empresa Zeta", "position": "Analista de Dados", "startDate": "2021-04", "isCurrent": true, "description": ["Construí pipelines que reduziram o fechamento mensal de cinco dias para um.", "Coordenei três analistas na migração do modelo dimensional.", "Criei painéis de indicadores usados semanalmente pela diretoria."]}
+      ],
+      "educations": [{"institution": "Universidade Federal", "course": "Estatística", "degree": "Bacharelado"}],
+      "skills": [{"name": "SQL"}, {"name": "Python"}, {"name": "Power BI"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "sem_formacao_nem_skills",
+    "payload": {
+      "name": "Sem formação nem habilidades",
+      "target_position": "Coordenador de Logística",
+      "summary": "Profissional de logística com sete anos em operação de centro de distribuição e gestão de equipe.",
+      "contact": {"fullName": "Perfil Demo 07", "email": "demo07@local.invalid", "city": "Campinas", "country": "Brasil"},
+      "experiences": [
+        {"company": "Transportadora Ômega", "position": "Supervisor de Logística", "startDate": "2019-01", "isCurrent": true, "description": ["Reduzi o índice de avarias no transporte de 3,2% para 0,9% em um ano.", "Coordeno uma equipe de dezoito conferentes em três turnos.", "Renegociei rotas e cortei 18% do custo de frete."]}
+      ],
+      "educations": [],
+      "skills": [],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "ingles_senior",
+    "payload": {
+      "name": "Inglês — sênior (testa detector de idioma)",
+      "target_position": "Senior Data Engineer",
+      "summary": "Data engineer with eight years building batch and streaming pipelines for retail analytics. I led the warehouse migration that cut nightly processing from six hours to fifty minutes.",
+      "contact": {"fullName": "Perfil Demo 08", "email": "demo08@local.invalid", "city": "Lisbon", "country": "Portugal", "linkedin": "https://linkedin.com/in/demo08"},
+      "experiences": [
+        {"company": "Retail Corp", "position": "Senior Data Engineer", "startDate": "2020-05", "isCurrent": true, "description": ["Cut nightly warehouse processing from six hours to fifty minutes by rewriting the incremental load.", "Led a team of four engineers through the migration to a columnar warehouse.", "Introduced data quality checks that caught 140 upstream defects in the first quarter."]},
+        {"company": "Logistics Ltd", "position": "Data Engineer", "startDate": "2017-02", "endDate": "2020-04", "description": ["Built the event pipeline handling 2.4 million messages per day.", "Reduced storage cost by 27% through partitioning and compression."]}
+      ],
+      "educations": [{"institution": "State University", "course": "Computer Science", "degree": "BSc"}],
+      "skills": [{"name": "Spark"}, {"name": "Airflow"}, {"name": "dbt"}, {"name": "Snowflake"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "espanhol_pleno",
+    "payload": {
+      "name": "Espanhol — pleno (testa detector de idioma)",
+      "target_position": "Diseñador UX Senior",
+      "summary": "Diseñador de experiencia de usuario con cinco años en productos digitales. Realicé investigación con usuarios y rediseñé el flujo de alta, que aumentó la conversión del 4,1% al 6,8%.",
+      "contact": {"fullName": "Perfil Demo 09", "email": "demo09@local.invalid", "city": "Madrid", "country": "España", "portfolio": "https://demo09.example"},
+      "experiences": [
+        {"company": "Producto SL", "position": "Diseñador UX", "startDate": "2021-03", "isCurrent": true, "description": ["Rediseñé el flujo de alta y aumenté la conversión del 4,1% al 6,8%.", "Conduje entrevistas con 32 usuarios para validar el nuevo panel de control.", "Establecí el sistema de diseño que hoy usan tres equipos de producto."]}
+      ],
+      "educations": [{"institution": "Universidad Politécnica", "course": "Diseño Digital", "degree": "Grado"}],
+      "skills": [{"name": "Figma"}, {"name": "Prototipado"}, {"name": "Investigación de usuarios"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "pt_com_stack_ingles",
+    "payload": {
+      "name": "Português com stack em inglês (idioma misturado)",
+      "target_position": "Desenvolvedor Full Stack",
+      "summary": "Desenvolvedor full stack com seis anos de experiência. Atuei com React, Node.js, Docker e AWS, responsável por deploy contínuo e code review do time de backend.",
+      "contact": {"fullName": "Perfil Demo 10", "email": "demo10@local.invalid", "city": "Florianópolis", "country": "Brasil", "github": "https://github.com/demo10"},
+      "experiences": [
+        {"company": "Startup Kappa", "position": "Desenvolvedor Full Stack", "startDate": "2019-09", "isCurrent": true, "description": ["Implementei o pipeline de CI/CD que reduziu o tempo de release de três dias para duas horas.", "Fui responsável pelo code review do time e pela definição do design system.", "Migrei o monólito para containers, cortando 40% do custo de hospedagem."]}
+      ],
+      "educations": [{"institution": "Universidade Federal", "course": "Engenharia de Software", "degree": "Bacharelado"}],
+      "skills": [{"name": "React"}, {"name": "Node.js"}, {"name": "Docker"}, {"name": "AWS"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "enfermagem_senior",
+    "payload": {
+      "name": "Enfermagem — sênior (domínio saúde)",
+      "target_position": "Enfermeiro Chefe",
+      "summary": "Enfermeiro com onze anos em unidade de terapia intensiva, dez deles em escala noturna, e três anos coordenando equipe assistencial.",
+      "contact": {"fullName": "Perfil Demo 11", "email": "demo11@local.invalid", "city": "Salvador", "country": "Brasil"},
+      "experiences": [
+        {"company": "Hospital Central", "position": "Enfermeiro Coordenador", "startDate": "2022-01", "isCurrent": true, "description": ["Coordeno uma equipe de vinte e dois profissionais em três turnos da UTI adulto.", "Reduzi a taxa de infecção associada a cateter de 4,8 para 1,3 por mil cateteres-dia.", "Implantei o protocolo de passagem de plantão que cortou falhas de comunicação em 60%."]},
+        {"company": "Hospital Municipal", "position": "Enfermeiro Assistencial", "startDate": "2014-03", "endDate": "2021-12", "description": ["Atendi pacientes críticos em UTI e sala vermelha.", "Treinei doze novos enfermeiros no protocolo de sepse."]}
+      ],
+      "educations": [{"institution": "Universidade Federal", "course": "Enfermagem", "degree": "Bacharelado"}, {"institution": "Faculdade de Saúde", "course": "Enfermagem em Terapia Intensiva", "degree": "Especialização"}],
+      "skills": [{"name": "UTI"}, {"name": "Protocolo de sepse"}, {"name": "Gestão de equipe"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "direito_pleno",
+    "payload": {
+      "name": "Direito — pleno (domínio jurídico)",
+      "target_position": "Advogada Trabalhista",
+      "summary": "Advogada com cinco anos em contencioso trabalhista, atuando na defesa de empresas de médio porte.",
+      "contact": {"fullName": "Perfil Demo 12", "email": "demo12@local.invalid", "city": "Rio de Janeiro", "country": "Brasil"},
+      "experiences": [
+        {"company": "Escritório Sigma", "position": "Advogada Trabalhista", "startDate": "2020-08", "isCurrent": true, "description": ["Conduzi 140 processos trabalhistas com índice de acordo de 68%.", "Reduzi o passivo estimado de um cliente em 2,3 milhões por meio de acordos escalonados.", "Elaborei o programa de compliance que eliminou autuações recorrentes por jornada."]}
+      ],
+      "educations": [{"institution": "Faculdade de Direito", "course": "Direito", "degree": "Bacharelado"}],
+      "skills": [{"name": "Contencioso trabalhista"}, {"name": "Compliance"}, {"name": "Negociação"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "soldador_operacoes",
+    "payload": {
+      "name": "Soldador — operação (o balde de 51%)",
+      "target_position": "Supervisor de Produção",
+      "summary": "Soldador com quatorze anos em estruturas metálicas e caldeiraria, com certificação em solda TIG e MIG.",
+      "contact": {"fullName": "Perfil Demo 13", "email": "demo13@local.invalid", "city": "Joinville", "country": "Brasil"},
+      "experiences": [
+        {"company": "Metalúrgica Theta", "position": "Soldador Líder", "startDate": "2018-05", "isCurrent": true, "description": ["Lidero uma turma de nove soldadores no setor de caldeiraria.", "Reduzi o retrabalho de solda de 7% para 2,1% padronizando os parâmetros de máquina.", "Treinei quinze soldadores no procedimento de solda TIG em aço inox."]},
+        {"company": "Estruturas Iota", "position": "Soldador", "startDate": "2011-02", "endDate": "2018-04", "description": ["Executei solda de estruturas metálicas conforme projeto e norma.", "Inspecionei visualmente cordões de solda antes da liberação."]}
+      ],
+      "educations": [{"institution": "SENAI", "course": "Soldagem Industrial", "degree": "Curso Técnico"}],
+      "skills": [{"name": "Solda TIG"}, {"name": "Solda MIG"}, {"name": "Leitura de projeto"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "marketing_com_metricas",
+    "payload": {
+      "name": "Marketing — métricas fortes",
+      "target_position": "Gerente de Marketing Digital",
+      "summary": "Profissional de marketing digital com sete anos em aquisição paga e conteúdo, atuando em empresas de assinatura.",
+      "contact": {"fullName": "Perfil Demo 14", "email": "demo14@local.invalid", "city": "São Paulo", "country": "Brasil", "linkedin": "https://linkedin.com/in/demo14"},
+      "experiences": [
+        {"company": "Assinaturas Lambda", "position": "Coordenadora de Marketing", "startDate": "2021-06", "isCurrent": true, "description": ["Reduzi o custo de aquisição de 82 para 47 reais reestruturando as campanhas de busca.", "Cresci a base de assinantes de 12 mil para 41 mil em dois anos.", "Lidero três analistas e a relação com duas agências parceiras."]}
+      ],
+      "educations": [{"institution": "Escola Superior de Propaganda", "course": "Publicidade e Propaganda", "degree": "Bacharelado"}],
+      "skills": [{"name": "Google Ads"}, {"name": "SEO"}, {"name": "Analytics"}, {"name": "CRM"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "financas_contabil",
+    "payload": {
+      "name": "Finanças — controladoria",
+      "target_position": "Controller",
+      "summary": "Contadora com nove anos em controladoria e fechamento contábil de grupos com múltiplas empresas.",
+      "contact": {"fullName": "Perfil Demo 15", "email": "demo15@local.invalid", "city": "Brasília", "country": "Brasil"},
+      "experiences": [
+        {"company": "Grupo Mu", "position": "Coordenadora de Controladoria", "startDate": "2019-02", "isCurrent": true, "description": ["Reduzi o prazo de fechamento contábil de doze para cinco dias úteis.", "Implantei o controle orçamentário que cortou 14% de despesa recorrente.", "Coordeno uma equipe de seis analistas e a relação com a auditoria externa."]}
+      ],
+      "educations": [{"institution": "Universidade Católica", "course": "Ciências Contábeis", "degree": "Bacharelado"}],
+      "skills": [{"name": "Fechamento contábil"}, {"name": "Orçamento"}, {"name": "SAP"}, {"name": "IFRS"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "troca_area_biologo_dev",
+    "payload": {
+      "name": "Troca de área — biólogo para dev",
+      "target_position": "Desenvolvedor Back-end",
+      "summary": "Biólogo em transição para desenvolvimento de software. Concluí formação complementar em programação e desenvolvo projetos pessoais em Python.",
+      "contact": {"fullName": "Perfil Demo 16", "email": "demo16@local.invalid", "city": "Manaus", "country": "Brasil", "github": "https://github.com/demo16"},
+      "experiences": [
+        {"company": "Instituto de Pesquisa Nu", "position": "Biólogo", "startDate": "2018-03", "endDate": "2025-06", "description": ["Conduzi levantamento de fauna em doze áreas de mata ciliar.", "Publiquei três artigos em revistas de ecologia.", "Automatizei a tabulação de dados de campo com planilhas e scripts em Python."]}
+      ],
+      "educations": [{"institution": "Universidade Federal", "course": "Ciências Biológicas", "degree": "Bacharelado"}],
+      "skills": [{"name": "Python"}, {"name": "SQL"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "troca_area_professor_instrucional",
+    "payload": {
+      "name": "Troca suave — professor para designer instrucional",
+      "target_position": "Designer Instrucional",
+      "summary": "Professora de ensino médio com dez anos de sala de aula, migrando para desenho de material didático e educação corporativa.",
+      "contact": {"fullName": "Perfil Demo 17", "email": "demo17@local.invalid", "city": "Fortaleza", "country": "Brasil"},
+      "experiences": [
+        {"company": "Colégio Xi", "position": "Professora de Biologia", "startDate": "2015-02", "isCurrent": true, "description": ["Elaborei o material didático de biologia usado em nove turmas.", "Elevei a média da turma no exame estadual de 6,1 para 7,4 em dois anos.", "Coordenei a formação de quatro professores substitutos."]}
+      ],
+      "educations": [{"institution": "Universidade Estadual", "course": "Licenciatura em Biologia", "degree": "Licenciatura"}],
+      "skills": [{"name": "Material didático"}, {"name": "Avaliação"}, {"name": "Formação de professores"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "verboso_e_vago",
+    "payload": {
+      "name": "Verboso e vago — muito texto, zero número",
+      "target_position": "Gerente de Projetos",
+      "summary": "Profissional dinâmico, proativo e com excelente relacionamento interpessoal, apaixonado por desafios e comprometido com a excelência. Busco uma oportunidade em uma empresa sólida onde possa aplicar meus conhecimentos, crescer profissionalmente e contribuir de forma significativa para os objetivos estratégicos da organização, sempre com foco em resultados e trabalho em equipe.",
+      "contact": {"fullName": "Perfil Demo 18", "email": "demo18@local.invalid", "city": "Goiânia", "country": "Brasil"},
+      "experiences": [
+        {"company": "Consultoria Ômicron", "position": "Gerente de Projetos", "startDate": "2018-01", "isCurrent": true, "description": ["Atuei na gestão de projetos diversos, sempre buscando a melhor solução para o cliente.", "Participei ativamente de reuniões estratégicas com stakeholders de várias áreas.", "Contribuí para a melhoria contínua dos processos internos da organização.", "Fui responsável por acompanhar cronogramas e reportar o andamento às lideranças.", "Apoiei o desenvolvimento da equipe por meio de feedbacks constantes."]}
+      ],
+      "educations": [{"institution": "Universidade Particular", "course": "Administração", "degree": "Bacharelado"}],
+      "skills": [{"name": "Gestão de projetos"}, {"name": "Comunicação"}, {"name": "Liderança"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "fit_ruim_alvo_distante",
+    "payload": {
+      "name": "Fit ruim — alvo distante do histórico",
+      "target_position": "Cirurgião Dentista",
+      "summary": "Analista de suporte técnico com seis anos em atendimento a usuários e manutenção de estações de trabalho.",
+      "contact": {"fullName": "Perfil Demo 19", "email": "demo19@local.invalid", "city": "Natal", "country": "Brasil"},
+      "experiences": [
+        {"company": "Empresa Pi", "position": "Analista de Suporte", "startDate": "2019-07", "isCurrent": true, "description": ["Atendo em média 45 chamados por semana com satisfação de 4,7 de 5.", "Reduzi o tempo médio de atendimento de 38 para 21 minutos.", "Documentei a base de conhecimento usada por todo o time de suporte."]}
+      ],
+      "educations": [{"institution": "Instituto Federal", "course": "Redes de Computadores", "degree": "Tecnólogo"}],
+      "skills": [{"name": "Windows"}, {"name": "Redes"}, {"name": "Help desk"}],
+      "languages": [],
+      "job_description_text": null
+    }
+  },
+  {
+    "key": "com_vaga_matching",
+    "payload": {
+      "name": "Com descrição de vaga — exercita matching",
+      "target_position": "Cientista de Dados",
+      "summary": "Cientista de dados com cinco anos em modelos preditivos para crédito e churn, com experiência em produtização de modelos.",
+      "contact": {"fullName": "Perfil Demo 20", "email": "demo20@local.invalid", "city": "São Paulo", "country": "Brasil", "linkedin": "https://linkedin.com/in/demo20", "github": "https://github.com/demo20"},
+      "experiences": [
+        {"company": "Fintech Rho", "position": "Cientista de Dados", "startDate": "2021-01", "isCurrent": true, "description": ["Elevei o AUC do modelo de inadimplência de 0,71 para 0,83 com novas variáveis de comportamento.", "Coloquei quatro modelos em produção com monitoramento de deriva.", "Reduzi a perda por fraude em 1,9 milhão no primeiro ano do modelo de transações."]}
+      ],
+      "educations": [{"institution": "Universidade Federal", "course": "Estatística", "degree": "Mestrado"}],
+      "skills": [{"name": "Python"}, {"name": "scikit-learn"}, {"name": "SQL"}, {"name": "MLflow"}, {"name": "Spark"}],
+      "languages": [],
+      "job_description_text": "Buscamos Cientista de Dados Sênior com experiência em modelos de risco de crédito, produtização de modelos e monitoramento em produção. Requisitos: Python, SQL, scikit-learn, experiência com feature engineering e métricas de discriminação (AUC, KS). Desejável: Spark, MLflow, versionamento de modelos."
+    }
+  }
+]
