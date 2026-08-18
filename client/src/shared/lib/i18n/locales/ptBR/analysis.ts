@@ -141,9 +141,8 @@ export const analysisDomain = {
     },
     targetFit: {
       sectionTitle: 'Cargo alvo e aderência',
-      sectionAria: 'Aderência ao cargo alvo e senioridade na área desejada',
+      sectionAria: 'Aderência ao cargo alvo',
       fitCard: 'Aderência ao cargo alvo',
-      targetSeniorityCard: 'Senioridade (na área-alvo)',
       resumeDomain: 'Área inferida do currículo',
       targetDomain: 'Área inferida do cargo alvo',
       careerSwitchTitle: 'Possível migração de área',
@@ -160,16 +159,8 @@ export const analysisDomain = {
       matchedTerms: 'Termos encontrados',
       missingTerms: 'Termos a reforçar',
       matchedSkills: 'Habilidades relacionadas',
-      clampTitle: 'Por que a senioridade na área-alvo é conservadora',
       disclaimer:
         'Estimativa baseada em dados estruturados do currículo e no cargo alvo (sem uso de LLM como decisão final). Adicione texto da vaga para maior precisão.',
-      clampMaxJuniorScore: 'Aderência baixa ao cargo alvo: limitamos a senioridade na área-alvo a Júnior.',
-      clampMaxMidScore: 'Aderência moderada: senioridade na área-alvo limitada a Pleno.',
-      clampNoExperiencePortfolio:
-        'Sem evidência clara nas experiências e sem portfólio: senioridade na área-alvo limitada a Júnior.',
-      clampSparseTargetHits: 'Poucos termos do cargo alvo aparecem no currículo.',
-      clampSkillsGap: 'Pouca sobreposição entre habilidades e o cargo alvo.',
-      clampHighGeneralLowFit: 'Senioridade geral alta, mas aderência ao cargo alvo muito baixa — perfil conservador na área nova.',
     },
     improvementExamples: {
       addMetrics: {

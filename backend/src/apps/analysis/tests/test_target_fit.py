@@ -1,4 +1,4 @@
-"""Target fit, domain inference, and conservative target seniority (generalist)."""
+"""Target fit and domain inference (generalist)."""
 from __future__ import annotations
 
 import unittest
@@ -7,7 +7,6 @@ from apps.analysis.application.inference.resume_mapper import resume_to_text
 from apps.analysis.application.inference.tasks.target_fit import (
     compute_career_switch,
     compute_target_fit_policy,
-    compute_target_seniority,
     extract_target_fit_signals,
     heuristic_target_fit_score,
     infer_domain_category,
@@ -80,7 +79,7 @@ def _domains_for(resume: dict, target: str, lang: str) -> tuple[str, str]:
 
 
 class TargetFitScenariosTest(unittest.TestCase):
-    def test_biologist_to_developer_low_target_seniority(self):
+    def test_biologist_to_developer_low_fit(self):
         resume = _bio_resume_data()
         resume["data"]["targetPosition"] = "Desenvolvedor(a) Full Stack"
         target = "Desenvolvedor(a) Full Stack"
@@ -88,8 +87,6 @@ class TargetFitScenariosTest(unittest.TestCase):
         rd, td = _domains_for(resume, target, "pt-BR")
         score = heuristic_target_fit_score(sig, has_job_text=False, resume_domain=rd, target_domain=td)
         self.assertLess(score, 55)
-        pack = compute_target_seniority("senior", score, sig, "pt-BR")
-        self.assertIn(pack["targetSeniorityLabel"], ("intern", "junior"))
 
     def test_biologist_to_senior_biologist_high_fit(self):
         resume = _bio_resume_data()
@@ -99,8 +96,6 @@ class TargetFitScenariosTest(unittest.TestCase):
         rd, td = _domains_for(resume, target, "pt-BR")
         score = heuristic_target_fit_score(sig, has_job_text=False, resume_domain=rd, target_domain=td)
         self.assertGreaterEqual(score, 40)
-        pack = compute_target_seniority("senior", score, sig, "pt-BR")
-        self.assertIn(pack["targetSeniorityLabel"], ("mid", "senior"))
 
     def test_finance_to_finance(self):
         resume = _finance_resume_data()
@@ -112,8 +107,6 @@ class TargetFitScenariosTest(unittest.TestCase):
         rd, td = _domains_for(resume, target, "pt-BR")
         score = heuristic_target_fit_score(sig, has_job_text=True, resume_domain=rd, target_domain=td)
         self.assertGreaterEqual(score, 50)
-        pack = compute_target_seniority("mid", score, sig, "pt-BR")
-        self.assertIn(pack["targetSeniorityLabel"], ("mid", "senior", "junior"))
 
     def test_finance_to_ux_career_switch(self):
         resume = _finance_resume_data()
@@ -124,19 +117,6 @@ class TargetFitScenariosTest(unittest.TestCase):
         score = heuristic_target_fit_score(sig, has_job_text=False, resume_domain=rd, target_domain=td)
         cs = compute_career_switch("mid", score, rd, td)
         self.assertTrue(cs["detected"] or score < 50)
-
-
-class ClampRulesTest(unittest.TestCase):
-    def test_no_experience_hits_caps_junior(self):
-        sig = TargetFitSignals(
-            required_terms_total=6,
-            required_terms_hit=4,
-            experience_keyword_hits=0,
-            portfolio_evidence=False,
-            skills_hit=3,
-        )
-        pack = compute_target_seniority("senior", 85, sig, "en-US")
-        self.assertEqual(pack["targetSeniorityLabel"], "junior")
 
 
 class PolicyAliasTest(unittest.TestCase):

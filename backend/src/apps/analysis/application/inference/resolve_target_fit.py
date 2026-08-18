@@ -14,7 +14,6 @@ from .tasks.target_fit import (
     TARGET_FIT_POLICY_VERSION,
     compute_career_switch,
     compute_target_fit_policy,
-    compute_target_seniority,
     extract_target_fit_signals,
     infer_domain_category,
 )
@@ -34,9 +33,8 @@ from .text_sanitizer import job_text_sanitized
 
 import logging
 
-from .resolve_seniority import SENIORITY_TO_SCORE
-
 logger = logging.getLogger(__name__)
+
 
 def _domain_block(domain: dict[str, Any]) -> dict[str, Any]:
     """
@@ -82,15 +80,13 @@ def _resolve_target_fit(
     fit_score = 0
     fit_signals_score = 0
     fit_embedding_score: int | None = None
-    target_seniority_label = final_label
-    ts_pack: dict = {"targetSeniorityLabel": final_label, "clampReasonKeys": []}
     career_sw: dict = {"detected": False, "reasonKey": ""}
     tf_imp = None
     tf_signals = None
     domain_target: dict = {"domainCategory": "general", "confidence": "low", "evidenceTokens": []}
     domain_resume: dict = {"domainCategory": "general", "confidence": "low", "evidenceTokens": []}
     target_fit_extra: dict[str, Any] = {}
-    target_fit_task: dict[str, float | None] = {"target_fit": None, "target_seniority": None}
+    target_fit_task: dict[str, float | None] = {"target_fit": None}
     target_fit_bundle_extra: dict[str, Any] | None = None
 
     if not target_pos:
@@ -99,8 +95,6 @@ def _resolve_target_fit(
             "fit_score": fit_score,
             "fit_signals_score": fit_signals_score,
             "fit_embedding_score": fit_embedding_score,
-            "target_seniority_label": target_seniority_label,
-            "ts_pack": ts_pack,
             "career_sw": career_sw,
             "tf_imp": tf_imp,
             "target_fit_extra": target_fit_extra,
@@ -231,8 +225,6 @@ def _resolve_target_fit(
             logger.warning("target_fit embedding failed, using signals only: %s", exc)
             fit_embedding_score = None
             semantic_kw = []
-    ts_pack = compute_target_seniority(final_label, fit_score, tf_signals, lang)
-    target_seniority_label = str(ts_pack.get("targetSeniorityLabel") or "junior")
     career_sw = compute_career_switch(
         final_label,
         fit_score,
@@ -240,10 +232,7 @@ def _resolve_target_fit(
         str(domain_target.get("domainCategory") or "general"),
     )
     tf_imp = target_fit_improvement(tf_signals.required_terms_missing, lang)
-    target_fit_task = {
-        "target_fit": float(fit_score),
-        "target_seniority": float(SENIORITY_TO_SCORE.get(target_seniority_label, 50)),
-    }
+    target_fit_task = {"target_fit": float(fit_score)}
     tfe: dict[str, Any] = {
         "matchedTerms": tf_signals.required_terms_matched,
         "missingTerms": tf_signals.required_terms_missing,
@@ -262,8 +251,6 @@ def _resolve_target_fit(
         "targetFitSignalsScore": int(fit_signals_score),
         "targetFitEmbeddingScore": fit_embedding_score,
         "targetFitFinalScore": int(fit_score),
-        "targetSeniorityLabel": target_seniority_label,
-        "targetSeniorityClampReasons": list(ts_pack.get("clampReasonKeys") or []),
         "targetRoleDomain": _domain_block(domain_target),
         "resumeDomain": _domain_block(domain_resume),
         "targetFitEvidence": tfe,
@@ -283,8 +270,6 @@ def _resolve_target_fit(
         "fit_score": fit_score,
         "fit_signals_score": fit_signals_score,
         "fit_embedding_score": fit_embedding_score,
-        "target_seniority_label": target_seniority_label,
-        "ts_pack": ts_pack,
         "career_sw": career_sw,
         "tf_imp": tf_imp,
         "target_fit_extra": target_fit_extra,

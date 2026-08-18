@@ -141,9 +141,8 @@ export const analysisDomain = {
     },
     targetFit: {
       sectionTitle: 'Puesto objetivo y ajuste',
-      sectionAria: 'Ajuste al puesto objetivo y senioridad en esa área',
+      sectionAria: 'Ajuste al puesto objetivo',
       fitCard: 'Ajuste al puesto objetivo',
-      targetSeniorityCard: 'Senioridad (área objetivo)',
       resumeDomain: 'Área inferida del currículo',
       targetDomain: 'Área inferida del puesto objetivo',
       careerSwitchTitle: 'Posible cambio de área',
@@ -160,17 +159,8 @@ export const analysisDomain = {
       matchedTerms: 'Términos encontrados',
       missingTerms: 'Términos a reforzar',
       matchedSkills: 'Habilidades relacionadas',
-      clampTitle: 'Por qué la senioridad en el área objetivo es conservadora',
       disclaimer:
         'Estimación a partir de datos estructurados del CV y del puesto objetivo (sin LLM como decisión final). Añade texto de la oferta para mayor precisión.',
-      clampMaxJuniorScore: 'Bajo ajuste al puesto: senioridad en el área objetivo limitada a Junior.',
-      clampMaxMidScore: 'Ajuste moderado: senioridad en el área objetivo limitada a nivel medio.',
-      clampNoExperiencePortfolio:
-        'Sin evidencia clara en experiencias y sin portafolio: senioridad en el área objetivo limitada a Junior.',
-      clampSparseTargetHits: 'Pocos términos del puesto aparecen en el currículo.',
-      clampSkillsGap: 'Poca superposición entre habilidades y el puesto objetivo.',
-      clampHighGeneralLowFit:
-        'Senioridad general alta pero ajuste al puesto muy bajo — perfil conservador para el área nueva.',
     },
     improvementExamples: {
       addMetrics: {

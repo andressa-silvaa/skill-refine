@@ -68,6 +68,44 @@ def rule_based_seniority(signals: ResumeSignals) -> tuple[str, str, list[dict[st
     return "mid", "medium", evidence
 
 
+def apply_tenure_floor(
+    label: str,
+    resume_data: dict[str, Any],
+) -> tuple[str, list[dict[str, Any]]]:
+    """
+    Nunca rotular abaixo do que o tempo de casa documentado sustenta.
+
+    Simetria dos vetos abaixo, que só sabem descer. Existe porque a sonda de texto é **só-texto por
+    decisão de projeto** — ler os meses vale 1,6 ponto para ela (§9.3) — e em currículo escrito fora
+    do estilo do corpus ela subestima num sentido só: em 19 currículos escritos à mão saiu mais baixa
+    que a regra 12 vezes e mais alta zero, com "intern" em carreiras de 9 a 12 anos
+    (ml/reports/length_leak_v3.md registra o que a investigação descartou).
+
+    Não conserta o modelo, e não finge consertar: é segurança sobre evidência **presente**, do mesmo
+    tipo declarado que ``clamp_seniority_vetoes`` é sobre evidência ausente. Um currículo com 111
+    meses de experiência datada não sai júnior, qualquer que seja a leitura da prosa.
+    """
+    from ...resume_signals import structured_seniority_floor_lift
+
+    floor = structured_seniority_floor_lift(resume_data)
+    if not floor:
+        return label, []
+    try:
+        current, minimum = _ORDER.index(label), _ORDER.index(floor)
+    except ValueError:
+        return label, []
+    if current >= minimum:
+        return label, []
+    return floor, [
+        {
+            "type": "floor",
+            "rule": "never_below_documented_tenure",
+            "from": label,
+            "to": floor,
+        }
+    ]
+
+
 def clamp_seniority_vetoes(
     label: str,
     signals: ResumeSignals,

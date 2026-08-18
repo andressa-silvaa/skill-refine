@@ -66,12 +66,10 @@ export type AnalysisPayload = {
   insufficientData?: boolean | null;
   gatingReasons?: string[] | null;
   targetFitScore?: number | null;
-  targetSeniorityLabel?: string | null;
   targetRoleDomain?: TargetRoleDomainApi | null;
   resumeDomain?: TargetRoleDomainApi | null;
   targetFitEvidence?: TargetFitEvidenceApi | null;
   careerSwitch?: CareerSwitchApi | null;
-  targetSeniorityClampReasons?: string[] | null;
   /** Audit: policy vs sklearn (for dev / TCC). */
   targetFitProvider?: string | null;
   targetFitModelVersion?: string | null;
@@ -82,7 +80,6 @@ export type AnalysisPayload = {
     seniority?: number | null;
     matching?: number | null;
     targetFit?: number | null;
-    targetSeniority?: number | null;
   };
   insights: {
     strengths: InsightItemApi[];

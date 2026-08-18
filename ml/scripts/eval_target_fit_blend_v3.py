@@ -66,9 +66,8 @@ from apps.analysis.application.inference.tasks.target_fit.isco_domains import ( 
 from apps.analysis.application.inference.tasks.target_fit.loader_embeddings import (  # noqa: E402
     get_embeddings_model,
 )
-from apps.analysis.application.inference.tasks.target_fit.target_seniority import (  # noqa: E402
+from apps.analysis.application.inference.tasks.target_fit.fit_policy import (  # noqa: E402
     compute_target_fit_policy,
-    compute_target_seniority,
 )
 
 REPORT_PATH = REPO_ROOT / "ml" / "reports" / "target_fit_blend_v3.md"
@@ -141,9 +140,6 @@ def main() -> None:
     emb_neg: list[float] = []
     pol_pos: list[float] = []
     pol_neg: list[float] = []
-    seniority_pos: list[int] = []
-    seniority_neg: list[int] = []
-    order = {"intern": 0, "junior": 1, "mid": 2, "senior": 3}
 
     for index, item in enumerate(pool):
         resume_data = item["resume_data"]
@@ -199,13 +195,6 @@ def main() -> None:
             else:
                 emb_hard.append(embedding)
                 pol_hard.append(policy)
-
-            if label in ("pos", "neg"):
-                pack = compute_target_seniority(
-                    "mid", int(round(0.65 * embedding + 0.35 * policy)), signals, lang
-                )
-                value = order.get(str(pack.get("targetSeniorityLabel") or "junior"), 1)
-                (seniority_pos if label == "pos" else seniority_neg).append(value)
 
         if (index + 1) % 200 == 0:
             print(f"  {index + 1}/{len(pool)}")
@@ -299,16 +288,6 @@ def main() -> None:
         out.append(
             f"| policy | {auc(pol_pos, pol_hard):.3f} | {np.mean(pol_pos):.1f} | {np.mean(pol_hard):.1f} |"
         )
-    out.append("")
-    out.append("## `target_seniority`: os clamps reagem ao alvo errado?")
-    out.append("")
-    same = int(np.sum(np.asarray(seniority_pos) == np.asarray(seniority_neg)))
-    out.append(
-        f"Rodando `compute_target_seniority` nos dois pares do mesmo currículo, o rótulo é **idêntico "
-        f"em {same}/{len(seniority_pos)} ({same / len(seniority_pos):.0%})** dos casos. Média do "
-        f"rótulo (0=intern, 3=senior): fit {np.mean(seniority_pos):.2f} contra não-fit "
-        f"{np.mean(seniority_neg):.2f}."
-    )
     out.append("")
     out.append("## Como ler")
     out.append("")

@@ -108,7 +108,6 @@ def analysis_payload(analysis: ResumeAnalysis) -> dict[str, Any]:
             "seniority": task_scores.get("seniority"),
             "matching": task_scores.get("matching"),
             "targetFit": task_scores.get("target_fit"),
-            "targetSeniority": task_scores.get("target_seniority"),
         },
         "insights": {
             "strengths": [
@@ -148,9 +147,6 @@ def analysis_payload(analysis: ResumeAnalysis) -> dict[str, Any]:
     tf = payload_json.get("targetFitScore")
     if isinstance(tf, (int, float)):
         out["targetFitScore"] = int(tf)
-    tsl = payload_json.get("targetSeniorityLabel")
-    if isinstance(tsl, str) and tsl.strip().lower() in _VALID_SENIORITY:
-        out["targetSeniorityLabel"] = tsl.strip().lower()
     trd = payload_json.get("targetRoleDomain")
     if isinstance(trd, dict):
         out["targetRoleDomain"] = {
@@ -192,10 +188,6 @@ def analysis_payload(analysis: ResumeAnalysis) -> dict[str, Any]:
             "detected": bool(cs.get("detected")),
             "reasonKey": str(cs.get("reasonKey") or ""),
         }
-    clamp = payload_json.get("targetSeniorityClampReasons")
-    if isinstance(clamp, list):
-        out["targetSeniorityClampReasons"] = [str(x) for x in clamp if isinstance(x, str)]
-
     tfp = payload_json.get("targetFitProvider")
     if isinstance(tfp, str) and tfp.strip():
         out["targetFitProvider"] = tfp.strip()
