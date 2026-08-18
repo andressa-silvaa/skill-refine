@@ -29,7 +29,6 @@ export type ImprovementItem = {
 /** Target role fit / migration (optional — present when backend computed target fit). */
 export type TargetFitView = {
   score: number;
-  seniorityLabel: string;
   roleDomainLabel: string;
   resumeDomainLabel: string;
   evidence: {
@@ -44,7 +43,6 @@ export type TargetFitView = {
     skillsHit: number;
     semanticKeywords?: string[];
   };
-  clampReasonLabels: string[];
   careerSwitch: { detected: boolean; reason?: string };
 };
 

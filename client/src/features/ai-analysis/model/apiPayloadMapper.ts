@@ -84,23 +84,12 @@ export function apiPayloadToResult(
   const seniorityKey =
     seniorityLabelToI18nKey(rawClass) ?? seniorityScoreToKey(seniorityScore);
 
-  const strengths: InsightItem[] = (payload.insights?.strengths ?? []).map((s) => {
-    if (
-      s.key === 'analysis.insights.strengths.career_switch_context' &&
-      s.params &&
-      typeof s.params.reasonKey === 'string' &&
-      s.params.reasonKey.length > 0
-    ) {
-      return {
-        key: s.key,
-        params: { context: t(s.params.reasonKey) },
-      };
-    }
-    return {
+  const strengths: InsightItem[] = (payload.insights?.strengths ?? [])
+    .filter((s) => s.key !== 'analysis.insights.strengths.career_switch_context')
+    .map((s) => ({
       key: s.key,
       params: localizeInsightParams(s.params, t),
-    };
-  });
+    }));
 
   const recommendationsByKey = new Map(
     (payload.recommendations ?? []).map((rec) => [rec.key, rec])
@@ -134,14 +123,6 @@ export function apiPayloadToResult(
   if (payload.targetFitScore != null && typeof payload.targetFitScore === 'number') {
     const ev = payload.targetFitEvidence ?? {};
     const cs = payload.careerSwitch ?? {};
-    const rawTsl = (payload.targetSeniorityLabel || '').trim().toLowerCase();
-    const tslKey =
-      seniorityLabelToI18nKey(rawTsl) ??
-      seniorityScoreToKey(
-        typeof payload.taskScores?.targetSeniority === 'number'
-          ? payload.taskScores.targetSeniority
-          : undefined
-      );
     const align = (ev.educationAlignment || 'weak').toLowerCase();
     const alignKey =
       align === 'strong'
@@ -156,7 +137,6 @@ export function apiPayloadToResult(
       : [];
     targetFit = {
       score: Math.round(payload.targetFitScore),
-      seniorityLabel: t(tslKey),
       roleDomainLabel: domainCategoryLabel(payload.targetRoleDomain?.category, t),
       resumeDomainLabel: domainCategoryLabel(payload.resumeDomain?.category, t),
       evidence: {
@@ -171,9 +151,6 @@ export function apiPayloadToResult(
         skillsHit: typeof ev.skillsHit === 'number' ? ev.skillsHit : 0,
         ...(semKw.length > 0 ? { semanticKeywords: semKw } : {}),
       },
-      clampReasonLabels: (payload.targetSeniorityClampReasons ?? [])
-        .filter((k): k is string => typeof k === 'string' && k.length > 0)
-        .map((k) => t(k)),
       careerSwitch: {
         detected: Boolean(cs.detected),
         reason:

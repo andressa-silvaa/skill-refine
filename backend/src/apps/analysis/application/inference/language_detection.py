@@ -8,7 +8,7 @@ cheaper field to switch to: ``resume_languages`` records the languages the candi
 
 Measured cost of getting it wrong (ml/reports/language_mismatch_v3.md, 1559 resumes): the ESCO index
 is built per language, so retrieval against the wrong one drops occupation top-1 by 29.5 points and
-the domain that feeds ``careerSwitch`` and ``target_seniority`` by 14.9. An English resume read as
+the domain that feeds ``careerSwitch`` by 14.9. An English resume read as
 pt-BR — the default path for a user who never touched settings — loses 17.4 points of domain
 accuracy.
 

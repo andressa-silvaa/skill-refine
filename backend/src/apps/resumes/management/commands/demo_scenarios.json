@@ -1,172 +1,407 @@
 [
-  {
-    "key": "senior_tech_lideranca",
-    "payload": {
-      "name": "Engenheiro de Software Sênior",
-      "target_position": "Engenheiro de Software Sênior",
-      "summary": "Engenheiro de software com nove anos em plataformas de alto tráfego. Conduzi a migração de um monólito para serviços, reduzindo o tempo de deploy de duas horas para onze minutos, e lidero um time de seis pessoas.",
-      "contact": {"fullName": "Perfil Demo 01", "email": "demo01@local.invalid", "city": "São Paulo", "country": "Brasil", "linkedin": "https://linkedin.com/in/demo01", "github": "https://github.com/demo01"},
-      "experiences": [
-        {"company": "Empresa Alfa", "position": "Engenheiro de Software Sênior", "startDate": "2021-02", "isCurrent": true, "description": ["Reduzi a latência p95 da API de 820ms para 180ms reescrevendo as consultas mais quentes.", "Liderei um time de seis engenheiros na migração de monólito para serviços.", "Cortei o custo de infraestrutura em 34% ao revisar o dimensionamento dos clusters.", "Implantei observabilidade com métricas e traces, derrubando o diagnóstico de 4h para 25min.", "Defini o processo de revisão de código adotado por três squads.", "Reduzi incidentes em produção de nove para dois por trimestre."]},
-        {"company": "Empresa Beta", "position": "Engenheiro de Software Pleno", "startDate": "2017-06", "endDate": "2021-01", "description": ["Construí o pipeline de cobrança que processa 90 mil transações por dia.", "Automatizei a esteira de testes, elevando a cobertura de 41% para 78%."]}
-      ],
-      "educations": [{"institution": "Universidade Federal", "course": "Ciência da Computação", "degree": "Bacharelado", "startDate": "2013-02", "endDate": "2016-12", "status": "completed"}],
-      "skills": [{"name": "Python"}, {"name": "PostgreSQL"}, {"name": "Kubernetes"}, {"name": "AWS"}, {"name": "Terraform"}],
-      "languages": [],
-      "job_description_text": null
+ {
+  "key": "estagio_juridico",
+  "payload": {
+   "name": "Estágio em Direito Tributário",
+   "target_position": "Estágio em Direito Tributário",
+   "summary": "Estudante de Direito no sétimo período, com passagem pelo contencioso tributário de um escritório de médio porte. Busco estágio na área tributária para aprofundar a prática em defesas administrativas.",
+   "contact": {
+    "fullName": "Perfil Demo 01",
+    "email": "demo01@local.invalid",
+    "city": "Belo Horizonte",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo01"
+   },
+   "experiences": [
+    {
+     "company": "Vieira & Associados Advocacia",
+     "position": "Estagiária de Direito",
+     "startDate": "2025-10",
+     "isCurrent": true,
+     "description": [
+      "Realizo pesquisa de jurisprudência e súmulas para subsidiar defesas administrativas.",
+      "Organizo o controle de prazos processuais de aproximadamente 60 processos ativos."
+     ]
     }
-  },
-  {
-    "key": "pleno_sem_resultados",
-    "payload": {
-      "name": "Desenvolvedor Back-end Pleno",
-      "target_position": "Desenvolvedor Back-end Pleno",
-      "summary": "Desenvolvedor back-end com quatro anos de experiência em sistemas corporativos e integrações.",
-      "contact": {"fullName": "Perfil Demo 02", "email": "demo02@local.invalid", "city": "Curitiba", "country": "Brasil"},
-      "experiences": [
-        {"company": "Empresa Gama", "position": "Desenvolvedor Back-end", "startDate": "2022-03", "isCurrent": true, "description": ["Responsável pela manutenção dos serviços internos da área financeira.", "Participei das reuniões semanais de alinhamento com o time de produto.", "Atuei na correção de defeitos reportados pelo suporte.", "Documentei rotinas de integração com sistemas de terceiros."]}
-      ],
-      "educations": [{"institution": "Centro Universitário", "course": "Sistemas de Informação", "degree": "Bacharelado", "startDate": "2017-02", "endDate": "2021-12", "status": "completed"}],
-      "skills": [{"name": "Java"}, {"name": "Spring"}, {"name": "Oracle"}],
-      "languages": [],
-      "job_description_text": null
+   ],
+   "educations": [
+    {
+     "institution": "Universidade Estadual",
+     "course": "Direito",
+     "degree": "Bacharelado",
+     "startDate": "2023-02",
+     "endDate": "2028-12",
+     "status": "in_progress"
     }
-  },
-  {
-    "key": "junior_com_metricas",
-    "payload": {
-      "name": "Desenvolvedora Front-end Júnior",
-      "target_position": "Desenvolvedora Front-end Júnior",
-      "summary": "Desenvolvedora front-end com um ano e meio de experiência, focada em acessibilidade e performance de interface.",
-      "contact": {"fullName": "Perfil Demo 03", "email": "demo03@local.invalid", "city": "Recife", "country": "Brasil", "github": "https://github.com/demo03"},
-      "experiences": [
-        {"company": "Agência Delta", "position": "Desenvolvedora Front-end Júnior", "startDate": "2024-06", "isCurrent": true, "description": ["Reduzi o tempo de carregamento da página inicial em 48% otimizando imagens e fontes.", "Corrigi 23 problemas de acessibilidade apontados em auditoria, levando o site ao nível AA.", "Criei a biblioteca de componentes usada hoje em quatro projetos da agência."]}
-      ],
-      "educations": [{"institution": "Instituto Federal", "course": "Análise e Desenvolvimento de Sistemas", "degree": "Tecnólogo", "startDate": "2021-02", "endDate": "2023-12", "status": "completed"}],
-      "skills": [{"name": "React"}, {"name": "TypeScript"}, {"name": "CSS"}],
-      "languages": [],
-      "job_description_text": null
-    }
-  },
-  {
-    "key": "estagiario_em_formacao",
-    "payload": {
-      "name": "Estágio em Desenvolvimento",
-      "target_position": "Estágio em Desenvolvimento",
-      "summary": "Estudante de engenharia de computação buscando primeiro estágio na área de tecnologia.",
-      "contact": {"fullName": "Perfil Demo 04", "email": "demo04@local.invalid", "city": "Belo Horizonte", "country": "Brasil"},
-      "experiences": [
-        {"company": "Empresa Épsilon", "position": "Estagiário de TI", "startDate": "2025-08", "isCurrent": true, "description": ["Apoiei o time no atendimento de chamados internos."]}
-      ],
-      "educations": [{"institution": "Universidade Estadual", "course": "Engenharia de Computação", "degree": "Graduação", "startDate": "2023-02", "endDate": "2027-12", "status": "in_progress"}],
-      "skills": [{"name": "Python"}],
-      "languages": [],
-      "job_description_text": null
-    }
-  },
-  {
-    "key": "enfermeiro_chefe_senior",
-    "payload": {
-      "name": "Enfermeiro Chefe",
-      "target_position": "Enfermeiro Chefe",
-      "summary": "Enfermeiro com doze anos em unidade de terapia intensiva e três anos coordenando equipe assistencial de vinte e dois profissionais.",
-      "contact": {"fullName": "Perfil Demo 05", "email": "demo05@local.invalid", "city": "Salvador", "country": "Brasil"},
-      "experiences": [
-        {"company": "Hospital Central", "position": "Enfermeiro Coordenador", "startDate": "2020-01", "isCurrent": true, "description": ["Coordeno vinte e dois profissionais em três turnos da UTI adulto.", "Reduzi a infecção por cateter de 4,8 para 1,3 por mil cateteres-dia.", "Implantei o protocolo de passagem de plantão que cortou falhas de comunicação em 60%.", "Conduzi a acreditação da unidade, aprovada sem ressalvas."]},
-        {"company": "Hospital Municipal", "position": "Enfermeiro Assistencial", "startDate": "2014-03", "endDate": "2019-12", "description": ["Atendi pacientes críticos em UTI e sala vermelha.", "Treinei doze novos enfermeiros no protocolo de sepse."]}
-      ],
-      "educations": [
-        {"institution": "Universidade Federal", "course": "Enfermagem", "degree": "Bacharelado", "startDate": "2009-02", "endDate": "2013-12", "status": "completed"},
-        {"institution": "Faculdade de Saúde", "course": "Enfermagem em Terapia Intensiva", "degree": "Especialização", "startDate": "2014-03", "endDate": "2015-08", "status": "completed"}
-      ],
-      "skills": [{"name": "UTI"}, {"name": "Protocolo de sepse"}, {"name": "Gestão de equipe"}, {"name": "Acreditação hospitalar"}],
-      "languages": [],
-      "job_description_text": null
-    }
-  },
-  {
-    "key": "ingles_data_engineer",
-    "payload": {
-      "name": "Senior Data Engineer",
-      "target_position": "Senior Data Engineer",
-      "summary": "Data engineer with eight years building batch and streaming pipelines for retail analytics. I led the warehouse migration that cut nightly processing from six hours to fifty minutes.",
-      "contact": {"fullName": "Perfil Demo 06", "email": "demo06@local.invalid", "city": "Lisbon", "country": "Portugal", "linkedin": "https://linkedin.com/in/demo06"},
-      "experiences": [
-        {"company": "Retail Corp", "position": "Senior Data Engineer", "startDate": "2020-05", "isCurrent": true, "description": ["Cut nightly warehouse processing from six hours to fifty minutes by rewriting the incremental load.", "Led a team of four engineers through the migration to a columnar warehouse.", "Introduced data quality checks that caught 140 upstream defects in the first quarter.", "Owned the on-call rotation and cut paging volume by 55%."]},
-        {"company": "Logistics Ltd", "position": "Data Engineer", "startDate": "2017-02", "endDate": "2020-04", "description": ["Built the event pipeline handling 2.4 million messages per day.", "Reduced storage cost by 27% through partitioning and compression."]}
-      ],
-      "educations": [{"institution": "State University", "course": "Computer Science", "degree": "BSc", "startDate": "2012-09", "endDate": "2016-06", "status": "completed"}],
-      "skills": [{"name": "Spark"}, {"name": "Airflow"}, {"name": "dbt"}, {"name": "Snowflake"}],
-      "languages": [],
-      "job_description_text": null
-    }
-  },
-  {
-    "key": "espanhol_ux",
-    "payload": {
-      "name": "Diseñador UX Senior",
-      "target_position": "Diseñador UX Senior",
-      "summary": "Diseñador de experiencia de usuario con cinco años en productos digitales. Realicé investigación con usuarios y rediseñé el flujo de alta, que aumentó la conversión del 4,1% al 6,8%.",
-      "contact": {"fullName": "Perfil Demo 07", "email": "demo07@local.invalid", "city": "Madrid", "country": "España", "portfolio": "https://demo07.example"},
-      "experiences": [
-        {"company": "Producto SL", "position": "Diseñador UX", "startDate": "2021-03", "isCurrent": true, "description": ["Rediseñé el flujo de alta y aumenté la conversión del 4,1% al 6,8%.", "Conduje entrevistas con 32 usuarios para validar el nuevo panel de control.", "Establecí el sistema de diseño que hoy usan tres equipos de producto.", "Reduje el tiempo de entrega de maquetas de dos semanas a cuatro días."]}
-      ],
-      "educations": [{"institution": "Universidad Politécnica", "course": "Diseño Digital", "degree": "Grado", "startDate": "2016-09", "endDate": "2020-06", "status": "completed"}],
-      "skills": [{"name": "Figma"}, {"name": "Prototipado"}, {"name": "Investigación de usuarios"}],
-      "languages": [],
-      "job_description_text": null
-    }
-  },
-  {
-    "key": "soldador_supervisor",
-    "payload": {
-      "name": "Supervisor de Produção",
-      "target_position": "Supervisor de Produção",
-      "summary": "Soldador com quinze anos em estruturas metálicas e caldeiraria, com certificação em solda TIG e MIG, liderando turma de nove profissionais.",
-      "contact": {"fullName": "Perfil Demo 08", "email": "demo08@local.invalid", "city": "Joinville", "country": "Brasil"},
-      "experiences": [
-        {"company": "Metalúrgica Theta", "position": "Soldador Líder", "startDate": "2018-05", "isCurrent": true, "description": ["Lidero uma turma de nove soldadores no setor de caldeiraria.", "Reduzi o retrabalho de solda de 7% para 2,1% padronizando os parâmetros de máquina.", "Treinei quinze soldadores no procedimento de solda TIG em aço inox.", "Implantei a inspeção por amostragem que cortou refugo em 30%."]},
-        {"company": "Estruturas Iota", "position": "Soldador", "startDate": "2011-02", "endDate": "2018-04", "description": ["Executei solda de estruturas metálicas conforme projeto e norma.", "Inspecionei visualmente cordões de solda antes da liberação."]}
-      ],
-      "educations": [{"institution": "SENAI", "course": "Soldagem Industrial", "degree": "Curso Técnico", "startDate": "2009-03", "endDate": "2010-11", "status": "completed"}],
-      "skills": [{"name": "Solda TIG"}, {"name": "Solda MIG"}, {"name": "Leitura de projeto"}],
-      "languages": [],
-      "job_description_text": null
-    }
-  },
-  {
-    "key": "troca_area_biologo_dev",
-    "payload": {
-      "name": "Desenvolvedor Back-end",
-      "target_position": "Desenvolvedor Back-end",
-      "summary": "Biólogo em transição para desenvolvimento de software. Concluí formação complementar em programação e desenvolvo projetos pessoais em Python.",
-      "contact": {"fullName": "Perfil Demo 09", "email": "demo09@local.invalid", "city": "Manaus", "country": "Brasil", "github": "https://github.com/demo09"},
-      "experiences": [
-        {"company": "Instituto de Pesquisa Nu", "position": "Biólogo", "startDate": "2018-03", "endDate": "2025-06", "description": ["Conduzi levantamento de fauna em doze áreas de mata ciliar.", "Publiquei três artigos em revistas de ecologia.", "Automatizei a tabulação de dados de campo com scripts em Python."]}
-      ],
-      "educations": [
-        {"institution": "Universidade Federal", "course": "Ciências Biológicas", "degree": "Bacharelado", "startDate": "2013-02", "endDate": "2017-12", "status": "completed"},
-        {"institution": "Escola de Tecnologia", "course": "Desenvolvimento Back-end", "degree": "Curso Livre", "startDate": "2025-01", "endDate": "2025-07", "status": "completed"}
-      ],
-      "skills": [{"name": "Python"}, {"name": "SQL"}],
-      "languages": [],
-      "job_description_text": null
-    }
-  },
-  {
-    "key": "vago_com_vaga",
-    "payload": {
-      "name": "Gerente de Projetos",
-      "target_position": "Gerente de Projetos",
-      "summary": "Profissional dinâmico, proativo e com excelente relacionamento interpessoal, apaixonado por desafios. Busco uma oportunidade onde possa aplicar meus conhecimentos e contribuir de forma significativa para os objetivos da organização.",
-      "contact": {"fullName": "Perfil Demo 10", "email": "demo10@local.invalid", "city": "Goiânia", "country": "Brasil"},
-      "experiences": [
-        {"company": "Consultoria Ômicron", "position": "Gerente de Projetos", "startDate": "2018-01", "isCurrent": true, "description": ["Atuei na gestão de projetos diversos, sempre buscando a melhor solução para o cliente.", "Participei ativamente de reuniões estratégicas com stakeholders de várias áreas.", "Contribuí para a melhoria contínua dos processos internos da organização.", "Fui responsável por acompanhar cronogramas e reportar o andamento às lideranças."]}
-      ],
-      "educations": [{"institution": "Universidade Particular", "course": "Administração", "degree": "Bacharelado", "startDate": "2012-02", "endDate": "2016-12", "status": "completed"}],
-      "skills": [{"name": "Gestão de projetos"}, {"name": "Comunicação"}, {"name": "Liderança"}],
-      "languages": [],
-      "job_description_text": "Buscamos Gerente de Projetos Sênior com experiência comprovada em gestão de portfólio, indicadores de entrega (OTD, burn-down) e negociação com fornecedores. Requisitos: certificação PMP ou equivalente, domínio de metodologias ágeis e cascata, histórico de projetos acima de 1 milhão em orçamento."
-    }
+   ],
+   "skills": [
+    {"name": "Pesquisa jurisprudencial"},
+    {"name": "Peticionamento eletrônico"},
+    {"name": "Excel"}
+   ],
+   "languages": [],
+   "job_description_text": null
   }
+ },
+ {
+  "key": "estagio_marketing",
+  "payload": {
+   "name": "Estágio em Marketing Digital",
+   "target_position": "Estágio em Marketing Digital",
+   "summary": "Estudante de Publicidade e Propaganda com experiência inicial em produção de conteúdo para redes sociais. Procuro estágio em marketing digital com foco em performance.",
+   "contact": {
+    "fullName": "Perfil Demo 02",
+    "email": "demo02@local.invalid",
+    "city": "Curitiba",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo02"
+   },
+   "experiences": [
+    {
+     "company": "Agência Prisma",
+     "position": "Estagiário de Marketing",
+     "startDate": "2026-01",
+     "isCurrent": true,
+     "description": [
+      "Produzo o calendário editorial de três perfis de clientes no Instagram.",
+      "Acompanho métricas de alcance e engajamento em relatórios quinzenais."
+     ]
+    }
+   ],
+   "educations": [
+    {
+     "institution": "Centro Universitário",
+     "course": "Publicidade e Propaganda",
+     "degree": "Bacharelado",
+     "startDate": "2024-02",
+     "endDate": "2027-12",
+     "status": "in_progress"
+    }
+   ],
+   "skills": [
+    {"name": "Meta Ads"},
+    {"name": "Canva"},
+    {"name": "Google Analytics"}
+   ],
+   "languages": [],
+   "job_description_text": null
+  }
+ },
+ {
+  "key": "junior_saude",
+  "payload": {
+   "name": "Enfermeira Assistencial Júnior",
+   "target_position": "Enfermeira Assistencial Júnior",
+   "summary": "Enfermeira formada em 2024, atuando em clínica médica desde então. Experiência em admissão de pacientes, administração de medicamentos e registro em prontuário eletrônico.",
+   "contact": {
+    "fullName": "Perfil Demo 03",
+    "email": "demo03@local.invalid",
+    "city": "Salvador",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo03"
+   },
+   "experiences": [
+    {
+     "company": "Hospital São Rafael",
+     "position": "Enfermeira Assistencial",
+     "startDate": "2024-06",
+     "isCurrent": true,
+     "description": [
+      "Assisto em média 18 leitos de clínica médica por plantão.",
+      "Reduzi o tempo de registro em prontuário eletrônico ao padronizar o checklist de admissão.",
+      "Participo da escala de treinamento de novos técnicos de enfermagem da unidade."
+     ]
+    }
+   ],
+   "educations": [
+    {
+     "institution": "Universidade Federal",
+     "course": "Enfermagem",
+     "degree": "Bacharelado",
+     "startDate": "2019-02",
+     "endDate": "2024-01",
+     "status": "completed"
+    }
+   ],
+   "skills": [
+    {"name": "Suporte básico de vida"},
+    {"name": "Prontuário eletrônico"},
+    {"name": "Administração de medicamentos"}
+   ],
+   "languages": [],
+   "job_description_text": null
+  }
+ },
+ {
+  "key": "junior_tecnologia",
+  "payload": {
+   "name": "Desenvolvedor Front-end Júnior",
+   "target_position": "Desenvolvedor Front-end Júnior",
+   "summary": "Desenvolvedor front-end formado em Análise e Desenvolvimento de Sistemas, atuando em interfaces de e-commerce. Foco em React, acessibilidade e desempenho de página.",
+   "contact": {
+    "fullName": "Perfil Demo 04",
+    "email": "demo04@local.invalid",
+    "city": "Recife",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo04",
+    "github": "https://github.com/demo04"
+   },
+   "experiences": [
+    {
+     "company": "Studio Nove",
+     "position": "Desenvolvedor Front-end Júnior",
+     "startDate": "2024-09",
+     "isCurrent": true,
+     "description": [
+      "Reduzi o tempo de carregamento da vitrine de 4,1s para 1,8s com carregamento sob demanda.",
+      "Implementei o design system em 24 telas do checkout.",
+      "Corrigi 31 apontamentos de acessibilidade levantados em auditoria interna."
+     ]
+    }
+   ],
+   "educations": [
+    {
+     "institution": "Instituto Federal",
+     "course": "Análise e Desenvolvimento de Sistemas",
+     "degree": "Tecnólogo",
+     "startDate": "2022-02",
+     "endDate": "2024-06",
+     "status": "completed"
+    }
+   ],
+   "skills": [
+    {"name": "React"},
+    {"name": "TypeScript"},
+    {"name": "CSS"},
+    {"name": "Git"}
+   ],
+   "languages": [],
+   "job_description_text": null
+  }
+ },
+ {
+  "key": "pleno_recursos_humanos",
+  "payload": {
+   "name": "Analista de Recursos Humanos Pleno",
+   "target_position": "Analista de Recursos Humanos Pleno",
+   "summary": "Analista de RH com cinco anos de experiência em recrutamento e desenvolvimento organizacional. Conduzo processos seletivos de ponta a ponta e o ciclo de avaliação de desempenho de 300 colaboradores.",
+   "contact": {
+    "fullName": "Perfil Demo 05",
+    "email": "demo05@local.invalid",
+    "city": "Porto Alegre",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo05"
+   },
+   "experiences": [
+    {
+     "company": "Grupo Meridiano",
+     "position": "Analista de Recursos Humanos Pleno",
+     "startDate": "2023-03",
+     "isCurrent": true,
+     "description": [
+      "Reduzi o tempo médio de fechamento de vagas de 47 para 29 dias.",
+      "Estruturei o ciclo semestral de avaliação de desempenho para 300 colaboradores.",
+      "Implantei entrevistas de desligamento e reduzi o turnover voluntário de 22% para 15%.",
+      "Conduzo em média 12 processos seletivos simultâneos."
+     ]
+    },
+    {
+     "company": "Indústria Castelo",
+     "position": "Assistente de Recursos Humanos",
+     "startDate": "2021-08",
+     "endDate": "2023-02",
+     "description": [
+      "Organizei a integração de novos colaboradores em duas plantas fabris.",
+      "Mantive o controle de ponto e banco de horas de 180 funcionários."
+     ]
+    }
+   ],
+   "educations": [
+    {
+     "institution": "Universidade Católica",
+     "course": "Psicologia",
+     "degree": "Bacharelado",
+     "startDate": "2016-02",
+     "endDate": "2021-06",
+     "status": "completed"
+    }
+   ],
+   "skills": [
+    {"name": "Recrutamento e seleção"},
+    {"name": "Avaliação de desempenho"},
+    {"name": "Gupy"},
+    {"name": "Legislação trabalhista"}
+   ],
+   "languages": [],
+   "job_description_text": null
+  }
+ },
+ {
+  "key": "pleno_logistica",
+  "payload": {
+   "name": "Analista de Logística Pleno",
+   "target_position": "Analista de Logística Pleno",
+   "summary": "Analista de logística com quatro anos em roteirização e gestão de centro de distribuição. Atuo com indicadores de nível de serviço, custo por entrega e ocupação de frota.",
+   "contact": {
+    "fullName": "Perfil Demo 06",
+    "email": "demo06@local.invalid",
+    "city": "Campinas",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo06"
+   },
+   "experiences": [
+    {
+     "company": "Transportes Andrade",
+     "position": "Analista de Logística Pleno",
+     "startDate": "2022-05",
+     "isCurrent": true,
+     "description": [
+      "Elevei a ocupação média da frota de 68% para 84% ao redesenhar as rotas regionais.",
+      "Reduzi o custo por entrega em 19% renegociando janelas de coleta.",
+      "Implantei o controle diário de OTIF, que passou de 81% para 93%.",
+      "Coordeno a operação de expedição de um CD com 40 mil posições-palete."
+     ]
+    }
+   ],
+   "educations": [
+    {
+     "institution": "Faculdade de Tecnologia",
+     "course": "Logística",
+     "degree": "Tecnólogo",
+     "startDate": "2019-02",
+     "endDate": "2022-01",
+     "status": "completed"
+    }
+   ],
+   "skills": [
+    {"name": "Roteirização"},
+    {"name": "WMS"},
+    {"name": "Excel avançado"},
+    {"name": "Power BI"}
+   ],
+   "languages": [],
+   "job_description_text": null
+  }
+ },
+ {
+  "key": "senior_arquitetura",
+  "payload": {
+   "name": "Arquiteta Sênior",
+   "target_position": "Arquiteta Sênior",
+   "summary": "Arquiteta com onze anos de atuação em projetos corporativos e residenciais de alto padrão. Coordeno uma equipe de sete pessoas e respondo pela compatibilização de projetos e pelo relacionamento com clientes.",
+   "contact": {
+    "fullName": "Perfil Demo 07",
+    "email": "demo07@local.invalid",
+    "city": "São Paulo",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo07",
+    "portfolio": "https://demo07.local.invalid/portfolio"
+   },
+   "experiences": [
+    {
+     "company": "Escritório Lumen Arquitetura",
+     "position": "Arquiteta Coordenadora",
+     "startDate": "2019-04",
+     "isCurrent": true,
+     "description": [
+      "Coordeno uma equipe de sete arquitetos e dois estagiários.",
+      "Entreguei 23 projetos corporativos, somando 41 mil metros quadrados.",
+      "Reduzi o retrabalho de compatibilização em 38% ao adotar modelagem BIM integrada.",
+      "Respondo pela aprovação de projetos junto à prefeitura e ao corpo de bombeiros.",
+      "Estruturei o padrão de detalhamento executivo adotado por todo o escritório.",
+      "Reduzi o prazo médio de entrega do executivo de 14 para 9 semanas."
+     ]
+    },
+    {
+     "company": "Construtora Vega",
+     "position": "Arquiteta Plena",
+     "startDate": "2015-02",
+     "endDate": "2019-03",
+     "description": [
+      "Desenvolvi projetos executivos de cinco empreendimentos residenciais.",
+      "Acompanhei a obra de dois edifícios de 18 pavimentos até a entrega."
+     ]
+    }
+   ],
+   "educations": [
+    {
+     "institution": "Universidade Federal",
+     "course": "Arquitetura e Urbanismo",
+     "degree": "Bacharelado",
+     "startDate": "2009-02",
+     "endDate": "2014-12",
+     "status": "completed"
+    }
+   ],
+   "skills": [
+    {"name": "Revit"},
+    {"name": "AutoCAD"},
+    {"name": "BIM"},
+    {"name": "Gestão de equipe"},
+    {"name": "Compatibilização de projetos"}
+   ],
+   "languages": [],
+   "job_description_text": null
+  }
+ },
+ {
+  "key": "senior_vendas",
+  "payload": {
+   "name": "Gerente Comercial Sênior",
+   "target_position": "Gerente Comercial Sênior",
+   "summary": "Executivo comercial com treze anos em vendas B2B no setor de distribuição. Lidero um time de doze vendedores e respondo por uma carteira de 40 milhões em receita anual.",
+   "contact": {
+    "fullName": "Perfil Demo 08",
+    "email": "demo08@local.invalid",
+    "city": "Goiânia",
+    "country": "Brasil",
+    "linkedin": "https://linkedin.com/in/demo08"
+   },
+   "experiences": [
+    {
+     "company": "Distribuidora Norte",
+     "position": "Gerente Comercial",
+     "startDate": "2018-01",
+     "isCurrent": true,
+     "description": [
+      "Lidero um time de doze vendedores distribuídos em quatro estados.",
+      "Cresci a receita da regional de 24 para 40 milhões em cinco anos.",
+      "Elevei a taxa de conversão de propostas de 18% para 27%.",
+      "Implantei CRM e rotina de forecast semanal, reduzindo o desvio de previsão para 8%.",
+      "Renegociei a política comercial e recuperei 31 contas inativas.",
+      "Reduzi o ciclo médio de venda de 74 para 52 dias."
+     ]
+    },
+    {
+     "company": "Atacado Sul",
+     "position": "Executivo de Contas Sênior",
+     "startDate": "2013-06",
+     "endDate": "2017-12",
+     "description": [
+      "Atendi uma carteira de 90 clientes do varejo alimentar.",
+      "Superei a meta anual em quatro dos cinco anos no cargo."
+     ]
+    }
+   ],
+   "educations": [
+    {
+     "institution": "Universidade Presbiteriana",
+     "course": "Administração",
+     "degree": "Bacharelado",
+     "startDate": "2008-02",
+     "endDate": "2012-12",
+     "status": "completed"
+    }
+   ],
+   "skills": [
+    {"name": "Vendas B2B"},
+    {"name": "Gestão de equipe comercial"},
+    {"name": "CRM"},
+    {"name": "Negociação"},
+    {"name": "Forecast"}
+   ],
+   "languages": [],
+   "job_description_text": null
+  }
+ }
 ]

@@ -141,9 +141,8 @@ export const analysisDomain = {
     },
     targetFit: {
       sectionTitle: 'Target role fit',
-      sectionAria: 'Fit to target role and seniority in that area',
+      sectionAria: 'Fit to target role',
       fitCard: 'Target role fit',
-      targetSeniorityCard: 'Seniority (target area)',
       resumeDomain: 'Inferred domain from resume',
       targetDomain: 'Inferred domain from target role',
       careerSwitchTitle: 'Possible career change',
@@ -160,17 +159,8 @@ export const analysisDomain = {
       matchedTerms: 'Terms matched',
       missingTerms: 'Terms to reinforce',
       matchedSkills: 'Related skills',
-      clampTitle: 'Why target-area seniority is conservative',
       disclaimer:
         'Estimate from structured resume data and target role (no LLM as the final decision). Add job description text for better accuracy.',
-      clampMaxJuniorScore: 'Low fit to target role: target-area seniority capped at Junior.',
-      clampMaxMidScore: 'Moderate fit: target-area seniority capped at Mid-level.',
-      clampNoExperiencePortfolio:
-        'No clear evidence in experience and no portfolio: target-area seniority capped at Junior.',
-      clampSparseTargetHits: 'Few target-role terms appear in the resume.',
-      clampSkillsGap: 'Little overlap between skills and the target role.',
-      clampHighGeneralLowFit:
-        'High general seniority but very low fit to the target role — conservative profile for the new area.',
     },
     improvementExamples: {
       addMetrics: {

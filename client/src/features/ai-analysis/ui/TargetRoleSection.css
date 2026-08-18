@@ -13,14 +13,8 @@
 
 .sr-target-role__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
-}
-
-@media (max-width: 640px) {
-  .sr-target-role__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 .sr-target-role__domains {
@@ -32,34 +26,6 @@
 
 .sr-target-role__domain-label {
   font-weight: 700;
-}
-
-.sr-target-role__callout {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-top: 16px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: var(--sr-callout-bg, rgba(234, 179, 8, 0.12));
-  border: 1px solid var(--sr-callout-border, rgba(234, 179, 8, 0.35));
-}
-
-.sr-target-role__callout-icon {
-  margin-top: 2px;
-  color: var(--sr-warning, #b45309);
-}
-
-.sr-target-role__callout-title {
-  margin: 0 0 4px;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.sr-target-role__callout-text {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.4;
 }
 
 .sr-target-role__evidence {

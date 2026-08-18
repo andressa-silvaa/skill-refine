@@ -138,7 +138,6 @@ def run_analysis_worker(analysis_id: str) -> None:
             "seniority_task": ts.get("seniority"),
             "matching_task": ts.get("matching"),
             "target_fit_task": ts.get("target_fit"),
-            "target_seniority_task": ts.get("target_seniority"),
             "seniority_label_source": analysis.seniority_label_source,
         },
     )

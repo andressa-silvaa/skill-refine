@@ -32,27 +32,7 @@ export function TargetRoleSection(props: Props) {
           badge={fitBadge}
           badgeTone={fitTone}
         />
-        <MetricCard
-          icon={<i className="fa-solid fa-user-check" aria-hidden />}
-          label={t('analysis.targetFit.targetSeniorityCard')}
-          value={tf.seniorityLabel}
-          valueVariant="text"
-          badge={t('analysis.estimate')}
-          badgeTone="neutral"
-        />
       </div>
-
-      {tf.careerSwitch.detected ? (
-        <div className="sr-target-role__callout" role="status">
-          <i className="fa-solid fa-shuffle sr-target-role__callout-icon" aria-hidden />
-          <div>
-            <p className="sr-target-role__callout-title">{t('analysis.targetFit.careerSwitchTitle')}</p>
-            {tf.careerSwitch.reason ? (
-              <p className="sr-target-role__callout-text">{tf.careerSwitch.reason}</p>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
     </section>
   );
 }
