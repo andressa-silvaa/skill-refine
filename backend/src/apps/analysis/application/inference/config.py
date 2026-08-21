@@ -113,12 +113,6 @@ def get_config(settings) -> dict:
         "multilang": bool(getattr(settings, "ANALYSIS_MULTILANG", False)),
         "parallel_inference": bool(getattr(settings, "ANALYSIS_PARALLEL_INFERENCE", True)),
         "heuristics_only_model": "heuristics-only",
-        "target_fit_ml_enabled": bool(getattr(settings, "ANALYSIS_TARGET_FIT_ML_ENABLED", False)),
-        "target_fit_ml_model_dir": str(getattr(settings, "ANALYSIS_TARGET_FIT_MODEL_DIR", "") or "").strip(),
-        "target_fit_ml_model_subdir": str(
-            getattr(settings, "ANALYSIS_TARGET_FIT_ML_SUBDIR", "target_fit_v1") or "target_fit_v1"
-        ),
-        "target_fit_ml_cache_key": "target_fit_v1",
         "text_seniority_probe_enabled": bool(
             getattr(settings, "ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED", False)
         ),

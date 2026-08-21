@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from django.conf import settings
 from typing import Any
-from .cascade import CascadeResult, run_cascade
 from .tasks.target_fit import (
     TARGET_FIT_POLICY_VERSION,
     compute_career_switch,
@@ -23,11 +22,6 @@ from .tasks.target_fit.embedding import (
     embedding_fit_scores,
 )
 from .tasks.target_fit.esco_retrieval import build_occupation_query
-from .tasks.target_fit.loader_ml import (
-    get_target_fit_ml_bundle,
-    predict_target_fit_ml_score,
-    target_fit_ml_metadata_for_task,
-)
 from .telemetry import target_fit_improvement
 from .text_sanitizer import job_text_sanitized
 
@@ -146,58 +140,8 @@ def _resolve_target_fit(
         },
     }
 
-    def _step_target_fit_ml() -> CascadeResult | None:
-        tf_ml_bundle = get_target_fit_ml_bundle(config)
-        if not tf_ml_bundle:
-            return CascadeResult(value=None, provider="target_fit_ml", status="skipped_no_model")
-        try:
-            score = predict_target_fit_ml_score(
-                tf_ml_bundle,
-                signals=tf_signals,
-                resume_domain=rd_cat,
-                target_domain=td_cat,
-                has_job_text=bool(job_text),
-            )
-            md_flat = target_fit_ml_metadata_for_task(tf_ml_bundle)
-            return CascadeResult(
-                value=int(score),
-                provider="target_fit_ml",
-                status="applied",
-                extra={
-                    "bundle_extra": {
-                        "provider": "target_fit_ml",
-                        "metadata": {
-                            "model_name_base": md_flat.get("model_name_base") or "target_fit_signals",
-                            "model_version": md_flat.get("model_version") or "",
-                            "dataset_version": md_flat.get("dataset_version") or "",
-                        },
-                    }
-                },
-            )
-        except Exception as exc:
-            logger.warning("target_fit_ml inference failed, using policy: %s", exc)
-            return CascadeResult(
-                value=None,
-                provider="target_fit_ml",
-                status="error",
-                evidence={"error": str(exc)},
-            )
-
-    def _step_target_fit_policy() -> CascadeResult:
-        return CascadeResult(
-            value=int(policy_score),
-            provider="target_fit_policy",
-            status="applied",
-            extra={"bundle_extra": policy_extra},
-        )
-
-    # Canonical cascade: ML (if available) then policy fallback — same order as before.
-    cascade = run_cascade(
-        [_step_target_fit_ml, _step_target_fit_policy],
-        default=_step_target_fit_policy(),
-    )
-    fit_score = int(cascade.value)
-    target_fit_bundle_extra = (cascade.extra or {}).get("bundle_extra") or policy_extra
+    fit_score = int(policy_score)
+    target_fit_bundle_extra = policy_extra
 
     fit_signals_score = int(fit_score)
     fit_embedding_score = None

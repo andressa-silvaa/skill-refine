@@ -25,11 +25,6 @@ ANALYSIS_PARALLEL_INFERENCE = env.bool("ANALYSIS_PARALLEL_INFERENCE", default=Tr
 ANALYSIS_MAX_CHARS_RESUME = env.int("ANALYSIS_MAX_CHARS_RESUME", default=12_000)
 ANALYSIS_MAX_CHARS_JOB = env.int("ANALYSIS_MAX_CHARS_JOB", default=8_000)
 
-# Target-fit sklearn Ridge (signals + domain one-hot). Artifact: ml/models/target_fit_v1/model.joblib
-ANALYSIS_TARGET_FIT_ML_ENABLED = env.bool("ANALYSIS_TARGET_FIT_ML_ENABLED", default=False)
-ANALYSIS_TARGET_FIT_MODEL_DIR = env.str("ANALYSIS_TARGET_FIT_MODEL_DIR", default="")
-ANALYSIS_TARGET_FIT_ML_SUBDIR = env.str("ANALYSIS_TARGET_FIT_ML_SUBDIR", default="target_fit_v1")
-
 # Linear probe over the frozen multilingual encoder, trained on band_target from text alone.
 # Primary seniority decision when it loads; needs ANALYSIS_EMBEDDINGS_ENABLED.
 ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED = env.bool("ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED", default=False)
