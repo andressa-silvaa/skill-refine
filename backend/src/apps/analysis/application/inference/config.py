@@ -113,18 +113,12 @@ def get_config(settings) -> dict:
         "multilang": bool(getattr(settings, "ANALYSIS_MULTILANG", False)),
         "parallel_inference": bool(getattr(settings, "ANALYSIS_PARALLEL_INFERENCE", True)),
         "heuristics_only_model": "heuristics-only",
-        "signals_ml_enabled": bool(getattr(settings, "ANALYSIS_SIGNALS_ML_ENABLED", False)),
-        "signals_ml_model_subdir": str(getattr(settings, "ANALYSIS_SIGNALS_ML_SUBDIR", "seniority_signals_v1") or "seniority_signals_v1"),
-        "signals_ml_model_dir": str(getattr(settings, "ANALYSIS_SIGNALS_MODEL_DIR", "") or "").strip(),
-        "signals_ml_cache_key": "signals_ml_v1",
         "target_fit_ml_enabled": bool(getattr(settings, "ANALYSIS_TARGET_FIT_ML_ENABLED", False)),
         "target_fit_ml_model_dir": str(getattr(settings, "ANALYSIS_TARGET_FIT_MODEL_DIR", "") or "").strip(),
         "target_fit_ml_model_subdir": str(
             getattr(settings, "ANALYSIS_TARGET_FIT_ML_SUBDIR", "target_fit_v1") or "target_fit_v1"
         ),
         "target_fit_ml_cache_key": "target_fit_v1",
-        "text_seniority_enabled": bool(getattr(settings, "ANALYSIS_TEXT_SENIORITY_ENABLED", False)),
-        "text_seniority_fusion_enabled": bool(getattr(settings, "ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED", True)),
         "text_seniority_probe_enabled": bool(
             getattr(settings, "ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED", False)
         ),
@@ -187,76 +181,3 @@ def get_config(settings) -> dict:
         "overall_w_seniority": float(getattr(settings, "ANALYSIS_OVERALL_WEIGHT_SENIORITY", 0.12)),
         "overall_w_target_fit": float(getattr(settings, "ANALYSIS_OVERALL_WEIGHT_TARGET_FIT", 0.10)),
     }
-
-
-def _defaults_signals_ml_thresholds() -> dict:
-    return {
-        "SENIOR_PROB_THRESHOLD": 0.70,
-        "SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS": 60,
-        "SIGNALS_ML_SENIOR_MIN_EXPERIENCES": 2,
-        "SIGNALS_ML_SENIOR_MIN_BULLETS": 6,
-        "MIN_COMPLETENESS_FOR_SIGNALS_ML": 52,
-        "MIN_WORDS_FOR_SIGNALS_ML": 48,
-    }
-
-
-def _thresholds_from_bundle_metadata(meta: dict | None) -> dict | None:
-    if not isinstance(meta, dict):
-        return None
-    raw = meta.get("inference_thresholds")
-    if not isinstance(raw, dict):
-        return None
-    key_map = {
-        "senior_prob_threshold": "SENIOR_PROB_THRESHOLD",
-        "senior_min_total_months": "SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS",
-        "senior_min_experiences": "SIGNALS_ML_SENIOR_MIN_EXPERIENCES",
-        "senior_min_bullets": "SIGNALS_ML_SENIOR_MIN_BULLETS",
-        "min_completeness": "MIN_COMPLETENESS_FOR_SIGNALS_ML",
-        "min_words": "MIN_WORDS_FOR_SIGNALS_ML",
-    }
-    out: dict = {}
-    for json_key, internal in key_map.items():
-        if json_key in raw:
-            v = raw[json_key]
-            if internal == "SENIOR_PROB_THRESHOLD":
-                out[internal] = float(v)
-            else:
-                out[internal] = int(v)
-    return out or None
-
-
-def get_signals_ml_thresholds(settings, bundle_metadata: dict | None = None) -> dict:
-    """
-    Thresholds for ``signals_ml_predict`` / policy.
-
-    If ``ANALYSIS_SIGNALS_THRESHOLDS_FROM_SETTINGS`` is True (default), values come from Django settings / env.
-    Otherwise, ``metadata.json`` on the artifact may provide ``inference_thresholds``; missing keys use defaults.
-    """
-    base = _defaults_signals_ml_thresholds()
-    use_settings = bool(getattr(settings, "ANALYSIS_SIGNALS_THRESHOLDS_FROM_SETTINGS", True))
-    if use_settings:
-        base.update(
-            {
-                "SENIOR_PROB_THRESHOLD": float(getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_PROB_THRESHOLD", base["SENIOR_PROB_THRESHOLD"])),
-                "SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS": int(
-                    getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS", base["SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS"])
-                ),
-                "SIGNALS_ML_SENIOR_MIN_EXPERIENCES": int(
-                    getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_MIN_EXPERIENCES", base["SIGNALS_ML_SENIOR_MIN_EXPERIENCES"])
-                ),
-                "SIGNALS_ML_SENIOR_MIN_BULLETS": int(
-                    getattr(settings, "ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS", base["SIGNALS_ML_SENIOR_MIN_BULLETS"])
-                ),
-                "MIN_COMPLETENESS_FOR_SIGNALS_ML": int(
-                    getattr(settings, "ANALYSIS_SIGNALS_ML_MIN_COMPLETENESS", base["MIN_COMPLETENESS_FOR_SIGNALS_ML"])
-                ),
-                "MIN_WORDS_FOR_SIGNALS_ML": int(getattr(settings, "ANALYSIS_SIGNALS_ML_MIN_WORDS", base["MIN_WORDS_FOR_SIGNALS_ML"])),
-            }
-        )
-        return base
-
-    merged = dict(base)
-    from_meta = _thresholds_from_bundle_metadata(bundle_metadata)
-    if from_meta:
-        merged.update(from_meta)
-    return merged

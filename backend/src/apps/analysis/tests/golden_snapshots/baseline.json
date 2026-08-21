@@ -175,7 +175,7 @@
               "type": "veto"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "junior",
           "was_truncated": false
         },
@@ -225,8 +225,7 @@
           "clarity": 30,
           "matching": null,
           "seniority": 50,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -408,7 +407,7 @@
               "type": "veto"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "junior",
           "was_truncated": false
         },
@@ -458,8 +457,7 @@
           "clarity": 30,
           "matching": null,
           "seniority": 50,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -659,7 +657,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "intern",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -695,13 +693,6 @@
               "programador"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampNoExperiencePortfolio",
-            "analysis.targetFit.clampSparseTargetHits",
-            "analysis.targetFit.clampSkillsGap"
-          ],
-          "targetSeniorityLabel": "intern",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -748,8 +739,7 @@
           "clarity": 35,
           "matching": null,
           "seniority": 25,
-          "target_fit": 11.0,
-          "target_seniority": 25.0
+          "target_fit": 11.0
         }
       },
       "tags": [
@@ -970,7 +960,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "intern",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -1006,11 +996,6 @@
               "programador"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampSparseTargetHits"
-          ],
-          "targetSeniorityLabel": "intern",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -1057,8 +1042,7 @@
           "clarity": 35,
           "matching": null,
           "seniority": 25,
-          "target_fit": 10.0,
-          "target_seniority": 25.0
+          "target_fit": 10.0
         }
       },
       "tags": [
@@ -1214,7 +1198,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "intern",
           "was_truncated": false
         },
@@ -1260,8 +1244,7 @@
           "clarity": 35,
           "matching": null,
           "seniority": 25,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -1503,7 +1486,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "junior",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -1540,10 +1523,6 @@
               "desenvolvedor"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore"
-          ],
-          "targetSeniorityLabel": "junior",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -1588,8 +1567,7 @@
           "clarity": 35,
           "matching": null,
           "seniority": 50,
-          "target_fit": 36.0,
-          "target_seniority": 50.0
+          "target_fit": 36.0
         }
       },
       "tags": [
@@ -1780,7 +1758,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "junior",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -1817,10 +1795,6 @@
               "desenvolvedor"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore"
-          ],
-          "targetSeniorityLabel": "junior",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -1867,8 +1841,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 50,
-          "target_fit": 25.0,
-          "target_seniority": 50.0
+          "target_fit": 25.0
         }
       },
       "tags": [
@@ -2022,7 +1995,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -2068,8 +2041,7 @@
           "clarity": 85,
           "matching": null,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -2234,7 +2206,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -2280,8 +2252,7 @@
           "clarity": 85,
           "matching": null,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -2455,7 +2426,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -2501,8 +2472,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -2695,7 +2665,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -2741,8 +2711,7 @@
           "clarity": 60,
           "matching": 54,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -2941,7 +2910,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -2980,8 +2949,6 @@
               "fp&a"
             ]
           },
-          "targetSeniorityClampReasons": [],
-          "targetSeniorityLabel": "mid",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -3026,8 +2993,7 @@
           "clarity": 60,
           "matching": 66,
           "seniority": 75,
-          "target_fit": 100.0,
-          "target_seniority": 75.0
+          "target_fit": 100.0
         }
       },
       "tags": [
@@ -3215,7 +3181,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -3261,8 +3227,7 @@
           "clarity": 60,
           "matching": 60,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -3442,7 +3407,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -3488,8 +3453,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -3643,7 +3607,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -3689,8 +3653,7 @@
           "clarity": 85,
           "matching": null,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -3914,7 +3877,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -3959,8 +3922,6 @@
               "kubernetes"
             ]
           },
-          "targetSeniorityClampReasons": [],
-          "targetSeniorityLabel": "mid",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -4005,8 +3966,7 @@
           "clarity": 60,
           "matching": 33,
           "seniority": 75,
-          "target_fit": 100.0,
-          "target_seniority": 75.0
+          "target_fit": 100.0
         }
       },
       "tags": [
@@ -4219,7 +4179,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -4256,8 +4216,6 @@
               "cloud"
             ]
           },
-          "targetSeniorityClampReasons": [],
-          "targetSeniorityLabel": "mid",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -4302,8 +4260,7 @@
           "clarity": 85,
           "matching": 33,
           "seniority": 75,
-          "target_fit": 83.0,
-          "target_seniority": 75.0
+          "target_fit": 83.0
         }
       },
       "tags": [
@@ -4470,7 +4427,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -4516,8 +4473,7 @@
           "clarity": 85,
           "matching": null,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -4737,7 +4693,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -4775,11 +4731,6 @@
               "desenvolvedor"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampHighGeneralLowFit"
-          ],
-          "targetSeniorityLabel": "junior",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -4824,8 +4775,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": 24.0,
-          "target_seniority": 50.0
+          "target_fit": 24.0
         }
       },
       "tags": [
@@ -5033,7 +4983,7 @@
               "type": "veto"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -5071,12 +5021,6 @@
               "ux"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampNoExperiencePortfolio",
-            "analysis.targetFit.clampSkillsGap"
-          ],
-          "targetSeniorityLabel": "intern",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -5130,8 +5074,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 25,
-          "target_fit": 14.0,
-          "target_seniority": 25.0
+          "target_fit": 14.0
         }
       },
       "tags": [
@@ -5337,7 +5280,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -5374,10 +5317,6 @@
               "biolog"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxMidScore"
-          ],
-          "targetSeniorityLabel": "mid",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -5422,8 +5361,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": 62.0,
-          "target_seniority": 75.0
+          "target_fit": 62.0
         }
       },
       "tags": [
@@ -5630,7 +5568,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -5666,12 +5604,6 @@
             "confidence": "low",
             "evidenceTokens": []
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampSparseTargetHits",
-            "analysis.targetFit.clampHighGeneralLowFit"
-          ],
-          "targetSeniorityLabel": "junior",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -5716,8 +5648,7 @@
           "clarity": 35,
           "matching": null,
           "seniority": 75,
-          "target_fit": 14.0,
-          "target_seniority": 50.0
+          "target_fit": 14.0
         }
       },
       "tags": [
@@ -5899,7 +5830,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -5945,8 +5876,7 @@
           "clarity": 60,
           "matching": 25,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -6176,7 +6106,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -6212,12 +6142,6 @@
               "hospital"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampNoExperiencePortfolio",
-            "analysis.targetFit.clampHighGeneralLowFit"
-          ],
-          "targetSeniorityLabel": "junior",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -6262,8 +6186,7 @@
           "clarity": 60,
           "matching": 28,
           "seniority": 75,
-          "target_fit": 29.0,
-          "target_seniority": 50.0
+          "target_fit": 29.0
         }
       },
       "tags": [
@@ -6477,7 +6400,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -6509,8 +6432,6 @@
               "profesor"
             ]
           },
-          "targetSeniorityClampReasons": [],
-          "targetSeniorityLabel": "mid",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -6555,8 +6476,7 @@
           "clarity": 60,
           "matching": 60,
           "seniority": 75,
-          "target_fit": 81.0,
-          "target_seniority": 75.0
+          "target_fit": 81.0
         }
       },
       "tags": [
@@ -6721,7 +6641,7 @@
               "type": "veto"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "junior",
           "was_truncated": false
         },
@@ -6771,8 +6691,7 @@
           "clarity": 30,
           "matching": null,
           "seniority": 50,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -6921,7 +6840,7 @@
               "type": "veto"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "junior",
           "was_truncated": false
         },
@@ -6970,8 +6889,7 @@
           "clarity": 30,
           "matching": null,
           "seniority": 50,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -7138,7 +7056,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -7184,8 +7102,7 @@
           "clarity": 100,
           "matching": 16,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -7403,7 +7320,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -7439,14 +7356,6 @@
             "confidence": "low",
             "evidenceTokens": []
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampNoExperiencePortfolio",
-            "analysis.targetFit.clampSparseTargetHits",
-            "analysis.targetFit.clampSkillsGap",
-            "analysis.targetFit.clampHighGeneralLowFit"
-          ],
-          "targetSeniorityLabel": "junior",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -7491,8 +7400,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": 9.0,
-          "target_seniority": 50.0
+          "target_fit": 9.0
         }
       },
       "tags": [
@@ -7677,7 +7585,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "was_truncated": false
         },
@@ -7723,8 +7631,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -7930,7 +7837,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -7968,8 +7875,6 @@
               "engineer"
             ]
           },
-          "targetSeniorityClampReasons": [],
-          "targetSeniorityLabel": "mid",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -8014,8 +7919,7 @@
           "clarity": 60,
           "matching": 57,
           "seniority": 75,
-          "target_fit": 100.0,
-          "target_seniority": 75.0
+          "target_fit": 100.0
         }
       },
       "tags": [
@@ -8212,7 +8116,7 @@
               "type": "veto"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "junior",
           "was_truncated": false
         },
@@ -8262,8 +8166,7 @@
           "clarity": 30,
           "matching": 0,
           "seniority": 50,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -8478,7 +8381,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -8516,11 +8419,6 @@
               "engineer"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxJuniorScore",
-            "analysis.targetFit.clampHighGeneralLowFit"
-          ],
-          "targetSeniorityLabel": "junior",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -8565,8 +8463,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": 23.0,
-          "target_seniority": 50.0
+          "target_fit": 23.0
         }
       },
       "tags": [
@@ -8717,7 +8614,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "intern",
           "was_truncated": false
         },
@@ -8765,8 +8662,7 @@
           "clarity": 35,
           "matching": null,
           "seniority": 25,
-          "target_fit": null,
-          "target_seniority": null
+          "target_fit": null
         }
       },
       "tags": [
@@ -8999,7 +8895,7 @@
               "type": "structural"
             }
           ],
-          "seniorityMlStatus": "skipped_no_signals_ml_bundle",
+          "seniorityMlStatus": "skipped_no_model",
           "seniorityRuleBase": "mid",
           "targetFitDatasetVersion": "",
           "targetFitEmbeddingScore": null,
@@ -9039,10 +8935,6 @@
               "hospital"
             ]
           },
-          "targetSeniorityClampReasons": [
-            "analysis.targetFit.clampMaxMidScore"
-          ],
-          "targetSeniorityLabel": "mid",
           "was_truncated": false
         },
         "provider": "rule_policy",
@@ -9087,8 +8979,7 @@
           "clarity": 60,
           "matching": null,
           "seniority": 75,
-          "target_fit": 57.0,
-          "target_seniority": 75.0
+          "target_fit": 57.0
         }
       },
       "tags": [
@@ -9104,10 +8995,7 @@
     "ANALYSIS_OVERALL_BLEND_ENABLED": true,
     "ANALYSIS_QUALITY_PROBE_ENABLED": false,
     "ANALYSIS_REQUIRE_MODEL_ANSWER": false,
-    "ANALYSIS_SIGNALS_ML_ENABLED": false,
     "ANALYSIS_TARGET_FIT_ML_ENABLED": false,
-    "ANALYSIS_TEXT_SENIORITY_ENABLED": false,
-    "ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED": false,
     "ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED": false,
     "DEBUG": false
   },

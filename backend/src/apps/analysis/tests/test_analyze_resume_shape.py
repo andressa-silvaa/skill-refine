@@ -165,7 +165,7 @@ class AnalyzeResumeStableShapeTest(TestCase):
             metadata_by_task["seniority"]["modelVersion"],
             ("analysis_v1_pt", SENIORITY_POLICY_VERSION),
         )
-        self.assertIn(metadata_by_task["seniority"]["provider"], ("rule_policy", "signals_ml"))
+        self.assertIn(metadata_by_task["seniority"]["provider"], ("rule_policy", "text_seniority_probe"))
         self.assertEqual(metadata_by_task["quality"]["modelVersion"], "analysis_quality_v9_pt")
         self.assertEqual(metadata_by_task["matching"]["modelVersion"], "analysis_matching_v3_reg_pt")
         self.assertIn(metadata_by_task["quality"]["provider"], ("local", "heuristics"))

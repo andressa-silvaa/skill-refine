@@ -25,48 +25,10 @@ ANALYSIS_PARALLEL_INFERENCE = env.bool("ANALYSIS_PARALLEL_INFERENCE", default=Tr
 ANALYSIS_MAX_CHARS_RESUME = env.int("ANALYSIS_MAX_CHARS_RESUME", default=12_000)
 ANALYSIS_MAX_CHARS_JOB = env.int("ANALYSIS_MAX_CHARS_JOB", default=8_000)
 
-# Signals-only sklearn seniority (LogReg + calibration). Artifact: ml/models/<subdir>/model.joblib
-ANALYSIS_SIGNALS_ML_ENABLED = env.bool("ANALYSIS_SIGNALS_ML_ENABLED", default=False)
-# Optional absolute path to model dir (overrides ANALYSIS_MODEL_ROOT + ANALYSIS_SIGNALS_ML_SUBDIR)
-ANALYSIS_SIGNALS_MODEL_DIR = env.str("ANALYSIS_SIGNALS_MODEL_DIR", default="")
-ANALYSIS_SIGNALS_ML_SUBDIR = env.str("ANALYSIS_SIGNALS_ML_SUBDIR", default="seniority_signals_v1")
-# If false, thresholds may be read from artifact metadata.json "inference_thresholds" (see export/tuning docs)
-ANALYSIS_SIGNALS_THRESHOLDS_FROM_SETTINGS = env.bool("ANALYSIS_SIGNALS_THRESHOLDS_FROM_SETTINGS", default=True)
-# Conservative gates for predicted "senior" (documentação TCC / tuning — nomes curtos no .env)
-SENIOR_PROB_THRESHOLD = env.float("SENIOR_PROB_THRESHOLD", default=0.70)
-SENIOR_MIN_MONTHS = env.int("SENIOR_MIN_MONTHS", default=60)
-SENIOR_MIN_EXPERIENCES = env.int("SENIOR_MIN_EXPERIENCES", default=2)
-SENIOR_MIN_BULLETS = env.int("SENIOR_MIN_BULLETS", default=6)
-ANALYSIS_SIGNALS_ML_SENIOR_PROB_THRESHOLD = env.float(
-    "ANALYSIS_SIGNALS_ML_SENIOR_PROB_THRESHOLD", default=SENIOR_PROB_THRESHOLD
-)
-ANALYSIS_SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS = env.int(
-    "ANALYSIS_SIGNALS_ML_SENIOR_MIN_TOTAL_MONTHS", default=SENIOR_MIN_MONTHS
-)
-ANALYSIS_SIGNALS_ML_SENIOR_MIN_EXPERIENCES = env.int(
-    "ANALYSIS_SIGNALS_ML_SENIOR_MIN_EXPERIENCES", default=SENIOR_MIN_EXPERIENCES
-)
-ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS = env.int(
-    "ANALYSIS_SIGNALS_ML_SENIOR_MIN_BULLETS", default=SENIOR_MIN_BULLETS
-)
-# Minimum text/completeness to trust signals_ml (aligned with neural gating by default)
-ANALYSIS_SIGNALS_ML_MIN_COMPLETENESS = env.int("ANALYSIS_SIGNALS_ML_MIN_COMPLETENESS", default=52)
-ANALYSIS_SIGNALS_ML_MIN_WORDS = env.int("ANALYSIS_SIGNALS_ML_MIN_WORDS", default=48)
-
 # Target-fit sklearn Ridge (signals + domain one-hot). Artifact: ml/models/target_fit_v1/model.joblib
 ANALYSIS_TARGET_FIT_ML_ENABLED = env.bool("ANALYSIS_TARGET_FIT_ML_ENABLED", default=False)
 ANALYSIS_TARGET_FIT_MODEL_DIR = env.str("ANALYSIS_TARGET_FIT_MODEL_DIR", default="")
 ANALYSIS_TARGET_FIT_ML_SUBDIR = env.str("ANALYSIS_TARGET_FIT_ML_SUBDIR", default="target_fit_v1")
-
-# BERT / XLM-R text seniority (HF sequence classification export under ml/models/text_seniority_v1/)
-ANALYSIS_TEXT_SENIORITY_ENABLED = env.bool("ANALYSIS_TEXT_SENIORITY_ENABLED", default=False)
-ANALYSIS_TEXT_SENIORITY_MODEL_DIR = env.str("ANALYSIS_TEXT_SENIORITY_MODEL_DIR", default="")
-# Optional Hugging Face hub id when MODEL_DIR is empty (slow first run; prefer local export).
-ANALYSIS_TEXT_SENIORITY_HUB_ID = env.str("ANALYSIS_TEXT_SENIORITY_HUB_ID", default="")
-# Fuse structured signals with text (neural if loaded, else lexical evidence). Safe on CPU.
-# Only consulted when the probe below is unavailable: blending was measured to lose to both of its
-# own inputs (ml/reports/seniority_fusion_v3.md).
-ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED = env.bool("ANALYSIS_TEXT_SENIORITY_FUSION_ENABLED", default=True)
 
 # Linear probe over the frozen multilingual encoder, trained on band_target from text alone.
 # Primary seniority decision when it loads; needs ANALYSIS_EMBEDDINGS_ENABLED.

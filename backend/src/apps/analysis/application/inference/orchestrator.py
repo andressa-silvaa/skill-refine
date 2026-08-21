@@ -91,7 +91,6 @@ def analyze_resume(
     level = rs.completeness_level
 
     allow_quality_neural = level != "insufficient"
-    allow_ml_seniority = level == "adequate"
 
     seniority = _resolve_seniority(
         resume_data=resume_data,
@@ -99,7 +98,6 @@ def analyze_resume(
         lang=lang,
         config=config,
         rs=rs,
-        allow_ml_seniority=allow_ml_seniority,
         encoder=shared_encoder,
     )
     base_label = seniority["base_label"]

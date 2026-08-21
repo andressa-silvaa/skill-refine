@@ -147,9 +147,6 @@ class WhoeverChangedTheLabelSignsItTest(SimpleTestCase):
             "source": "probe",
         }
         with (
-            patch.object(mod, "get_signals_ml_bundle", return_value=None),
-            patch.object(mod, "get_model_bundle", return_value=None),
-            patch.object(mod, "predict_hf_seniority_probs", return_value=(None, 0.0, "")),
             patch.object(mod, "get_seniority_probe_bundle", return_value=object()),
             patch.object(mod, "predict_text_seniority", return_value=prediction),
             patch.object(
@@ -165,11 +162,8 @@ class WhoeverChangedTheLabelSignsItTest(SimpleTestCase):
                 config={
                     "multilang": False,
                     "require_model_answer": True,
-                    "text_seniority_enabled": False,
-                    "text_seniority_fusion_enabled": False,
                 },
                 rs=signals,
-                allow_ml_seniority=False,
                 encoder=object(),
             )
 
