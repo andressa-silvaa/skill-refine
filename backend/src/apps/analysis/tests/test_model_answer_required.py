@@ -154,7 +154,6 @@ class QualityRefusesHeuristicAnswerTest(SimpleTestCase):
     ANALYSIS_QUALITY_PROBE_ENABLED=False,
     ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=False,
     ANALYSIS_ESCO_DOMAIN_ENABLED=False,
-    ANALYSIS_LLM_FEEDBACK_ENABLED=False,
 )
 class OrchestratorRefusalTest(SimpleTestCase):
     @override_settings(ANALYSIS_REQUIRE_MODEL_ANSWER=True)
@@ -182,7 +181,6 @@ class OrchestratorRefusalTest(SimpleTestCase):
     ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=False,
     ANALYSIS_REQUIRE_MODEL_ANSWER=True,
     ANALYSIS_ESCO_DOMAIN_ENABLED=False,
-    ANALYSIS_LLM_FEEDBACK_ENABLED=False,
 )
 class SeniorityDegradedModeTest(SimpleTestCase):
     """

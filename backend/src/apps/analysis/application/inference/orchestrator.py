@@ -23,7 +23,6 @@ from .postprocess.insight_ranking import (
 )
 from .postprocess.finalize import apply_completeness_caps, decorate_insights
 from .postprocess.insights import derive_insights
-from .postprocess.llm_feedback import generate_ai_feedback
 from .postprocess.recommendations import build_recommendations
 from .resume_mapper import resume_to_text
 from .resume_signals import is_thin_student_or_intern_profile

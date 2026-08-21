@@ -16,7 +16,6 @@ from typing import Any
 from .overall_score import compute_overall_score
 from .postprocess.finalize import apply_completeness_caps, decorate_insights
 from .postprocess.insights import derive_insights
-from .postprocess.llm_feedback import generate_ai_feedback
 from .postprocess.recommendations import build_recommendations
 from .resolve_quality import _dimension_score
 from .tasks.seniority.constants import SENIORITY_POLICY_VERSION
@@ -96,15 +95,6 @@ def finalize_analysis(
         w_target=float(config.get("overall_w_target_fit") or 0.10),
     )
 
-    ai_feedback = generate_ai_feedback(
-        resume_text=resume_text,
-        seniority_label=final_label,
-        quality_score=int(quality_score),
-        target_fit_score=int(fit_score) if target_pos else None,
-        target_position=target_pos,
-        language=lang,
-    )
-
     debug_block = build_debug_block(
         quality_score=quality_score,
         seniority_score=seniority_score,
@@ -137,7 +127,6 @@ def finalize_analysis(
         rs=rs,
         target_fit_extra=target_fit_extra,
         debug_block=debug_block,
-        ai_feedback=ai_feedback,
         integrity=integrity,
     )
 

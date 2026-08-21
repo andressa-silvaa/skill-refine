@@ -106,10 +106,6 @@ AI_CLOUD_API_KEY = env.str("AI_CLOUD_API_KEY", default="")
 AI_CLOUD_MODEL = env.str("AI_CLOUD_MODEL", default="")
 AI_CLOUD_TIMEOUT_SECONDS = env.int("AI_CLOUD_TIMEOUT_SECONDS", default=15)
 
-# Optional: LLM-generated natural-language feedback about an already-decided analysis
-# result (never decides scores/labels — purely additive, fails safe to None).
-ANALYSIS_LLM_FEEDBACK_ENABLED = env.bool("ANALYSIS_LLM_FEEDBACK_ENABLED", default=False)
-
 DASHBOARD_SUMMARY_CACHE_TTL_SECONDS = env.int("DASHBOARD_SUMMARY_CACHE_TTL_SECONDS", default=45)
 
 # Internal review API (GET /analysis/internal/...). Empty = 403 for all.

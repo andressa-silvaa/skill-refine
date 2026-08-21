@@ -102,7 +102,6 @@ class DetectorDefersWhenItShouldTest(SimpleTestCase):
     ANALYSIS_LANGUAGE_DETECTION_ENABLED=True,
     ANALYSIS_EMBEDDINGS_ENABLED=False,
     ANALYSIS_ESCO_DOMAIN_ENABLED=False,
-    ANALYSIS_LLM_FEEDBACK_ENABLED=False,
     ANALYSIS_REQUIRE_MODEL_ANSWER=False,
 )
 class ShippedDetectorReadsARealResumeTest(SimpleTestCase):

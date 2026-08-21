@@ -228,7 +228,6 @@ class RealBundleBeatsTheRegexTest(SimpleTestCase):
     ANALYSIS_QUALITY_PROBE_ENABLED=True,
     ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=True,
     ANALYSIS_ESCO_DOMAIN_ENABLED=False,
-    ANALYSIS_LLM_FEEDBACK_ENABLED=False,
 )
 class LeadershipSignalComesFromTheProbeTest(SimpleTestCase):
     """

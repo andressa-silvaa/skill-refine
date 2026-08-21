@@ -169,7 +169,6 @@ def build_payload_body(
     rs: Any,
     target_fit_extra: dict[str, Any],
     debug_block: dict[str, Any] | None,
-    ai_feedback: str | None = None,
     integrity: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload_body: dict[str, Any] = {
@@ -195,8 +194,6 @@ def build_payload_body(
     }
     if debug_block is not None:
         payload_body["debug"] = debug_block
-    if ai_feedback:
-        payload_body["aiFeedback"] = ai_feedback
     return payload_body
 
 

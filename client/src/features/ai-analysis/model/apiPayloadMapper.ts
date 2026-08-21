@@ -194,10 +194,5 @@ function logAnalysisFlow(payload: AnalysisPayload): void {
     payload.targetFitModelVersion ?? 'n/a'
   );
   console.log('task scores:', payload.taskScores);
-  if (payload.aiFeedback) {
-    console.log('LLM feedback (cloud): generated —', payload.aiFeedback);
-  } else {
-    console.log('LLM feedback (cloud): not present (disabled, unavailable, or call failed — scoring is unaffected either way)');
-  }
   console.groupEnd();
 }
