@@ -1,15 +1,19 @@
 import { useTranslation } from 'react-i18next';
 
-import { Button, Card, CustomSelect } from '@/shared/ui';
+import { Button, Card, CustomSelect, Textarea } from '@/shared/ui';
 
 import type { ResumeOption } from '../model/types';
 
 import './ResumeSelectCard.css';
 
+const JOB_DESCRIPTION_MAX_LENGTH = 10_000;
+
 type Props = {
   options: ResumeOption[];
   value: string;
   onChange: (value: string) => void;
+  jobDescription: string;
+  onJobDescriptionChange: (value: string) => void;
   onAnalyze: () => void;
   loading?: boolean;
   selectPlaceholder: string;
@@ -21,6 +25,8 @@ export function ResumeSelectCard(props: Props) {
     options,
     value,
     onChange,
+    jobDescription,
+    onJobDescriptionChange,
     onAnalyze,
     loading = false,
     selectPlaceholder,
@@ -67,6 +73,17 @@ export function ResumeSelectCard(props: Props) {
           )}
         </Button>
       </div>
+      <Textarea
+        className="sr-ai-select-card__job-description"
+        label={t('analysis.jobDescriptionLabel')}
+        placeholder={t('analysis.jobDescriptionPlaceholder')}
+        hint={t('analysis.jobDescriptionHint')}
+        value={jobDescription}
+        onChange={(e) => onJobDescriptionChange(e.target.value)}
+        disabled={loading}
+        maxLength={JOB_DESCRIPTION_MAX_LENGTH}
+        rows={4}
+      />
     </Card>
   );
 }

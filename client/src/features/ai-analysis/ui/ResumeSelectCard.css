@@ -58,6 +58,10 @@
   opacity: 0.55;
 }
 
+.sr-ai-select-card__job-description {
+  margin-top: 14px;
+}
+
 /* sm: coluna — select-wrap não pode usar flex-grow:1 no eixo vertical (vinha de flex: 1 1 200px) */
 @media (max-width: 480px) {
   .sr-ai-select-card {

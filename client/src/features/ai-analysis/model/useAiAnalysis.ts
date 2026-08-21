@@ -28,6 +28,7 @@ export function useAiAnalysis(initialResumeId?: string) {
   const resumes = useResumes();
 
   const [selectedResumeId, setSelectedResumeId] = useState(initialResumeId ?? '');
+  const [jobDescription, setJobDescription] = useState('');
   const [status, setStatus] = useState<AnalysisStatus>('idle');
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [latestPayload, setLatestPayload] = useState<Awaited<ReturnType<typeof getLatestAnalysis>>['item'] | null>(null);
@@ -240,7 +241,7 @@ export function useAiAnalysis(initialResumeId?: string) {
     stopPolling();
 
     try {
-      await runAnalysisApi(selectedResumeId);
+      await runAnalysisApi(selectedResumeId, jobDescription);
 
       const pollResumeId = selectedResumeId;
       const tick = async (): Promise<boolean> => {
@@ -320,7 +321,7 @@ export function useAiAnalysis(initialResumeId?: string) {
       setStatus('error');
       notify.error(t('analysis.toast.failed'));
     }
-  }, [selectedResumeId, sessionStatus, fetchLatest, stopPolling, t]);
+  }, [selectedResumeId, jobDescription, sessionStatus, fetchLatest, stopPolling, t]);
 
   const retry = useCallback(() => {
     analysisRunActiveRef.current = false;
@@ -343,6 +344,8 @@ export function useAiAnalysis(initialResumeId?: string) {
     resumeOptions,
     selectedResumeId,
     setSelectedResumeId,
+    jobDescription,
+    setJobDescription,
     status,
     result,
     latestPayload,

@@ -24,6 +24,8 @@ export function AiAnalysisPage() {
     resumeOptions,
     selectedResumeId,
     setSelectedResumeId,
+    jobDescription,
+    setJobDescription,
     status,
     result,
     runAnalysis,
@@ -49,6 +51,8 @@ export function AiAnalysisPage() {
           options={resumeOptions}
           value={selectedResumeId}
           onChange={setSelectedResumeId}
+          jobDescription={jobDescription}
+          onJobDescriptionChange={setJobDescription}
           onAnalyze={runAnalysis}
           loading={isLoading}
           selectPlaceholder={t('analysis.selectPlaceholder')}
