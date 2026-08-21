@@ -49,6 +49,11 @@ class CompletenessAssessmentTest(TestCase):
         c = assess_completeness(data, sections)
         self.assertEqual(c["level"], "insufficient")
 
+    @override_settings(
+        ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=False,
+        ANALYSIS_QUALITY_PROBE_ENABLED=False,
+        ANALYSIS_BULLET_PROBE_ENABLED=False,
+    )
     def test_analyze_sparse_resume_caps_scores(self) -> None:
         resume_data = {
             "data": {
@@ -189,6 +194,11 @@ class CompletenessAssessmentTest(TestCase):
         result = analyze_resume(resume_data, None, "pt-BR")
         self.assertGreaterEqual(result["task_scores"]["seniority"], 50)
 
+    @override_settings(
+        ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=False,
+        ANALYSIS_QUALITY_PROBE_ENABLED=False,
+        ANALYSIS_BULLET_PROBE_ENABLED=False,
+    )
     def test_junior_two_years_in_summary_only_not_intern(self) -> None:
         """Texto típico de resumo (júnior + 2 anos) sem cargo de estágio."""
         resume_data = {

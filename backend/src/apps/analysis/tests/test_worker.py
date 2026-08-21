@@ -49,5 +49,5 @@ class WorkerPersistsMetadataTest(TestCase):
         self.assertIsNotNone(analysis.model_version)
         self.assertIn(
             analysis.provider,
-            ("local", "heuristics-only", "heuristics", "rule_policy"),
+            ("local", "heuristics-only", "heuristics", "rule_policy", "text_seniority_probe"),
         )

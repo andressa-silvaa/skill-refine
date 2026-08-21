@@ -30,6 +30,7 @@ class VerifyEnabledProbesTest(SimpleTestCase):
     @override_settings(
         ANALYSIS_QUALITY_PROBE_ENABLED=False,
         ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=False,
+        ANALYSIS_BULLET_PROBE_ENABLED=False,
         ANALYSIS_EMBEDDINGS_ENABLED=False,
     )
     def test_nothing_to_check_when_no_probe_is_enabled(self):
@@ -38,6 +39,7 @@ class VerifyEnabledProbesTest(SimpleTestCase):
     @override_settings(
         ANALYSIS_QUALITY_PROBE_ENABLED=True,
         ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=False,
+        ANALYSIS_BULLET_PROBE_ENABLED=False,
         ANALYSIS_EMBEDDINGS_ENABLED=False,
     )
     def test_probe_without_the_encoder_is_reported(self):
@@ -47,6 +49,7 @@ class VerifyEnabledProbesTest(SimpleTestCase):
     @override_settings(
         ANALYSIS_QUALITY_PROBE_ENABLED=True,
         ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=True,
+        ANALYSIS_BULLET_PROBE_ENABLED=False,
         ANALYSIS_EMBEDDINGS_ENABLED=True,
     )
     def test_missing_bundles_are_reported_per_probe(self):
@@ -60,6 +63,7 @@ class VerifyEnabledProbesTest(SimpleTestCase):
     @override_settings(
         ANALYSIS_QUALITY_PROBE_ENABLED=True,
         ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=True,
+        ANALYSIS_BULLET_PROBE_ENABLED=False,
         ANALYSIS_EMBEDDINGS_ENABLED=True,
     )
     def test_loaded_bundles_report_no_problem(self):
@@ -73,6 +77,7 @@ class VerifyEnabledProbesTest(SimpleTestCase):
     ANALYSIS_PREWARM_LANGUAGES="pt-BR",
     ANALYSIS_QUALITY_PROBE_ENABLED=True,
     ANALYSIS_TEXT_SENIORITY_PROBE_ENABLED=True,
+    ANALYSIS_BULLET_PROBE_ENABLED=False,
     ANALYSIS_EMBEDDINGS_ENABLED=True,
     ANALYSIS_ESCO_DOMAIN_ENABLED=False,
 )
