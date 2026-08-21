@@ -52,13 +52,6 @@ from .password_services import (
 
 from .auth_common import WrongCurrentPassword, build_default_password_hasher, get_cfg
 
-
-
-
-
-
-
-
 def register_service(validated_data: dict, meta: dict) -> tuple[object, bool]:
     """Register user and optionally send email confirmation. Returns (user_dto, email_confirmation_sent)."""
     users = OrmUserRepository()

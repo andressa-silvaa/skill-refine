@@ -1,8 +1,3 @@
-"""
-O que registro/login e os fluxos por token compartilham: config, hasher e a excecao de senha.
-
-Existe para os dois lados nao se importarem em circulo.
-"""
 from __future__ import annotations
 
 from django.conf import settings

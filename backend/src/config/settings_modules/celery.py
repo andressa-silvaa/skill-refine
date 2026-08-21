@@ -12,5 +12,4 @@ CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_TASKS_ENABLED = env.bool("CELERY_TASKS_ENABLED", default=True)
-# Em dev, executa tarefas no mesmo processo (sem broker/worker) para garantir notificações
 CELERY_TASK_ALWAYS_EAGER = env.bool("CELERY_TASK_ALWAYS_EAGER", default=DEBUG)
