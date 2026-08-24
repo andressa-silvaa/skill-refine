@@ -1,7 +1,15 @@
 # Inventário do corte legado — o que cairia se `signals_ml` e `target_fit_ml` não voltarem
 
-Levantamento, **não** uma proposta de remoção. Nada foi apagado. O objetivo é que a decisão seja
-tomada com o número na mão, porque ela não é técnica: depende de essas duas famílias voltarem ou não.
+> **Status: executado em 2026-08-24.** Este documento passou a ser registro histórico. As duas
+> etapas da recomendação foram aplicadas de uma vez, porque a decisão pendente já tinha sido tomada
+> nos commits `c538b25` (remove `signals_ml`) e `ba6b5e6` (remove `target_fit_ml`, *no artifact, none
+> planned*): `ml/training/` inteiro, `ml/eval/`, `ml/schemas/`, `ml/labeling/` e os 16 scripts do
+> cluster v1/v2 não existem mais. O que ficou em `ml/` é o pipeline v3 e os cinco bundles que a
+> produção carrega. Os números abaixo são os do levantamento original, preservados como estavam.
+
+Levantamento original, escrito quando nada tinha sido apagado ainda. O objetivo era que a decisão
+fosse tomada com o número na mão, porque ela não é técnica: dependia de essas duas famílias voltarem
+ou não.
 
 ## Por que a pergunta existe
 

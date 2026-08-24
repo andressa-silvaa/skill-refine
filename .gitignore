@@ -88,20 +88,13 @@ ml/models/*
 *.pth
 *.safetensors
 
-# Validation reports rewritten by the smoke test on every run — output, not source.
-ml/training/reports/
-
-# Dados gerados/derivados — reproduzíveis via ml/scripts/generate_resumes_v2.py (seed fixo)
+# Corpus v3 e caches derivados — reproduziveis via ml/scripts/generate_resume_specs_v3.py +
+# write_resume_prose_v3.py (specs com seed fixo, prosa por LLM).
 ml/data/*
 # The ESCO taxonomy is a product input, not generated data: inference reads it at runtime.
 !ml/data/reference/
 ml/data/reference/*
 !ml/data/reference/esco_occupations.jsonl
-# Test input, not derived data: test_target_fit_dataset_validate_smoke reads this fixture, so a
-# fresh clone without it fails a test that has nothing to do with the change being made.
-!ml/data/synthetic/
-ml/data/synthetic/*
-!ml/data/synthetic/target_fit_smoke.jsonl
 *.onnx
 *.h5
 

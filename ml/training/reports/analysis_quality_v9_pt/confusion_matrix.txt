@@ -1,6 +1,0 @@
-Confusion matrix (rows=true, cols=pred)
-
-              poor     ok strong
-poor           50      1      4
-ok              4     53      3
-strong          0      1     24
