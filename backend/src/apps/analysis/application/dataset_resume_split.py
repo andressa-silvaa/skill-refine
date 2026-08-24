@@ -1,7 +1,7 @@
 """
 Deterministic train/val/test split by resume_key (no row-level leakage).
 
-Used by ``ml/training/src/split_dataset.py`` (monorepo). Pure Python / no ORM.
+Pure Python / no ORM. Kept as the shared split rule for dataset exports.
 """
 from __future__ import annotations
 
