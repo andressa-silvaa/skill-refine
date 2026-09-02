@@ -1,8 +1,3 @@
-"""
-Acoes sobre um curriculo existente: duplicar e os dois endpoints que o PDF usa.
-
-Separado de ``resume_views.py``, que fica com listagem, criacao e edicao de rascunho.
-"""
 from __future__ import annotations
 
 from datetime import date

@@ -1,22 +1,21 @@
 """Resume CRUD, list, duplicate, token, pdf-data views."""
 from __future__ import annotations
 
-from datetime import date
-
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.resumes.infrastructure.models import ResumeContact, ResumeStatus
+from apps.resumes.infrastructure.models import ResumeContact
 from shared.api.responses import (
     error_response as _error,
+    extract_error_message as _extract_error_message,
     field_error_response as _field_error,
     serializer_field_errors as _serializer_field_errors,
 )
 from shared.auth.drf import request_meta
 
 from .payloads import resume_detail_payload, resume_payload
-from .serializers import ResumeDraftSerializer
+from .serializers import ResumeDraftSerializer, ResumeListFilterSerializer
 from .services import (
     create_pdf_token,
     create_resume_draft,
@@ -45,81 +44,25 @@ PAGINATION_LIMIT_MIN = 1
 PAGINATION_LIMIT_MAX = 100
 PAGINATION_LIMIT_DEFAULT = 20
 PAGINATION_OFFSET_DEFAULT = 0
-LIST_SORT_ALLOWED = {"recent", "oldest", "score", "name"}
-
-
-def _parse_date_or_none(raw: str | None):
-    if raw in (None, ""):
-        return None
-    try:
-        return date.fromisoformat(str(raw).strip())
-    except ValueError:
-        return "invalid"
 
 
 def _parse_list_filters(request):
-    status_value = (request.query_params.get("status") or "").strip()
-    search = (request.query_params.get("search") or "").strip()
-    score_min_raw = (request.query_params.get("score_min") or "").strip()
-    score_max_raw = (request.query_params.get("score_max") or "").strip()
-    include_no_score_raw = (request.query_params.get("include_no_score") or "").strip().lower()
-    updated_from_raw = (request.query_params.get("updated_from") or "").strip()
-    updated_to_raw = (request.query_params.get("updated_to") or "").strip()
-    sort = (request.query_params.get("sort") or "recent").strip() or "recent"
+    ser = ResumeListFilterSerializer(data=request.query_params)
+    if not ser.is_valid():
+        message = _extract_error_message(next(iter(ser.errors.values())))
+        return (None, _error("validation_error", message, status.HTTP_400_BAD_REQUEST))
 
-    allowed_statuses = {value for value, _ in ResumeStatus.choices}
-    if status_value and status_value not in allowed_statuses:
-        return (None, _error("validation_error", "Parâmetro status inválido.", status.HTTP_400_BAD_REQUEST))
-
-    score_min = None
-    score_max = None
-    if score_min_raw:
-        try:
-            score_min = int(score_min_raw)
-        except ValueError:
-            return (None, _error("validation_error", "Parâmetro score_min inválido.", status.HTTP_400_BAD_REQUEST))
-    if score_max_raw:
-        try:
-            score_max = int(score_max_raw)
-        except ValueError:
-            return (None, _error("validation_error", "Parâmetro score_max inválido.", status.HTTP_400_BAD_REQUEST))
-    if score_min is not None and (score_min < 0 or score_min > 100):
-        return (None, _error("validation_error", "Parâmetro score_min deve ser entre 0 e 100.", status.HTTP_400_BAD_REQUEST))
-    if score_max is not None and (score_max < 0 or score_max > 100):
-        return (None, _error("validation_error", "Parâmetro score_max deve ser entre 0 e 100.", status.HTTP_400_BAD_REQUEST))
-    if score_min is not None and score_max is not None and score_min > score_max:
-        return (None, _error("validation_error", "Parâmetro score_min não pode ser maior que score_max.", status.HTTP_400_BAD_REQUEST))
-
-    updated_from = _parse_date_or_none(updated_from_raw)
-    updated_to = _parse_date_or_none(updated_to_raw)
-    if updated_from == "invalid":
-        return (None, _error("validation_error", "Parâmetro updated_from inválido (use YYYY-MM-DD).", status.HTTP_400_BAD_REQUEST))
-    if updated_to == "invalid":
-        return (None, _error("validation_error", "Parâmetro updated_to inválido (use YYYY-MM-DD).", status.HTTP_400_BAD_REQUEST))
-    if updated_from and updated_to and updated_from > updated_to:
-        return (None, _error("validation_error", "Parâmetro updated_from não pode ser maior que updated_to.", status.HTTP_400_BAD_REQUEST))
-
-    if sort not in LIST_SORT_ALLOWED:
-        return (
-            None,
-            _error(
-                "validation_error",
-                f"Parâmetro sort inválido. Valores permitidos: {', '.join(sorted(LIST_SORT_ALLOWED))}.",
-                status.HTTP_400_BAD_REQUEST,
-            ),
-        )
-
-    include_no_score = include_no_score_raw in ("1", "true", "yes")
+    data = ser.validated_data
     return (
         {
-            "status": status_value or None,
-            "search": search or None,
-            "score_min": score_min,
-            "score_max": score_max,
-            "include_no_score": include_no_score,
-            "updated_from": updated_from,
-            "updated_to": updated_to,
-            "sort": sort,
+            "status": data.get("status") or None,
+            "search": data.get("search") or None,
+            "score_min": data.get("score_min"),
+            "score_max": data.get("score_max"),
+            "include_no_score": data.get("include_no_score", False),
+            "updated_from": data.get("updated_from"),
+            "updated_to": data.get("updated_to"),
+            "sort": data.get("sort", "recent"),
         },
         None,
     )
